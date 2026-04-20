@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Canvas - Academic Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#0a0e14",
+                        "secondary-fixed": "#d3e4ff",
+                        "inverse-primary": "#0060aa",
+                        "background": "#10141a",
+                        "tertiary-container": "#da9600",
+                        "inverse-surface": "#dfe2eb",
+                        "secondary": "#aec8ef",
+                        "surface-container-low": "#181c22",
+                        "inverse-on-surface": "#2d3137",
+                        "tertiary-fixed-dim": "#ffba42",
+                        "surface-tint": "#a2c9ff",
+                        "on-secondary-fixed": "#001c38",
+                        "error-container": "#93000a",
+                        "outline": "#8b919d",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-container-high": "#262a31",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "tertiary": "#ffba42",
+                        "surface-variant": "#31353c",
+                        "on-secondary": "#163151",
+                        "on-background": "#dfe2eb",
+                        "on-secondary-container": "#9db7dd",
+                        "outline-variant": "#414752",
+                        "primary": "#a2c9ff",
+                        "on-primary-container": "#003a6b",
+                        "on-primary-fixed": "#001c38",
+                        "tertiary-fixed": "#ffddaf",
+                        "surface-container": "#1c2026",
+                        "on-secondary-fixed-variant": "#2e4869",
+                        "on-surface-variant": "#c0c7d4",
+                        "surface-dim": "#10141a",
+                        "on-error-container": "#ffdad6",
+                        "on-error": "#690005",
+                        "on-tertiary-fixed": "#281800",
+                        "secondary-fixed-dim": "#aec8ef",
+                        "on-tertiary-container": "#4f3400",
+                        "primary-container": "#58a6ff",
+                        "on-primary": "#00315c",
+                        "on-tertiary-fixed-variant": "#614000",
+                        "error": "#ffb4ab",
+                        "on-surface": "#dfe2eb",
+                        "surface-container-highest": "#31353c",
+                        "on-tertiary": "#432c00",
+                        "surface-bright": "#353940",
+                        "on-primary-fixed-variant": "#004882",
+                        "surface": "#10141a",
+                        "secondary-container": "#2e4869"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary-fixed">
+<!-- TopNavBar -->
+<header class="bg-[#10141a]/60 backdrop-blur-xl font-['Inter'] font-medium tracking-tight shadow-[0_20px_40px_rgba(0,0,0,0.4)] docked full-width top-0 sticky z-50">
+<div class="flex justify-between items-center w-full px-8 py-4 max-w-[1600px] mx-auto">
+<div class="flex items-center gap-12">
+<!-- Brand -->
+<a class="text-xl font-semibold tracking-tighter text-white flex items-center gap-2" href="#">
+<span class="material-symbols-outlined text-primary" data-weight="fill" style="font-variation-settings: 'FILL' 1;">dataset</span>
+                    Canvas.APStudy.org
+                </a>
+<!-- Navigation -->
+<nav class="hidden md:flex items-center gap-8">
+<!-- Dashboard (Active) -->
+<a class="flex flex-col text-[#a2c9ff] font-semibold border-b-2 border-[#a2c9ff] pb-1 active:scale-95 transition-transform" href="#">
+<span>Dashboard</span>
+</a>
+<!-- Courses (Inactive) -->
+<a class="text-slate-400 hover:text-white transition-colors active:scale-95 transition-transform" href="#">
+<span>Courses</span>
+</a>
+<!-- Resources (Inactive) -->
+<a class="text-slate-400 hover:text-white transition-colors active:scale-95 transition-transform" href="#">
+<span>Resources</span>
+</a>
+</nav>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-4">
+<button class="hidden md:flex items-center justify-center bg-gradient-to-br from-primary to-primary-container text-on-primary-container px-5 py-2.5 rounded-lg font-medium tracking-tight hover:scale-[1.02] active:scale-95 transition-all duration-150 ease-in-out shadow-[0_8px_16px_rgba(88,166,255,0.15)]">
+                    Sync Now
+                </button>
+<div class="flex items-center gap-2 border-l border-outline-variant/30 pl-4 ml-2">
+<button class="p-2 text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-150 ease-in-out rounded-full active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="p-2 text-slate-400 hover:text-white hover:bg-white/5 transition-all duration-150 ease-in-out rounded-full active:scale-95 flex items-center justify-center">
+<span class="material-symbols-outlined">logout</span>
+</button>
+<button class="w-9 h-9 rounded-full overflow-hidden hover:bg-white/5 transition-all duration-150 ease-in-out active:scale-95 ml-2 border border-outline-variant/30">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="close-up portrait of a young professional woman with natural lighting and soft blurred background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBa6r-2lqFLtViiDnkA_HlCsz0ZtBU1SXRS4GzcACMVtx4fYzgE0BuNc4TWPbbQ49BXXPr2sP3AF82cg0NeBS27tDa7mZ0Jt5OnpyoFHv6dyqJ8h8OdN6rQj0uM3Tqw9QFWuH5y0LiOmmrK4keLBZR8HiOt09v4yPmd3EZdJr-aagNbKfPeb7i4jY6UyKytwclzjU-CLQ7RL9Pl28EjCLruz2pP1756nYJ_2kFPlpS0ju0uvaKGuDwUuGcbrX4Wvjxjj7YBpu8kk0c"/>
+</button>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-[1600px] mx-auto px-6 md:px-8 py-10 flex flex-col gap-12 relative z-10">
+<!-- Top Section: Expansive Calendar -->
+<section class="flex flex-col gap-6 w-full animate-fade-in-up">
+<!-- Calendar Header -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+<h1 class="text-3xl font-headline font-semibold text-on-surface tracking-tight mb-1">November 2024</h1>
+<p class="text-on-surface-variant text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+                        Overview of deadlines and events
+                    </p>
+</div>
+<div class="flex items-center gap-3 bg-surface-container-low p-1.5 rounded-lg border border-outline-variant/10">
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">chevron_left</span>
+</button>
+<span class="text-sm font-medium text-on-surface px-3">Today</span>
+<button class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">chevron_right</span>
+</button>
+</div>
+</div>
+<!-- Calendar Grid Container -->
+<div class="bg-surface-container-low p-6 rounded-2xl">
+<!-- Days of Week -->
+<div class="grid grid-cols-7 gap-4 mb-4">
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Sun</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Mon</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Tue</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Wed</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Thu</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Fri</div>
+<div class="text-label text-on-surface-variant uppercase tracking-[0.05em] text-xs font-semibold text-center">Sat</div>
+</div>
+<!-- Days Grid (Floating Obsidian Tiles) -->
+<div class="grid grid-cols-7 gap-3 sm:gap-4">
+<!-- Prev Month Days (Dimmed) -->
+<div class="bg-surface-container/30 rounded-xl min-h-[120px] p-3 flex flex-col opacity-50">
+<span class="text-sm font-medium text-on-surface-variant self-end">27</span>
+</div>
+<div class="bg-surface-container/30 rounded-xl min-h-[120px] p-3 flex flex-col opacity-50">
+<span class="text-sm font-medium text-on-surface-variant self-end">28</span>
+</div>
+<div class="bg-surface-container/30 rounded-xl min-h-[120px] p-3 flex flex-col opacity-50">
+<span class="text-sm font-medium text-on-surface-variant self-end">29</span>
+</div>
+<div class="bg-surface-container/30 rounded-xl min-h-[120px] p-3 flex flex-col opacity-50">
+<span class="text-sm font-medium text-on-surface-variant self-end">30</span>
+</div>
+<div class="bg-surface-container/30 rounded-xl min-h-[120px] p-3 flex flex-col opacity-50">
+<span class="text-sm font-medium text-on-surface-variant self-end">31</span>
+</div>
+<!-- Current Month Days -->
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">1</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">2</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">3</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">4</span>
+<div class="bg-tertiary/10 text-tertiary-fixed-dim text-[11px] font-medium px-2 py-1 rounded w-full truncate border border-tertiary/20">
+                            Bio Lab Report
+                        </div>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">5</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">6</span>
+</div>
+<!-- Today -->
+<div class="bg-surface-container-high rounded-xl min-h-[120px] p-3 flex flex-col gap-2 relative shadow-[0_8px_24px_rgba(0,0,0,0.2)] border border-primary/20">
+<div class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-primary rounded-b-full"></div>
+<span class="w-7 h-7 flex items-center justify-center bg-primary text-on-primary rounded-full text-sm font-bold self-end shadow-[0_0_12px_rgba(162,201,255,0.4)]">7</span>
+<div class="flex flex-col gap-1 mt-1">
+<div class="bg-primary/10 text-primary-fixed text-[11px] font-medium px-2 py-1 rounded w-full truncate border border-primary/20 flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                                CS301 Midterm
+                            </div>
+<div class="bg-secondary-container/30 text-secondary-fixed-dim text-[11px] font-medium px-2 py-1 rounded w-full truncate border border-secondary-container/50">
+                                Reading: Ch 4-5
+                            </div>
+</div>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">8</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">9</span>
+<div class="bg-error-container/20 text-error text-[11px] font-medium px-2 py-1 rounded w-full truncate border border-error/20">
+                            History Essay Draft
+                        </div>
+</div>
+<!-- Row 3 -->
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">10</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">11</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">12</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">13</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5 relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">14</span>
+<div class="bg-primary/10 text-primary-fixed text-[11px] font-medium px-2 py-1 rounded w-full truncate border border-primary/20">
+                            CS301 Project P1
+                        </div>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">15</span>
+</div>
+<div class="bg-surface-container rounded-xl min-h-[120px] p-3 flex flex-col gap-2 hover:bg-surface-container-high transition-colors group cursor-pointer border border-outline-variant/5">
+<span class="text-sm font-medium text-on-surface-variant self-end group-hover:text-on-surface transition-colors">16</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Section: Upcoming Assignments -->
+<section class="flex flex-col gap-6 w-full animate-fade-in-up" style="animation-delay: 100ms;">
+<!-- Section Header -->
+<div class="flex items-center justify-between border-b border-surface-container-low pb-4">
+<h2 class="text-xl font-headline font-semibold text-on-surface tracking-tight flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">assignment</span>
+                    Upcoming Assignments
+                </h2>
+<a class="text-sm text-primary hover:text-primary-container transition-colors font-medium flex items-center gap-1" href="#">
+                    View All
+                    <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+<!-- Assignments Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Urgent Card -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-all duration-300 rounded-xl p-6 relative overflow-hidden group cursor-pointer flex flex-col gap-4 shadow-[0_8px_16px_rgba(0,0,0,0.2)]">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-error"></div>
+<div class="flex justify-between items-start">
+<span class="text-label text-error uppercase tracking-[0.05em] text-[10px] font-bold bg-error-container/20 px-2 py-1 rounded">Due Today • 11:59 PM</span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-on-surface transition-colors text-[20px]">more_horiz</span>
+</div>
+<div>
+<h3 class="text-lg font-headline font-semibold text-on-surface leading-tight mb-1">Advanced Algorithms Midterm</h3>
+<p class="text-sm text-on-surface-variant">Computer Science 301</p>
+</div>
+<div class="mt-auto pt-4 flex items-center justify-between border-t border-surface-container-highest/50">
+<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">description</span>
+                            Online Exam
+                        </div>
+<button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- High Priority Card -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-all duration-300 rounded-xl p-6 relative overflow-hidden group cursor-pointer flex flex-col gap-4">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-tertiary"></div>
+<div class="flex justify-between items-start">
+<span class="text-label text-tertiary-fixed uppercase tracking-[0.05em] text-[10px] font-bold">Due in 2 days</span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-on-surface transition-colors text-[20px]">more_horiz</span>
+</div>
+<div>
+<h3 class="text-lg font-headline font-semibold text-on-surface leading-tight mb-1">Cellular Division Lab Report</h3>
+<p class="text-sm text-on-surface-variant">Biology 204</p>
+</div>
+<div class="mt-auto pt-4 flex items-center justify-between border-t border-surface-container-highest/50">
+<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">upload_file</span>
+                            PDF Upload
+                        </div>
+<button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface group-hover:bg-tertiary-container group-hover:text-on-tertiary-container transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Standard Card -->
+<div class="bg-surface-container hover:bg-surface-container-high transition-all duration-300 rounded-xl p-6 relative overflow-hidden group cursor-pointer flex flex-col gap-4">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex justify-between items-start">
+<span class="text-label text-primary-fixed uppercase tracking-[0.05em] text-[10px] font-bold">Next Week • Nov 14</span>
+<span class="material-symbols-outlined text-outline-variant group-hover:text-on-surface transition-colors text-[20px]">more_horiz</span>
+</div>
+<div>
+<h3 class="text-lg font-headline font-semibold text-on-surface leading-tight mb-1">Project Phase 1 Submission</h3>
+<p class="text-sm text-on-surface-variant">Software Engineering 410</p>
+</div>
+<div class="mt-auto pt-4 flex items-center justify-between border-t border-surface-container-highest/50">
+<div class="flex items-center gap-2 text-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">group</span>
+                            Group Project
+                        </div>
+<button class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface group-hover:bg-primary group-hover:text-on-primary transition-colors">
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#10141a] full-width mt-auto border-t border-white/5">
+<div class="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 gap-4 max-w-[1600px] mx-auto">
+<p class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-medium text-slate-500">
+                © 2024 Canvas.APStudy.org • Last synced: 2 minutes ago
+            </p>
+<nav class="flex flex-wrap items-center gap-6">
+<a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-medium text-slate-500 hover:text-[#a2c9ff] transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-medium text-slate-500 hover:text-[#a2c9ff] transition-colors" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-medium text-slate-500 hover:text-[#a2c9ff] transition-colors" href="#">Help Center</a>
+<a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-medium text-slate-500 hover:text-[#a2c9ff] transition-colors" href="#">Support</a>
+</nav>
+</div>
+</footer>
+</body></html>
