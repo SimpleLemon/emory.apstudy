@@ -1,0 +1,76 @@
+{
+  "course_code": "MATH 112Z",
+  "course_title": "Calculus II",
+  "subject": "MATH",
+  "catalog_number": "112Z",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2723",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Taskovic",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2725",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "M. Taskovic"
+  ],
+  "scraped_at": "2026-04-20T20:51:13.087Z"
+}

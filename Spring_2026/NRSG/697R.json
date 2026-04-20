@@ -1,0 +1,55 @@
+{
+  "course_code": "NRSG 697R",
+  "course_title": "Directed Study: State of the Science",
+  "subject": "NRSG",
+  "catalog_number": "697R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5919",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "S. Moore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6557",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "E. Mroz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Mroz",
+    "S. Moore"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.782Z"
+}

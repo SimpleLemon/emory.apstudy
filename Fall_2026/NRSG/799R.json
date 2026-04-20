@@ -1,0 +1,181 @@
+{
+  "course_code": "NRSG 799R",
+  "course_title": "Dissertation Research",
+  "subject": "NRSG",
+  "catalog_number": "799R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5114",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "C. Xiao",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5117",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "R. Chandler-Coley",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5118",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "V. Hertzberg",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5119",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Wells",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5120",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "L. McCauley",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5121",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "N. Giordano",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5122",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "J. Cimiotti",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5123",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "S. Brasher",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5124",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "J. Bai",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5115",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "N. Carlson",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5116",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "E. Ferranti",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 11,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 11,
+    "open": 11,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Xiao",
+    "E. Ferranti",
+    "J. Bai",
+    "J. Cimiotti",
+    "J. Wells",
+    "L. McCauley",
+    "N. Carlson",
+    "N. Giordano",
+    "R. Chandler-Coley",
+    "S. Brasher",
+    "V. Hertzberg"
+  ],
+  "scraped_at": "2026-04-20T20:52:09.354Z"
+}

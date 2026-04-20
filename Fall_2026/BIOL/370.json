@@ -1,0 +1,128 @@
+{
+  "course_code": "BIOL 370",
+  "course_title": "Introduction to Microbiology",
+  "subject": "BIOL",
+  "catalog_number": "370",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1672",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1774",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6-6:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "1850"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1777",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6-6:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "1850"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1778",
+      "section_number": "4",
+      "schedule_type": "DIS",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6-6:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "1850"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1779",
+      "section_number": "5",
+      "schedule_type": "DIS",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 6-6:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1800",
+            "end": "1850"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 4,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 5
+  },
+  "instructors_unique": [
+    "E. Battaglioli"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.640Z"
+}

@@ -1,0 +1,106 @@
+{
+  "course_code": "BUS 694",
+  "course_title": "Study Abroad: PUC Chile",
+  "subject": "BUS",
+  "catalog_number": "694",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-02",
+    "end": "2026-01-11"
+  },
+  "sections": [
+    {
+      "crn": "6221",
+      "section_number": "3201",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6222",
+      "section_number": "3202",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6223",
+      "section_number": "3203",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6224",
+      "section_number": "3204",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6225",
+      "section_number": "3205",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6226",
+      "section_number": "3206",
+      "schedule_type": "ABR",
+      "instructor": "H. Ruskin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 6,
+    "open": 3,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Ruskin"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.759Z"
+}

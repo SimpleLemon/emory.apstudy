@@ -1,0 +1,151 @@
+{
+  "course_code": "AMST 285",
+  "course_title": "Special Topics: American Questions: American Jewish History",
+  "subject": "AMST",
+  "catalog_number": "285",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3910",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "E. Goldstein",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3925",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "J. Prude",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3927",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "M. Lowery",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4006",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "I. Goh",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4481",
+      "section_number": "5",
+      "schedule_type": "SEM",
+      "instructor": "M. Lowery",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Goldstein",
+    "I. Goh",
+    "J. Prude",
+    "M. Lowery"
+  ],
+  "scraped_at": "2026-04-20T20:50:18.369Z"
+}

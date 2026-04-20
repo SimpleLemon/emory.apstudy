@@ -1,0 +1,50 @@
+{
+  "course_code": "NRSG 570MN",
+  "course_title": "Pharmacology for Professional Nurses: MN",
+  "subject": "NRSG",
+  "catalog_number": "570MN",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4655",
+      "section_number": "400",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "ThF 10:30-11:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1030",
+            "end": "1150"
+          },
+          {
+            "day": "Fri",
+            "start": "1030",
+            "end": "1150"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:52:09.342Z"
+}

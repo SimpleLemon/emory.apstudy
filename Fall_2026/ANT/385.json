@@ -1,0 +1,122 @@
+{
+  "course_code": "ANT 385",
+  "course_title": "Special Topics: Anthropology: Energy Matters",
+  "subject": "ANT",
+  "catalog_number": "385",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3102",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "K. Phillips",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3535",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "S. Blakely",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3924",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "X. Marsilli-Vargas",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4524",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "L. Jones",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-2:30p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1430"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 4,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "K. Phillips",
+    "L. Jones",
+    "S. Blakely",
+    "X. Marsilli-Vargas"
+  ],
+  "scraped_at": "2026-04-20T20:50:20.084Z"
+}

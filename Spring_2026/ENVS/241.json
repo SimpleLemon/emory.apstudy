@@ -1,0 +1,47 @@
+{
+  "course_code": "ENVS 241",
+  "course_title": "Modern & Ancient Tropical Environments",
+  "subject": "ENVS",
+  "catalog_number": "241",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2590",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Martin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Martin"
+  ],
+  "scraped_at": "2026-04-20T20:47:59.634Z"
+}

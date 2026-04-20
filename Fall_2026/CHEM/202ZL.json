@@ -1,0 +1,50 @@
+{
+  "course_code": "CHEM 202ZL",
+  "course_title": "Principles of Reactivity Lab",
+  "subject": "CHEM",
+  "catalog_number": "202ZL",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2998",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; M 3:45-5:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Mon",
+            "start": "1545",
+            "end": "1750"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:50:30.041Z"
+}

@@ -1,0 +1,69 @@
+{
+  "course_code": "DANC 496R",
+  "course_title": "Special: Studio/Teaching Assistant",
+  "subject": "DANC",
+  "catalog_number": "496R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6230",
+      "section_number": "1",
+      "schedule_type": "DIS",
+      "instructor": "M. Mandradjieff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6510",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "G. Catellier",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6644",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "T. Myers",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 3,
+    "other": 0,
+    "open": 0,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "G. Catellier",
+    "M. Mandradjieff",
+    "T. Myers"
+  ],
+  "scraped_at": "2026-04-20T20:47:52.918Z"
+}

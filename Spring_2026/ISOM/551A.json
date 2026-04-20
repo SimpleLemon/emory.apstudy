@@ -1,0 +1,104 @@
+{
+  "course_code": "ISOM 551A",
+  "course_title": "Processes and Systems Management",
+  "subject": "ISOM",
+  "catalog_number": "551A",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-21",
+    "end": "2026-03-01"
+  },
+  "sections": [
+    {
+      "crn": "3524",
+      "section_number": "2188",
+      "schedule_type": "LEC",
+      "instructor": "R. Cui",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3525",
+      "section_number": "2189",
+      "schedule_type": "LEC",
+      "instructor": "R. Cui",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3526",
+      "section_number": "2688",
+      "schedule_type": "LEC",
+      "instructor": "R. Cui",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3527",
+      "section_number": "2689",
+      "schedule_type": "LEC",
+      "instructor": "R. Cui",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 4,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "R. Cui"
+  ],
+  "scraped_at": "2026-04-20T20:49:19.128Z"
+}

@@ -1,0 +1,125 @@
+{
+  "course_code": "PHYS 397R",
+  "course_title": "Directed Study",
+  "subject": "PHYS",
+  "catalog_number": "397R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1923",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "A. Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6178",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "L. Santos",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6334",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "T. Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6517",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "S. Boettcher",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6548",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6612",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "E. Bonning",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6615",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "T. Can",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 6,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Bans",
+    "Batiste/Bans",
+    "E. Bonning",
+    "L. Santos",
+    "S. Boettcher",
+    "T. Bing",
+    "T. Can"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.254Z"
+}

@@ -1,0 +1,41 @@
+{
+  "course_code": "BUS 536",
+  "course_title": "Washington Campus",
+  "subject": "BUS",
+  "catalog_number": "536",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-10",
+    "end": "2026-08-14"
+  },
+  "sections": [
+    {
+      "crn": "5642",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Lord/Ruskin"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.383Z"
+}

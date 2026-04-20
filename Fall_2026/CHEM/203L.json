@@ -1,0 +1,196 @@
+{
+  "course_code": "CHEM 203L",
+  "course_title": "Advanced Reactivity Lab",
+  "subject": "CHEM",
+  "catalog_number": "203L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3170",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-5:15p; T 5:15-7:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Tue",
+            "start": "1715",
+            "end": "1920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3173",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 10-11:15a; W 11:15a-1:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1115",
+            "end": "1320"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3179",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-3:45p; W 3:45-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1545",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3183",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-2:15p; Th 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3184",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4:30-5:45p; Th 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Thu",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3185",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:45a; F 9:45-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Fri",
+            "start": "945",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3186",
+      "section_number": "7",
+      "schedule_type": "LAB",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-2:15p; F 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Fri",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 7,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 5
+  },
+  "instructors_unique": [
+    "D. Mulford"
+  ],
+  "scraped_at": "2026-04-20T20:50:30.043Z"
+}

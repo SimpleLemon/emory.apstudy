@@ -1,0 +1,193 @@
+{
+  "course_code": "HLTH 300R",
+  "course_title": "Peer Health Partners",
+  "subject": "HLTH",
+  "catalog_number": "300R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2648",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 10-11:15a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2675",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2676",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2677",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2679",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2680",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2681",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2683",
+      "section_number": "8",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-2:15p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2684",
+      "section_number": "9",
+      "schedule_type": "DIS",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 9,
+    "lectures": 8,
+    "labs": 0,
+    "discussions": 1,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 9
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:50:56.530Z"
+}

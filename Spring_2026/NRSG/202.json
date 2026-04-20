@@ -1,0 +1,103 @@
+{
+  "course_code": "NRSG 202",
+  "course_title": "Human Anatomy and Physiology II with Lab",
+  "subject": "NRSG",
+  "catalog_number": "202",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4569",
+      "section_number": "LAB1",
+      "schedule_type": "LAB",
+      "instructor": "J. Clark",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4571",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "D. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4568",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Clark",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4570",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "D. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 2,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Lewis",
+    "J. Clark"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.757Z"
+}

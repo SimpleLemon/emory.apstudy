@@ -1,0 +1,66 @@
+{
+  "course_code": "HPM 575",
+  "course_title": "Capstone-Advanced Topics in Policy Analysis",
+  "subject": "HPM",
+  "catalog_number": "575",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1617",
+      "section_number": "LAB",
+      "schedule_type": "LAB",
+      "instructor": "Thorpe/Pappalardo",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-10:20a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1020"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1509",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "Thorpe/Pappalardo",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-11:20a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1120"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 1,
+    "discussions": 0,
+    "other": 1,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Thorpe/Pappalardo"
+  ],
+  "scraped_at": "2026-04-20T20:49:35.665Z"
+}

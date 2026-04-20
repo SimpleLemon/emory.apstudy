@@ -1,0 +1,41 @@
+{
+  "course_code": "NBB 498R",
+  "course_title": "Supervised Reading",
+  "subject": "NBB",
+  "catalog_number": "498R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1850",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "R. Wyttenbach",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "R. Wyttenbach"
+  ],
+  "scraped_at": "2026-04-20T20:51:21.297Z"
+}

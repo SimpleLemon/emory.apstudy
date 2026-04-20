@@ -1,0 +1,81 @@
+{
+  "course_code": "HPM 500",
+  "course_title": "Intro To US Health Care System",
+  "subject": "HPM",
+  "catalog_number": "500",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2130",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "D. Howard",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2132",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "R. Merritt",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 5-6:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1700",
+            "end": "1850"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2134",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "W. Pearson",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-2:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1450"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Howard",
+    "R. Merritt",
+    "W. Pearson"
+  ],
+  "scraped_at": "2026-04-20T20:52:19.272Z"
+}

@@ -1,0 +1,57 @@
+{
+  "course_code": "PE 114",
+  "course_title": "PPF/Jogging",
+  "subject": "PE",
+  "catalog_number": "114",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3374",
+      "section_number": "1",
+      "schedule_type": "PE",
+      "instructor": "E. Noell",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MWF 10-10:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1050"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1050"
+          },
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Noell"
+  ],
+  "scraped_at": "2026-04-20T20:51:27.877Z"
+}

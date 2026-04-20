@@ -1,0 +1,72 @@
+{
+  "course_code": "ANT 385W",
+  "course_title": "Special Topics: Anthropology: Humans as Drivers Evol. Change",
+  "subject": "ANT",
+  "catalog_number": "385W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1623",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "L. van Holstein",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2068",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "D. Vidali",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 1,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Vidali",
+    "L. van Holstein"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.248Z"
+}

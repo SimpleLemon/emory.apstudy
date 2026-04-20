@@ -1,0 +1,137 @@
+{
+  "course_code": "PHIL 100",
+  "course_title": "Basic Problems in Philosophy",
+  "subject": "PHIL",
+  "catalog_number": "100",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1686",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Bell",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2442",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "M. Wang",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TThF 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "920"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "920"
+          },
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2446",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "G. Yancy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3399",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "D. Estrada",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MWF 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "920"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "920"
+          },
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 4,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Estrada",
+    "G. Yancy",
+    "J. Bell",
+    "M. Wang"
+  ],
+  "scraped_at": "2026-04-20T20:51:31.135Z"
+}

@@ -1,0 +1,86 @@
+{
+  "course_code": "IBS 500R",
+  "course_title": "Current Topics In Bioscience: IDAS Seminar",
+  "subject": "IBS",
+  "catalog_number": "500R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5250",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "De Roode/Waller",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 3-4p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1500",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5520",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5:30-6:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5705",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-5p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1700"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "De Roode/Waller",
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T21:51:36.734Z"
+}

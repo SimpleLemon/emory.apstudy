@@ -1,0 +1,293 @@
+{
+  "course_code": "PHYS 796",
+  "course_title": "Qualifier Proposal",
+  "subject": "PHYS",
+  "catalog_number": "796",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1782",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "H. Harutyunyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1793",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "J. Rieser",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1795",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "J. Burton",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1797",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "K. Warncke",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1799",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "E. Weeks",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1801",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "D. Weissman",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1971",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "T. Can",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1803",
+      "section_number": "8",
+      "schedule_type": "LEC",
+      "instructor": "K. Davis",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1972",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "C. Roth",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1783",
+      "section_number": "10",
+      "schedule_type": "LEC",
+      "instructor": "W. Benalcazar",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1966",
+      "section_number": "11",
+      "schedule_type": "LEC",
+      "instructor": "M. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1785",
+      "section_number": "12",
+      "schedule_type": "LEC",
+      "instructor": "S. Shekhar",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1967",
+      "section_number": "13",
+      "schedule_type": "LEC",
+      "instructor": "S. Boettcher",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1787",
+      "section_number": "14",
+      "schedule_type": "LEC",
+      "instructor": "L. Santos",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1968",
+      "section_number": "15",
+      "schedule_type": "LEC",
+      "instructor": "I. Nemenman",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1789",
+      "section_number": "16",
+      "schedule_type": "LEC",
+      "instructor": "D. Sussman",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1969",
+      "section_number": "17",
+      "schedule_type": "LEC",
+      "instructor": "J. Lin",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1791",
+      "section_number": "18",
+      "schedule_type": "LEC",
+      "instructor": "A. Srivastava",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1970",
+      "section_number": "19",
+      "schedule_type": "LEC",
+      "instructor": "G. Berman",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 19,
+    "lectures": 19,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 19,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Srivastava",
+    "C. Roth",
+    "D. Sussman",
+    "D. Weissman",
+    "E. Weeks",
+    "G. Berman",
+    "H. Harutyunyan",
+    "I. Nemenman",
+    "J. Burton",
+    "J. Lin",
+    "J. Rieser",
+    "K. Davis",
+    "K. Warncke",
+    "L. Santos",
+    "M. Kim",
+    "S. Boettcher",
+    "S. Shekhar",
+    "T. Can",
+    "W. Benalcazar"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.265Z"
+}

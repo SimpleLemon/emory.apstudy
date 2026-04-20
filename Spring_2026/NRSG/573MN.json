@@ -1,0 +1,47 @@
+{
+  "course_code": "NRSG 573MN",
+  "course_title": "Health Care Quality, Safety & Informatics: MN",
+  "subject": "NRSG",
+  "catalog_number": "573MN",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4234",
+      "section_number": "200",
+      "schedule_type": "LEC",
+      "instructor": "I. Duva",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 8:30-10:20a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "1020"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "I. Duva"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.777Z"
+}

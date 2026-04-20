@@ -1,0 +1,202 @@
+{
+  "course_code": "ECS 190",
+  "course_title": "Emory College Freshman Seminar: ATTENTION!: Reading, Focusing",
+  "subject": "ECS",
+  "catalog_number": "190",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1793",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "L. Velloso-Lyons",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1795",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "A. Chira",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1796",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "C. Crowley",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1797",
+      "section_number": "5",
+      "schedule_type": "SEM",
+      "instructor": "K. Loudermilk",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1798",
+      "section_number": "6",
+      "schedule_type": "SEM",
+      "instructor": "N. Suhr-Sytsma",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1799",
+      "section_number": "7",
+      "schedule_type": "SEM",
+      "instructor": "R. De Luca",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1800",
+      "section_number": "8",
+      "schedule_type": "SEM",
+      "instructor": "B. Ozawa-de Silva",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 0,
+    "closed": 7,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Chira",
+    "B. Ozawa-de Silva",
+    "C. Crowley",
+    "K. Loudermilk",
+    "L. Velloso-Lyons",
+    "N. Suhr-Sytsma",
+    "R. De Luca"
+  ],
+  "scraped_at": "2026-04-20T21:52:09.210Z"
+}

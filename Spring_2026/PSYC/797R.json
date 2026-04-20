@@ -1,0 +1,167 @@
+{
+  "course_code": "PSYC 797R",
+  "course_title": "Directed Research",
+  "subject": "PSYC",
+  "catalog_number": "797R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1796",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "P. Brennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1798",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "A. Cohen",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1800",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "R. Hampton",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1885",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "A. Kelly",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1802",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "P. Kragel",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1886",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "S. Lourenco",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1804",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "P. Palmer",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1887",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5824",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "D. Dilks",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5823",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "M. Treadway",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Cohen",
+    "A. Kelly",
+    "D. Dilks",
+    "J. Medina",
+    "M. Treadway",
+    "P. Brennan",
+    "P. Kragel",
+    "P. Palmer",
+    "R. Hampton",
+    "S. Lourenco"
+  ],
+  "scraped_at": "2026-04-20T20:48:55.908Z"
+}

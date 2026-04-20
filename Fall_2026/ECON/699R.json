@@ -1,0 +1,223 @@
+{
+  "course_code": "ECON 699R",
+  "course_title": "Thesis Research",
+  "subject": "ECON",
+  "catalog_number": "699R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5546",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "D. Jacho-Chavez",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5547",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "D. Fershtman",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5548",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "J. Grennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5549",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "F. Gunsilius",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5550",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "C. Hansman",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5551",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "V. Yue",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5586",
+      "section_number": "7",
+      "schedule_type": "RSC",
+      "instructor": "S. O'Connell",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5587",
+      "section_number": "8",
+      "schedule_type": "RSC",
+      "instructor": "N. Lind",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5600",
+      "section_number": "9",
+      "schedule_type": "RSC",
+      "instructor": "J. Rubio Ramirez",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5601",
+      "section_number": "10",
+      "schedule_type": "RSC",
+      "instructor": "K. Karbownik",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5602",
+      "section_number": "11",
+      "schedule_type": "RSC",
+      "instructor": "T. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5603",
+      "section_number": "12",
+      "schedule_type": "RSC",
+      "instructor": "S. Markowitz",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5604",
+      "section_number": "13",
+      "schedule_type": "RSC",
+      "instructor": "I. McCarthy",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5639",
+      "section_number": "14",
+      "schedule_type": "RSC",
+      "instructor": "M. Grennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "14",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 14,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 14,
+    "open": 14,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Hansman",
+    "D. Fershtman",
+    "D. Jacho-Chavez",
+    "F. Gunsilius",
+    "I. McCarthy",
+    "J. Grennan",
+    "J. Rubio Ramirez",
+    "K. Karbownik",
+    "M. Grennan",
+    "N. Lind",
+    "S. Markowitz",
+    "S. O'Connell",
+    "T. Kim",
+    "V. Yue"
+  ],
+  "scraped_at": "2026-04-20T20:50:38.317Z"
+}

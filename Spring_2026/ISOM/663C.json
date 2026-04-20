@@ -1,0 +1,54 @@
+{
+  "course_code": "ISOM 663C",
+  "course_title": "Problem Solving Bootcamp",
+  "subject": "ISOM",
+  "catalog_number": "663C",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-02-08"
+  },
+  "sections": [
+    {
+      "crn": "3540",
+      "section_number": "4101",
+      "schedule_type": "LEC",
+      "instructor": "J. Andrle",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3541",
+      "section_number": "4102",
+      "schedule_type": "LEC",
+      "instructor": "J. Andrle",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Andrle"
+  ],
+  "scraped_at": "2026-04-20T20:49:19.132Z"
+}

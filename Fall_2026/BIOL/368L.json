@@ -1,0 +1,52 @@
+{
+  "course_code": "BIOL 368L",
+  "course_title": "Biotechnology & Molecular Biology Lab",
+  "subject": "BIOL",
+  "catalog_number": "368L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1781",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "S. Comstra",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-4p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1600"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "S. Comstra"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.640Z"
+}

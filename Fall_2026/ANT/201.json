@@ -1,0 +1,128 @@
+{
+  "course_code": "ANT 201",
+  "course_title": "Concepts And Methods in Biol Anth",
+  "subject": "ANT",
+  "catalog_number": "201",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3451",
+      "section_number": "L1",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-11a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1100"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3452",
+      "section_number": "L2",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11a-1p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1300"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3454",
+      "section_number": "L3",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-3p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1500"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3457",
+      "section_number": "L4",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 3-5p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1500",
+            "end": "1700"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3093",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "C. Hadley",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 1,
+    "labs": 4,
+    "discussions": 0,
+    "other": 0,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Hadley"
+  ],
+  "scraped_at": "2026-04-20T20:50:20.078Z"
+}

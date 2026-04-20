@@ -1,0 +1,172 @@
+{
+  "course_code": "CHEM 204L",
+  "course_title": "Macromolecules Lab",
+  "subject": "CHEM",
+  "catalog_number": "204L",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3747",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 1-2:15p; T 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Tue",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3748",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4:30-5:45p; T 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Tue",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3749",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 10-11:15a; W 11:15a-1:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1115",
+            "end": "1320"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3750",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-3:45p; W 3:45-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1545",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3751",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-2:15p; Th 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3752",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4:30-5:45p; Th 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Thu",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 6,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 5
+  },
+  "instructors_unique": [
+    "J. Smith"
+  ],
+  "scraped_at": "2026-04-20T20:47:46.128Z"
+}

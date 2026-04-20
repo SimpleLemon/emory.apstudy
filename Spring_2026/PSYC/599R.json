@@ -1,0 +1,166 @@
+{
+  "course_code": "PSYC 599R",
+  "course_title": "Master Thesis Research",
+  "subject": "PSYC",
+  "catalog_number": "599R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1784",
+      "section_number": "1",
+      "schedule_type": "THE",
+      "instructor": "P. Brennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1786",
+      "section_number": "2",
+      "schedule_type": "THE",
+      "instructor": "V. Brown",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1882",
+      "section_number": "3",
+      "schedule_type": "THE",
+      "instructor": "D. Dilks",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1788",
+      "section_number": "4",
+      "schedule_type": "THE",
+      "instructor": "A. Kelly",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1883",
+      "section_number": "5",
+      "schedule_type": "THE",
+      "instructor": "A. Klin",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1790",
+      "section_number": "6",
+      "schedule_type": "THE",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1884",
+      "section_number": "7",
+      "schedule_type": "THE",
+      "instructor": "M. Treadway",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1792",
+      "section_number": "8",
+      "schedule_type": "THE",
+      "instructor": "P. Wolff",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1794",
+      "section_number": "9",
+      "schedule_type": "THE",
+      "instructor": "B. Yamasaki",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1881",
+      "section_number": "10",
+      "schedule_type": "THE",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Kelly",
+    "A. Klin",
+    "B. Yamasaki",
+    "D. Dilks",
+    "J. Medina",
+    "M. Treadway",
+    "P. Brennan",
+    "P. Wolff",
+    "V. Brown"
+  ],
+  "scraped_at": "2026-04-20T20:48:55.907Z"
+}

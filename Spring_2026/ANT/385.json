@@ -1,0 +1,181 @@
+{
+  "course_code": "ANT 385",
+  "course_title": "Special Topics: Anthropology: Chaos, Disorder, & Dysfunction",
+  "subject": "ANT",
+  "catalog_number": "385",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1856",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "D. Nugent",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1858",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "J. Saers",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2743",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "Jones/Buckmaster",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2872",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "J. Glass",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4395",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "B. Holsey",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4537",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "D. Seeman",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6-8:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5613",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "J. Saers",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-6:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1845"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 7,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 6,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "B. Holsey",
+    "D. Nugent",
+    "D. Seeman",
+    "J. Glass",
+    "J. Saers",
+    "Jones/Buckmaster"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.248Z"
+}

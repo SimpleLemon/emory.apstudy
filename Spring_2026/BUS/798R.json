@@ -1,0 +1,292 @@
+{
+  "course_code": "BUS 798R",
+  "course_title": "Pre-Candidacy Dissertation Research",
+  "subject": "BUS",
+  "catalog_number": "798R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5637",
+      "section_number": "5101",
+      "schedule_type": "RSC",
+      "instructor": "K. Sedatole",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5638",
+      "section_number": "5102",
+      "schedule_type": "RSC",
+      "instructor": "N. Jegadeesh",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5639",
+      "section_number": "5103",
+      "schedule_type": "RSC",
+      "instructor": "C. Green",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5640",
+      "section_number": "5104",
+      "schedule_type": "RSC",
+      "instructor": "S. Jap",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5641",
+      "section_number": "5105",
+      "schedule_type": "RSC",
+      "instructor": "T. Chan",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5642",
+      "section_number": "5106",
+      "schedule_type": "RSC",
+      "instructor": "P. Roberts",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5643",
+      "section_number": "5107",
+      "schedule_type": "RSC",
+      "instructor": "N. Osadchiy",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5644",
+      "section_number": "5108",
+      "schedule_type": "RSC",
+      "instructor": "R. Cui",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5645",
+      "section_number": "5110",
+      "schedule_type": "RSC",
+      "instructor": "G. Maturana",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5646",
+      "section_number": "5111",
+      "schedule_type": "RSC",
+      "instructor": "R. Chellappa",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5647",
+      "section_number": "5112",
+      "schedule_type": "RSC",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5648",
+      "section_number": "5113",
+      "schedule_type": "RSC",
+      "instructor": "M. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5649",
+      "section_number": "5114",
+      "schedule_type": "RSC",
+      "instructor": "M. Williams",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5650",
+      "section_number": "5115",
+      "schedule_type": "RSC",
+      "instructor": "J. Perry-Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5651",
+      "section_number": "5116",
+      "schedule_type": "RSC",
+      "instructor": "S. Sridharan",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5652",
+      "section_number": "5117",
+      "schedule_type": "RSC",
+      "instructor": "E. Hall",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6186",
+      "section_number": "5118",
+      "schedule_type": "RSC",
+      "instructor": "I. Dichev",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6297",
+      "section_number": "5119",
+      "schedule_type": "RSC",
+      "instructor": "T. Yohn",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6399",
+      "section_number": "5120",
+      "schedule_type": "RSC",
+      "instructor": "G. Maturana",
+      "enrollment_status": "Open",
+      "enrollment_count": "19",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 19,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 19,
+    "open": 19,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Green",
+    "D. Schweidel",
+    "E. Hall",
+    "G. Maturana",
+    "I. Dichev",
+    "J. Perry-Smith",
+    "K. Sedatole",
+    "M. Lewis",
+    "M. Williams",
+    "N. Jegadeesh",
+    "N. Osadchiy",
+    "P. Roberts",
+    "R. Chellappa",
+    "R. Cui",
+    "S. Jap",
+    "S. Sridharan",
+    "T. Chan",
+    "T. Yohn"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.761Z"
+}

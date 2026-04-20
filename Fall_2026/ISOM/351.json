@@ -1,0 +1,221 @@
+{
+  "course_code": "ISOM 351",
+  "course_title": "Process & Systems Management",
+  "subject": "ISOM",
+  "catalog_number": "351",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3604",
+      "section_number": "1174",
+      "schedule_type": "LEC",
+      "instructor": "T. Chan",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3605",
+      "section_number": "1175",
+      "schedule_type": "LEC",
+      "instructor": "T. Chan",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3606",
+      "section_number": "1176",
+      "schedule_type": "LEC",
+      "instructor": "S. Walton",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3607",
+      "section_number": "1177",
+      "schedule_type": "LEC",
+      "instructor": "S. Walton",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3608",
+      "section_number": "1474",
+      "schedule_type": "LEC",
+      "instructor": "T. Chan",
+      "enrollment_status": "Closed",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3609",
+      "section_number": "1475",
+      "schedule_type": "LEC",
+      "instructor": "T. Chan",
+      "enrollment_status": "Closed",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3610",
+      "section_number": "1476",
+      "schedule_type": "LEC",
+      "instructor": "S. Walton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3611",
+      "section_number": "1477",
+      "schedule_type": "LEC",
+      "instructor": "S. Walton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 8,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 4,
+    "waitlisted": 4
+  },
+  "instructors_unique": [
+    "S. Walton",
+    "T. Chan"
+  ],
+  "scraped_at": "2026-04-20T20:52:02.721Z"
+}

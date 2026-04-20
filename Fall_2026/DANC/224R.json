@@ -1,0 +1,52 @@
+{
+  "course_code": "DANC 224R",
+  "course_title": "Jazz Dance II (Advanced Beginning)",
+  "subject": "DANC",
+  "catalog_number": "224R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2410",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "T. Myers",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Myers"
+  ],
+  "scraped_at": "2026-04-20T20:50:36.607Z"
+}

@@ -1,0 +1,83 @@
+{
+  "course_code": "WGS 798R",
+  "course_title": "Pre-Candidacy Research",
+  "subject": "WGS",
+  "catalog_number": "798R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3898",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "S. Mulla",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3975",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "A. Finch",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3976",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "K. Amin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5714",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "F. Sheth",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 0,
+    "closed": 4,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Finch",
+    "F. Sheth",
+    "K. Amin",
+    "S. Mulla"
+  ],
+  "scraped_at": "2026-04-20T20:49:10.859Z"
+}

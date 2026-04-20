@@ -1,0 +1,41 @@
+{
+  "course_code": "NRSG 619D",
+  "course_title": "Pediatric Primary Care Nurse Practitioner Clinical Practicum I",
+  "subject": "NRSG",
+  "catalog_number": "619D",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4574",
+      "section_number": "1",
+      "schedule_type": "CLN",
+      "instructor": "H. Lecesne",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Lecesne"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.779Z"
+}

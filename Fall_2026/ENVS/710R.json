@@ -1,0 +1,83 @@
+{
+  "course_code": "ENVS 710R",
+  "course_title": "Pre-Candidacy Research",
+  "subject": "ENVS",
+  "catalog_number": "710R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2089",
+      "section_number": "1",
+      "schedule_type": "THE",
+      "instructor": "S. Robinson",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2090",
+      "section_number": "2",
+      "schedule_type": "THE",
+      "instructor": "J. Ajibade",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2091",
+      "section_number": "3",
+      "schedule_type": "THE",
+      "instructor": "X. Huang",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2092",
+      "section_number": "4",
+      "schedule_type": "THE",
+      "instructor": "M. Mucioki",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Ajibade",
+    "M. Mucioki",
+    "S. Robinson",
+    "X. Huang"
+  ],
+  "scraped_at": "2026-04-20T20:50:43.289Z"
+}

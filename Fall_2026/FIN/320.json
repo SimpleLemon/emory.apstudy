@@ -1,0 +1,318 @@
+{
+  "course_code": "FIN 320",
+  "course_title": "Corporate Finance",
+  "subject": "FIN",
+  "catalog_number": "320",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3561",
+      "section_number": "1129",
+      "schedule_type": "LEC",
+      "instructor": "S. Ramachandran",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3562",
+      "section_number": "1130",
+      "schedule_type": "LEC",
+      "instructor": "B. Lee",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3563",
+      "section_number": "1131",
+      "schedule_type": "LEC",
+      "instructor": "B. Lee",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3564",
+      "section_number": "1132",
+      "schedule_type": "LEC",
+      "instructor": "T. Chordia",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3565",
+      "section_number": "1133",
+      "schedule_type": "LEC",
+      "instructor": "T. Chordia",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3566",
+      "section_number": "1134",
+      "schedule_type": "LEC",
+      "instructor": "S. Ramachandran",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3567",
+      "section_number": "1429",
+      "schedule_type": "LEC",
+      "instructor": "S. Ramachandran",
+      "enrollment_status": "Closed",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3568",
+      "section_number": "1430",
+      "schedule_type": "LEC",
+      "instructor": "B. Lee",
+      "enrollment_status": "Closed",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3569",
+      "section_number": "1431",
+      "schedule_type": "LEC",
+      "instructor": "B. Lee",
+      "enrollment_status": "Closed",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3570",
+      "section_number": "1432",
+      "schedule_type": "LEC",
+      "instructor": "T. Chordia",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3571",
+      "section_number": "1433",
+      "schedule_type": "LEC",
+      "instructor": "T. Chordia",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3572",
+      "section_number": "1434",
+      "schedule_type": "LEC",
+      "instructor": "S. Ramachandran",
+      "enrollment_status": "Closed",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 12,
+    "lectures": 12,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 4,
+    "waitlisted": 4
+  },
+  "instructors_unique": [
+    "B. Lee",
+    "S. Ramachandran",
+    "T. Chordia"
+  ],
+  "scraped_at": "2026-04-20T20:52:01.031Z"
+}

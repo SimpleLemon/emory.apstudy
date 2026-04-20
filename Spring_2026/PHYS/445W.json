@@ -1,0 +1,52 @@
+{
+  "course_code": "PHYS 445W",
+  "course_title": "Materials and Quantum Phys Lab",
+  "subject": "PHYS",
+  "catalog_number": "445W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1831",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "J. Brody",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Brody"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.256Z"
+}

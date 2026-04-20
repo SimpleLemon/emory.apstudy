@@ -1,0 +1,115 @@
+{
+  "course_code": "BIOS 500",
+  "course_title": "Statistical Methods I",
+  "subject": "BIOS",
+  "catalog_number": "500",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3471",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Nizam",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "950"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3472",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "J. Binongo",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 3-4:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1500",
+            "end": "1620"
+          },
+          {
+            "day": "Thu",
+            "start": "1500",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3473",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "A. Sur",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 3-4:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1500",
+            "end": "1620"
+          },
+          {
+            "day": "Thu",
+            "start": "1500",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3474",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "J. Binongo",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 4,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Nizam",
+    "A. Sur",
+    "J. Binongo"
+  ],
+  "scraped_at": "2026-04-20T20:52:10.989Z"
+}

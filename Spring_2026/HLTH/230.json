@@ -1,0 +1,52 @@
+{
+  "course_code": "HLTH 230",
+  "course_title": "Health, Wellbeing & Humanities",
+  "subject": "HLTH",
+  "catalog_number": "230",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3650",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Zhang",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Zhang"
+  ],
+  "scraped_at": "2026-04-20T20:48:12.832Z"
+}

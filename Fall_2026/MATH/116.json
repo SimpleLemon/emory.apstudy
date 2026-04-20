@@ -1,0 +1,91 @@
+{
+  "course_code": "MATH 116",
+  "course_title": "Life Sciences Calculus II",
+  "subject": "MATH",
+  "catalog_number": "116",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2758",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "C. Drum",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3225",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "Drum/Bu",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3429",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "Drum/Bu",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "C. Drum",
+    "Drum/Bu"
+  ],
+  "scraped_at": "2026-04-20T20:51:13.087Z"
+}

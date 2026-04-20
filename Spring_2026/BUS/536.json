@@ -1,0 +1,146 @@
+{
+  "course_code": "BUS 536",
+  "course_title": "Washington Campus",
+  "subject": "BUS",
+  "catalog_number": "536",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-05",
+    "end": "2026-01-09"
+  },
+  "sections": [
+    {
+      "crn": "5412",
+      "section_number": "2101",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5413",
+      "section_number": "2102",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5759",
+      "section_number": "2103",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3386",
+      "section_number": "2201",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3387",
+      "section_number": "2202",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4397",
+      "section_number": "2203",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Conner",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5884",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5885",
+      "section_number": "3202",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5886",
+      "section_number": "3203",
+      "schedule_type": "LEC",
+      "instructor": "Lord/Ruskin",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 9,
+    "lectures": 9,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 9,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Lord/Conner",
+    "Lord/Ruskin"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.756Z"
+}

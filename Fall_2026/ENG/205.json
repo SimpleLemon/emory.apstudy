@@ -1,0 +1,101 @@
+{
+  "course_code": "ENG 205",
+  "course_title": "Poetry",
+  "subject": "ENG",
+  "catalog_number": "205",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1862",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "W. Kalaidjian",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2021",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "W. Kalaidjian",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2022",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "G. Higgins",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "G. Higgins",
+    "W. Kalaidjian"
+  ],
+  "scraped_at": "2026-04-20T20:50:41.614Z"
+}

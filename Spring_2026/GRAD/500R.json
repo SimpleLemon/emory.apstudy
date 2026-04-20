@@ -1,0 +1,52 @@
+{
+  "course_code": "GRAD 500R",
+  "course_title": "Interdisciplinary Studies Seminar",
+  "subject": "GRAD",
+  "catalog_number": "500R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2538",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "D. Das Acevedo",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2-3:25p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1400",
+            "end": "1525"
+          },
+          {
+            "day": "Wed",
+            "start": "1400",
+            "end": "1525"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Das Acevedo"
+  ],
+  "scraped_at": "2026-04-20T21:51:33.517Z"
+}

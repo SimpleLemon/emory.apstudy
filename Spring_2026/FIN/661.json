@@ -1,0 +1,52 @@
+{
+  "course_code": "FIN 661",
+  "course_title": "International 1: Currencies and Commodities",
+  "subject": "FIN",
+  "catalog_number": "661",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-03-08"
+  },
+  "sections": [
+    {
+      "crn": "3574",
+      "section_number": "4201",
+      "schedule_type": "LEC",
+      "instructor": "T. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Smith"
+  ],
+  "scraped_at": "2026-04-20T20:49:17.434Z"
+}

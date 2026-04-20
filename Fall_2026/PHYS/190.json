@@ -1,0 +1,72 @@
+{
+  "course_code": "PHYS 190",
+  "course_title": "Fresh Sem: Physics: Learning Physics",
+  "subject": "PHYS",
+  "catalog_number": "190",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1391",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "K. Berland",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-6:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4494",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "J. Brody",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Brody",
+    "K. Berland"
+  ],
+  "scraped_at": "2026-04-20T20:51:32.835Z"
+}

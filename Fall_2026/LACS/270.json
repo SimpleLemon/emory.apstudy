@@ -1,0 +1,47 @@
+{
+  "course_code": "LACS 270",
+  "course_title": "Topics: Latin Americn Issues: God, Sex, and Crime",
+  "subject": "LACS",
+  "catalog_number": "270",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4022",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Villa-Flores",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Villa-Flores"
+  ],
+  "scraped_at": "2026-04-20T20:51:08.049Z"
+}

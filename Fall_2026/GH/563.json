@@ -1,0 +1,47 @@
+{
+  "course_code": "GH 563",
+  "course_title": "AIDS: Global Public Health Implications",
+  "subject": "GH",
+  "catalog_number": "563",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2253",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "S. Hussen",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 3-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1500",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "S. Hussen"
+  ],
+  "scraped_at": "2026-04-20T20:52:17.629Z"
+}

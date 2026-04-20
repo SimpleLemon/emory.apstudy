@@ -1,0 +1,71 @@
+{
+  "course_code": "ENVS 232",
+  "course_title": "Fundamentals of Ecology w/Lab",
+  "subject": "ENVS",
+  "catalog_number": "232",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1808",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Pynne",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1809",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "J. Pynne",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-3:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 1,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Pynne"
+  ],
+  "scraped_at": "2026-04-20T20:50:43.282Z"
+}

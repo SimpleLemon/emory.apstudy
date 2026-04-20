@@ -1,0 +1,1682 @@
+{
+  "course_code": "ECS 101",
+  "course_title": "Emory Essentials",
+  "subject": "ECS",
+  "catalog_number": "101",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2491",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2492",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2494",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2495",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2496",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2497",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2498",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2499",
+      "section_number": "8",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2500",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2501",
+      "section_number": "10",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2502",
+      "section_number": "11",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2503",
+      "section_number": "12",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2504",
+      "section_number": "13",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2505",
+      "section_number": "14",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2506",
+      "section_number": "15",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2507",
+      "section_number": "16",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2508",
+      "section_number": "17",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2509",
+      "section_number": "18",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2510",
+      "section_number": "19",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2511",
+      "section_number": "20",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2512",
+      "section_number": "21",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2513",
+      "section_number": "22",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2514",
+      "section_number": "23",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2515",
+      "section_number": "24",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2516",
+      "section_number": "25",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2659",
+      "section_number": "26",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2662",
+      "section_number": "27",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2663",
+      "section_number": "28",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2665",
+      "section_number": "29",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2666",
+      "section_number": "30",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2759",
+      "section_number": "31",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2761",
+      "section_number": "32",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2762",
+      "section_number": "33",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2766",
+      "section_number": "34",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2767",
+      "section_number": "35",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2768",
+      "section_number": "36",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2769",
+      "section_number": "37",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2771",
+      "section_number": "38",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2773",
+      "section_number": "39",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2775",
+      "section_number": "40",
+      "schedule_type": "LEC",
+      "instructor": "Obrentz/Morran",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2778",
+      "section_number": "41",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2789",
+      "section_number": "42",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5-5:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2790",
+      "section_number": "43",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5-5:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2792",
+      "section_number": "44",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5-5:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2797",
+      "section_number": "45",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5-5:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2799",
+      "section_number": "46",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5-5:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1700",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2801",
+      "section_number": "47",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2805",
+      "section_number": "48",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2810",
+      "section_number": "49",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2815",
+      "section_number": "50",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2883",
+      "section_number": "51",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2820",
+      "section_number": "52",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2823",
+      "section_number": "53",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2828",
+      "section_number": "54",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2831",
+      "section_number": "55",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-9:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2837",
+      "section_number": "56",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2841",
+      "section_number": "57",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2842",
+      "section_number": "58",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2843",
+      "section_number": "59",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2844",
+      "section_number": "60",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2845",
+      "section_number": "61",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2848",
+      "section_number": "62",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2849",
+      "section_number": "63",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2850",
+      "section_number": "64",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2851",
+      "section_number": "65",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2853",
+      "section_number": "66",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2854",
+      "section_number": "67",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2855",
+      "section_number": "68",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2856",
+      "section_number": "69",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2857",
+      "section_number": "70",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2858",
+      "section_number": "71",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2859",
+      "section_number": "72",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2860",
+      "section_number": "73",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2861",
+      "section_number": "74",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2862",
+      "section_number": "75",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2863",
+      "section_number": "76",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2864",
+      "section_number": "77",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2865",
+      "section_number": "78",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2866",
+      "section_number": "79",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2867",
+      "section_number": "80",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2869",
+      "section_number": "81",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2870",
+      "section_number": "82",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2871",
+      "section_number": "83",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2873",
+      "section_number": "84",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2874",
+      "section_number": "85",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2875",
+      "section_number": "86",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2876",
+      "section_number": "87",
+      "schedule_type": "LEC",
+      "instructor": "Morran/Obrentz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "87",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 87,
+    "lectures": 87,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 87,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Morran/Obrentz",
+    "Obrentz/Morran"
+  ],
+  "scraped_at": "2026-04-20T21:52:09.207Z"
+}

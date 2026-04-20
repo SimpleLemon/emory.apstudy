@@ -1,0 +1,90 @@
+{
+  "course_code": "ISOM 551A",
+  "course_title": "Processes and Systems Management",
+  "subject": "ISOM",
+  "catalog_number": "551A",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3770",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "R. Chellappa",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "920"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3771",
+      "section_number": "3202",
+      "schedule_type": "LEC",
+      "instructor": "R. Chellappa",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-10:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1050"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3772",
+      "section_number": "4401",
+      "schedule_type": "LEC",
+      "instructor": "S. Walton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "R. Chellappa",
+    "S. Walton"
+  ],
+  "scraped_at": "2026-04-20T20:52:02.727Z"
+}

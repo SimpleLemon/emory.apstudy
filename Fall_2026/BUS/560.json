@@ -1,0 +1,106 @@
+{
+  "course_code": "BUS 560",
+  "course_title": "Design Thinking",
+  "subject": "BUS",
+  "catalog_number": "560",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-10",
+    "end": "2026-08-25"
+  },
+  "sections": [
+    {
+      "crn": "3676",
+      "section_number": "2194",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3677",
+      "section_number": "2195",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3678",
+      "section_number": "2294",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3679",
+      "section_number": "2295",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3680",
+      "section_number": "3294",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3681",
+      "section_number": "3295",
+      "schedule_type": "LEC",
+      "instructor": "J. Barton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 6,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Barton"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.384Z"
+}

@@ -1,0 +1,102 @@
+{
+  "course_code": "CHEM 470",
+  "course_title": "Special Topics in Chemistry: Capstone: Catalysis",
+  "subject": "CHEM",
+  "catalog_number": "470",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3719",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "J. Soria",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3720",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "D. Lynn",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3721",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "F. Liu",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Lynn",
+    "F. Liu",
+    "J. Soria"
+  ],
+  "scraped_at": "2026-04-20T20:47:46.131Z"
+}

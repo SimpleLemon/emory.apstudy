@@ -1,0 +1,205 @@
+{
+  "course_code": "PHYS 152",
+  "course_title": "Physics for Scientists and Engineers II w/Lab",
+  "subject": "PHYS",
+  "catalog_number": "152",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1708",
+      "section_number": "LAB1",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4062",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6-8:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4063",
+      "section_number": "LAB3",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4064",
+      "section_number": "LAB4",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6-8:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4065",
+      "section_number": "LAB5",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4066",
+      "section_number": "LAB6",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6-8:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4067",
+      "section_number": "LAB7",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4068",
+      "section_number": "LAB8",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2020",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "W. Benalcazar",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 9,
+    "lectures": 1,
+    "labs": 8,
+    "discussions": 0,
+    "other": 0,
+    "open": 8,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Donofrio/Bing",
+    "W. Benalcazar"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.253Z"
+}

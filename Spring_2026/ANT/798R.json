@@ -1,0 +1,97 @@
+{
+  "course_code": "ANT 798R",
+  "course_title": "Advanced Research",
+  "subject": "ANT",
+  "catalog_number": "798R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6061",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "D. Stout",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6062",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "E. Lonsdorf",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6063",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "D. Nugent",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6064",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "K. Phillips",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6065",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "M. Benitez",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Nugent",
+    "D. Stout",
+    "E. Lonsdorf",
+    "K. Phillips",
+    "M. Benitez"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.258Z"
+}

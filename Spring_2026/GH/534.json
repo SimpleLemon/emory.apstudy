@@ -1,0 +1,92 @@
+{
+  "course_code": "GH 534",
+  "course_title": "Diabetes: A Model for Global Non-communicable Disease Prevention & Control",
+  "subject": "GH",
+  "catalog_number": "534",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-05",
+    "end": "2026-01-10"
+  },
+  "sections": [
+    {
+      "crn": "2569",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "U. Gujral",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWThF 9a-12p; MTWThF 1-3:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1530"
+          },
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1530"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1530"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1530"
+          },
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1530"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "U. Gujral"
+  ],
+  "scraped_at": "2026-04-20T20:49:34.021Z"
+}

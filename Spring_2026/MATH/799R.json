@@ -1,0 +1,167 @@
+{
+  "course_code": "MATH 799R",
+  "course_title": "Research",
+  "subject": "MATH",
+  "catalog_number": "799R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5876",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "D. Borthwick",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6085",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Chung",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5747",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "T. Mayo",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5875",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "C. Pohoata",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6072",
+      "section_number": "15",
+      "schedule_type": "SUP",
+      "instructor": "P. Raman",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6086",
+      "section_number": "17",
+      "schedule_type": "SUP",
+      "instructor": "V. Rodl",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6204",
+      "section_number": "19",
+      "schedule_type": "SUP",
+      "instructor": "L. Ruthotto",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5628",
+      "section_number": "24",
+      "schedule_type": "SUP",
+      "instructor": "A. Veneziani",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5872",
+      "section_number": "27",
+      "schedule_type": "SUP",
+      "instructor": "Y. Xi",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5895",
+      "section_number": "30",
+      "schedule_type": "SUP",
+      "instructor": "L. Yepremyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Veneziani",
+    "C. Pohoata",
+    "D. Borthwick",
+    "J. Chung",
+    "L. Ruthotto",
+    "L. Yepremyan",
+    "P. Raman",
+    "T. Mayo",
+    "V. Rodl",
+    "Y. Xi"
+  ],
+  "scraped_at": "2026-04-20T20:48:29.474Z"
+}

@@ -1,0 +1,167 @@
+{
+  "course_code": "ARTHIST 799R",
+  "course_title": "Dissertation Research",
+  "subject": "ARTHIST",
+  "catalog_number": "799R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5826",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "E. Varner",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5827",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "T. Cronan",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5828",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "W. Melion",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5829",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "L. Lee",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5830",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "B. Wescoat",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5831",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "M. O'Neil",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5832",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "C. Crawford",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5833",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "R. Nyord",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5834",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "S. Gagliardi",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5835",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "S. McPhee",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 0,
+    "closed": 10,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Wescoat",
+    "C. Crawford",
+    "E. Varner",
+    "L. Lee",
+    "M. O'Neil",
+    "R. Nyord",
+    "S. Gagliardi",
+    "S. McPhee",
+    "T. Cronan",
+    "W. Melion"
+  ],
+  "scraped_at": "2026-04-20T21:51:17.195Z"
+}

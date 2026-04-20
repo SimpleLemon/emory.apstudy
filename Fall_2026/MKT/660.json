@@ -1,0 +1,130 @@
+{
+  "course_code": "MKT 660",
+  "course_title": "Driving Growth with AI",
+  "subject": "MKT",
+  "catalog_number": "660",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-15",
+    "end": "2026-08-22"
+  },
+  "sections": [
+    {
+      "crn": "5568",
+      "section_number": "2195",
+      "schedule_type": "LEC",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "SaSu 9a-12p; SaSu 2-5p",
+        "meetings": [
+          {
+            "day": "Sat",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sun",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sat",
+            "start": "1400",
+            "end": "1700"
+          },
+          {
+            "day": "Sun",
+            "start": "1400",
+            "end": "1700"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5569",
+      "section_number": "2295",
+      "schedule_type": "LEC",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "SaSu 9a-12p; SaSu 2-5p",
+        "meetings": [
+          {
+            "day": "Sat",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sun",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sat",
+            "start": "1400",
+            "end": "1700"
+          },
+          {
+            "day": "Sun",
+            "start": "1400",
+            "end": "1700"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5570",
+      "section_number": "3295",
+      "schedule_type": "LEC",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "SaSu 9a-12p; SaSu 2-5p",
+        "meetings": [
+          {
+            "day": "Sat",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sun",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Sat",
+            "start": "1400",
+            "end": "1700"
+          },
+          {
+            "day": "Sun",
+            "start": "1400",
+            "end": "1700"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Schweidel"
+  ],
+  "scraped_at": "2026-04-20T20:52:04.410Z"
+}

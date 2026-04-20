@@ -1,0 +1,314 @@
+{
+  "course_code": "MUS 300R",
+  "course_title": "Ensemble: Orchestra",
+  "subject": "MUS",
+  "catalog_number": "300R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2983",
+      "section_number": "1",
+      "schedule_type": "MUS",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4:30-6:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1630",
+            "end": "1830"
+          },
+          {
+            "day": "Thu",
+            "start": "1630",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2984",
+      "section_number": "2",
+      "schedule_type": "MUS",
+      "instructor": "C. O'Hara",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4:30-6:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1630",
+            "end": "1830"
+          },
+          {
+            "day": "Wed",
+            "start": "1630",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2985",
+      "section_number": "3",
+      "schedule_type": "MUS",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-5:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1730"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2986",
+      "section_number": "4",
+      "schedule_type": "MUS",
+      "instructor": "L. Andonovska",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4:30-6:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1630",
+            "end": "1830"
+          },
+          {
+            "day": "Wed",
+            "start": "1630",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2987",
+      "section_number": "5",
+      "schedule_type": "MUS",
+      "instructor": "E. Nelson",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 7:30-9:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1930",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2989",
+      "section_number": "6",
+      "schedule_type": "MUS",
+      "instructor": "E. Nelson",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-6p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1800"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1800"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2990",
+      "section_number": "7",
+      "schedule_type": "MUS",
+      "instructor": "E. Cholakova",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2991",
+      "section_number": "8",
+      "schedule_type": "MUS",
+      "instructor": "G. Motley",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 8-10p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "2000",
+            "end": "2200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2992",
+      "section_number": "9",
+      "schedule_type": "MUS",
+      "instructor": "G. Motley",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 5:30-7:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1730",
+            "end": "1930"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2993",
+      "section_number": "10",
+      "schedule_type": "MUS",
+      "instructor": "Mamola/Dinkins-Matthews",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1730"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1730"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2994",
+      "section_number": "11",
+      "schedule_type": "MUS",
+      "instructor": "E. Cholakova",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2995",
+      "section_number": "12",
+      "schedule_type": "MUS",
+      "instructor": "L. Andonovska",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2996",
+      "section_number": "13",
+      "schedule_type": "MUS",
+      "instructor": "F. Darsono",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-8:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2030"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2997",
+      "section_number": "14",
+      "schedule_type": "MUS",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-8:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2030"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 14,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 14,
+    "open": 13,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. O'Hara",
+    "E. Cholakova",
+    "E. Nelson",
+    "F. Darsono",
+    "G. Motley",
+    "L. Andonovska",
+    "Mamola/Dinkins-Matthews",
+    "P. Bhasin"
+  ],
+  "scraped_at": "2026-04-20T20:48:35.985Z"
+}

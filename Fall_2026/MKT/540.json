@@ -1,0 +1,144 @@
+{
+  "course_code": "MKT 540",
+  "course_title": "Marketing Management",
+  "subject": "MKT",
+  "catalog_number": "540",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3657",
+      "section_number": "2146",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3658",
+      "section_number": "2167",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3659",
+      "section_number": "2646",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3660",
+      "section_number": "2647",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3661",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "R. Hamilton",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3662",
+      "section_number": "3202",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3663",
+      "section_number": "4401",
+      "schedule_type": "LEC",
+      "instructor": "O. Rodriguez",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 7,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "O. Rodriguez",
+    "R. Hamilton"
+  ],
+  "scraped_at": "2026-04-20T20:52:04.407Z"
+}

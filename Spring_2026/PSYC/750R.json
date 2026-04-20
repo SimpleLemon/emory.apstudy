@@ -1,0 +1,81 @@
+{
+  "course_code": "PSYC 750R",
+  "course_title": "Clinical Supervision: Evidence-Based Child & Fam.Sup",
+  "subject": "PSYC",
+  "catalog_number": "750R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2442",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "H. Trotman",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2443",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "H. Trotman",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2444",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "Z. Delawalla",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2446",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "Z. Delawalla",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Trotman",
+    "Z. Delawalla"
+  ],
+  "scraped_at": "2026-04-20T20:48:55.908Z"
+}

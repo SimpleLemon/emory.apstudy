@@ -1,0 +1,269 @@
+{
+  "course_code": "OAM 330",
+  "course_title": "Organization & Management",
+  "subject": "OAM",
+  "catalog_number": "330",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3573",
+      "section_number": "1158",
+      "schedule_type": "LEC",
+      "instructor": "J. Jo",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3574",
+      "section_number": "1159",
+      "schedule_type": "LEC",
+      "instructor": "J. Jo",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3575",
+      "section_number": "1160",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3576",
+      "section_number": "1161",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3577",
+      "section_number": "1162",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3578",
+      "section_number": "1458",
+      "schedule_type": "LEC",
+      "instructor": "J. Jo",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3579",
+      "section_number": "1459",
+      "schedule_type": "LEC",
+      "instructor": "J. Jo",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3580",
+      "section_number": "1460",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3581",
+      "section_number": "1461",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3582",
+      "section_number": "1462",
+      "schedule_type": "LEC",
+      "instructor": "L. Wallace",
+      "enrollment_status": "Closed",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 10,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 2,
+    "waitlisted": 5
+  },
+  "instructors_unique": [
+    "J. Jo",
+    "L. Wallace"
+  ],
+  "scraped_at": "2026-04-20T20:52:07.660Z"
+}

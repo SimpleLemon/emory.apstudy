@@ -1,0 +1,122 @@
+{
+  "course_code": "POLS 494",
+  "course_title": "Research Topics Seminar in Political Science: Comparative Political Parties",
+  "subject": "POLS",
+  "catalog_number": "494",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2656",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "H. Tworzecki",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2803",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "Sun/Kim",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3035",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "A. Abramowitz",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5102",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "M. Rueda",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "A. Abramowitz",
+    "H. Tworzecki",
+    "M. Rueda",
+    "Sun/Kim"
+  ],
+  "scraped_at": "2026-04-20T20:51:36.157Z"
+}

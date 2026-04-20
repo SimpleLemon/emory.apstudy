@@ -1,0 +1,52 @@
+{
+  "course_code": "HIST 207",
+  "course_title": "Medieval Europe and the World",
+  "subject": "HIST",
+  "catalog_number": "207",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2525",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Armstrong-Partida",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "M. Armstrong-Partida"
+  ],
+  "scraped_at": "2026-04-20T20:50:54.863Z"
+}

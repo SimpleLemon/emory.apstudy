@@ -1,0 +1,172 @@
+{
+  "course_code": "CHEM 205L",
+  "course_title": "Light and Matter Lab",
+  "subject": "CHEM",
+  "catalog_number": "205L",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3762",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3763",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; W 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3764",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; W 5:30-8:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1730",
+            "end": "2015"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3765",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; Th 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3766",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; Th 5:30-8:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "2015"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3767",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p; F 1-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 6,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "A. Brathwaite"
+  ],
+  "scraped_at": "2026-04-20T20:47:46.129Z"
+}

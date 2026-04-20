@@ -1,0 +1,66 @@
+{
+  "course_code": "OAM 471",
+  "course_title": "Applied Entrepreneurship",
+  "subject": "OAM",
+  "catalog_number": "471",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3645",
+      "section_number": "1101",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3646",
+      "section_number": "1172",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "C. Goetz"
+  ],
+  "scraped_at": "2026-04-20T20:52:07.666Z"
+}

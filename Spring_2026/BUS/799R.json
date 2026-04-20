@@ -1,0 +1,139 @@
+{
+  "course_code": "BUS 799R",
+  "course_title": "Dissertation",
+  "subject": "BUS",
+  "catalog_number": "799R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5656",
+      "section_number": "5101",
+      "schedule_type": "SUP",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5657",
+      "section_number": "5102",
+      "schedule_type": "SUP",
+      "instructor": "K. Kadous",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5658",
+      "section_number": "5103",
+      "schedule_type": "SUP",
+      "instructor": "D. McCarthy",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5659",
+      "section_number": "5104",
+      "schedule_type": "SUP",
+      "instructor": "M. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5660",
+      "section_number": "5105",
+      "schedule_type": "SUP",
+      "instructor": "N. Jegadeesh",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5661",
+      "section_number": "5106",
+      "schedule_type": "SUP",
+      "instructor": "J. Perry-Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5662",
+      "section_number": "5107",
+      "schedule_type": "SUP",
+      "instructor": "W. Longhofer",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5663",
+      "section_number": "5108",
+      "schedule_type": "SUP",
+      "instructor": "G. Maturana",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 8,
+    "open": 8,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. McCarthy",
+    "D. Schweidel",
+    "G. Maturana",
+    "J. Perry-Smith",
+    "K. Kadous",
+    "M. Lewis",
+    "N. Jegadeesh",
+    "W. Longhofer"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.761Z"
+}

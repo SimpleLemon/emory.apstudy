@@ -1,0 +1,83 @@
+{
+  "course_code": "WGS 798R",
+  "course_title": "Pre-Candidacy Research",
+  "subject": "WGS",
+  "catalog_number": "798R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3144",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "E. Wilson",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3146",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "A. Finch",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3230",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "S. Mulla",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3416",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "K. Amin",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Finch",
+    "E. Wilson",
+    "K. Amin",
+    "S. Mulla"
+  ],
+  "scraped_at": "2026-04-20T20:51:54.475Z"
+}

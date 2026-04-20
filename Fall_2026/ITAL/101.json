@@ -1,0 +1,204 @@
+{
+  "course_code": "ITAL 101",
+  "course_title": "Language & Culture, Elem I",
+  "subject": "ITAL",
+  "catalog_number": "101",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1814",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "S. Maranzana",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p; F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1815",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "S. Maranzana",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p; F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1816",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "S. Muratore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p; F 12-12:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1250"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1817",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "S. Muratore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p; F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1818",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "A. Porcarelli",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a; F 10:30-11:20a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Fri",
+            "start": "1030",
+            "end": "1120"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1819",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "A. Porcarelli",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p; F 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 6,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 6,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Porcarelli",
+    "S. Maranzana",
+    "S. Muratore"
+  ],
+  "scraped_at": "2026-04-20T20:51:01.542Z"
+}

@@ -1,0 +1,52 @@
+{
+  "course_code": "OAM 515",
+  "course_title": "Coaching a Problem-Solving Team",
+  "subject": "OAM",
+  "catalog_number": "515",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6434",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "L. Segall",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "L. Segall"
+  ],
+  "scraped_at": "2026-04-20T20:49:24.086Z"
+}

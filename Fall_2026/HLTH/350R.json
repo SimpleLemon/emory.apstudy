@@ -1,0 +1,52 @@
+{
+  "course_code": "HLTH 350R",
+  "course_title": "Core Issues in Global Health: Under the Weather?",
+  "subject": "HLTH",
+  "catalog_number": "350R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2324",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "G. Luber",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "G. Luber"
+  ],
+  "scraped_at": "2026-04-20T20:50:56.532Z"
+}

@@ -1,0 +1,125 @@
+{
+  "course_code": "IDS 290R",
+  "course_title": "Interdisciplinary Sidecar: Queering Immunity",
+  "subject": "IDS",
+  "catalog_number": "290R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5519",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "Sharma/Gutierrez",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-6p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1800"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5743",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1:30-4p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1330",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5735",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5738",
+      "section_number": "5",
+      "schedule_type": "SEM",
+      "instructor": "Team",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-5:15p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5822",
+      "section_number": "6",
+      "schedule_type": "SEM",
+      "instructor": "Bekele/Faniyi",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-6:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1845"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "Bekele/Faniyi",
+    "Sharma/Gutierrez",
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:48:14.490Z"
+}

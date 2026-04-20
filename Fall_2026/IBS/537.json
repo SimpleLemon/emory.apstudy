@@ -1,0 +1,47 @@
+{
+  "course_code": "IBS 537",
+  "course_title": "Grant Writing for Molecular and Systems Pharmacology",
+  "subject": "IBS",
+  "catalog_number": "537",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5321",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Calvert/Doering",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2-3:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1400",
+            "end": "1530"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Calvert/Doering"
+  ],
+  "scraped_at": "2026-04-20T21:52:17.282Z"
+}

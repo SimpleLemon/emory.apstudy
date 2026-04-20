@@ -1,0 +1,52 @@
+{
+  "course_code": "ISOM 550M",
+  "course_title": "Digital First: Commerce & Society in the 21st Century",
+  "subject": "ISOM",
+  "catalog_number": "550M",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-03-02",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3608",
+      "section_number": "4501",
+      "schedule_type": "LEC",
+      "instructor": "B. Konsynski",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Konsynski"
+  ],
+  "scraped_at": "2026-04-20T20:49:19.128Z"
+}

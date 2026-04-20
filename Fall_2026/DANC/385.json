@@ -1,0 +1,52 @@
+{
+  "course_code": "DANC 385",
+  "course_title": "Spec Topics:Dance & Mvmnt Studies",
+  "subject": "DANC",
+  "catalog_number": "385",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3538",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Lanier/Teague",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Lanier/Teague"
+  ],
+  "scraped_at": "2026-04-20T20:50:36.608Z"
+}

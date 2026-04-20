@@ -1,0 +1,82 @@
+{
+  "course_code": "PHIL 115",
+  "course_title": "Introduction to Ethics",
+  "subject": "PHIL",
+  "catalog_number": "115",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1688",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Lysaker/Pandita",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3384",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "K. Schoina",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TThF 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          },
+          {
+            "day": "Fri",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "K. Schoina",
+    "Lysaker/Pandita"
+  ],
+  "scraped_at": "2026-04-20T20:51:31.138Z"
+}

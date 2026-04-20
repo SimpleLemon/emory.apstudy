@@ -1,0 +1,102 @@
+{
+  "course_code": "WGS 190",
+  "course_title": "Fresh Sem: Women, Gender, & Sexuality Studies",
+  "subject": "WGS",
+  "catalog_number": "190",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2341",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "S. Mulla",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3544",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "K. Wallace-Sanders",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3909",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "T. Menashe",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 0,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "K. Wallace-Sanders",
+    "S. Mulla",
+    "T. Menashe"
+  ],
+  "scraped_at": "2026-04-20T20:51:54.458Z"
+}

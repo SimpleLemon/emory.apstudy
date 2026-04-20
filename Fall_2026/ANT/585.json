@@ -1,0 +1,97 @@
+{
+  "course_code": "ANT 585",
+  "course_title": "Spec Tops: Anthropology",
+  "subject": "ANT",
+  "catalog_number": "585",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3104",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "K. Phillips",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3118",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "P. Little",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3131",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "J. Saers",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Saers",
+    "K. Phillips",
+    "P. Little"
+  ],
+  "scraped_at": "2026-04-20T20:50:20.086Z"
+}

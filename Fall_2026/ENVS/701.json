@@ -1,0 +1,47 @@
+{
+  "course_code": "ENVS 701",
+  "course_title": "ENVS Foundation I",
+  "subject": "ENVS",
+  "catalog_number": "701",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2304",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Gillespie/Vazquez Prokopec",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-10:40a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1040"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Gillespie/Vazquez Prokopec"
+  ],
+  "scraped_at": "2026-04-20T20:50:43.288Z"
+}

@@ -1,0 +1,167 @@
+{
+  "course_code": "PSYC 597R",
+  "course_title": "Directed Study",
+  "subject": "PSYC",
+  "catalog_number": "597R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1580",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "P. Brennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1582",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "R. Hampton",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1583",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "P. Hitchcock",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1584",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "S. Lourenco",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1585",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "J. Manns",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1586",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "I. Waldman",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1587",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "A. Klin",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1588",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "A. Tasimi",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1589",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "L. Nygaard",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1581",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Klin",
+    "A. Tasimi",
+    "I. Waldman",
+    "J. Manns",
+    "J. Medina",
+    "L. Nygaard",
+    "P. Brennan",
+    "P. Hitchcock",
+    "R. Hampton",
+    "S. Lourenco"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.456Z"
+}

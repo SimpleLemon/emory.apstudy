@@ -1,0 +1,95 @@
+{
+  "course_code": "PE 125",
+  "course_title": "Play Emory",
+  "subject": "PE",
+  "catalog_number": "125",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3064",
+      "section_number": "1",
+      "schedule_type": "PE",
+      "instructor": "E. Noell",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4009",
+      "section_number": "2",
+      "schedule_type": "PE",
+      "instructor": "A. Murphy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4012",
+      "section_number": "3",
+      "schedule_type": "PE",
+      "instructor": "A. Murphy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4015",
+      "section_number": "4",
+      "schedule_type": "PE",
+      "instructor": "L. Shepard",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4016",
+      "section_number": "5",
+      "schedule_type": "PE",
+      "instructor": "L. Shepard",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 0,
+    "closed": 5,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Murphy",
+    "E. Noell",
+    "L. Shepard"
+  ],
+  "scraped_at": "2026-04-20T20:48:44.263Z"
+}

@@ -1,0 +1,712 @@
+{
+  "course_code": "CS 598R",
+  "course_title": "Rotation Project",
+  "subject": "CS",
+  "catalog_number": "598R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5708",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "A. Zufle",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5709",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "S. Tang",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5930",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "J. Ho",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5941",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "A. Sarker",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5943",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "E. Agichtein",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5944",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "A. Madabhushi",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5945",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "D. Arnold",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5946",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "A. Ismail",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5947",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "S. Bozkurt",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5948",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "Y. Bromberg",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5949",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "B. Mahmoudi",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5950",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "J. Choi",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5951",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "A. Emami",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5952",
+      "section_number": "14",
+      "schedule_type": "SUP",
+      "instructor": "G. Clifford",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5954",
+      "section_number": "15",
+      "schedule_type": "SUP",
+      "instructor": "M. Grigni",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5955",
+      "section_number": "16",
+      "schedule_type": "SUP",
+      "instructor": "H. Kwon",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5956",
+      "section_number": "17",
+      "schedule_type": "SUP",
+      "instructor": "W. Jin",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5957",
+      "section_number": "18",
+      "schedule_type": "SUP",
+      "instructor": "J. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5958",
+      "section_number": "19",
+      "schedule_type": "SUP",
+      "instructor": "R. Krafty",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5959",
+      "section_number": "20",
+      "schedule_type": "SUP",
+      "instructor": "Y. Kwon",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5960",
+      "section_number": "21",
+      "schedule_type": "SUP",
+      "instructor": "Q. Li",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5961",
+      "section_number": "22",
+      "schedule_type": "SUP",
+      "instructor": "F. Liu",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5962",
+      "section_number": "23",
+      "schedule_type": "SUP",
+      "instructor": "L. Mckay",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5963",
+      "section_number": "24",
+      "schedule_type": "SUP",
+      "instructor": "M. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5964",
+      "section_number": "25",
+      "schedule_type": "SUP",
+      "instructor": "M. Reyna",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5965",
+      "section_number": "26",
+      "schedule_type": "SUP",
+      "instructor": "R. Nabi",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5966",
+      "section_number": "27",
+      "schedule_type": "SUP",
+      "instructor": "N. Katebi",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5967",
+      "section_number": "28",
+      "schedule_type": "SUP",
+      "instructor": "T. Prioleau",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5968",
+      "section_number": "29",
+      "schedule_type": "SUP",
+      "instructor": "Z. Qin",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5969",
+      "section_number": "30",
+      "schedule_type": "SUP",
+      "instructor": "Y. Rankin",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5970",
+      "section_number": "31",
+      "schedule_type": "SUP",
+      "instructor": "R. Sameni",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5971",
+      "section_number": "32",
+      "schedule_type": "SUP",
+      "instructor": "R. Kamaleswaran",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5972",
+      "section_number": "33",
+      "schedule_type": "SUP",
+      "instructor": "S. Rathore",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5973",
+      "section_number": "34",
+      "schedule_type": "SUP",
+      "instructor": "S. Nasiri Ghosheh Bolagh",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5975",
+      "section_number": "35",
+      "schedule_type": "SUP",
+      "instructor": "K. Shu",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5976",
+      "section_number": "36",
+      "schedule_type": "SUP",
+      "instructor": "T. Pan",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5977",
+      "section_number": "37",
+      "schedule_type": "SUP",
+      "instructor": "E. Wall",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5978",
+      "section_number": "38",
+      "schedule_type": "SUP",
+      "instructor": "L. Waller",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5979",
+      "section_number": "39",
+      "schedule_type": "SUP",
+      "instructor": "K. Williams",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5981",
+      "section_number": "40",
+      "schedule_type": "SUP",
+      "instructor": "J. Wrobel",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5982",
+      "section_number": "41",
+      "schedule_type": "SUP",
+      "instructor": "X. Yang",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5983",
+      "section_number": "42",
+      "schedule_type": "SUP",
+      "instructor": "L. Xiong",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5984",
+      "section_number": "43",
+      "schedule_type": "SUP",
+      "instructor": "C. Yang",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5985",
+      "section_number": "44",
+      "schedule_type": "SUP",
+      "instructor": "L. Zhao",
+      "enrollment_status": "Closed",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6080",
+      "section_number": "45",
+      "schedule_type": "SUP",
+      "instructor": "Y. Wang",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6104",
+      "section_number": "46",
+      "schedule_type": "SUP",
+      "instructor": "J. Gichoya",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6190",
+      "section_number": "47",
+      "schedule_type": "SUP",
+      "instructor": "X. Hu",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6567",
+      "section_number": "48",
+      "schedule_type": "SUP",
+      "instructor": "T. Pan",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6568",
+      "section_number": "49",
+      "schedule_type": "SUP",
+      "instructor": "C. Su",
+      "enrollment_status": "Open",
+      "enrollment_count": "49",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 49,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 49,
+    "open": 48,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Emami",
+    "A. Ismail",
+    "A. Madabhushi",
+    "A. Sarker",
+    "A. Zufle",
+    "B. Mahmoudi",
+    "C. Su",
+    "C. Yang",
+    "D. Arnold",
+    "E. Agichtein",
+    "E. Wall",
+    "F. Liu",
+    "G. Clifford",
+    "H. Kwon",
+    "J. Choi",
+    "J. Gichoya",
+    "J. Ho",
+    "J. Kim",
+    "J. Wrobel",
+    "K. Shu",
+    "K. Williams",
+    "L. Mckay",
+    "L. Waller",
+    "L. Xiong",
+    "L. Zhao",
+    "M. Bhasin",
+    "M. Grigni",
+    "M. Reyna",
+    "N. Katebi",
+    "Q. Li",
+    "R. Kamaleswaran",
+    "R. Krafty",
+    "R. Nabi",
+    "R. Sameni",
+    "S. Bozkurt",
+    "S. Nasiri Ghosheh Bolagh",
+    "S. Rathore",
+    "S. Tang",
+    "T. Pan",
+    "T. Prioleau",
+    "W. Jin",
+    "X. Hu",
+    "X. Yang",
+    "Y. Bromberg",
+    "Y. Kwon",
+    "Y. Rankin",
+    "Y. Wang",
+    "Z. Qin"
+  ],
+  "scraped_at": "2026-04-20T20:47:51.250Z"
+}

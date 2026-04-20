@@ -1,0 +1,90 @@
+{
+  "course_code": "ANT 202",
+  "course_title": "Concepts and Methods in Cultural Anthropology",
+  "subject": "ANT",
+  "catalog_number": "202",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3460",
+      "section_number": "D1",
+      "schedule_type": "DIS",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3464",
+      "section_number": "D2",
+      "schedule_type": "DIS",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2-2:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1400",
+            "end": "1450"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3111",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Glass",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 2,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Glass"
+  ],
+  "scraped_at": "2026-04-20T20:50:20.079Z"
+}

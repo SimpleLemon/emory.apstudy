@@ -1,0 +1,41 @@
+{
+  "course_code": "OAM 620",
+  "course_title": "Advanced Groups & Teams",
+  "subject": "OAM",
+  "catalog_number": "620",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3484",
+      "section_number": "2201",
+      "schedule_type": "LEC",
+      "instructor": "J. Perry-Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Perry-Smith"
+  ],
+  "scraped_at": "2026-04-20T20:49:24.089Z"
+}

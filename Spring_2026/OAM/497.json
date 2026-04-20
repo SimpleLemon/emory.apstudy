@@ -1,0 +1,82 @@
+{
+  "course_code": "OAM 497",
+  "course_title": "Directed Study: Business & Society Institute",
+  "subject": "OAM",
+  "catalog_number": "497",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5903",
+      "section_number": "1101",
+      "schedule_type": "SUP",
+      "instructor": "P. Roberts",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5938",
+      "section_number": "1102",
+      "schedule_type": "SUP",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6321",
+      "section_number": "1103",
+      "schedule_type": "SUP",
+      "instructor": "B. Goebel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6433",
+      "section_number": "1104",
+      "schedule_type": "SUP",
+      "instructor": "B. Goebel",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 2,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Goebel",
+    "C. Goetz",
+    "P. Roberts"
+  ],
+  "scraped_at": "2026-04-20T20:49:24.085Z"
+}

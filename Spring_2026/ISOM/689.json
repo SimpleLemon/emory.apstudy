@@ -1,0 +1,54 @@
+{
+  "course_code": "ISOM 689",
+  "course_title": "Analytics Practicum",
+  "subject": "ISOM",
+  "catalog_number": "689",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3516",
+      "section_number": "4101",
+      "schedule_type": "LEC",
+      "instructor": "Adamopoulos/Chellappa",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3517",
+      "section_number": "4102",
+      "schedule_type": "LEC",
+      "instructor": "Adamopoulos/Chellappa",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "Adamopoulos/Chellappa"
+  ],
+  "scraped_at": "2026-04-20T20:49:19.134Z"
+}

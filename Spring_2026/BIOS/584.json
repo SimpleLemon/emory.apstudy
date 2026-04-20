@@ -1,0 +1,61 @@
+{
+  "course_code": "BIOS 584",
+  "course_title": "Python Programming (Non-BIOS Student)",
+  "subject": "BIOS",
+  "catalog_number": "584",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1619",
+      "section_number": "L1",
+      "schedule_type": "LAB",
+      "instructor": "Team",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1618",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Sur",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1150"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 1,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Sur",
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:49:27.422Z"
+}

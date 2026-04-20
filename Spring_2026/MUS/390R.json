@@ -1,0 +1,54 @@
+{
+  "course_code": "MUS 390R",
+  "course_title": "Half - Recital",
+  "subject": "MUS",
+  "catalog_number": "390R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5722",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5723",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "P. Bhasin"
+  ],
+  "scraped_at": "2026-04-20T20:48:35.988Z"
+}

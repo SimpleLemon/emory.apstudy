@@ -1,0 +1,111 @@
+{
+  "course_code": "PHIL 797R",
+  "course_title": "Directed Study",
+  "subject": "PHIL",
+  "catalog_number": "797R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1727",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "N. McAfee",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6207",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "J. Lysaker",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6216",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "C. Willett",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6313",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "G. Yancy",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6315",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "A. Mitchell",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6347",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "D. Marriott",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 6,
+    "open": 6,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Mitchell",
+    "C. Willett",
+    "D. Marriott",
+    "G. Yancy",
+    "J. Lysaker",
+    "N. McAfee"
+  ],
+  "scraped_at": "2026-04-20T20:48:47.571Z"
+}

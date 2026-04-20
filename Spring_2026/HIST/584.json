@@ -1,0 +1,116 @@
+{
+  "course_code": "HIST 584",
+  "course_title": "Research Workshop in History",
+  "subject": "HIST",
+  "catalog_number": "584",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5132",
+      "section_number": "LAB",
+      "schedule_type": "LAB",
+      "instructor": "L. Nenzi",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3868",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "L. Nenzi",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9a-12p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "6276",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "C. Sanders",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6277",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "A. Greene",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6279",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "C. Suddler",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6294",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "M. Payne",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 1,
+    "labs": 5,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 6,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Greene",
+    "C. Sanders",
+    "C. Suddler",
+    "L. Nenzi",
+    "M. Payne"
+  ],
+  "scraped_at": "2026-04-20T20:48:11.188Z"
+}

@@ -1,0 +1,52 @@
+{
+  "course_code": "MKT 343",
+  "course_title": "Digital & Social Media Strategy",
+  "subject": "MKT",
+  "catalog_number": "343",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3748",
+      "section_number": "1101",
+      "schedule_type": "LEC",
+      "instructor": "J. Turner",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "J. Turner"
+  ],
+  "scraped_at": "2026-04-20T20:52:04.403Z"
+}

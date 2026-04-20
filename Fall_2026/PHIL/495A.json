@@ -1,0 +1,111 @@
+{
+  "course_code": "PHIL 495A",
+  "course_title": "Honors (Directed Reading)",
+  "subject": "PHIL",
+  "catalog_number": "495A",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2460",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "M. Schwarz",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5379",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "D. Marriott",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5488",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "L. Huffer",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5489",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "E. Blanes-Martinez",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5638",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "J. Stuhr",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5661",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "A. Mitchell",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 6,
+    "open": 6,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Mitchell",
+    "D. Marriott",
+    "E. Blanes-Martinez",
+    "J. Stuhr",
+    "L. Huffer",
+    "M. Schwarz"
+  ],
+  "scraped_at": "2026-04-20T20:51:31.145Z"
+}

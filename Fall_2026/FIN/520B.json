@@ -1,0 +1,41 @@
+{
+  "course_code": "FIN 520B",
+  "course_title": "Managerial Finance",
+  "subject": "FIN",
+  "catalog_number": "520B",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3797",
+      "section_number": "4401",
+      "schedule_type": "LEC",
+      "instructor": "J. Kurish",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Kurish"
+  ],
+  "scraped_at": "2026-04-20T20:52:01.045Z"
+}

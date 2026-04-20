@@ -1,0 +1,459 @@
+{
+  "course_code": "BUS 300",
+  "course_title": "BBA Board Room",
+  "subject": "BUS",
+  "catalog_number": "300",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-31",
+    "end": "2026-11-02"
+  },
+  "sections": [
+    {
+      "crn": "5081",
+      "section_number": "1101",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5095",
+      "section_number": "1102",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5096",
+      "section_number": "1104",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5097",
+      "section_number": "1105",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5098",
+      "section_number": "1106",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5101",
+      "section_number": "1107",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5106",
+      "section_number": "1108",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5107",
+      "section_number": "1109",
+      "schedule_type": "LEC",
+      "instructor": "D. Clear",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5108",
+      "section_number": "1110",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5245",
+      "section_number": "1111",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5246",
+      "section_number": "1112",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5247",
+      "section_number": "1113",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5248",
+      "section_number": "1114",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5249",
+      "section_number": "1115",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5109",
+      "section_number": "1117",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5250",
+      "section_number": "1118",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5251",
+      "section_number": "1119",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5252",
+      "section_number": "1120",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5253",
+      "section_number": "1121",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5111",
+      "section_number": "1122",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5254",
+      "section_number": "1123",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5255",
+      "section_number": "1124",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5256",
+      "section_number": "1125",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "23",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 23,
+    "lectures": 23,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 18,
+    "closed": 5,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Clear"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.375Z"
+}

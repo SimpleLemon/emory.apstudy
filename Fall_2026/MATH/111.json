@@ -1,0 +1,351 @@
+{
+  "course_code": "MATH 111",
+  "course_title": "Calculus I",
+  "subject": "MATH",
+  "catalog_number": "111",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2686",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Beougher",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2687",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "N. Navarrete",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2688",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "N. Milnes",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2692",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "X. Zheng",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2694",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "N. Gupta",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2696",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "Q. Alston",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2699",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "N. Gupta",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2702",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "L. Vescovo",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2704",
+      "section_number": "10",
+      "schedule_type": "LEC",
+      "instructor": "C. Fikes",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2708",
+      "section_number": "11",
+      "schedule_type": "LEC",
+      "instructor": "A. Sureshkumar",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2713",
+      "section_number": "12",
+      "schedule_type": "LEC",
+      "instructor": "Y. Chen",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3223",
+      "section_number": "13",
+      "schedule_type": "LEC",
+      "instructor": "R. Miyazaki",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2719",
+      "section_number": "14",
+      "schedule_type": "LEC",
+      "instructor": "M. Allen",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 13,
+    "lectures": 13,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 11,
+    "closed": 0,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "A. Sureshkumar",
+    "C. Fikes",
+    "L. Vescovo",
+    "M. Allen",
+    "M. Beougher",
+    "N. Gupta",
+    "N. Milnes",
+    "N. Navarrete",
+    "Q. Alston",
+    "R. Miyazaki",
+    "X. Zheng",
+    "Y. Chen"
+  ],
+  "scraped_at": "2026-04-20T20:51:13.085Z"
+}

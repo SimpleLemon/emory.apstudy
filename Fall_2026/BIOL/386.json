@@ -1,0 +1,52 @@
+{
+  "course_code": "BIOL 386",
+  "course_title": "Special Topics with Laboratory: Microbio of Phages-Genes Funct",
+  "subject": "BIOL",
+  "catalog_number": "386",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1822",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "E. Battaglioli",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 9:30a-12:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "930",
+            "end": "1230"
+          },
+          {
+            "day": "Thu",
+            "start": "930",
+            "end": "1230"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Battaglioli"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.641Z"
+}

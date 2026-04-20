@@ -1,0 +1,104 @@
+{
+  "course_code": "OAM 536",
+  "course_title": "Social Impact Management",
+  "subject": "OAM",
+  "catalog_number": "536",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3757",
+      "section_number": "2168",
+      "schedule_type": "LEC",
+      "instructor": "Goebel/Martin",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3758",
+      "section_number": "3268",
+      "schedule_type": "LEC",
+      "instructor": "Goebel/Martin",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5428",
+      "section_number": "4168",
+      "schedule_type": "LEC",
+      "instructor": "Goebel/Martin",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5429",
+      "section_number": "4268",
+      "schedule_type": "LEC",
+      "instructor": "Goebel/Martin",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 4,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Goebel/Martin"
+  ],
+  "scraped_at": "2026-04-20T20:52:07.670Z"
+}

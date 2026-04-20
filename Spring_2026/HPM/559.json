@@ -1,0 +1,67 @@
+{
+  "course_code": "HPM 559",
+  "course_title": "Negotiation and Conflict Management in the Healthcare Setting",
+  "subject": "HPM",
+  "catalog_number": "559",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-05",
+    "end": "2026-01-10"
+  },
+  "sections": [
+    {
+      "crn": "1502",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "E. Becker",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWThF 9a-4:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1630"
+          },
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1630"
+          },
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1630"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1630"
+          },
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1630"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Becker"
+  ],
+  "scraped_at": "2026-04-20T20:49:35.663Z"
+}

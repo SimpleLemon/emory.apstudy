@@ -1,0 +1,52 @@
+{
+  "course_code": "DANC 424R",
+  "course_title": "Jazz Dance IV (Advanced)",
+  "subject": "DANC",
+  "catalog_number": "424R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3094",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "T. Myers",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Myers"
+  ],
+  "scraped_at": "2026-04-20T20:47:52.917Z"
+}

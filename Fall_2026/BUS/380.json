@@ -1,0 +1,164 @@
+{
+  "course_code": "BUS 380",
+  "course_title": "Professional Development",
+  "subject": "BUS",
+  "catalog_number": "380",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-09-04",
+    "end": "2026-10-30"
+  },
+  "sections": [
+    {
+      "crn": "5082",
+      "section_number": "1101",
+      "schedule_type": "SEM",
+      "instructor": "Smith/Leist",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5083",
+      "section_number": "1102",
+      "schedule_type": "SEM",
+      "instructor": "Smith/Leist",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5084",
+      "section_number": "1103",
+      "schedule_type": "SEM",
+      "instructor": "Timpone/Leist",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5085",
+      "section_number": "1104",
+      "schedule_type": "SEM",
+      "instructor": "Timpone/Leist",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5086",
+      "section_number": "1105",
+      "schedule_type": "SEM",
+      "instructor": "Morales/Leist",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5087",
+      "section_number": "1106",
+      "schedule_type": "SEM",
+      "instructor": "Morales/Leist",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5088",
+      "section_number": "1107",
+      "schedule_type": "SEM",
+      "instructor": "S. Leist",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 2,
+    "closed": 5,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Morales/Leist",
+    "S. Leist",
+    "Smith/Leist",
+    "Timpone/Leist"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.378Z"
+}

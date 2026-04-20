@@ -1,0 +1,125 @@
+{
+  "course_code": "PSYC 599R",
+  "course_title": "Master Thesis Research",
+  "subject": "PSYC",
+  "catalog_number": "599R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1590",
+      "section_number": "1",
+      "schedule_type": "THE",
+      "instructor": "J. Rilling",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1591",
+      "section_number": "2",
+      "schedule_type": "THE",
+      "instructor": "V. Brown",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1592",
+      "section_number": "3",
+      "schedule_type": "THE",
+      "instructor": "S. Hamann",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1593",
+      "section_number": "4",
+      "schedule_type": "THE",
+      "instructor": "A. Cohen",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1594",
+      "section_number": "5",
+      "schedule_type": "THE",
+      "instructor": "P. Hitchcock",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1595",
+      "section_number": "6",
+      "schedule_type": "THE",
+      "instructor": "B. Wilson",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1596",
+      "section_number": "7",
+      "schedule_type": "THE",
+      "instructor": "B. Yamasaki",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 7,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Cohen",
+    "B. Wilson",
+    "B. Yamasaki",
+    "J. Rilling",
+    "P. Hitchcock",
+    "S. Hamann",
+    "V. Brown"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.456Z"
+}

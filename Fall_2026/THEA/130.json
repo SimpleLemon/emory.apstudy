@@ -1,0 +1,65 @@
+{
+  "course_code": "THEA 130",
+  "course_title": "Stagecraft",
+  "subject": "THEA",
+  "catalog_number": "130",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4387",
+      "section_number": "LAB",
+      "schedule_type": "LAB",
+      "instructor": "B. Glenn",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2556",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "B. Glenn",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 1,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Glenn"
+  ],
+  "scraped_at": "2026-04-20T20:51:51.074Z"
+}

@@ -1,0 +1,89 @@
+{
+  "course_code": "GH 502",
+  "course_title": "Evidence-Based Policy, Programs & Research",
+  "subject": "GH",
+  "catalog_number": "502",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1529",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1420"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1420"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1530",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 3-4:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1500",
+            "end": "1620"
+          },
+          {
+            "day": "Thu",
+            "start": "1500",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1531",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:49:34.019Z"
+}

@@ -1,0 +1,91 @@
+{
+  "course_code": "PHYS 311",
+  "course_title": "Astrophysics I with Laboratory",
+  "subject": "PHYS",
+  "catalog_number": "311",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1749",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Bans",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Wed",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1750",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4061",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Bans",
+    "Batiste/Bans"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.254Z"
+}

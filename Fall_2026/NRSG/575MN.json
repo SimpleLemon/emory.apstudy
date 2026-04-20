@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 575MN",
+  "course_title": "Behavioral & Mental Health Nursing Clinical: MN",
+  "subject": "NRSG",
+  "catalog_number": "575MN",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-10-14"
+  },
+  "sections": [
+    {
+      "crn": "4661",
+      "section_number": "401",
+      "schedule_type": "CLN",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4662",
+      "section_number": "402",
+      "schedule_type": "CLN",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:52:09.343Z"
+}

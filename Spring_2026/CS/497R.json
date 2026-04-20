@@ -1,0 +1,167 @@
+{
+  "course_code": "CS 497R",
+  "course_title": "Directed Research",
+  "subject": "CS",
+  "catalog_number": "497R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6594",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "A. Julian",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6595",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "A. Zufle",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6596",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "C. Yang",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6597",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "D. Fossati",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6598",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "J. Choi",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6599",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "K. Shu",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6600",
+      "section_number": "7",
+      "schedule_type": "RSC",
+      "instructor": "K. Williams",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6601",
+      "section_number": "8",
+      "schedule_type": "RSC",
+      "instructor": "L. Xiong",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6602",
+      "section_number": "9",
+      "schedule_type": "RSC",
+      "instructor": "S. Tang",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6603",
+      "section_number": "10",
+      "schedule_type": "RSC",
+      "instructor": "Y. Rankin",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Julian",
+    "A. Zufle",
+    "C. Yang",
+    "D. Fossati",
+    "J. Choi",
+    "K. Shu",
+    "K. Williams",
+    "L. Xiong",
+    "S. Tang",
+    "Y. Rankin"
+  ],
+  "scraped_at": "2026-04-20T20:47:51.243Z"
+}

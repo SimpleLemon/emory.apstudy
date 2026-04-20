@@ -1,0 +1,381 @@
+{
+  "course_code": "PHYS 141",
+  "course_title": "Intro Physics I W/Lab",
+  "subject": "PHYS",
+  "catalog_number": "141",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2357",
+      "section_number": "L10",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2358",
+      "section_number": "L11",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6-8:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2359",
+      "section_number": "L12",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 6-8:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2361",
+      "section_number": "L13",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2362",
+      "section_number": "L14",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2364",
+      "section_number": "L15",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2365",
+      "section_number": "L16",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2348",
+      "section_number": "LAB1",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2349",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2350",
+      "section_number": "LAB3",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6-8:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2351",
+      "section_number": "LAB4",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 6-8:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2352",
+      "section_number": "LAB5",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2353",
+      "section_number": "LAB6",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2354",
+      "section_number": "LAB7",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6-8:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2355",
+      "section_number": "LAB8",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6-8:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2045"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2356",
+      "section_number": "LAB9",
+      "schedule_type": "LAB",
+      "instructor": "Donofrio/Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1388",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "T. Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1389",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "T. Bing",
+      "enrollment_status": "Closed",
+      "enrollment_count": "18",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 18,
+    "lectures": 2,
+    "labs": 16,
+    "discussions": 0,
+    "other": 0,
+    "open": 5,
+    "closed": 13,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Donofrio/Bing",
+    "T. Bing"
+  ],
+  "scraped_at": "2026-04-20T20:51:32.835Z"
+}

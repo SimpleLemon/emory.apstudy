@@ -1,0 +1,83 @@
+{
+  "course_code": "BUS 797R",
+  "course_title": "Directed Study",
+  "subject": "BUS",
+  "catalog_number": "797R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6175",
+      "section_number": "5101",
+      "schedule_type": "SUP",
+      "instructor": "D. Schweidel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6220",
+      "section_number": "5102",
+      "schedule_type": "SUP",
+      "instructor": "M. Williams",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6617",
+      "section_number": "5103",
+      "schedule_type": "SUP",
+      "instructor": "W. Jiang",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6618",
+      "section_number": "5104",
+      "schedule_type": "SUP",
+      "instructor": "C. Green",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 3,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Green",
+    "D. Schweidel",
+    "M. Williams",
+    "W. Jiang"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.760Z"
+}

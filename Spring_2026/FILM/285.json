@@ -1,0 +1,137 @@
+{
+  "course_code": "FILM 285",
+  "course_title": "Special Topics: Film and Media: Awards Shows",
+  "subject": "FILM",
+  "catalog_number": "285",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3716",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "E. Walters",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4044",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "J. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3956",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "D. Barba",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3965",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "J. Pellerito",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 1-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4342",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "T. Dixon",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 5,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "D. Barba",
+    "E. Walters",
+    "J. Kim",
+    "J. Pellerito",
+    "T. Dixon"
+  ],
+  "scraped_at": "2026-04-20T20:48:01.273Z"
+}

@@ -1,0 +1,77 @@
+{
+  "course_code": "WGS 285",
+  "course_title": "Variable Topics in Women, Gender & Sexuality Studies",
+  "subject": "WGS",
+  "catalog_number": "285",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4007",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "I. Goh",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4526",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "A. Cato",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "A. Cato",
+    "I. Goh"
+  ],
+  "scraped_at": "2026-04-20T20:51:54.461Z"
+}

@@ -1,0 +1,39 @@
+{
+  "course_code": "NRSG 756D",
+  "course_title": "Emergency Nurse Practitioner II",
+  "subject": "NRSG",
+  "catalog_number": "756D",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4581",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:52:09.352Z"
+}

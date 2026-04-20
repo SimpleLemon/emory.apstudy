@@ -1,0 +1,87 @@
+{
+  "course_code": "CPLT 751R",
+  "course_title": "Spec Topics: Comparative Literature: Introduction to Derrida",
+  "subject": "CPLT",
+  "catalog_number": "751R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2333",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "G. Bennington",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-4p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2334",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "E. Marder",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-4p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5389",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "Mitchell/Mendoza-De Jesus",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Marder",
+    "G. Bennington",
+    "Mitchell/Mendoza-De Jesus"
+  ],
+  "scraped_at": "2026-04-20T20:50:33.317Z"
+}

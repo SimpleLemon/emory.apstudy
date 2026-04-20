@@ -1,0 +1,192 @@
+{
+  "course_code": "MATH 210",
+  "course_title": "Advanced Calculus for Data Sciences",
+  "subject": "MATH",
+  "catalog_number": "210",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3366",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Carr",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3385",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "M. Carr",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3396",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Brarda",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3398",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Brarda",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3407",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Brarda",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3412",
+      "section_number": "7",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Brarda",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3440",
+      "section_number": "8",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Scott",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3442",
+      "section_number": "9",
+      "schedule_type": "LAB",
+      "instructor": "Carr/Scott",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 2,
+    "labs": 6,
+    "discussions": 0,
+    "other": 0,
+    "open": 8,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Carr/Brarda",
+    "Carr/Scott",
+    "M. Carr"
+  ],
+  "scraped_at": "2026-04-20T20:51:13.088Z"
+}

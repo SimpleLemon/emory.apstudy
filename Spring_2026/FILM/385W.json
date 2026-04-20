@@ -1,0 +1,47 @@
+{
+  "course_code": "FILM 385W",
+  "course_title": "Special Topics: Film and Media: Adaptation for TV and Film",
+  "subject": "FILM",
+  "catalog_number": "385W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4423",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "C. Kras",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Kras"
+  ],
+  "scraped_at": "2026-04-20T20:48:01.281Z"
+}

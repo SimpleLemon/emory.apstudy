@@ -1,0 +1,60 @@
+{
+  "course_code": "BUS 594",
+  "course_title": "Professional Development",
+  "subject": "BUS",
+  "catalog_number": "594",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3825",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "L. Chilla",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3826",
+      "section_number": "3202",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "L. Chilla"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.387Z"
+}

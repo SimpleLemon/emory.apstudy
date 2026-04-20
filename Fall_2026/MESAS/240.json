@@ -1,0 +1,52 @@
+{
+  "course_code": "MESAS 240",
+  "course_title": "Conversational Tibetan",
+  "subject": "MESAS",
+  "catalog_number": "240",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1654",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "T. Rigzin",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 3-3:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1500",
+            "end": "1550"
+          },
+          {
+            "day": "Thu",
+            "start": "1500",
+            "end": "1550"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "T. Rigzin"
+  ],
+  "scraped_at": "2026-04-20T21:52:01.041Z"
+}

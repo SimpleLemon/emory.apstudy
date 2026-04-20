@@ -1,0 +1,47 @@
+{
+  "course_code": "NRSG 730",
+  "course_title": "Quantitative methods and Study Designs for Nursing Research II",
+  "subject": "NRSG",
+  "catalog_number": "730",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4107",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "N. Giordano",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-10:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1050"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "N. Giordano"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.783Z"
+}

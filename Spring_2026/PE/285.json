@@ -1,0 +1,47 @@
+{
+  "course_code": "PE 285",
+  "course_title": "Special Topics in PE: Learning in Motion",
+  "subject": "PE",
+  "catalog_number": "285",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5750",
+      "section_number": "1",
+      "schedule_type": "PE",
+      "instructor": "Flint/Bedzow",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 8:30-9:20a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "920"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "Flint/Bedzow"
+  ],
+  "scraped_at": "2026-04-20T20:48:44.274Z"
+}

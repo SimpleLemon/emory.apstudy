@@ -1,0 +1,190 @@
+{
+  "course_code": "BIOL 241",
+  "course_title": "Evolutionary Biology",
+  "subject": "BIOL",
+  "catalog_number": "241",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1640",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1641",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1642",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 10-10:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1643",
+      "section_number": "4",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 11-11:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1644",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1645",
+      "section_number": "6",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-1:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1646",
+      "section_number": "7",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2-2:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1400",
+            "end": "1450"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1647",
+      "section_number": "8",
+      "schedule_type": "DIS",
+      "instructor": "M. Arbilly",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 3-3:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1500",
+            "end": "1550"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 6,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 5
+  },
+  "instructors_unique": [
+    "M. Arbilly"
+  ],
+  "scraped_at": "2026-04-20T20:47:42.866Z"
+}

@@ -1,0 +1,54 @@
+{
+  "course_code": "NRSG 727D",
+  "course_title": "DNP Scholarly Project II",
+  "subject": "NRSG",
+  "catalog_number": "727D",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5131",
+      "section_number": "CLN2",
+      "schedule_type": "CLN",
+      "instructor": "S. Moore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4167",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "S. Moore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "S. Moore"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.783Z"
+}

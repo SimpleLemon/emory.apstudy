@@ -1,0 +1,205 @@
+{
+  "course_code": "ECON 320",
+  "course_title": "Econometrics",
+  "subject": "ECON",
+  "catalog_number": "320",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4284",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "H. Pitzer",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3949",
+      "section_number": "LAB3",
+      "schedule_type": "LAB",
+      "instructor": "J. Zhang",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3950",
+      "section_number": "LAB4",
+      "schedule_type": "LAB",
+      "instructor": "J. Zhang",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-3:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1520"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3941",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "E. Maasoumi",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4042",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "P. Lopez de mesa Moyano",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3944",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "S. Hoderlein",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3945",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "P. Sant'Anna",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3946",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "H. Pitzer",
+      "enrollment_status": "Open",
+      "enrollment_count": "8",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 4,
+    "labs": 4,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 4
+  },
+  "instructors_unique": [
+    "E. Maasoumi",
+    "H. Pitzer",
+    "J. Zhang",
+    "P. Lopez de mesa Moyano",
+    "P. Sant'Anna",
+    "S. Hoderlein"
+  ],
+  "scraped_at": "2026-04-20T20:47:54.566Z"
+}

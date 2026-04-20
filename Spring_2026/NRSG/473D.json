@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 473D",
+  "course_title": "Population Health: Community and Public Health Nursing",
+  "subject": "NRSG",
+  "catalog_number": "473D",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-03-04"
+  },
+  "sections": [
+    {
+      "crn": "4158",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "T. Tanner",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 3:30-6p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1530",
+            "end": "1800"
+          },
+          {
+            "day": "Thu",
+            "start": "1530",
+            "end": "1800"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Tanner"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.767Z"
+}

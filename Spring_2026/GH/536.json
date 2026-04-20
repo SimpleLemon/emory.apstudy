@@ -1,0 +1,72 @@
+{
+  "course_code": "GH 536",
+  "course_title": "Religion & Health in Context: HIV",
+  "subject": "GH",
+  "catalog_number": "536",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-05",
+    "end": "2026-01-10"
+  },
+  "sections": [
+    {
+      "crn": "1377",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Blevins/Toure",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWThFSa 9a-5p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1700"
+          },
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1700"
+          },
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1700"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1700"
+          },
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1700"
+          },
+          {
+            "day": "Sat",
+            "start": "900",
+            "end": "1700"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Blevins/Toure"
+  ],
+  "scraped_at": "2026-04-20T20:49:34.021Z"
+}

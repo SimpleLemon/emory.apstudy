@@ -1,0 +1,47 @@
+{
+  "course_code": "SOC 506",
+  "course_title": "Applied Regression",
+  "subject": "SOC",
+  "catalog_number": "506",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3228",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "H. Sohn",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 8:30-11:15a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Sohn"
+  ],
+  "scraped_at": "2026-04-20T20:49:04.193Z"
+}

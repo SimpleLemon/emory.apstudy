@@ -1,0 +1,69 @@
+{
+  "course_code": "SOC 498R",
+  "course_title": "Supervised Reading",
+  "subject": "SOC",
+  "catalog_number": "498R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3113",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "H. Sohn",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6281",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "R. Franzosi",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6655",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "J. Mullis",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Sohn",
+    "J. Mullis",
+    "R. Franzosi"
+  ],
+  "scraped_at": "2026-04-20T20:49:04.191Z"
+}

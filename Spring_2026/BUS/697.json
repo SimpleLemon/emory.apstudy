@@ -1,0 +1,381 @@
+{
+  "course_code": "BUS 697",
+  "course_title": "Directed Study: Pet Health Record System",
+  "subject": "BUS",
+  "catalog_number": "697",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5910",
+      "section_number": "2101",
+      "schedule_type": "SUP",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6311",
+      "section_number": "2102",
+      "schedule_type": "SUP",
+      "instructor": "B. Goebel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6357",
+      "section_number": "2103",
+      "schedule_type": "SUP",
+      "instructor": "G. Maturana",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6393",
+      "section_number": "2104",
+      "schedule_type": "SUP",
+      "instructor": "R. Cui",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6466",
+      "section_number": "2105",
+      "schedule_type": "SUP",
+      "instructor": "B. Goebel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6497",
+      "section_number": "2106",
+      "schedule_type": "SUP",
+      "instructor": "S. Garate",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6498",
+      "section_number": "2107",
+      "schedule_type": "SUP",
+      "instructor": "S. Garate",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4618",
+      "section_number": "2192",
+      "schedule_type": "SUP",
+      "instructor": "Rosensweig/Sullivan",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5907",
+      "section_number": "2201",
+      "schedule_type": "SUP",
+      "instructor": "U. Rackliffe",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6259",
+      "section_number": "2202",
+      "schedule_type": "SUP",
+      "instructor": "T. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6239",
+      "section_number": "2203",
+      "schedule_type": "SUP",
+      "instructor": "T. Smith",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6260",
+      "section_number": "2204",
+      "schedule_type": "SUP",
+      "instructor": "R. Kazanjian",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6483",
+      "section_number": "2205",
+      "schedule_type": "SUP",
+      "instructor": "R. Garg",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6518",
+      "section_number": "2206",
+      "schedule_type": "SUP",
+      "instructor": "R. Kazanjian",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4619",
+      "section_number": "2292",
+      "schedule_type": "SUP",
+      "instructor": "Rosensweig/Sullivan",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6400",
+      "section_number": "3201",
+      "schedule_type": "SUP",
+      "instructor": "D. Lee",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6402",
+      "section_number": "3202",
+      "schedule_type": "SUP",
+      "instructor": "B. Konsynski",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6403",
+      "section_number": "3203",
+      "schedule_type": "SUP",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6406",
+      "section_number": "3204",
+      "schedule_type": "SUP",
+      "instructor": "B. Goebel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6407",
+      "section_number": "3205",
+      "schedule_type": "SUP",
+      "instructor": "R. Berlin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6408",
+      "section_number": "3206",
+      "schedule_type": "SUP",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6409",
+      "section_number": "3207",
+      "schedule_type": "SUP",
+      "instructor": "R. Berlin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6472",
+      "section_number": "3208",
+      "schedule_type": "SUP",
+      "instructor": "Jap/Brames",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6499",
+      "section_number": "3209",
+      "schedule_type": "SUP",
+      "instructor": "G. Negro",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6577",
+      "section_number": "3210",
+      "schedule_type": "SUP",
+      "instructor": "D. Bowman",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6578",
+      "section_number": "3211",
+      "schedule_type": "SUP",
+      "instructor": "S. Garate",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 26,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 26,
+    "open": 4,
+    "closed": 22,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Goebel",
+    "B. Konsynski",
+    "C. Goetz",
+    "D. Bowman",
+    "D. Lee",
+    "G. Maturana",
+    "G. Negro",
+    "Jap/Brames",
+    "R. Berlin",
+    "R. Cui",
+    "R. Garg",
+    "R. Kazanjian",
+    "Rosensweig/Sullivan",
+    "S. Garate",
+    "T. Smith",
+    "U. Rackliffe"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.760Z"
+}

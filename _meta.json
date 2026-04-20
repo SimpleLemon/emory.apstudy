@@ -1,0 +1,22 @@
+{
+  "scrape_started": "2026-04-20T21:51:16.715Z",
+  "terms": {
+    "Spring_2026": {
+      "srcdb": "5261",
+      "subjects_attempted": 25,
+      "subjects_with_data": 10,
+      "courses_written": 126,
+      "total_sections": 188,
+      "errors": []
+    },
+    "Fall_2026": {
+      "srcdb": "5269",
+      "subjects_attempted": 25,
+      "subjects_with_data": 10,
+      "courses_written": 112,
+      "total_sections": 237,
+      "errors": []
+    }
+  },
+  "scrape_finished": "2026-04-20T21:52:38.204Z"
+}

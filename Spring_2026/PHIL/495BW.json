@@ -1,0 +1,125 @@
+{
+  "course_code": "PHIL 495BW",
+  "course_title": "Honors (Directed Reading)",
+  "subject": "PHIL",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6268",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "L. Huffer",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6269",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "D. Marriott",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6270",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "J. Stuhr",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6271",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "M. Schwarz",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6272",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "J. Lysaker",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6273",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "E. Blanes-Martinez",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6274",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "N. McAfee",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 7,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Marriott",
+    "E. Blanes-Martinez",
+    "J. Lysaker",
+    "J. Stuhr",
+    "L. Huffer",
+    "M. Schwarz",
+    "N. McAfee"
+  ],
+  "scraped_at": "2026-04-20T20:48:47.569Z"
+}

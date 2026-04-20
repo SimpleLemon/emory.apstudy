@@ -1,0 +1,66 @@
+{
+  "course_code": "CS 700R",
+  "course_title": "Graduate Seminar",
+  "subject": "CS",
+  "catalog_number": "700R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4029",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "V. Sunderam",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1100"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4032",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "V. Sunderam",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 8:30-9:30a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "830",
+            "end": "930"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "V. Sunderam"
+  ],
+  "scraped_at": "2026-04-20T20:47:51.251Z"
+}

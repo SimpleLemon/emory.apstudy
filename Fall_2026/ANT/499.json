@@ -1,0 +1,47 @@
+{
+  "course_code": "ANT 499",
+  "course_title": "Capstone Seminar: Why Anthropology Matters",
+  "subject": "ANT",
+  "catalog_number": "499",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3123",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "D. Vidali",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Vidali"
+  ],
+  "scraped_at": "2026-04-20T20:50:20.086Z"
+}

@@ -1,0 +1,76 @@
+{
+  "course_code": "CHEM 204L",
+  "course_title": "Macromolecules Lab",
+  "subject": "CHEM",
+  "catalog_number": "204L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3187",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; M 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Mon",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3188",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "J. Smith",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4:30-5:45p; M 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Mon",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "J. Smith"
+  ],
+  "scraped_at": "2026-04-20T20:50:30.044Z"
+}

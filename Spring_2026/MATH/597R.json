@@ -1,0 +1,181 @@
+{
+  "course_code": "MATH 597R",
+  "course_title": "Directed Study",
+  "subject": "MATH",
+  "catalog_number": "597R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6092",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Chung",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6206",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "M. Chung",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6095",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "C. Pohoata",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6155",
+      "section_number": "14",
+      "schedule_type": "SUP",
+      "instructor": "A. Polyanskii",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6163",
+      "section_number": "15",
+      "schedule_type": "SUP",
+      "instructor": "P. Raman",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6019",
+      "section_number": "16",
+      "schedule_type": "SUP",
+      "instructor": "Ramadas/Silversmith",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6124",
+      "section_number": "17",
+      "schedule_type": "SUP",
+      "instructor": "V. Rodl",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6360",
+      "section_number": "27",
+      "schedule_type": "SUP",
+      "instructor": "Y. Xi",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6205",
+      "section_number": "29",
+      "schedule_type": "SUP",
+      "instructor": "S. Yang",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6619",
+      "section_number": "30",
+      "schedule_type": "SUP",
+      "instructor": "L. Yepremyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6471",
+      "section_number": "31",
+      "schedule_type": "SUP",
+      "instructor": "M. Lukic",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 11,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 11,
+    "open": 11,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Polyanskii",
+    "C. Pohoata",
+    "J. Chung",
+    "L. Yepremyan",
+    "M. Chung",
+    "M. Lukic",
+    "P. Raman",
+    "Ramadas/Silversmith",
+    "S. Yang",
+    "V. Rodl",
+    "Y. Xi"
+  ],
+  "scraped_at": "2026-04-20T20:48:29.474Z"
+}

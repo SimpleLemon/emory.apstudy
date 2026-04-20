@@ -1,0 +1,172 @@
+{
+  "course_code": "CHEM 202L",
+  "course_title": "Principles of Reactivity Lab",
+  "subject": "CHEM",
+  "catalog_number": "202L",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3688",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 10-11:15a; W 11:15a-1:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1115",
+            "end": "1320"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3690",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 2:30-3:45p; W 3:45-5:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1545",
+            "end": "1750"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3693",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-2:15p; Th 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3701",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4:30-5:45p; Th 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Thu",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3702",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a; F 11:15a-1:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Fri",
+            "start": "1115",
+            "end": "1320"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3704",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "M. McCormick",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1:30-2:45p; F 2:45-4:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1330",
+            "end": "1445"
+          },
+          {
+            "day": "Fri",
+            "start": "1445",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 6,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "M. McCormick"
+  ],
+  "scraped_at": "2026-04-20T20:47:46.127Z"
+}

@@ -1,0 +1,81 @@
+{
+  "course_code": "GH 521",
+  "course_title": "Qualitative Methods 1: Data Collection",
+  "subject": "GH",
+  "catalog_number": "521",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1545",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Hennink/Javaid",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-3:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1550"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1546",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-11:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1547",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "B. Caruso",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Caruso",
+    "Hennink/Javaid",
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:49:34.020Z"
+}

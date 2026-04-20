@@ -1,0 +1,47 @@
+{
+  "course_code": "POLS 394",
+  "course_title": "Research Topics in Political Science",
+  "subject": "POLS",
+  "catalog_number": "394",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2872",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "H. Semetko",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-6:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1845"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "H. Semetko"
+  ],
+  "scraped_at": "2026-04-20T20:51:36.157Z"
+}

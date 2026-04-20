@@ -1,0 +1,447 @@
+{
+  "course_code": "ENGRD 101",
+  "course_title": "Rhetorical Composition/Critical Reading",
+  "subject": "ENGRD",
+  "catalog_number": "101",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4069",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "R. Spera",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4070",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "S. Press",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4071",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "S. Chipman",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4072",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "A. Ali",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4073",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "S. Press",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4074",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "I. Juneja",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4075",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "A. Young",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Wed",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4076",
+      "section_number": "8",
+      "schedule_type": "LEC",
+      "instructor": "H. Terasawa",
+      "enrollment_status": "Open",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4077",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "D. Abitz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4078",
+      "section_number": "10",
+      "schedule_type": "LEC",
+      "instructor": "G. Massey",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4079",
+      "section_number": "11",
+      "schedule_type": "LEC",
+      "instructor": "D. Abitz",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4080",
+      "section_number": "12",
+      "schedule_type": "LEC",
+      "instructor": "C. Gallichio",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4081",
+      "section_number": "13",
+      "schedule_type": "LEC",
+      "instructor": "C. Gallichio",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5256",
+      "section_number": "14",
+      "schedule_type": "LEC",
+      "instructor": "D. McDermott",
+      "enrollment_status": "Closed",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5257",
+      "section_number": "15",
+      "schedule_type": "LEC",
+      "instructor": "M. Uddin",
+      "enrollment_status": "Open",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5258",
+      "section_number": "16",
+      "schedule_type": "LEC",
+      "instructor": "M. Uddin",
+      "enrollment_status": "Open",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "6087",
+      "section_number": "17",
+      "schedule_type": "LEC",
+      "instructor": "S. Press",
+      "enrollment_status": "Open",
+      "enrollment_count": "17",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 17,
+    "lectures": 17,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 13,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Ali",
+    "A. Young",
+    "C. Gallichio",
+    "D. Abitz",
+    "D. McDermott",
+    "G. Massey",
+    "H. Terasawa",
+    "I. Juneja",
+    "M. Uddin",
+    "R. Spera",
+    "S. Chipman",
+    "S. Press"
+  ],
+  "scraped_at": "2026-04-20T21:51:31.843Z"
+}

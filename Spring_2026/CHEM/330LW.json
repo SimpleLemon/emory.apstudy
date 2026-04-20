@@ -1,0 +1,124 @@
+{
+  "course_code": "CHEM 330LW",
+  "course_title": "Experimental Physical Chem.Lab",
+  "subject": "CHEM",
+  "catalog_number": "330LW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3756",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; T 5:30-8:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Tue",
+            "start": "1730",
+            "end": "2015"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3758",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; W 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3760",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5699",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "A. Brathwaite",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; F 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 4,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "A. Brathwaite"
+  ],
+  "scraped_at": "2026-04-20T20:47:46.130Z"
+}

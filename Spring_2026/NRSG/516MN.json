@@ -1,0 +1,47 @@
+{
+  "course_code": "NRSG 516MN",
+  "course_title": "Determinants of Health & Health Promotion: MN",
+  "subject": "NRSG",
+  "catalog_number": "516MN",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4218",
+      "section_number": "300",
+      "schedule_type": "LEC",
+      "instructor": "D. Cofield",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 8:30-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "950"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Cofield"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.775Z"
+}

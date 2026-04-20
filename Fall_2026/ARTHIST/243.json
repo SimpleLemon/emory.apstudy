@@ -1,0 +1,47 @@
+{
+  "course_code": "ARTHIST 243",
+  "course_title": "Arts Administration",
+  "subject": "ARTHIST",
+  "catalog_number": "243",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3998",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "A. Fristoe",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-3:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Fristoe"
+  ],
+  "scraped_at": "2026-04-20T21:51:57.783Z"
+}

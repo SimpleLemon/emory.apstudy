@@ -1,0 +1,152 @@
+{
+  "course_code": "PSYC 200W",
+  "course_title": "Lab In Experimental Methods",
+  "subject": "PSYC",
+  "catalog_number": "200W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2036",
+      "section_number": "LAB1",
+      "schedule_type": "LAB",
+      "instructor": "N. Menon",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2037",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "C. Wilson",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2038",
+      "section_number": "LAB3",
+      "schedule_type": "LAB",
+      "instructor": "N. Jiang",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2039",
+      "section_number": "LAB4",
+      "schedule_type": "LAB",
+      "instructor": "S. Frandsen",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 7-8:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1900",
+            "end": "2015"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5455",
+      "section_number": "LAB5",
+      "schedule_type": "LAB",
+      "instructor": "N. Slepneva",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2035",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Kazama/Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 1,
+    "labs": 5,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 4,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Wilson",
+    "Kazama/Medina",
+    "N. Jiang",
+    "N. Menon",
+    "N. Slepneva",
+    "S. Frandsen"
+  ],
+  "scraped_at": "2026-04-20T20:48:55.890Z"
+}

@@ -1,0 +1,68 @@
+{
+  "course_code": "MKT 497",
+  "course_title": "Directed Study: Digital Marketing Algorithms",
+  "subject": "MKT",
+  "catalog_number": "497",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6320",
+      "section_number": "1101",
+      "schedule_type": "SUP",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6468",
+      "section_number": "1102",
+      "schedule_type": "SUP",
+      "instructor": "Jap/Brames",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6513",
+      "section_number": "1103",
+      "schedule_type": "SUP",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 1,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Jap/Brames",
+    "M. Cooley"
+  ],
+  "scraped_at": "2026-04-20T20:49:20.824Z"
+}

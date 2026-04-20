@@ -1,0 +1,52 @@
+{
+  "course_code": "HPM 550",
+  "course_title": "Capstone-Operations Management",
+  "subject": "HPM",
+  "catalog_number": "550",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1507",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Wollenzien",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1150"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1150"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Wollenzien"
+  ],
+  "scraped_at": "2026-04-20T20:49:35.661Z"
+}

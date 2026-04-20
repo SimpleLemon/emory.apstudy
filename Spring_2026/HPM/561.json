@@ -1,0 +1,47 @@
+{
+  "course_code": "HPM 561",
+  "course_title": "Fundamentals Of Public Health Law",
+  "subject": "HPM",
+  "catalog_number": "561",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1515",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 5-6:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1700",
+            "end": "1850"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:49:35.663Z"
+}

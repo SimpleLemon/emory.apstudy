@@ -1,0 +1,83 @@
+{
+  "course_code": "ENVS 499R",
+  "course_title": "Advanced Independent Research",
+  "subject": "ENVS",
+  "catalog_number": "499R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6480",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "E. Lonsdorf",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6489",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "T. Gillespie",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6511",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "A. Avramov",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6623",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "G. Vazquez Prokopec",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 0,
+    "closed": 4,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Avramov",
+    "E. Lonsdorf",
+    "G. Vazquez Prokopec",
+    "T. Gillespie"
+  ],
+  "scraped_at": "2026-04-20T20:47:59.646Z"
+}

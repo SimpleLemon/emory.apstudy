@@ -1,0 +1,77 @@
+{
+  "course_code": "CL 329R",
+  "course_title": "Spec Stud in Classical Culture: Egypt. Art Crossroad of Cult.",
+  "subject": "CL",
+  "catalog_number": "329R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4500",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "T. Holman",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4501",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "G. Lovisetto",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "G. Lovisetto",
+    "T. Holman"
+  ],
+  "scraped_at": "2026-04-20T21:51:25.337Z"
+}

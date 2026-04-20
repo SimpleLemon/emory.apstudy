@@ -1,0 +1,153 @@
+{
+  "course_code": "SOC 497R",
+  "course_title": "Directed Research",
+  "subject": "SOC",
+  "catalog_number": "497R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3112",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "R. Franzosi",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6392",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "K. Brown",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6481",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "R. Hall-Clifford",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6482",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "N. Hoffmann",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6531",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "C. Puckett",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6555",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "B. Xu",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6556",
+      "section_number": "7",
+      "schedule_type": "RSC",
+      "instructor": "E. Idler",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6585",
+      "section_number": "8",
+      "schedule_type": "RSC",
+      "instructor": "A. Sewell",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6625",
+      "section_number": "9",
+      "schedule_type": "RSC",
+      "instructor": "J. Mullis",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 9,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 9,
+    "open": 8,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "A. Sewell",
+    "B. Xu",
+    "C. Puckett",
+    "E. Idler",
+    "J. Mullis",
+    "K. Brown",
+    "N. Hoffmann",
+    "R. Franzosi",
+    "R. Hall-Clifford"
+  ],
+  "scraped_at": "2026-04-20T20:49:04.191Z"
+}

@@ -1,0 +1,307 @@
+{
+  "course_code": "PSYC 799R",
+  "course_title": "Doctoral Dissertation Research",
+  "subject": "PSYC",
+  "catalog_number": "799R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1606",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "L. Craighead",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1617",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "D. Dilks",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1619",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "L. Nygaard",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1620",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "A. Tasimi",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1621",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "P. Rochat",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1637",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "S. Lourenco",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1622",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "J. Manns",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1623",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "R. Hampton",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1624",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "B. Wilson",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1607",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "P. Palmer",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1608",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "P. Brennan",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1609",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "P. Wolff",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1610",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "I. Waldman",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1611",
+      "section_number": "14",
+      "schedule_type": "SUP",
+      "instructor": "A. Klin",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1612",
+      "section_number": "15",
+      "schedule_type": "SUP",
+      "instructor": "S. Goodman",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1613",
+      "section_number": "16",
+      "schedule_type": "SUP",
+      "instructor": "M. Treadway",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1614",
+      "section_number": "17",
+      "schedule_type": "SUP",
+      "instructor": "P. Kragel",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1615",
+      "section_number": "18",
+      "schedule_type": "SUP",
+      "instructor": "A. Cohen",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1616",
+      "section_number": "19",
+      "schedule_type": "SUP",
+      "instructor": "A. Kelly",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1618",
+      "section_number": "20",
+      "schedule_type": "SUP",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "20",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 20,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 20,
+    "open": 20,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Cohen",
+    "A. Kelly",
+    "A. Klin",
+    "A. Tasimi",
+    "B. Wilson",
+    "D. Dilks",
+    "I. Waldman",
+    "J. Manns",
+    "J. Medina",
+    "L. Craighead",
+    "L. Nygaard",
+    "M. Treadway",
+    "P. Brennan",
+    "P. Kragel",
+    "P. Palmer",
+    "P. Rochat",
+    "P. Wolff",
+    "R. Hampton",
+    "S. Goodman",
+    "S. Lourenco"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.458Z"
+}

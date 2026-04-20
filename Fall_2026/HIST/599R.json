@@ -1,0 +1,97 @@
+{
+  "course_code": "HIST 599R",
+  "course_title": "Research",
+  "subject": "HIST",
+  "catalog_number": "599R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5518",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "Andrade/Nenzi",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5519",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5520",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "Chira/Yannakakis",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5521",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "Lesser/Rogers",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5522",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "Suddler/Ward",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Andrade/Nenzi",
+    "Chira/Yannakakis",
+    "Lesser/Rogers",
+    "Suddler/Ward",
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:50:54.878Z"
+}

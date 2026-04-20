@@ -1,0 +1,153 @@
+{
+  "course_code": "MATH 495BW",
+  "course_title": "Honors",
+  "subject": "MATH",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6181",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "Nurbekyan/Ruthotto",
+      "enrollment_status": "Closed",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6452",
+      "section_number": "27",
+      "schedule_type": "SUP",
+      "instructor": "Y. Xi",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6546",
+      "section_number": "28",
+      "schedule_type": "SUP",
+      "instructor": "M. Chung",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6547",
+      "section_number": "29",
+      "schedule_type": "SUP",
+      "instructor": "M. Manetta",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6583",
+      "section_number": "30",
+      "schedule_type": "SUP",
+      "instructor": "M. Tezzele",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6584",
+      "section_number": "31",
+      "schedule_type": "SUP",
+      "instructor": "S. Venapally",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6586",
+      "section_number": "32",
+      "schedule_type": "SUP",
+      "instructor": "J. Nagy",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6587",
+      "section_number": "33",
+      "schedule_type": "SUP",
+      "instructor": "M. Lukic",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6588",
+      "section_number": "34",
+      "schedule_type": "SUP",
+      "instructor": "A. Veneziani",
+      "enrollment_status": "Open",
+      "enrollment_count": "9",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 9,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 9,
+    "open": 8,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Veneziani",
+    "J. Nagy",
+    "M. Chung",
+    "M. Lukic",
+    "M. Manetta",
+    "M. Tezzele",
+    "Nurbekyan/Ruthotto",
+    "S. Venapally",
+    "Y. Xi"
+  ],
+  "scraped_at": "2026-04-20T20:48:29.471Z"
+}

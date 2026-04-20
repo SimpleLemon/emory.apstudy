@@ -1,0 +1,52 @@
+{
+  "course_code": "EH 587",
+  "course_title": "Intro.to Satellite Remote Sensing of the Environment and its Applications in PH",
+  "subject": "EH",
+  "catalog_number": "587",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-03-03",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1524",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Liu/Qi",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 10-11:50a; Th 1-2:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1150"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1450"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Liu/Qi"
+  ],
+  "scraped_at": "2026-04-20T20:49:30.770Z"
+}

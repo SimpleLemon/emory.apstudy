@@ -1,0 +1,55 @@
+{
+  "course_code": "SPAN 495BW",
+  "course_title": "Honors",
+  "subject": "SPAN",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5450",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "K. Ostrom",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5451",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "A. Herrero-Olaizola",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Herrero-Olaizola",
+    "K. Ostrom"
+  ],
+  "scraped_at": "2026-04-20T20:49:05.825Z"
+}

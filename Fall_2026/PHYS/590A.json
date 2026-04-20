@@ -1,0 +1,47 @@
+{
+  "course_code": "PHYS 590A",
+  "course_title": "Seminar Teaching College Physics",
+  "subject": "PHYS",
+  "catalog_number": "590A",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1424",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "T. Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Bing"
+  ],
+  "scraped_at": "2026-04-20T20:51:32.842Z"
+}

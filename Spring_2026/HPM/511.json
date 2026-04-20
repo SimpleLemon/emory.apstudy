@@ -1,0 +1,47 @@
+{
+  "course_code": "HPM 511",
+  "course_title": "Fin Manage/Health Care Organizatio",
+  "subject": "HPM",
+  "catalog_number": "511",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1505",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-3:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1550"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T20:49:35.657Z"
+}

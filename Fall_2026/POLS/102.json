@@ -1,0 +1,67 @@
+{
+  "course_code": "POLS 102",
+  "course_title": "Intro to Political Theory",
+  "subject": "POLS",
+  "catalog_number": "102",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2958",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Owen",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-4:50p; F 10-10:50a; F 11-11:50a; F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          },
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          },
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          },
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Owen"
+  ],
+  "scraped_at": "2026-04-20T20:51:36.141Z"
+}

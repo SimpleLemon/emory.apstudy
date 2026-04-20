@@ -1,0 +1,103 @@
+{
+  "course_code": "BUS 500",
+  "course_title": "Goizueta IMPACT",
+  "subject": "BUS",
+  "catalog_number": "500",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3750",
+      "section_number": "2128",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3751",
+      "section_number": "2201",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3752",
+      "section_number": "2427",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3753",
+      "section_number": "2527",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3754",
+      "section_number": "2628",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 5,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:51:59.381Z"
+}

@@ -1,0 +1,47 @@
+{
+  "course_code": "ECS 400R",
+  "course_title": "Honor Council Advanced Practicum",
+  "subject": "ECS",
+  "catalog_number": "400R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1802",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 5:30-7:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1730",
+            "end": "1915"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T21:52:09.212Z"
+}

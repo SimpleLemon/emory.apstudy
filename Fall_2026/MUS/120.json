@@ -1,0 +1,66 @@
+{
+  "course_code": "MUS 120",
+  "course_title": "Keyboard Skills",
+  "subject": "MUS",
+  "catalog_number": "120",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2999",
+      "section_number": "1",
+      "schedule_type": "DIS",
+      "instructor": "P. Dinkins-Matthews",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3004",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "P. Dinkins-Matthews",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 2,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "P. Dinkins-Matthews"
+  ],
+  "scraped_at": "2026-04-20T20:51:19.598Z"
+}

@@ -1,0 +1,209 @@
+{
+  "course_code": "BIOL 497R",
+  "course_title": "Supervised Reading",
+  "subject": "BIOL",
+  "catalog_number": "497R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1710",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "E. Abreu",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4417",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "J. Bou Dagher",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4394",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "P. Cafferty",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4395",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "M. Cole",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4396",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "S. Comstra",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4397",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "J. De Roode",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4398",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "A. Eisen",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4400",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "A. Escobar",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4401",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "D. Jaeger",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4402",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "R. Liu",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4403",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "I. Shepherd",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4447",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "N. Gerardo",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4448",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "L. Morran",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 13,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 13,
+    "open": 13,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Eisen",
+    "A. Escobar",
+    "D. Jaeger",
+    "E. Abreu",
+    "I. Shepherd",
+    "J. Bou Dagher",
+    "J. De Roode",
+    "L. Morran",
+    "M. Cole",
+    "N. Gerardo",
+    "P. Cafferty",
+    "R. Liu",
+    "S. Comstra"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.642Z"
+}

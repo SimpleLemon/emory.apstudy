@@ -1,0 +1,294 @@
+{
+  "course_code": "BUS 365",
+  "course_title": "Business Communication Strategy",
+  "subject": "BUS",
+  "catalog_number": "365",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3613",
+      "section_number": "1101",
+      "schedule_type": "LEC",
+      "instructor": "N. Graves",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3614",
+      "section_number": "1102",
+      "schedule_type": "LEC",
+      "instructor": "N. Graves",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3615",
+      "section_number": "1103",
+      "schedule_type": "LEC",
+      "instructor": "N. Graves",
+      "enrollment_status": "Open",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3616",
+      "section_number": "1104",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3617",
+      "section_number": "1105",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3618",
+      "section_number": "1106",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3619",
+      "section_number": "1107",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3620",
+      "section_number": "1108",
+      "schedule_type": "LEC",
+      "instructor": "S. Savage",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 8:30-9:45a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "945"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3621",
+      "section_number": "1110",
+      "schedule_type": "LEC",
+      "instructor": "S. Savage",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3622",
+      "section_number": "1111",
+      "schedule_type": "LEC",
+      "instructor": "S. Savage",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3623",
+      "section_number": "1112",
+      "schedule_type": "LEC",
+      "instructor": "S. Savage",
+      "enrollment_status": "Closed",
+      "enrollment_count": "11",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 11,
+    "lectures": 11,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 10,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Lowy",
+    "N. Graves",
+    "S. Savage"
+  ],
+  "scraped_at": "2026-04-20T20:51:59.377Z"
+}

@@ -1,0 +1,77 @@
+{
+  "course_code": "FIN 672",
+  "course_title": "Practicum 2:  Exploring Markets, Ethics, Sales and Trading",
+  "subject": "FIN",
+  "catalog_number": "672",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3813",
+      "section_number": "4201",
+      "schedule_type": "PRA",
+      "instructor": "T. Balch",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10:45a-12p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1045",
+            "end": "1200"
+          },
+          {
+            "day": "Thu",
+            "start": "1045",
+            "end": "1200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3814",
+      "section_number": "4202",
+      "schedule_type": "PRA",
+      "instructor": "K. Travers-Uyham",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 9:30-10:45a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "930",
+            "end": "1045"
+          },
+          {
+            "day": "Thu",
+            "start": "930",
+            "end": "1045"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "K. Travers-Uyham",
+    "T. Balch"
+  ],
+  "scraped_at": "2026-04-20T20:52:01.049Z"
+}

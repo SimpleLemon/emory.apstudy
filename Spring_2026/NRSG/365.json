@@ -1,0 +1,54 @@
+{
+  "course_code": "NRSG 365",
+  "course_title": "Ambulatory Care & Community Health Nursing Clinical: BSN",
+  "subject": "NRSG",
+  "catalog_number": "365",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-03-04"
+  },
+  "sections": [
+    {
+      "crn": "4223",
+      "section_number": "101",
+      "schedule_type": "CLN",
+      "instructor": "E. Davis",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4565",
+      "section_number": "102",
+      "schedule_type": "CLN",
+      "instructor": "E. Davis",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Davis"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.760Z"
+}

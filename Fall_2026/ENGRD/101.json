@@ -1,0 +1,324 @@
+{
+  "course_code": "ENGRD 101",
+  "course_title": "Rhetorical Composition/Critical Reading",
+  "subject": "ENGRD",
+  "catalog_number": "101",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3264",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "B. Whelan",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3265",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "E. Agu",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3266",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "M. McDaniel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 1-2:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3267",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3268",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "M. McDaniel",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3269",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "S. Richman",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 4-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3270",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "M. Suhr-Sytsma",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3271",
+      "section_number": "8",
+      "schedule_type": "LEC",
+      "instructor": "M. Suhr-Sytsma",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3272",
+      "section_number": "9",
+      "schedule_type": "LEC",
+      "instructor": "S. Salter",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3273",
+      "section_number": "10",
+      "schedule_type": "LEC",
+      "instructor": "A. Obedkoff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3274",
+      "section_number": "11",
+      "schedule_type": "LEC",
+      "instructor": "A. Obedkoff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3354",
+      "section_number": "12",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3355",
+      "section_number": "13",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 13,
+    "lectures": 13,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 13,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Obedkoff",
+    "B. Whelan",
+    "E. Agu",
+    "M. McDaniel",
+    "M. Suhr-Sytsma",
+    "S. Richman",
+    "S. Salter"
+  ],
+  "scraped_at": "2026-04-20T21:52:12.438Z"
+}

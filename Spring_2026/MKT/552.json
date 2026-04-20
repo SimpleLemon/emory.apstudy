@@ -1,0 +1,268 @@
+{
+  "course_code": "MKT 552",
+  "course_title": "Content Marketing",
+  "subject": "MKT",
+  "catalog_number": "552",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-03",
+    "end": "2026-01-11"
+  },
+  "sections": [
+    {
+      "crn": "3601",
+      "section_number": "2195",
+      "schedule_type": "LEC",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWTh 6-9:30p; SaSu 8:30a-3:30p; Sa 8:30a-3p; Su 8:30-11:30a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Thu",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1500"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3602",
+      "section_number": "2295",
+      "schedule_type": "LEC",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWTh 6-9:30p; SaSu 8:30a-3:30p; Sa 8:30a-3p; Su 8:30-11:30a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Thu",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1500"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3603",
+      "section_number": "3295",
+      "schedule_type": "LEC",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWTh 6-9:30p; SaSu 8:30a-3:30p; Sa 8:30a-3p; Su 8:30-11:30a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Thu",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1500"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3600",
+      "section_number": "4567",
+      "schedule_type": "LEC",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "6358",
+      "section_number": "6295",
+      "schedule_type": "LEC",
+      "instructor": "M. Cooley",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWTh 6-9:30p; SaSu 8:30a-3:30p; Sa 8:30a-3p; Su 8:30-11:30a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Tue",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Wed",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Thu",
+            "start": "1800",
+            "end": "2130"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1530"
+          },
+          {
+            "day": "Sat",
+            "start": "830",
+            "end": "1500"
+          },
+          {
+            "day": "Sun",
+            "start": "830",
+            "end": "1130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 5,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "M. Cooley"
+  ],
+  "scraped_at": "2026-04-20T20:49:20.828Z"
+}

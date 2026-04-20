@@ -1,0 +1,125 @@
+{
+  "course_code": "HIST 495BW",
+  "course_title": "Intro Historical Interpretation II",
+  "subject": "HIST",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3853",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "J. Crespino",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6210",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "J. Lesser",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6211",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "M. Payne",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6212",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Prude",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6213",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "I. Rodriguez",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6214",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "C. Suddler",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6215",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "C. Suh",
+      "enrollment_status": "Closed",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 7,
+    "open": 1,
+    "closed": 6,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Suddler",
+    "C. Suh",
+    "I. Rodriguez",
+    "J. Crespino",
+    "J. Lesser",
+    "J. Prude",
+    "M. Payne"
+  ],
+  "scraped_at": "2026-04-20T20:48:11.187Z"
+}

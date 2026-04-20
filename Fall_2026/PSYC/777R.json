@@ -1,0 +1,52 @@
+{
+  "course_code": "PSYC 777R",
+  "course_title": "Research Seminar A",
+  "subject": "PSYC",
+  "catalog_number": "777R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2313",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "J. Medina",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-6p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1800"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1800"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Medina"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.458Z"
+}

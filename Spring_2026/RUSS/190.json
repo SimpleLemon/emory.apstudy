@@ -1,0 +1,52 @@
+{
+  "course_code": "RUSS 190",
+  "course_title": "Fresh Sem: Russian: Leo Tolstoy's Short Stories",
+  "subject": "RUSS",
+  "catalog_number": "190",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2839",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "V. Proskurina",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "V. Proskurina"
+  ],
+  "scraped_at": "2026-04-20T20:49:02.549Z"
+}

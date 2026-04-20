@@ -1,0 +1,111 @@
+{
+  "course_code": "ENVS 399R",
+  "course_title": "Intro to Independent Research",
+  "subject": "ENVS",
+  "catalog_number": "399R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6332",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "G. Vazquez Prokopec",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6395",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "E. Saikawa",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6516",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "T. Gillespie",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6526",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "Martin/Page",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6580",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "D. Civitello",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6622",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "X. Huang",
+      "enrollment_status": "Closed",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 6,
+    "open": 3,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Civitello",
+    "E. Saikawa",
+    "G. Vazquez Prokopec",
+    "Martin/Page",
+    "T. Gillespie",
+    "X. Huang"
+  ],
+  "scraped_at": "2026-04-20T20:47:59.641Z"
+}

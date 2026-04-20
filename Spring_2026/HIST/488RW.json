@@ -1,0 +1,67 @@
+{
+  "course_code": "HIST 488RW",
+  "course_title": "Jr./Sr. Colloquium: U.S.: Slavery & the Archive",
+  "subject": "HIST",
+  "catalog_number": "488RW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3865",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "M. Montalvo",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-3:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3866",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "C. Suddler",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 1-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Suddler",
+    "M. Montalvo"
+  ],
+  "scraped_at": "2026-04-20T20:48:11.186Z"
+}

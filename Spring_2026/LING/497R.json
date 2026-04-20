@@ -1,0 +1,55 @@
+{
+  "course_code": "LING 497R",
+  "course_title": "Directed Research",
+  "subject": "LING",
+  "catalog_number": "497R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6299",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "Y. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6604",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "D. Walter",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Walter",
+    "Y. Kim"
+  ],
+  "scraped_at": "2026-04-20T20:48:27.758Z"
+}

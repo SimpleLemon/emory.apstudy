@@ -1,0 +1,80 @@
+{
+  "course_code": "BUS 500",
+  "course_title": "Goizueta IMPACT",
+  "subject": "BUS",
+  "catalog_number": "500",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3502",
+      "section_number": "2190",
+      "schedule_type": "LEC",
+      "instructor": "S. Turner",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3503",
+      "section_number": "2690",
+      "schedule_type": "LEC",
+      "instructor": "S. Turner",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3504",
+      "section_number": "4401",
+      "schedule_type": "LEC",
+      "instructor": "J. Andrle",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "J. Andrle",
+    "S. Turner"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.756Z"
+}

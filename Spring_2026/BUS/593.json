@@ -1,0 +1,76 @@
+{
+  "course_code": "BUS 593",
+  "course_title": "Tech Trends and Transformation",
+  "subject": "BUS",
+  "catalog_number": "593",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-03-17",
+    "end": "2026-04-23"
+  },
+  "sections": [
+    {
+      "crn": "3620",
+      "section_number": "3201",
+      "schedule_type": "LEC",
+      "instructor": "T. Balch",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3621",
+      "section_number": "3202",
+      "schedule_type": "LEC",
+      "instructor": "T. Balch",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 2:30-3:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1545"
+          },
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1545"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 2,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Balch"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.758Z"
+}

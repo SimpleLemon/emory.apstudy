@@ -1,0 +1,209 @@
+{
+  "course_code": "HIST 799R",
+  "course_title": "Advanced Research",
+  "subject": "HIST",
+  "catalog_number": "799R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5546",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "T. Andrade",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5547",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "Candido/Crais",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5548",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "Candido/Rogers",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5549",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "D. LaChance",
+      "enrollment_status": "Open",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5550",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "M. Lowery",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5551",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "J. Miller",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5552",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "G. Pandey",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5553",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "T. Rogers",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5554",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "C. Suddler",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5604",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "B. Vick",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5607",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "J. Ward",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5608",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "Y. Yannakakis",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5636",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "Ward/Dudziak",
+      "enrollment_status": "Closed",
+      "enrollment_count": "13",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 13,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 13,
+    "open": 1,
+    "closed": 12,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Vick",
+    "C. Suddler",
+    "Candido/Crais",
+    "Candido/Rogers",
+    "D. LaChance",
+    "G. Pandey",
+    "J. Miller",
+    "J. Ward",
+    "M. Lowery",
+    "T. Andrade",
+    "T. Rogers",
+    "Ward/Dudziak",
+    "Y. Yannakakis"
+  ],
+  "scraped_at": "2026-04-20T20:48:11.190Z"
+}

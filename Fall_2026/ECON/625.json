@@ -1,0 +1,92 @@
+{
+  "course_code": "ECON 625",
+  "course_title": "Quantitative Methods (Ph.D.) I",
+  "subject": "ECON",
+  "catalog_number": "625",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-10",
+    "end": "2026-08-25"
+  },
+  "sections": [
+    {
+      "crn": "4399",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "D. Levy",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWThF 9a-1p; MTWThF 2-4p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1300"
+          },
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1300"
+          },
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1300"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1300"
+          },
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1300"
+          },
+          {
+            "day": "Mon",
+            "start": "1400",
+            "end": "1600"
+          },
+          {
+            "day": "Tue",
+            "start": "1400",
+            "end": "1600"
+          },
+          {
+            "day": "Wed",
+            "start": "1400",
+            "end": "1600"
+          },
+          {
+            "day": "Thu",
+            "start": "1400",
+            "end": "1600"
+          },
+          {
+            "day": "Fri",
+            "start": "1400",
+            "end": "1600"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Levy"
+  ],
+  "scraped_at": "2026-04-20T20:50:38.316Z"
+}

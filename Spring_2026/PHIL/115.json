@@ -1,0 +1,82 @@
+{
+  "course_code": "PHIL 115",
+  "course_title": "Introduction to Ethics",
+  "subject": "PHIL",
+  "catalog_number": "115",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1914",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Lysaker/Imran",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1992",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "D. Westbrook",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MWF 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1220"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1220"
+          },
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 2
+  },
+  "instructors_unique": [
+    "D. Westbrook",
+    "Lysaker/Imran"
+  ],
+  "scraped_at": "2026-04-20T20:48:47.555Z"
+}

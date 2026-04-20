@@ -1,0 +1,112 @@
+{
+  "course_code": "ANT 201",
+  "course_title": "Concepts And Methods in Biol Anth",
+  "subject": "ANT",
+  "catalog_number": "201",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2741",
+      "section_number": "L1",
+      "schedule_type": "LAB",
+      "instructor": "Broehl/Vieira dos Santos Hauskrecht",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 9-11a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1100"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1841",
+      "section_number": "L2",
+      "schedule_type": "LAB",
+      "instructor": "Broehl/Kesserwani",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-2p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1400"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1842",
+      "section_number": "L3",
+      "schedule_type": "LAB",
+      "instructor": "Broehl/Kurilla",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-11a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1100"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1839",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "K. Broehl",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 10-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 1,
+    "labs": 3,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Broehl/Kesserwani",
+    "Broehl/Kurilla",
+    "Broehl/Vieira dos Santos Hauskrecht",
+    "K. Broehl"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.243Z"
+}

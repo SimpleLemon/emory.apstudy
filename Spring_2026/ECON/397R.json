@@ -1,0 +1,195 @@
+{
+  "course_code": "ECON 397R",
+  "course_title": "Directed Reading In Economics",
+  "subject": "ECON",
+  "catalog_number": "397R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6159",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "Y. Wang",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6193",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "F. Mandelman",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6197",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "J. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6284",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "T. Zha",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6293",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "S. Banerjee",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6344",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "S. Wunderly",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6385",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "L. Xu",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6541",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "M. Ayar",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6542",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "E. Antoniadou",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6620",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "K. Robinson",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6631",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "K. Lanier",
+      "enrollment_status": "Open",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6709",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "C. Fohlin",
+      "enrollment_status": "Closed",
+      "enrollment_count": "12",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 12,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 12,
+    "open": 11,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Fohlin",
+    "E. Antoniadou",
+    "F. Mandelman",
+    "J. Kim",
+    "K. Lanier",
+    "K. Robinson",
+    "L. Xu",
+    "M. Ayar",
+    "S. Banerjee",
+    "S. Wunderly",
+    "T. Zha",
+    "Y. Wang"
+  ],
+  "scraped_at": "2026-04-20T20:47:54.570Z"
+}

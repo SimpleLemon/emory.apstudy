@@ -1,0 +1,167 @@
+{
+  "course_code": "ANT 799R",
+  "course_title": "Dissertation Research",
+  "subject": "ANT",
+  "catalog_number": "799R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6051",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "Ozawa-de Silva/Phillips",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6052",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "M. Benitez",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6053",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "Lonsdorf/Benitez",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6054",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "Phillips/Sterk",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6055",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "M. Peletz",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6056",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "Nugent/Holsey",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6057",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "Knauft/Mulla",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6058",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "Phillips/Hall-Clifford",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6059",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "B. Knauft",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6060",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "A. Grimshaw",
+      "enrollment_status": "Open",
+      "enrollment_count": "10",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 10,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 10,
+    "open": 10,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Grimshaw",
+    "B. Knauft",
+    "Knauft/Mulla",
+    "Lonsdorf/Benitez",
+    "M. Benitez",
+    "M. Peletz",
+    "Nugent/Holsey",
+    "Ozawa-de Silva/Phillips",
+    "Phillips/Hall-Clifford",
+    "Phillips/Sterk"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.258Z"
+}

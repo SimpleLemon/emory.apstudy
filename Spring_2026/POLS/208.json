@@ -1,0 +1,112 @@
+{
+  "course_code": "POLS 208",
+  "course_title": "Research Design and Methods",
+  "subject": "POLS",
+  "catalog_number": "208",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3204",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "N. Bueno",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3205",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "Bueno/Li",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3207",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "Bueno/Lyu",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3208",
+      "section_number": "4",
+      "schedule_type": "DIS",
+      "instructor": "Bueno/Sylvia",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 3,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Bueno/Li",
+    "Bueno/Lyu",
+    "Bueno/Sylvia",
+    "N. Bueno"
+  ],
+  "scraped_at": "2026-04-20T20:48:52.590Z"
+}

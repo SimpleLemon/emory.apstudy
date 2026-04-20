@@ -1,0 +1,71 @@
+{
+  "course_code": "NRSG 511MN",
+  "course_title": "Pathophysiology for Professional Nurses: MN",
+  "subject": "NRSG",
+  "catalog_number": "511MN",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4213",
+      "section_number": "300",
+      "schedule_type": "LEC",
+      "instructor": "P. Landerfelt",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TW 10-11:20a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1120"
+          },
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1120"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5280",
+      "section_number": "301",
+      "schedule_type": "LEC",
+      "instructor": "P. Landerfelt",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 8:30-10:20a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "1020"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "P. Landerfelt"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.774Z"
+}

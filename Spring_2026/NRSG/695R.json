@@ -1,0 +1,68 @@
+{
+  "course_code": "NRSG 695R",
+  "course_title": "Clinical Directed Study: Acute Care Pediatric NP Prac",
+  "subject": "NRSG",
+  "catalog_number": "695R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6261",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "A. Brown",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6302",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "A. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6303",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "A. Lewis",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Brown",
+    "A. Lewis"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.782Z"
+}

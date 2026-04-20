@@ -1,0 +1,136 @@
+{
+  "course_code": "MUS 320R",
+  "course_title": "Applied Music: Majors: Strings",
+  "subject": "MUS",
+  "catalog_number": "320R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3415",
+      "section_number": "1",
+      "schedule_type": "MUS",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3417",
+      "section_number": "2",
+      "schedule_type": "MUS",
+      "instructor": "P. Bhasin",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3455",
+      "section_number": "3",
+      "schedule_type": "MUS",
+      "instructor": "G. Motley",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3458",
+      "section_number": "4",
+      "schedule_type": "MUS",
+      "instructor": "E. Cholakova",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3461",
+      "section_number": "5",
+      "schedule_type": "MUS",
+      "instructor": "Dinkins-Matthews/Cholakova",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3463",
+      "section_number": "6",
+      "schedule_type": "MUS",
+      "instructor": "B. Mamola",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3465",
+      "section_number": "7",
+      "schedule_type": "MUS",
+      "instructor": "B. Mamola",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3467",
+      "section_number": "8",
+      "schedule_type": "MUS",
+      "instructor": "E. Cholakova",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 8,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 8,
+    "open": 8,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "B. Mamola",
+    "Dinkins-Matthews/Cholakova",
+    "E. Cholakova",
+    "G. Motley",
+    "P. Bhasin"
+  ],
+  "scraped_at": "2026-04-20T20:51:19.609Z"
+}

@@ -1,0 +1,47 @@
+{
+  "course_code": "BIOL 385W",
+  "course_title": "Special Topics in Biology: Human as Drivers Evol. Change",
+  "subject": "BIOL",
+  "catalog_number": "385W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5611",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "L. van Holstein",
+      "enrollment_status": "Closed",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "L. van Holstein"
+  ],
+  "scraped_at": "2026-04-20T20:47:42.870Z"
+}

@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 469D",
+  "course_title": "Mental Health Nursing",
+  "subject": "NRSG",
+  "catalog_number": "469D",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-03-16",
+    "end": "2026-05-06"
+  },
+  "sections": [
+    {
+      "crn": "4154",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "J. Todd",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 12:30-2:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1230",
+            "end": "1430"
+          },
+          {
+            "day": "Thu",
+            "start": "1230",
+            "end": "1430"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Todd"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.765Z"
+}

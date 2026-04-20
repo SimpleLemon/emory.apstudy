@@ -1,0 +1,55 @@
+{
+  "course_code": "MATH 497R",
+  "course_title": "Directed Research",
+  "subject": "MATH",
+  "catalog_number": "497R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6426",
+      "section_number": "27",
+      "schedule_type": "RSC",
+      "instructor": "Y. Xi",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6540",
+      "section_number": "28",
+      "schedule_type": "RSC",
+      "instructor": "Veneziani/De Cecco, MD/PhD",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Veneziani/De Cecco, MD/PhD",
+    "Y. Xi"
+  ],
+  "scraped_at": "2026-04-20T20:48:29.471Z"
+}

@@ -1,0 +1,100 @@
+{
+  "course_code": "CHEM 300L",
+  "course_title": "Analytical Tools and Techniques",
+  "subject": "CHEM",
+  "catalog_number": "300L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3254",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "R. Himes",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; W 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Wed",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3255",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "R. Himes",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; Th 1-3:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3256",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "R. Himes",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 1-2:15p; F 1:30-4:15p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Fri",
+            "start": "1330",
+            "end": "1615"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 3,
+    "discussions": 0,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 3
+  },
+  "instructors_unique": [
+    "R. Himes"
+  ],
+  "scraped_at": "2026-04-20T20:50:30.046Z"
+}

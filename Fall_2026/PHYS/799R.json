@@ -1,0 +1,335 @@
+{
+  "course_code": "PHYS 799R",
+  "course_title": "Advanced Research (Post- Candidacy)",
+  "subject": "PHYS",
+  "catalog_number": "799R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1448",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "H. Harutyunyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1459",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "J. Rieser",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1463",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "S. Shekhar",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1464",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "N. Vega",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1465",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "M. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1466",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "D. Sussman",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1467",
+      "section_number": "7",
+      "schedule_type": "SUP",
+      "instructor": "R. Ribeiro",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1468",
+      "section_number": "8",
+      "schedule_type": "SUP",
+      "instructor": "K. Salaita",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1501",
+      "section_number": "9",
+      "schedule_type": "SUP",
+      "instructor": "C. Roth",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1449",
+      "section_number": "10",
+      "schedule_type": "SUP",
+      "instructor": "S. Urazhdin",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1450",
+      "section_number": "11",
+      "schedule_type": "SUP",
+      "instructor": "K. Warncke",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1451",
+      "section_number": "12",
+      "schedule_type": "SUP",
+      "instructor": "J. Burton",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1452",
+      "section_number": "13",
+      "schedule_type": "SUP",
+      "instructor": "E. Weeks",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1453",
+      "section_number": "14",
+      "schedule_type": "SUP",
+      "instructor": "L. Santos",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1454",
+      "section_number": "15",
+      "schedule_type": "SUP",
+      "instructor": "S. Boettcher",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1455",
+      "section_number": "16",
+      "schedule_type": "SUP",
+      "instructor": "W. Benalcazar",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1456",
+      "section_number": "17",
+      "schedule_type": "SUP",
+      "instructor": "T. Can",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1457",
+      "section_number": "18",
+      "schedule_type": "SUP",
+      "instructor": "I. Nemenman",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1458",
+      "section_number": "19",
+      "schedule_type": "SUP",
+      "instructor": "K. Davis",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1460",
+      "section_number": "20",
+      "schedule_type": "SUP",
+      "instructor": "G. Berman",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1461",
+      "section_number": "21",
+      "schedule_type": "SUP",
+      "instructor": "J. Lin",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1462",
+      "section_number": "22",
+      "schedule_type": "SUP",
+      "instructor": "D. Weissman",
+      "enrollment_status": "Open",
+      "enrollment_count": "22",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 22,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 22,
+    "open": 22,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Roth",
+    "D. Sussman",
+    "D. Weissman",
+    "E. Weeks",
+    "G. Berman",
+    "H. Harutyunyan",
+    "I. Nemenman",
+    "J. Burton",
+    "J. Lin",
+    "J. Rieser",
+    "K. Davis",
+    "K. Salaita",
+    "K. Warncke",
+    "L. Santos",
+    "M. Kim",
+    "N. Vega",
+    "R. Ribeiro",
+    "S. Boettcher",
+    "S. Shekhar",
+    "S. Urazhdin",
+    "T. Can",
+    "W. Benalcazar"
+  ],
+  "scraped_at": "2026-04-20T20:51:32.848Z"
+}

@@ -1,0 +1,127 @@
+{
+  "course_code": "ENG 789",
+  "course_title": "Special Topics In Literature: Novel Theory",
+  "subject": "ENG",
+  "catalog_number": "789",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2483",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "E. Davenport",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-3:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2484",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "E. Goodstein",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-3:45p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1545"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2485",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "Klein/Salter",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4008",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "G. Bennington",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-4p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5404",
+      "section_number": "5",
+      "schedule_type": "SEM",
+      "instructor": "S. Gagliardi",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Davenport",
+    "E. Goodstein",
+    "G. Bennington",
+    "Klein/Salter",
+    "S. Gagliardi"
+  ],
+  "scraped_at": "2026-04-20T20:50:41.629Z"
+}

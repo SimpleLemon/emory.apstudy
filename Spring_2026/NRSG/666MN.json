@@ -1,0 +1,54 @@
+{
+  "course_code": "NRSG 666MN",
+  "course_title": "Pathway to Practice Practicum: MN",
+  "subject": "NRSG",
+  "catalog_number": "666MN",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-03-04"
+  },
+  "sections": [
+    {
+      "crn": "4255",
+      "section_number": "301",
+      "schedule_type": "CLN",
+      "instructor": "L. Wands",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4256",
+      "section_number": "302",
+      "schedule_type": "CLN",
+      "instructor": "L. Wands",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "L. Wands"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.781Z"
+}

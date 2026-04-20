@@ -1,0 +1,111 @@
+{
+  "course_code": "CS 597R",
+  "course_title": "Directed Study",
+  "subject": "CS",
+  "catalog_number": "597R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5684",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "D. Williamson",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5931",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "A. Ismail",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6069",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "J. Varghese",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6098",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Ho",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6627",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "A. Madabhushi",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6633",
+      "section_number": "6",
+      "schedule_type": "SUP",
+      "instructor": "X. Yang",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 6,
+    "open": 6,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Ismail",
+    "A. Madabhushi",
+    "D. Williamson",
+    "J. Ho",
+    "J. Varghese",
+    "X. Yang"
+  ],
+  "scraped_at": "2026-04-20T20:47:51.247Z"
+}

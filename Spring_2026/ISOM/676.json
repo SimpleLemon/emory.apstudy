@@ -1,0 +1,66 @@
+{
+  "course_code": "ISOM 676",
+  "course_title": "Machine Learning & AI at Scale",
+  "subject": "ISOM",
+  "catalog_number": "676",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "3514",
+      "section_number": "4101",
+      "schedule_type": "LEC",
+      "instructor": "P. Adamopoulos",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 8:30-11:15a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "830",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3515",
+      "section_number": "4102",
+      "schedule_type": "LEC",
+      "instructor": "P. Adamopoulos",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 8:30-11:15a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "830",
+            "end": "1115"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "P. Adamopoulos"
+  ],
+  "scraped_at": "2026-04-20T20:49:19.133Z"
+}

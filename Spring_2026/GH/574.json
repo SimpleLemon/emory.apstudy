@@ -1,0 +1,67 @@
+{
+  "course_code": "GH 574",
+  "course_title": "Malaria Prevention, Control & Treatment",
+  "subject": "GH",
+  "catalog_number": "574",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-05",
+    "end": "2026-01-10"
+  },
+  "sections": [
+    {
+      "crn": "1380",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Gutman",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MTWThF 9a-6p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "1800"
+          },
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1800"
+          },
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1800"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1800"
+          },
+          {
+            "day": "Fri",
+            "start": "900",
+            "end": "1800"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Gutman"
+  ],
+  "scraped_at": "2026-04-20T20:49:34.023Z"
+}

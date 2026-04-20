@@ -1,0 +1,72 @@
+{
+  "course_code": "PSYC 770R",
+  "course_title": "Topic Seminars: Psych: Applied Bayesian Statistics",
+  "subject": "PSYC",
+  "catalog_number": "770R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2308",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "V. Brown",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2382",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "Z. Delawalla",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 11a-12:30p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1100",
+            "end": "1230"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "V. Brown",
+    "Z. Delawalla"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.457Z"
+}

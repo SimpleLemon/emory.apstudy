@@ -1,0 +1,97 @@
+{
+  "course_code": "PSYC 498R",
+  "course_title": "Directed Reading",
+  "subject": "PSYC",
+  "catalog_number": "498R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2061",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "P. Palmer",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6492",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "A. Kazama",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6503",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "B. Yamasaki",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6564",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "E. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6630",
+      "section_number": "5",
+      "schedule_type": "SUP",
+      "instructor": "E. Johnson",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Kazama",
+    "B. Yamasaki",
+    "E. Johnson",
+    "E. Kim",
+    "P. Palmer"
+  ],
+  "scraped_at": "2026-04-20T20:48:55.902Z"
+}

@@ -1,0 +1,95 @@
+{
+  "course_code": "BIOL 236L",
+  "course_title": "Human Anatomy & Physiology I with Lab",
+  "subject": "BIOL",
+  "catalog_number": "236L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1665",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Bou Dagher",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 8:30-9:45a; T 11:30a-12:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Thu",
+            "start": "830",
+            "end": "945"
+          },
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1230"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1667",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "J. Bou Dagher",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 10a-12p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1000",
+            "end": "1200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3098",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "J. Bou Dagher",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 11:30a-1:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1330"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Bou Dagher"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.627Z"
+}

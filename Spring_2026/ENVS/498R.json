@@ -1,0 +1,55 @@
+{
+  "course_code": "ENVS 498R",
+  "course_title": "Individual Directed Reading",
+  "subject": "ENVS",
+  "catalog_number": "498R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6582",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "J. Clennon",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6639",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "M. Mucioki",
+      "enrollment_status": "Closed",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 1,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "J. Clennon",
+    "M. Mucioki"
+  ],
+  "scraped_at": "2026-04-20T20:47:59.645Z"
+}

@@ -1,0 +1,67 @@
+{
+  "course_code": "WGS 730R",
+  "course_title": "Special Topics: Women, Gender, & Sexuality Studies: Introduction to Derrida",
+  "subject": "WGS",
+  "catalog_number": "730R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "4009",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "G. Bennington",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-4p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5374",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "J. Montlouis-Gabriel",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 1-4p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1600"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "G. Bennington",
+    "J. Montlouis-Gabriel"
+  ],
+  "scraped_at": "2026-04-20T20:51:54.473Z"
+}

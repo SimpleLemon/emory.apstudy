@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 475D",
+  "course_title": "Working with Vulnerable Populations Globally, Regionally, and Locally",
+  "subject": "NRSG",
+  "catalog_number": "475D",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-03-04"
+  },
+  "sections": [
+    {
+      "crn": "4160",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Haynes Ferere",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 9a-12p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1200"
+          },
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "1200"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Haynes Ferere"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.768Z"
+}

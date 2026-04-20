@@ -1,0 +1,66 @@
+{
+  "course_code": "IBS 500R",
+  "course_title": "Current Topics In Bioscience",
+  "subject": "IBS",
+  "catalog_number": "500R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5359",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 5:30-6:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1730",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5360",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-5p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1700"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Team"
+  ],
+  "scraped_at": "2026-04-20T21:52:17.276Z"
+}

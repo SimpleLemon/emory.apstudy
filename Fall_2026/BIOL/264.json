@@ -1,0 +1,109 @@
+{
+  "course_code": "BIOL 264",
+  "course_title": "Genetics: A Human Perspective",
+  "subject": "BIOL",
+  "catalog_number": "264",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1670",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "M. Cole",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1835",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "M. Cole",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-1:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2950",
+      "section_number": "4",
+      "schedule_type": "DIS",
+      "instructor": "M. Cole",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2952",
+      "section_number": "5",
+      "schedule_type": "DIS",
+      "instructor": "M. Cole",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-1:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 3,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 4
+  },
+  "instructors_unique": [
+    "M. Cole"
+  ],
+  "scraped_at": "2026-04-20T20:50:26.634Z"
+}

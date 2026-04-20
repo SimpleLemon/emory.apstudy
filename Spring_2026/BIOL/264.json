@@ -1,0 +1,109 @@
+{
+  "course_code": "BIOL 264",
+  "course_title": "Genetics: A Human Perspective",
+  "subject": "BIOL",
+  "catalog_number": "264",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1652",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "L. Rieder",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2599",
+      "section_number": "2",
+      "schedule_type": "DIS",
+      "instructor": "L. Rieder",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2600",
+      "section_number": "3",
+      "schedule_type": "DIS",
+      "instructor": "L. Rieder",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-1:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2601",
+      "section_number": "4",
+      "schedule_type": "DIS",
+      "instructor": "L. Rieder",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-3:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1520"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 3,
+    "other": 0,
+    "open": 0,
+    "closed": 0,
+    "waitlisted": 4
+  },
+  "instructors_unique": [
+    "L. Rieder"
+  ],
+  "scraped_at": "2026-04-20T20:47:42.867Z"
+}

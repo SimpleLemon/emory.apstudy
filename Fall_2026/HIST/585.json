@@ -1,0 +1,127 @@
+{
+  "course_code": "HIST 585",
+  "course_title": "Special Topics in History: European Borderlands",
+  "subject": "HIST",
+  "catalog_number": "585",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2601",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "Eckert/Payne",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1730"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2604",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "L. Nenzi",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9a-12p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2608",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "C. Suh",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:30p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1730"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2610",
+      "section_number": "4",
+      "schedule_type": "SEM",
+      "instructor": "J. Ward",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9a-12p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "1200"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4477",
+      "section_number": "5",
+      "schedule_type": "SEM",
+      "instructor": "W. Rucker",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9a-12p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "1200"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 5,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Suh",
+    "Eckert/Payne",
+    "J. Ward",
+    "L. Nenzi",
+    "W. Rucker"
+  ],
+  "scraped_at": "2026-04-20T20:50:54.878Z"
+}

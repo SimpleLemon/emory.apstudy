@@ -1,0 +1,47 @@
+{
+  "course_code": "ECON 499R",
+  "course_title": "Undergraduate Research in Economics",
+  "subject": "ECON",
+  "catalog_number": "499R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3178",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "Fohlin/Cherribi",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 12-2:30p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1200",
+            "end": "1430"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Fohlin/Cherribi"
+  ],
+  "scraped_at": "2026-04-20T20:50:38.314Z"
+}

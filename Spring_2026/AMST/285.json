@@ -1,0 +1,102 @@
+{
+  "course_code": "AMST 285",
+  "course_title": "Special Topics: American Questions: Making of Mod Am:US Since 1877",
+  "subject": "AMST",
+  "catalog_number": "285",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4434",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "P. Allitt",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 10-11:15a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Thu",
+            "start": "1000",
+            "end": "1115"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4439",
+      "section_number": "2",
+      "schedule_type": "SEM",
+      "instructor": "LaChance/Prude",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 4-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5428",
+      "section_number": "3",
+      "schedule_type": "SEM",
+      "instructor": "I. Goh",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 1-2:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "I. Goh",
+    "LaChance/Prude",
+    "P. Allitt"
+  ],
+  "scraped_at": "2026-04-20T20:47:34.612Z"
+}

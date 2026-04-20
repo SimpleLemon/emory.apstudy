@@ -1,0 +1,68 @@
+{
+  "course_code": "THEA 497R",
+  "course_title": "Directed Research in Theater",
+  "subject": "THEA",
+  "catalog_number": "497R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2619",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "M. Evenden",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2622",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "M. Evenden",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5511",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "S. Culpepper",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "M. Evenden",
+    "S. Culpepper"
+  ],
+  "scraped_at": "2026-04-20T20:51:51.087Z"
+}

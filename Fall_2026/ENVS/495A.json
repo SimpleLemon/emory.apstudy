@@ -1,0 +1,97 @@
+{
+  "course_code": "ENVS 495A",
+  "course_title": "Honors Research",
+  "subject": "ENVS",
+  "catalog_number": "495A",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5365",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "J. Ajibade",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5371",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "T. Gillespie",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5422",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "G. Vazquez Prokopec",
+      "enrollment_status": "Closed",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5513",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "A. Avramov",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5669",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "E. Saikawa",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 5,
+    "open": 2,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Avramov",
+    "E. Saikawa",
+    "G. Vazquez Prokopec",
+    "J. Ajibade",
+    "T. Gillespie"
+  ],
+  "scraped_at": "2026-04-20T20:50:43.287Z"
+}

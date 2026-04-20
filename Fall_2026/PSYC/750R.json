@@ -1,0 +1,68 @@
+{
+  "course_code": "PSYC 750R",
+  "course_title": "Clinical Supervision: Psych Center Practicum",
+  "subject": "PSYC",
+  "catalog_number": "750R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2299",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "Z. Delawalla",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2300",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "Z. Delawalla",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4419",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "H. Trotman",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 3,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "H. Trotman",
+    "Z. Delawalla"
+  ],
+  "scraped_at": "2026-04-20T20:51:39.457Z"
+}

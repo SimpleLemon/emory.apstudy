@@ -1,0 +1,85 @@
+{
+  "course_code": "FIN 622",
+  "course_title": "Doing Deals-Private Equity",
+  "subject": "FIN",
+  "catalog_number": "622",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "5460",
+      "section_number": "3282",
+      "schedule_type": "LEC",
+      "instructor": "K. Crowley",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-6:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5461",
+      "section_number": "4182",
+      "schedule_type": "LEC",
+      "instructor": "K. Crowley",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-6:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1830"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5462",
+      "section_number": "4282",
+      "schedule_type": "LEC",
+      "instructor": "K. Crowley",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-6:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1830"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 3,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "K. Crowley"
+  ],
+  "scraped_at": "2026-04-20T20:52:01.047Z"
+}

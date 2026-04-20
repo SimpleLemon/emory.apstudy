@@ -1,0 +1,72 @@
+{
+  "course_code": "MATH 276",
+  "course_title": "Honors Vector Calculus",
+  "subject": "MATH",
+  "catalog_number": "276",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2752",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "L. Nurbekyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5516",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "Nurbekyan/Sureshkumar",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11:30a-12:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1130",
+            "end": "1220"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 1,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "L. Nurbekyan",
+    "Nurbekyan/Sureshkumar"
+  ],
+  "scraped_at": "2026-04-20T20:48:29.463Z"
+}

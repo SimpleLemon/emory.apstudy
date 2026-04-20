@@ -1,0 +1,90 @@
+{
+  "course_code": "PHYS 116",
+  "course_title": "Intro Astronomy W/Lab",
+  "subject": "PHYS",
+  "catalog_number": "116",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2116",
+      "section_number": "LAB1",
+      "schedule_type": "LAB",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2117",
+      "section_number": "LAB2",
+      "schedule_type": "LAB",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10a-12:45p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1387",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Batiste/Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 3,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Batiste/Bans"
+  ],
+  "scraped_at": "2026-04-20T20:51:32.834Z"
+}

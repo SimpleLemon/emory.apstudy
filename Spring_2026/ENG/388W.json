@@ -1,0 +1,72 @@
+{
+  "course_code": "ENG 388W",
+  "course_title": "Topics in Lit. & Environment: Ecological and Climate Fiction",
+  "subject": "ENG",
+  "catalog_number": "388W",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2759",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "A. Sahni",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 5:30-6:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1730",
+            "end": "1845"
+          },
+          {
+            "day": "Wed",
+            "start": "1730",
+            "end": "1845"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2761",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "M. Magloire",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 2:30-5:15p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1430",
+            "end": "1715"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Sahni",
+    "M. Magloire"
+  ],
+  "scraped_at": "2026-04-20T20:47:58.001Z"
+}

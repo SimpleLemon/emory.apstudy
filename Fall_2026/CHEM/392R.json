@@ -1,0 +1,134 @@
+{
+  "course_code": "CHEM 392R",
+  "course_title": "Peer-Led Learning",
+  "subject": "CHEM",
+  "catalog_number": "392R",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3257",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "T. McGill",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3258",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "M. Weinschenk",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1-1:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1300",
+            "end": "1350"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3259",
+      "section_number": "3",
+      "schedule_type": "LEC",
+      "instructor": "J. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3260",
+      "section_number": "4",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3261",
+      "section_number": "5",
+      "schedule_type": "LEC",
+      "instructor": "D. Mulford",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3262",
+      "section_number": "6",
+      "schedule_type": "LEC",
+      "instructor": "J. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3263",
+      "section_number": "7",
+      "schedule_type": "LEC",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 7,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 7,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Mulford",
+    "J. Smith",
+    "M. Weinschenk",
+    "T. McGill"
+  ],
+  "scraped_at": "2026-04-20T20:50:30.047Z"
+}

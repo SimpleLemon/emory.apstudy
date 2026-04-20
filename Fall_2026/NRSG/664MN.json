@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 664MN",
+  "course_title": "Care of the Person with Complex Health Conditions Clinical: MN",
+  "subject": "NRSG",
+  "catalog_number": "664MN",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-10-14"
+  },
+  "sections": [
+    {
+      "crn": "4677",
+      "section_number": "201",
+      "schedule_type": "CLN",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4678",
+      "section_number": "202",
+      "schedule_type": "CLN",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:52:09.348Z"
+}

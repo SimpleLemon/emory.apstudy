@@ -1,0 +1,83 @@
+{
+  "course_code": "ENVS 495BW",
+  "course_title": "Honors Research",
+  "subject": "ENVS",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5150",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "E. Saikawa",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5152",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "M. Mucioki",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5171",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "J. Ajibade",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5154",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "D. Civitello",
+      "enrollment_status": "Closed",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 1,
+    "closed": 3,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Civitello",
+    "E. Saikawa",
+    "J. Ajibade",
+    "M. Mucioki"
+  ],
+  "scraped_at": "2026-04-20T20:47:59.644Z"
+}

@@ -1,0 +1,47 @@
+{
+  "course_code": "ARTHIST 769",
+  "course_title": "Seminar:19th Century Art/Arch",
+  "subject": "ARTHIST",
+  "catalog_number": "769",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1763",
+      "section_number": "1",
+      "schedule_type": "SEM",
+      "instructor": "T. Cronan",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 5:30-8:15p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1730",
+            "end": "2015"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 1,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "T. Cronan"
+  ],
+  "scraped_at": "2026-04-20T21:51:57.795Z"
+}

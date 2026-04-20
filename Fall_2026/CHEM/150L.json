@@ -1,0 +1,194 @@
+{
+  "course_code": "CHEM 150L",
+  "course_title": "Structure and Properties Lab",
+  "subject": "CHEM",
+  "catalog_number": "150L",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2977",
+      "section_number": "1",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 1-2:15p; T 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Tue",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2984",
+      "section_number": "2",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4:30-5:45p; T 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Tue",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2986",
+      "section_number": "3",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-5:15p; W 5:15-7:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1715"
+          },
+          {
+            "day": "Wed",
+            "start": "1715",
+            "end": "1920"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2989",
+      "section_number": "4",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 1-2:15p; Th 2:15-4:20p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1300",
+            "end": "1415"
+          },
+          {
+            "day": "Thu",
+            "start": "1415",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2993",
+      "section_number": "5",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4:30-5:45p; Th 5:45-7:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1630",
+            "end": "1745"
+          },
+          {
+            "day": "Thu",
+            "start": "1745",
+            "end": "1950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3209",
+      "section_number": "6",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:15a; F 11:15a-1:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1115"
+          },
+          {
+            "day": "Fri",
+            "start": "1115",
+            "end": "1320"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2997",
+      "section_number": "7",
+      "schedule_type": "LAB",
+      "instructor": "Staff",
+      "enrollment_status": "Open",
+      "enrollment_count": "7",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 1:30-2:45p; F 2:45-4:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1330",
+            "end": "1445"
+          },
+          {
+            "day": "Fri",
+            "start": "1445",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 7,
+    "lectures": 0,
+    "labs": 7,
+    "discussions": 0,
+    "other": 0,
+    "open": 7,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [],
+  "scraped_at": "2026-04-20T20:50:30.040Z"
+}

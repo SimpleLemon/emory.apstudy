@@ -1,0 +1,83 @@
+{
+  "course_code": "FILM 495BW",
+  "course_title": "Honors Thesis",
+  "subject": "FILM",
+  "catalog_number": "495BW",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "5468",
+      "section_number": "1",
+      "schedule_type": "SUP",
+      "instructor": "M. Schreiber",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5469",
+      "section_number": "2",
+      "schedule_type": "SUP",
+      "instructor": "D. Rogers",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5470",
+      "section_number": "3",
+      "schedule_type": "SUP",
+      "instructor": "T. Ozdemir",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5471",
+      "section_number": "4",
+      "schedule_type": "SUP",
+      "instructor": "J. Pellerito",
+      "enrollment_status": "Open",
+      "enrollment_count": "4",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 4,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 4,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "D. Rogers",
+    "J. Pellerito",
+    "M. Schreiber",
+    "T. Ozdemir"
+  ],
+  "scraped_at": "2026-04-20T20:48:01.282Z"
+}

@@ -1,0 +1,60 @@
+{
+  "course_code": "BIOS 585",
+  "course_title": "Python Programming",
+  "subject": "BIOS",
+  "catalog_number": "585",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3513",
+      "section_number": "L1",
+      "schedule_type": "LAB",
+      "instructor": "R. Manyam",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Meets Online",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "3512",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "R. Manyam",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1150"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 1,
+    "labs": 1,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "R. Manyam"
+  ],
+  "scraped_at": "2026-04-20T20:52:11.004Z"
+}

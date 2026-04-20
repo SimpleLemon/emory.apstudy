@@ -1,0 +1,123 @@
+{
+  "course_code": "OAM 661",
+  "course_title": "Applied  Entrepreneurship",
+  "subject": "OAM",
+  "catalog_number": "661",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "3732",
+      "section_number": "2172",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3733",
+      "section_number": "2672",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "3734",
+      "section_number": "3272",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5432",
+      "section_number": "4172",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Open",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "5433",
+      "section_number": "4272",
+      "schedule_type": "LEC",
+      "instructor": "C. Goetz",
+      "enrollment_status": "Waitlist",
+      "enrollment_count": "5",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 6:30-9:30p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1830",
+            "end": "2130"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 5,
+    "lectures": 5,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 4,
+    "closed": 0,
+    "waitlisted": 1
+  },
+  "instructors_unique": [
+    "C. Goetz"
+  ],
+  "scraped_at": "2026-04-20T20:52:07.675Z"
+}

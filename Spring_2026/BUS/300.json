@@ -1,0 +1,688 @@
+{
+  "course_code": "BUS 300",
+  "course_title": "BBA Board Room",
+  "subject": "BUS",
+  "catalog_number": "300",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-26",
+    "end": "2026-03-23"
+  },
+  "sections": [
+    {
+      "crn": "4585",
+      "section_number": "1101",
+      "schedule_type": "LEC",
+      "instructor": "U. Rackliffe",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4586",
+      "section_number": "1102",
+      "schedule_type": "LEC",
+      "instructor": "M. Schmees",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4587",
+      "section_number": "1103",
+      "schedule_type": "LEC",
+      "instructor": "S. Cruz",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4584",
+      "section_number": "1104",
+      "schedule_type": "LEC",
+      "instructor": "J. Ross",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 9-9:50a",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4588",
+      "section_number": "1105",
+      "schedule_type": "LEC",
+      "instructor": "A. Gibbons",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4589",
+      "section_number": "1106",
+      "schedule_type": "LEC",
+      "instructor": "C. Frederick",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4590",
+      "section_number": "1107",
+      "schedule_type": "LEC",
+      "instructor": "J. Billetdeaux",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4591",
+      "section_number": "1108",
+      "schedule_type": "LEC",
+      "instructor": "C. Frederick",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "M 4-4:50p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4592",
+      "section_number": "1109",
+      "schedule_type": "LEC",
+      "instructor": "D. Clear",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "4593",
+      "section_number": "1110",
+      "schedule_type": "LEC",
+      "instructor": "B. Baker",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4594",
+      "section_number": "1111",
+      "schedule_type": "LEC",
+      "instructor": "R. Bobowski",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4595",
+      "section_number": "1112",
+      "schedule_type": "LEC",
+      "instructor": "D. Clear",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4596",
+      "section_number": "1113",
+      "schedule_type": "LEC",
+      "instructor": "N. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4597",
+      "section_number": "1114",
+      "schedule_type": "LEC",
+      "instructor": "N. Smith",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4598",
+      "section_number": "1115",
+      "schedule_type": "LEC",
+      "instructor": "A. Gibbons",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4599",
+      "section_number": "1116",
+      "schedule_type": "LEC",
+      "instructor": "A. Errore",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 4-4:50p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4600",
+      "section_number": "1117",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4604",
+      "section_number": "1118",
+      "schedule_type": "LEC",
+      "instructor": "D. Clear",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4605",
+      "section_number": "1119",
+      "schedule_type": "LEC",
+      "instructor": "W. Gu",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4606",
+      "section_number": "1120",
+      "schedule_type": "LEC",
+      "instructor": "C. Morales",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 9-9:50a",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4607",
+      "section_number": "1121",
+      "schedule_type": "LEC",
+      "instructor": "K. Timpone",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4608",
+      "section_number": "1122",
+      "schedule_type": "LEC",
+      "instructor": "M. Foronda",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4609",
+      "section_number": "1123",
+      "schedule_type": "LEC",
+      "instructor": "K. Timpone",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4610",
+      "section_number": "1124",
+      "schedule_type": "LEC",
+      "instructor": "A. Kays",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4611",
+      "section_number": "1125",
+      "schedule_type": "LEC",
+      "instructor": "R. Bobowski",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4612",
+      "section_number": "1126",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4613",
+      "section_number": "1127",
+      "schedule_type": "LEC",
+      "instructor": "J. Lowy",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4614",
+      "section_number": "1128",
+      "schedule_type": "LEC",
+      "instructor": "E. Bianchi",
+      "enrollment_status": "Closed",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 9-9:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4615",
+      "section_number": "1129",
+      "schedule_type": "LEC",
+      "instructor": "S. Leist",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4616",
+      "section_number": "1130",
+      "schedule_type": "LEC",
+      "instructor": "S. Leist",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4617",
+      "section_number": "1131",
+      "schedule_type": "LEC",
+      "instructor": "D. Clear",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4601",
+      "section_number": "1132",
+      "schedule_type": "LEC",
+      "instructor": "R. Bobowski",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Th 4-4:50p",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4602",
+      "section_number": "1133",
+      "schedule_type": "LEC",
+      "instructor": "S. Cruz",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 9-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "900",
+            "end": "950"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "4603",
+      "section_number": "1136",
+      "schedule_type": "LEC",
+      "instructor": "S. Savage",
+      "enrollment_status": "Open",
+      "enrollment_count": "34",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 4-4:50p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 34,
+    "lectures": 34,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 25,
+    "closed": 9,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Errore",
+    "A. Gibbons",
+    "A. Kays",
+    "B. Baker",
+    "C. Frederick",
+    "C. Morales",
+    "D. Clear",
+    "E. Bianchi",
+    "J. Billetdeaux",
+    "J. Lowy",
+    "J. Ross",
+    "K. Timpone",
+    "M. Foronda",
+    "M. Schmees",
+    "N. Smith",
+    "R. Bobowski",
+    "S. Cruz",
+    "S. Leist",
+    "S. Savage",
+    "U. Rackliffe",
+    "W. Gu"
+  ],
+  "scraped_at": "2026-04-20T20:49:15.750Z"
+}

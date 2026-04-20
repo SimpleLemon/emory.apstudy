@@ -1,0 +1,52 @@
+{
+  "course_code": "NRSG 631MN",
+  "course_title": "Reproductive Health & Gender Related Care: MN",
+  "subject": "NRSG",
+  "catalog_number": "631MN",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-12",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "4239",
+      "section_number": "400",
+      "schedule_type": "LEC",
+      "instructor": "S. Stevenson",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "ThF 10:30-11:50a",
+        "meetings": [
+          {
+            "day": "Thu",
+            "start": "1030",
+            "end": "1150"
+          },
+          {
+            "day": "Fri",
+            "start": "1030",
+            "end": "1150"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 1,
+    "labs": 0,
+    "discussions": 0,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "S. Stevenson"
+  ],
+  "scraped_at": "2026-04-20T20:49:25.779Z"
+}

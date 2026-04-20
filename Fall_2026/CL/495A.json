@@ -1,0 +1,55 @@
+{
+  "course_code": "CL 495A",
+  "course_title": "Honors Course",
+  "subject": "CL",
+  "catalog_number": "495A",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "1990",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "S. Blakely",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "5635",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "E. Master",
+      "enrollment_status": "Open",
+      "enrollment_count": "2",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 2,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 2,
+    "open": 2,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "E. Master",
+    "S. Blakely"
+  ],
+  "scraped_at": "2026-04-20T21:52:05.931Z"
+}

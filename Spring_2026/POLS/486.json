@@ -1,0 +1,41 @@
+{
+  "course_code": "POLS 486",
+  "course_title": "Washington Semester",
+  "subject": "POLS",
+  "catalog_number": "486",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "6401",
+      "section_number": "1",
+      "schedule_type": "DIS",
+      "instructor": "M. Baker",
+      "enrollment_status": "Open",
+      "enrollment_count": "1",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 1,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 1,
+    "other": 0,
+    "open": 1,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "M. Baker"
+  ],
+  "scraped_at": "2026-04-20T20:48:52.598Z"
+}

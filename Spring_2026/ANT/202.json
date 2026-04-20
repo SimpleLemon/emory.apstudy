@@ -1,0 +1,156 @@
+{
+  "course_code": "ANT 202",
+  "course_title": "Concepts and Methods in Cultural Anthropology",
+  "subject": "ANT",
+  "catalog_number": "202",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "1845",
+      "section_number": "D1",
+      "schedule_type": "DIS",
+      "instructor": "J. Abillama",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 10-10:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1000",
+            "end": "1050"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1846",
+      "section_number": "D2",
+      "schedule_type": "DIS",
+      "instructor": "R. K K",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 4-4:50p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1600",
+            "end": "1650"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1847",
+      "section_number": "D3",
+      "schedule_type": "DIS",
+      "instructor": "L. Hickman",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 11-11:50a",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1100",
+            "end": "1150"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1848",
+      "section_number": "D4",
+      "schedule_type": "DIS",
+      "instructor": "C. Paillot",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "F 2:30-3:20p",
+        "meetings": [
+          {
+            "day": "Fri",
+            "start": "1430",
+            "end": "1520"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1843",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "J. Glass",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "MW 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Mon",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Wed",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "1844",
+      "section_number": "2",
+      "schedule_type": "LEC",
+      "instructor": "J. Glass",
+      "enrollment_status": "Open",
+      "enrollment_count": "6",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "TTh 11:30a-12:45p",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "1130",
+            "end": "1245"
+          },
+          {
+            "day": "Thu",
+            "start": "1130",
+            "end": "1245"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 6,
+    "lectures": 2,
+    "labs": 0,
+    "discussions": 4,
+    "other": 0,
+    "open": 6,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "C. Paillot",
+    "J. Abillama",
+    "J. Glass",
+    "L. Hickman",
+    "R. K K"
+  ],
+  "scraped_at": "2026-04-20T20:47:36.244Z"
+}

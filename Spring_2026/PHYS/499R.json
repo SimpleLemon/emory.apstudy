@@ -1,0 +1,391 @@
+{
+  "course_code": "PHYS 499R",
+  "course_title": "Undergraduate Research",
+  "subject": "PHYS",
+  "catalog_number": "499R",
+  "term": "Spring_2026",
+  "srcdb": "5261",
+  "date_range": {
+    "start": "2026-01-13",
+    "end": "2026-04-27"
+  },
+  "sections": [
+    {
+      "crn": "2016",
+      "section_number": "1",
+      "schedule_type": "RSC",
+      "instructor": "A. Bans",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1734",
+      "section_number": "2",
+      "schedule_type": "RSC",
+      "instructor": "S. Urazhdin",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1949",
+      "section_number": "3",
+      "schedule_type": "RSC",
+      "instructor": "T. Bing",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1742",
+      "section_number": "4",
+      "schedule_type": "RSC",
+      "instructor": "C. Roth",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1950",
+      "section_number": "5",
+      "schedule_type": "RSC",
+      "instructor": "S. Shekhar",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1951",
+      "section_number": "6",
+      "schedule_type": "RSC",
+      "instructor": "J. Rieser",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1952",
+      "section_number": "7",
+      "schedule_type": "RSC",
+      "instructor": "Team",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1747",
+      "section_number": "8",
+      "schedule_type": "RSC",
+      "instructor": "S. Boettcher",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1953",
+      "section_number": "9",
+      "schedule_type": "RSC",
+      "instructor": "D. Weissman",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1928",
+      "section_number": "10",
+      "schedule_type": "RSC",
+      "instructor": "J. Brody",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1722",
+      "section_number": "11",
+      "schedule_type": "RSC",
+      "instructor": "E. Bonning",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1930",
+      "section_number": "12",
+      "schedule_type": "RSC",
+      "instructor": "A. Srivastava",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1932",
+      "section_number": "13",
+      "schedule_type": "RSC",
+      "instructor": "L. Santos",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1934",
+      "section_number": "14",
+      "schedule_type": "RSC",
+      "instructor": "K. Warncke",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1936",
+      "section_number": "15",
+      "schedule_type": "RSC",
+      "instructor": "K. Berland",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1938",
+      "section_number": "16",
+      "schedule_type": "RSC",
+      "instructor": "J. Lin",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1940",
+      "section_number": "17",
+      "schedule_type": "RSC",
+      "instructor": "T. Can",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "2017",
+      "section_number": "18",
+      "schedule_type": "RSC",
+      "instructor": "D. Sussman",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1731",
+      "section_number": "19",
+      "schedule_type": "RSC",
+      "instructor": "J. Burton",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1942",
+      "section_number": "20",
+      "schedule_type": "RSC",
+      "instructor": "H. Harutyunyan",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1944",
+      "section_number": "21",
+      "schedule_type": "RSC",
+      "instructor": "E. Weeks",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1945",
+      "section_number": "22",
+      "schedule_type": "RSC",
+      "instructor": "I. Nemenman",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1946",
+      "section_number": "23",
+      "schedule_type": "RSC",
+      "instructor": "W. Benalcazar",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1947",
+      "section_number": "24",
+      "schedule_type": "RSC",
+      "instructor": "M. Kim",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "1948",
+      "section_number": "25",
+      "schedule_type": "RSC",
+      "instructor": "G. Berman",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    },
+    {
+      "crn": "6335",
+      "section_number": "26",
+      "schedule_type": "RSC",
+      "instructor": "K. Davis",
+      "enrollment_status": "Open",
+      "enrollment_count": "26",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "Does Not Meet",
+        "meetings": []
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 26,
+    "lectures": 0,
+    "labs": 0,
+    "discussions": 0,
+    "other": 26,
+    "open": 26,
+    "closed": 0,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "A. Bans",
+    "A. Srivastava",
+    "C. Roth",
+    "D. Sussman",
+    "D. Weissman",
+    "E. Bonning",
+    "E. Weeks",
+    "G. Berman",
+    "H. Harutyunyan",
+    "I. Nemenman",
+    "J. Brody",
+    "J. Burton",
+    "J. Lin",
+    "J. Rieser",
+    "K. Berland",
+    "K. Davis",
+    "K. Warncke",
+    "L. Santos",
+    "M. Kim",
+    "S. Boettcher",
+    "S. Shekhar",
+    "S. Urazhdin",
+    "T. Bing",
+    "T. Can",
+    "Team",
+    "W. Benalcazar"
+  ],
+  "scraped_at": "2026-04-20T20:48:49.258Z"
+}

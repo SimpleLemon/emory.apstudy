@@ -1,0 +1,85 @@
+{
+  "course_code": "GH 532",
+  "course_title": "Quantitative Methods 2: Data Analysis",
+  "subject": "GH",
+  "catalog_number": "532",
+  "term": "Fall_2026",
+  "srcdb": "5269",
+  "date_range": {
+    "start": "2026-08-26",
+    "end": "2026-12-09"
+  },
+  "sections": [
+    {
+      "crn": "2249",
+      "section_number": "L1",
+      "schedule_type": "LAB",
+      "instructor": "Patel/Varghese",
+      "enrollment_status": "Closed",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 1-2:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1300",
+            "end": "1420"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2250",
+      "section_number": "L2",
+      "schedule_type": "LAB",
+      "instructor": "Patel/Varghese",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "W 3-4:20p",
+        "meetings": [
+          {
+            "day": "Wed",
+            "start": "1500",
+            "end": "1620"
+          }
+        ]
+      }
+    },
+    {
+      "crn": "2248",
+      "section_number": "1",
+      "schedule_type": "LEC",
+      "instructor": "Patel/Varghese",
+      "enrollment_status": "Open",
+      "enrollment_count": "3",
+      "is_cancelled": false,
+      "schedule": {
+        "display": "T 8:30-9:50a",
+        "meetings": [
+          {
+            "day": "Tue",
+            "start": "830",
+            "end": "950"
+          }
+        ]
+      }
+    }
+  ],
+  "section_summary": {
+    "total_sections": 3,
+    "lectures": 1,
+    "labs": 2,
+    "discussions": 0,
+    "other": 0,
+    "open": 2,
+    "closed": 1,
+    "waitlisted": 0
+  },
+  "instructors_unique": [
+    "Patel/Varghese"
+  ],
+  "scraped_at": "2026-04-20T20:52:17.627Z"
+}
