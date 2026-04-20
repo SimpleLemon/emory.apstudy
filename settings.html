@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Settings - Canvas.APStudy.org</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#1c2026",
+                        "on-tertiary": "#432c00",
+                        "secondary-fixed": "#d3e4ff",
+                        "on-surface-variant": "#c0c7d4",
+                        "primary-fixed-dim": "#a2c9ff",
+                        "tertiary-fixed": "#ffddaf",
+                        "on-secondary": "#163151",
+                        "on-tertiary-fixed": "#281800",
+                        "inverse-primary": "#0060aa",
+                        "surface-tint": "#a2c9ff",
+                        "secondary-container": "#2e4869",
+                        "outline": "#8b919d",
+                        "inverse-on-surface": "#2d3137",
+                        "surface": "#10141a",
+                        "surface-bright": "#353940",
+                        "surface-container-low": "#181c22",
+                        "on-secondary-container": "#9db7dd",
+                        "surface-container-high": "#262a31",
+                        "on-background": "#dfe2eb",
+                        "outline-variant": "#414752",
+                        "on-tertiary-fixed-variant": "#614000",
+                        "on-error": "#690005",
+                        "secondary-fixed-dim": "#aec8ef",
+                        "primary-container": "#58a6ff",
+                        "surface-variant": "#31353c",
+                        "surface-dim": "#10141a",
+                        "on-secondary-fixed-variant": "#2e4869",
+                        "tertiary-fixed-dim": "#ffba42",
+                        "inverse-surface": "#dfe2eb",
+                        "on-primary": "#00315c",
+                        "on-error-container": "#ffdad6",
+                        "on-tertiary-container": "#4f3400",
+                        "error": "#ffb4ab",
+                        "tertiary": "#ffba42",
+                        "on-surface": "#dfe2eb",
+                        "surface-container-highest": "#31353c",
+                        "primary": "#a2c9ff",
+                        "background": "#10141a",
+                        "on-primary-fixed-variant": "#004882",
+                        "on-primary-fixed": "#001c38",
+                        "primary-fixed": "#d3e4ff",
+                        "surface-container-lowest": "#0a0e14",
+                        "on-primary-container": "#003a6b",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed": "#001c38",
+                        "secondary": "#aec8ef",
+                        "tertiary-container": "#da9600"
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.25rem",
+                        lg: "0.5rem",
+                        xl: "0.75rem",
+                        full: "9999px"
+                    },
+                    fontFamily: {
+                        headline: ["Inter", "sans-serif"],
+                        body: ["Inter", "sans-serif"],
+                        label: ["Inter", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-[#1c2026]/60 backdrop-blur-md fixed top-0 w-full z-50 flex justify-between items-center h-16 px-8 shadow-2xl shadow-black/40 border-b border-[#181c22]">
+        <div class="flex items-center gap-4">
+            <span class="text-xl font-semibold tracking-tighter text-[#c0c7d4]">Canvas.APStudy.org</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <button class="text-[#c0c7d4]/60 hover:text-[#a2c9ff] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
+                <span class="material-symbols-outlined" data-icon="sync">sync</span>
+            </button>
+            <button class="text-[#a2c9ff] hover:bg-[#262a31] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
+                <span class="material-symbols-outlined" data-icon="settings">settings</span>
+            </button>
+            <button class="text-[#c0c7d4]/60 hover:text-[#a2c9ff] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
+                <span class="material-symbols-outlined" data-icon="logout">logout</span>
+            </button>
+            <div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden ml-2 border border-outline-variant/30">
+                <img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIfYSsGVwQhSKDisBejBzu2WjfUSy7ZvB6EuSniyEVL0AFAL-zPWMSUf7nY7dcreb3wFIGRN0FldnYUKwUD8biMdNGR7mQgOBdpWxWYeAOZ3T6RxewSCPkDsTNfT9wHiMcWitHbciCn4Rdm0e4jxbaEEd1UxWduW8n_MF_2DUm_MfIUs2TnGVWHOV7I9vPjdY_PQYLR9EDW4JqkFUaA3SeQRORrzX7nb7lO2JSgUCGjY36VsPPGZjED0Zc56B7JbjQhDVVIa6TIdY" />
+            </div>
+        </div>
+    </header>
+
+    <!-- Body Layout -->
+    <div class="flex flex-1 overflow-hidden pt-16">
+
+        <!-- Sidebar Navigation -->
+        <aside class="flex-col h-full py-8 gap-2 bg-[#181c22] w-64 hidden md:flex border-r border-[#1c2026]">
+            <div class="px-6 mb-8">
+                <h2 class="text-lg font-bold text-[#a2c9ff]">Settings</h2>
+                <p class="text-xs text-on-surface-variant mt-1">Canvas.APStudy</p>
+            </div>
+            <nav class="flex flex-col gap-1 w-full">
+                <a id="nav-account" onclick="switchTab('account')" class="nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer">
+                    <span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+                    Account & Data
+                </a>
+                <a id="nav-preferences" onclick="switchTab('preferences')" class="nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent">
+                    <span class="material-symbols-outlined" data-icon="tune">tune</span>
+                    Preferences
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16">
+            <div class="max-w-4xl mx-auto">
+
+                <!-- Mobile Tab Selector (visible on small screens) -->
+                <div class="flex gap-2 mb-8 md:hidden">
+                    <button onclick="switchTab('account')" class="mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-high text-primary font-medium text-sm" data-tab="account">Account & Data</button>
+                    <button onclick="switchTab('preferences')" class="mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-low text-on-surface-variant font-medium text-sm" data-tab="preferences">Preferences</button>
+                </div>
+
+                <!-- ===================== -->
+                <!-- ACCOUNT & DATA VIEW   -->
+                <!-- ===================== -->
+                <div id="view-account" class="space-y-12">
+                    <header class="mb-12">
+                        <h1 class="text-4xl font-headline font-semibold text-on-surface mb-2 tracking-tight">Account & Data</h1>
+                        <p class="text-lg text-on-surface-variant font-body">Manage your profile and Canvas data connection.</p>
+                    </header>
+
+                    <!-- Profile Information -->
+                    <section>
+                        <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-container" data-icon="person">person</span>
+                            Profile Information
+                        </h2>
+                        <div class="bg-surface-container p-8 rounded-2xl flex flex-col sm:flex-row items-center gap-8 shadow-2xl shadow-black/20">
+                            <div class="relative group">
+                                <div class="w-24 h-24 rounded-full overflow-hidden bg-surface-container-highest">
+                                    <img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCzfK2a_2-Fuyl26BJ3BiMy944o4bAuKsbg4fBQ01FBGwhVv92xOvI0ou19wjfwnvgw0WxvlJ6cfA1Y9XHowuJI_AU_HyP-lFkNe09PCxXG5dFE7jwqPqvS1kKLhdEfmvKufnu4R60_bfFfaksBj531C_vpXtUrgAg_O-sYgMFPzlh5WaT2Yxzwo-8LfQP8Ots6PbHq9zlEeaoHp1rGSk_ZJGBPtFwVMuuzu7LhGACsdgwLNppXiIoXOdap6-FPntDRAjdkxakCWjg" />
+                                </div>
+                                <button class="absolute inset-0 bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-on-surface text-sm font-medium">
+                                    Edit
+                                </button>
+                            </div>
+                            <div class="flex-1 space-y-4 w-full">
+                                <div>
+                                    <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-1 font-medium">Full Name</label>
+                                    <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-2.5 text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all font-body text-sm" readonly type="text" value="Alexander Wright" />
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <div class="flex-1">
+                                        <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-1 font-medium">Student ID</label>
+                                        <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-2.5 text-on-surface-variant focus:outline-none font-body text-sm cursor-not-allowed" disabled type="text" value="2049581" />
+                                    </div>
+                                    <div class="flex-1">
+                                        <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-1 font-medium">Email Address</label>
+                                        <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-2.5 text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all font-body text-sm" readonly type="email" value="a.wright@emory.edu" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Data Connection -->
+                    <section>
+                        <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-container" data-icon="cloud_sync">cloud_sync</span>
+                            Data Connection
+                        </h2>
+                        <div class="bg-surface-container p-8 rounded-2xl space-y-8 shadow-2xl shadow-black/20">
+                            <div>
+                                <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2 font-medium">Emory Canvas Calendar Link</label>
+                                <p class="text-sm text-on-surface-variant mb-3">Paste your ICS calendar link here to sync your schedule and assignments.</p>
+                                <div class="relative">
+                                    <input class="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg pl-10 pr-4 py-3 text-on-surface focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all font-body text-sm" placeholder="https://emory.instructure.com/feeds/calendars/..." type="text" />
+                                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-lg" data-icon="link">link</span>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] uppercase tracking-[0.05em] text-on-surface-variant mb-2 font-medium">Sync Frequency</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <label class="cursor-pointer">
+                                        <input class="peer sr-only" name="sync" type="radio" />
+                                        <div class="text-center px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface-variant peer-checked:bg-primary-container/10 peer-checked:border-primary peer-checked:text-primary transition-all text-sm font-medium">
+                                            Manual
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input checked class="peer sr-only" name="sync" type="radio" />
+                                        <div class="text-center px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface-variant peer-checked:bg-primary-container/10 peer-checked:border-primary peer-checked:text-primary transition-all text-sm font-medium">
+                                            Every 4 Hours
+                                        </div>
+                                    </label>
+                                    <label class="cursor-pointer">
+                                        <input class="peer sr-only" name="sync" type="radio" />
+                                        <div class="text-center px-4 py-3 rounded-lg bg-surface-container-low border border-outline-variant/20 text-on-surface-variant peer-checked:bg-primary-container/10 peer-checked:border-primary peer-checked:text-primary transition-all text-sm font-medium">
+                                            Daily
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-surface-container-low flex justify-end">
+                                <button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container px-6 py-2.5 rounded-lg font-medium text-sm hover:scale-[1.02] transition-transform shadow-lg shadow-primary/20">
+                                    Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <!-- ===================== -->
+                <!-- PREFERENCES VIEW      -->
+                <!-- ===================== -->
+                <div id="view-preferences" class="hidden space-y-12">
+                    <header class="mb-12">
+                        <h1 class="text-4xl font-headline font-semibold text-on-surface mb-2 tracking-tight">Preferences</h1>
+                        <p class="text-lg text-on-surface-variant font-body">Customize your environment and notification flow.</p>
+                    </header>
+
+                    <!-- Interface Theme -->
+                    <section>
+                        <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-container" data-icon="palette">palette</span>
+                            Interface Theme
+                        </h2>
+                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                            <!-- Obsidian Dark (Selected) -->
+                            <div class="bg-surface-container p-6 rounded-xl border border-primary/30 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container-high">
+                                <div class="absolute top-4 right-4 text-primary">
+                                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                </div>
+                                <div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4">
+                                    <span class="material-symbols-outlined text-on-surface" data-icon="dark_mode">dark_mode</span>
+                                </div>
+                                <h3 class="font-headline font-medium text-on-surface mb-1">Obsidian Dark</h3>
+                                <p class="text-sm text-on-surface-variant">Optimized for focus.</p>
+                            </div>
+                            <!-- Parchment Light -->
+                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center mb-4">
+                                    <span class="material-symbols-outlined text-on-surface-variant" data-icon="light_mode">light_mode</span>
+                                </div>
+                                <h3 class="font-headline font-medium text-on-surface mb-1">Parchment Light</h3>
+                                <p class="text-sm text-on-surface-variant">Classic reading mode.</p>
+                            </div>
+                            <!-- System Match -->
+                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center mb-4">
+                                    <span class="material-symbols-outlined text-on-surface-variant" data-icon="contrast">contrast</span>
+                                </div>
+                                <h3 class="font-headline font-medium text-on-surface mb-1">System Match</h3>
+                                <p class="text-sm text-on-surface-variant">Adapts to device.</p>
+                            </div>
+                            <!-- Emory Light -->
+                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-4 border border-[#012169]/20">
+                                    <span class="material-symbols-outlined text-[#012169]" data-icon="wb_sunny">wb_sunny</span>
+                                </div>
+                                <h3 class="font-headline font-medium text-on-surface mb-1">Emory Light</h3>
+                                <p class="text-sm text-on-surface-variant">University classic style.</p>
+                            </div>
+                            <!-- Emory Dark -->
+                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="w-12 h-12 rounded-full bg-[#012169] flex items-center justify-center mb-4">
+                                    <span class="material-symbols-outlined text-[#D4AF37]" data-icon="brightness_2">brightness_2</span>
+                                </div>
+                                <h3 class="font-headline font-medium text-on-surface mb-1">Emory Dark</h3>
+                                <p class="text-sm text-on-surface-variant">Midnight blue and gold.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Notifications -->
+                    <section>
+                        <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary-container" data-icon="notifications_active">notifications_active</span>
+                            Notifications
+                        </h2>
+                        <div class="bg-surface-container rounded-xl flex flex-col">
+                            <!-- Assignment Reminders -->
+                            <div class="flex items-center justify-between p-6">
+                                <div>
+                                    <h3 class="font-headline font-medium text-on-surface">Assignment Reminders</h3>
+                                    <p class="text-sm text-on-surface-variant mt-1">Alerts for upcoming deadlines (48h prior).</p>
+                                </div>
+                                <button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface bg-primary" role="switch" type="button">
+                                    <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow ring-0 transition duration-200 ease-in-out translate-x-5"></span>
+                                </button>
+                            </div>
+                            <!-- Grade Updates -->
+                            <div class="flex items-center justify-between p-6 bg-surface-container-low/50">
+                                <div>
+                                    <h3 class="font-headline font-medium text-on-surface">Grade Updates</h3>
+                                    <p class="text-sm text-on-surface-variant mt-1">Instant notification when a grade is posted.</p>
+                                </div>
+                                <button aria-checked="true" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface bg-primary" role="switch" type="button">
+                                    <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-primary shadow ring-0 transition duration-200 ease-in-out translate-x-5"></span>
+                                </button>
+                            </div>
+                            <!-- Weekly Digest -->
+                            <div class="flex items-center justify-between p-6">
+                                <div>
+                                    <h3 class="font-headline font-medium text-on-surface">Weekly Digest</h3>
+                                    <p class="text-sm text-on-surface-variant mt-1">Summary of course activity every Sunday.</p>
+                                </div>
+                                <button aria-checked="false" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-surface bg-surface-container-highest" role="switch" type="button">
+                                    <span aria-hidden="true" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-on-surface-variant shadow ring-0 transition duration-200 ease-in-out translate-x-0"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="mt-12 flex justify-end">
+                        <button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-medium px-6 py-2.5 rounded-lg hover:scale-[1.02] transition-transform duration-150 shadow-lg shadow-primary/20">
+                            Save Preferences
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-[#10141a] w-full py-12 border-t border-[#181c22]">
+        <div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-7xl mx-auto">
+            <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40">&copy; 2024 Canvas.APStudy.org. The Digital Monolith.</span>
+            <div class="flex gap-6 mt-4 md:mt-0">
+                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Support</a>
+                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Archive</a>
+                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Privacy</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Tab Switching Logic -->
+    <script>
+        function switchTab(tab) {
+            const viewAccount = document.getElementById('view-account');
+            const viewPreferences = document.getElementById('view-preferences');
+            const navAccount = document.getElementById('nav-account');
+            const navPreferences = document.getElementById('nav-preferences');
+
+            const activeClasses = ['bg-[#1c2026]', 'text-[#a2c9ff]', 'border-[#a2c9ff]'];
+            const inactiveClasses = ['text-[#c0c7d4]', 'opacity-70', 'border-transparent'];
+
+            if (tab === 'account') {
+                viewAccount.classList.remove('hidden');
+                viewPreferences.classList.add('hidden');
+
+                // Sidebar active states
+                navAccount.className = 'nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer';
+                navPreferences.className = 'nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
+            } else {
+                viewAccount.classList.add('hidden');
+                viewPreferences.classList.remove('hidden');
+
+                navPreferences.className = 'nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer';
+                navAccount.className = 'nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
+            }
+
+            // Mobile tabs
+            document.querySelectorAll('.mobile-tab').forEach(btn => {
+                if (btn.dataset.tab === tab) {
+                    btn.className = 'mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-high text-primary font-medium text-sm';
+                } else {
+                    btn.className = 'mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-low text-on-surface-variant font-medium text-sm';
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
