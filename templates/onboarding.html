@@ -36,12 +36,25 @@
     </main>
 
     <script>
+        const REDIRECT_DELAY_MS = 1000;
+
         document.getElementById("onboarding-form").addEventListener("submit", async (event) => {
             event.preventDefault();
             const status = document.getElementById("status");
             const button = document.getElementById("submit-button");
             const url = document.getElementById("canvas-feed-url").value.trim();
-            const isCanvasFeed = url.includes("emory.instructure.com/feeds/");
+            let parsedUrl;
+
+            try {
+                parsedUrl = new URL(url);
+            } catch (_error) {
+                status.textContent = "Please enter a valid URL.";
+                return;
+            }
+
+            const isCanvasFeed =
+                parsedUrl.hostname === "emory.instructure.com" &&
+                parsedUrl.pathname.includes("/feeds/");
 
             if (!isCanvasFeed) {
                 status.textContent = "Please enter a valid Emory Canvas feed URL.";
@@ -66,7 +79,7 @@
                 status.textContent = "Saved. Redirecting to dashboard...";
                 setTimeout(() => {
                     window.location.assign("/dashboard");
-                }, 900);
+                }, REDIRECT_DELAY_MS);
             } catch (error) {
                 status.textContent = error.message;
                 button.disabled = false;
