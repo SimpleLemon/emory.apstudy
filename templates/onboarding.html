@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+    <title>Onboarding - Emory University | APStudy</title>
+</head>
+<body class="bg-background text-on-surface min-h-screen font-body">
+    <main class="max-w-2xl mx-auto p-6 sm:p-10">
+        <h1 class="text-3xl font-semibold mb-2">Welcome, {{ user.name or user.email }}</h1>
+        <p class="text-on-surface-variant mb-6">
+            Add your Emory Canvas iCal feed to finish setup.
+        </p>
+
+        <form id="onboarding-form" class="space-y-4">
+            <label for="canvas-feed-url" class="block text-sm font-medium">Canvas iCal URL</label>
+            <input
+                id="canvas-feed-url"
+                type="url"
+                required
+                placeholder="https://emory.instructure.com/feeds/calendars/..."
+                class="w-full rounded-lg px-3 py-2 bg-surface-container border border-outline"
+            />
+            <p id="status" class="text-sm text-on-surface-variant"></p>
+            <button
+                id="submit-button"
+                type="submit"
+                class="px-4 py-2 rounded-lg bg-primary text-on-primary font-medium"
+            >
+                Save and Continue
+            </button>
+        </form>
+    </main>
+
+    <script>
+        document.getElementById("onboarding-form").addEventListener("submit", async (event) => {
+            event.preventDefault();
+            const status = document.getElementById("status");
+            const button = document.getElementById("submit-button");
+            const url = document.getElementById("canvas-feed-url").value.trim();
+
+            status.textContent = "Saving...";
+            button.disabled = true;
+
+            try {
+                const response = await fetch("/settings/api/feed-url", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ canvas_ical_url: url }),
+                });
+
+                const payload = await response.json();
+                if (!response.ok) {
+                    throw new Error(payload.error || "Failed to save feed URL.");
+                }
+
+                status.textContent = "Saved. Redirecting to dashboard...";
+                window.location.assign("/dashboard");
+            } catch (error) {
+                status.textContent = error.message;
+                button.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
