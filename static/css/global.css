@@ -1,7 +1,3 @@
-global {
-    display: block;
-}
-
 .animate-fade-in-up {
     animation: fade-in-up 320ms ease-out both;
 }

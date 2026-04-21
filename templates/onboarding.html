@@ -47,14 +47,14 @@
 
             try {
                 parsedUrl = new URL(url);
-            } catch (_error) {
+            } catch {
                 status.textContent = "Please enter a valid URL.";
                 return;
             }
 
             const isCanvasFeed =
                 parsedUrl.hostname === "emory.instructure.com" &&
-                parsedUrl.pathname.includes("/feeds/");
+                parsedUrl.pathname.startsWith("/feeds/");
 
             if (!isCanvasFeed) {
                 status.textContent = "Please enter a valid Emory Canvas feed URL.";
