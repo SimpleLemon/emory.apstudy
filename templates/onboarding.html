@@ -41,6 +41,12 @@
             const status = document.getElementById("status");
             const button = document.getElementById("submit-button");
             const url = document.getElementById("canvas-feed-url").value.trim();
+            const isCanvasFeed = url.includes("emory.instructure.com/feeds/");
+
+            if (!isCanvasFeed) {
+                status.textContent = "Please enter a valid Emory Canvas feed URL.";
+                return;
+            }
 
             status.textContent = "Saving...";
             button.disabled = true;
@@ -58,7 +64,9 @@
                 }
 
                 status.textContent = "Saved. Redirecting to dashboard...";
-                window.location.assign("/dashboard");
+                setTimeout(() => {
+                    window.location.assign("/dashboard");
+                }, 900);
             } catch (error) {
                 status.textContent = error.message;
                 button.disabled = false;
