@@ -1,33 +1,34 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html lang="en">
 <head>
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <!-- HTML Meta Tags -->
+    <script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
     <title>Settings - Emory University | APStudy</title>
     <link rel="icon" href="https://resources.apstudy.org/images/AP-Resources-Logo.png" alt="APStudy Logo">
-    <link rel="stylesheet" type="text/css" href="/index.css">
-    <link rel="stylesheet" type="text/css" href="/global.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
     <script src="https://kit.fontawesome.com/a7731f7ef8.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <script src="index.js" defer></script>
-    <script src="global.js" defer></script>
+    <script src="{{ url_for('static', filename='js/global.js') }}" defer></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <meta name="description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory University Student."/>
+    <meta name="description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
     <!-- Facebook Meta Tags -->
     <meta property="og:url" content="https://emory.apstudy.org/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="Emory University | APStudy">
-    <meta property="og:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory University Student."/>
+    <meta property="og:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
     <meta property="og:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
     <!-- Twitter Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
     <meta property="twitter:domain" content="emory.apstudy.org">
     <meta property="twitter:url" content="https://emory.apstudy.org/">
     <meta name="twitter:title" content="Emory University | APStudy">
-    <meta name="twitter:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory University Student."/>
+    <meta name="twitter:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
     <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-0NT330ZX5L"></script>
@@ -43,53 +44,53 @@
             theme: {
                 extend: {
                     colors: {
-                        "surface-container": "#1c2026",
-                        "on-tertiary": "#432c00",
-                        "secondary-fixed": "#d3e4ff",
-                        "on-surface-variant": "#c0c7d4",
-                        "primary-fixed-dim": "#a2c9ff",
-                        "tertiary-fixed": "#ffddaf",
-                        "on-secondary": "#163151",
-                        "on-tertiary-fixed": "#281800",
-                        "inverse-primary": "#0060aa",
-                        "surface-tint": "#a2c9ff",
-                        "secondary-container": "#2e4869",
-                        "outline": "#8b919d",
-                        "inverse-on-surface": "#2d3137",
-                        "surface": "#10141a",
-                        "surface-bright": "#353940",
-                        "surface-container-low": "#181c22",
-                        "on-secondary-container": "#9db7dd",
-                        "surface-container-high": "#262a31",
-                        "on-background": "#dfe2eb",
-                        "outline-variant": "#414752",
-                        "on-tertiary-fixed-variant": "#614000",
-                        "on-error": "#690005",
-                        "secondary-fixed-dim": "#aec8ef",
-                        "primary-container": "#58a6ff",
-                        "surface-variant": "#31353c",
-                        "surface-dim": "#10141a",
-                        "on-secondary-fixed-variant": "#2e4869",
-                        "tertiary-fixed-dim": "#ffba42",
-                        "inverse-surface": "#dfe2eb",
-                        "on-primary": "#00315c",
-                        "on-error-container": "#ffdad6",
-                        "on-tertiary-container": "#4f3400",
-                        "error": "#ffb4ab",
-                        "tertiary": "#ffba42",
-                        "on-surface": "#dfe2eb",
-                        "surface-container-highest": "#31353c",
-                        "primary": "#a2c9ff",
-                        "background": "#10141a",
-                        "on-primary-fixed-variant": "#004882",
-                        "on-primary-fixed": "#001c38",
-                        "primary-fixed": "#d3e4ff",
-                        "surface-container-lowest": "#0a0e14",
-                        "on-primary-container": "#003a6b",
-                        "error-container": "#93000a",
-                        "on-secondary-fixed": "#001c38",
-                        "secondary": "#aec8ef",
-                        "tertiary-container": "#da9600"
+                        "surface-container":       "var(--color-surface-container)",
+                        "on-tertiary":             "var(--color-on-tertiary)",
+                        "secondary-fixed":         "#d3e4ff",
+                        "on-surface-variant":      "var(--color-on-surface-variant)",
+                        "primary-fixed-dim":       "#a2c9ff",
+                        "tertiary-fixed":          "#ffddaf",
+                        "on-secondary":            "var(--color-on-secondary)",
+                        "on-tertiary-fixed":       "#281800",
+                        "inverse-primary":         "var(--color-inverse-primary)",
+                        "surface-tint":            "var(--color-surface-tint)",
+                        "secondary-container":     "var(--color-secondary-container)",
+                        "outline":                 "var(--color-outline)",
+                        "inverse-on-surface":      "var(--color-inverse-on-surface)",
+                        "surface":                 "var(--color-surface)",
+                        "surface-bright":          "var(--color-surface-bright)",
+                        "surface-container-low":   "var(--color-surface-container-low)",
+                        "on-secondary-container":  "var(--color-on-secondary-container)",
+                        "surface-container-high":  "var(--color-surface-container-high)",
+                        "on-background":           "var(--color-on-background)",
+                        "outline-variant":         "var(--color-outline-variant)",
+                        "on-tertiary-fixed-variant":"#614000",
+                        "on-error":                "var(--color-on-error)",
+                        "secondary-fixed-dim":     "#aec8ef",
+                        "primary-container":       "var(--color-primary-container)",
+                        "surface-variant":         "var(--color-surface-variant)",
+                        "surface-dim":             "var(--color-surface-dim)",
+                        "on-secondary-fixed-variant":"#2e4869",
+                        "tertiary-fixed-dim":      "#ffba42",
+                        "inverse-surface":         "var(--color-inverse-surface)",
+                        "on-primary":              "var(--color-on-primary)",
+                        "on-error-container":      "var(--color-on-error-container)",
+                        "on-tertiary-container":   "var(--color-on-tertiary-container)",
+                        "error":                   "var(--color-error)",
+                        "tertiary":                "var(--color-tertiary)",
+                        "on-surface":              "var(--color-on-surface)",
+                        "surface-container-highest":"var(--color-surface-container-highest)",
+                        "primary":                 "var(--color-primary)",
+                        "background":              "var(--color-background)",
+                        "on-primary-fixed-variant":"#004882",
+                        "on-primary-fixed":        "#001c38",
+                        "primary-fixed":           "#d3e4ff",
+                        "surface-container-lowest": "var(--color-surface-container-lowest)",
+                        "on-primary-container":    "var(--color-on-primary-container)",
+                        "error-container":         "var(--color-error-container)",
+                        "on-secondary-fixed":      "#001c38",
+                        "secondary":               "var(--color-secondary)",
+                        "tertiary-container":      "var(--color-tertiary-container)"
                     },
                     borderRadius: {
                         DEFAULT: "0.25rem",
@@ -108,59 +109,34 @@
     </script>
 </head>
 <body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased">
-
-    <!-- Top Navigation Bar -->
-    <header class="bg-[#1c2026]/60 backdrop-blur-md fixed top-0 w-full z-50 flex justify-between items-center h-16 px-8 shadow-2xl shadow-black/40 border-b border-[#181c22]">
-        <div class="flex items-center gap-4">
-            <span class="text-xl font-semibold tracking-tighter text-[#c0c7d4]">Canvas.APStudy.org</span>
-        </div>
-        <div class="flex items-center gap-4">
-            <button class="text-[#c0c7d4]/60 hover:text-[#a2c9ff] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
-                <span class="material-symbols-outlined" data-icon="sync">sync</span>
-            </button>
-            <button class="text-[#a2c9ff] hover:bg-[#262a31] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
-                <span class="material-symbols-outlined" data-icon="settings">settings</span>
-            </button>
-            <button class="text-[#c0c7d4]/60 hover:text-[#a2c9ff] transition-all duration-150 ease-in-out active:scale-95 p-2 rounded-full">
-                <span class="material-symbols-outlined" data-icon="logout">logout</span>
-            </button>
-            <div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden ml-2 border border-outline-variant/30">
-                <img alt="Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBIfYSsGVwQhSKDisBejBzu2WjfUSy7ZvB6EuSniyEVL0AFAL-zPWMSUf7nY7dcreb3wFIGRN0FldnYUKwUD8biMdNGR7mQgOBdpWxWYeAOZ3T6RxewSCPkDsTNfT9wHiMcWitHbciCn4Rdm0e4jxbaEEd1UxWduW8n_MF_2DUm_MfIUs2TnGVWHOV7I9vPjdY_PQYLR9EDW4JqkFUaA3SeQRORrzX7nb7lO2JSgUCGjY36VsPPGZjED0Zc56B7JbjQhDVVIa6TIdY" />
-            </div>
-        </div>
-    </header>
-
+    <global class="thenav"></global>
     <!-- Body Layout -->
     <div class="flex flex-1 overflow-hidden pt-16">
-
         <!-- Sidebar Navigation -->
-        <aside class="flex-col h-full py-8 gap-2 bg-[#181c22] w-64 hidden md:flex border-r border-[#1c2026]">
+        <aside class="flex-col h-full py-8 gap-2 w-64 hidden md:flex" style="background: var(--color-sidebar-bg); border-right: 1px solid var(--color-sidebar-border);">
             <div class="px-6 mb-8">
-                <h2 class="text-lg font-bold text-[#a2c9ff]">Settings</h2>
+                <h2 class="text-lg font-bold text-primary">Settings</h2>
                 <p class="text-xs text-on-surface-variant mt-1">Canvas.APStudy</p>
             </div>
             <nav class="flex flex-col gap-1 w-full">
-                <a id="nav-account" onclick="switchTab('account')" class="nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer">
+                <a id="nav-account" onclick="switchTab('account')" class="nav-link flex items-center gap-3 bg-surface-container text-primary border-l-4 border-primary px-4 py-3 hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer">
                     <span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
                     Account & Data
                 </a>
-                <a id="nav-preferences" onclick="switchTab('preferences')" class="nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent">
+                <a id="nav-preferences" onclick="switchTab('preferences')" class="nav-link flex items-center gap-3 text-on-surface-variant px-4 py-3 opacity-70 hover:bg-surface-container-high hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent">
                     <span class="material-symbols-outlined" data-icon="tune">tune</span>
                     Preferences
                 </a>
             </nav>
         </aside>
-
         <!-- Main Content -->
         <main class="flex-1 overflow-y-auto p-8 md:p-12 lg:p-16">
             <div class="max-w-4xl mx-auto">
-
-                <!-- Mobile Tab Selector (visible on small screens) -->
+                <!-- Mobile Tab Selector -->
                 <div class="flex gap-2 mb-8 md:hidden">
                     <button onclick="switchTab('account')" class="mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-high text-primary font-medium text-sm" data-tab="account">Account & Data</button>
                     <button onclick="switchTab('preferences')" class="mobile-tab flex-1 px-4 py-2 rounded-lg bg-surface-container-low text-on-surface-variant font-medium text-sm" data-tab="preferences">Preferences</button>
                 </div>
-
                 <!-- ===================== -->
                 <!-- ACCOUNT & DATA VIEW   -->
                 <!-- ===================== -->
@@ -169,7 +145,6 @@
                         <h1 class="text-4xl font-headline font-semibold text-on-surface mb-2 tracking-tight">Account & Data</h1>
                         <p class="text-lg text-on-surface-variant font-body">Manage your profile and Canvas data connection.</p>
                     </header>
-
                     <!-- Profile Information -->
                     <section>
                         <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
@@ -203,7 +178,6 @@
                             </div>
                         </div>
                     </section>
-
                     <!-- Data Connection -->
                     <section>
                         <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
@@ -250,7 +224,6 @@
                         </div>
                     </section>
                 </div>
-
                 <!-- ===================== -->
                 <!-- PREFERENCES VIEW      -->
                 <!-- ===================== -->
@@ -259,17 +232,16 @@
                         <h1 class="text-4xl font-headline font-semibold text-on-surface mb-2 tracking-tight">Preferences</h1>
                         <p class="text-lg text-on-surface-variant font-body">Customize your environment and notification flow.</p>
                     </header>
-
                     <!-- Interface Theme -->
                     <section>
                         <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary-container" data-icon="palette">palette</span>
                             Interface Theme
                         </h2>
-                        <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
-                            <!-- Obsidian Dark (Selected) -->
-                            <div class="bg-surface-container p-6 rounded-xl border border-primary/30 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container-high">
-                                <div class="absolute top-4 right-4 text-primary">
+                        <div id="theme-cards" class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                            <!-- Obsidian Dark -->
+                            <div data-theme-value="obsidian-dark" class="theme-card bg-surface-container p-6 rounded-xl border border-outline-variant/15 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container-high hover:border-outline-variant/30">
+                                <div class="theme-check absolute top-4 right-4 text-primary hidden">
                                     <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
                                 </div>
                                 <div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4">
@@ -279,7 +251,10 @@
                                 <p class="text-sm text-on-surface-variant">Optimized for focus.</p>
                             </div>
                             <!-- Parchment Light -->
-                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                            <div data-theme-value="parchment-light" class="theme-card bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="theme-check absolute top-4 right-4 text-primary hidden">
+                                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                </div>
                                 <div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center mb-4">
                                     <span class="material-symbols-outlined text-on-surface-variant" data-icon="light_mode">light_mode</span>
                                 </div>
@@ -287,7 +262,10 @@
                                 <p class="text-sm text-on-surface-variant">Classic reading mode.</p>
                             </div>
                             <!-- System Match -->
-                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                            <div data-theme-value="system-match" class="theme-card bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="theme-check absolute top-4 right-4 text-primary hidden">
+                                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                </div>
                                 <div class="w-12 h-12 rounded-full bg-surface flex items-center justify-center mb-4">
                                     <span class="material-symbols-outlined text-on-surface-variant" data-icon="contrast">contrast</span>
                                 </div>
@@ -295,7 +273,10 @@
                                 <p class="text-sm text-on-surface-variant">Adapts to device.</p>
                             </div>
                             <!-- Emory Light -->
-                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                            <div data-theme-value="emory-light" class="theme-card bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="theme-check absolute top-4 right-4 text-primary hidden">
+                                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                </div>
                                 <div class="w-12 h-12 rounded-full bg-white flex items-center justify-center mb-4 border border-[#012169]/20">
                                     <span class="material-symbols-outlined text-[#012169]" data-icon="wb_sunny">wb_sunny</span>
                                 </div>
@@ -303,7 +284,10 @@
                                 <p class="text-sm text-on-surface-variant">University classic style.</p>
                             </div>
                             <!-- Emory Dark -->
-                            <div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                            <div data-theme-value="emory-dark" class="theme-card bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 relative cursor-pointer group transition-all duration-150 hover:bg-surface-container hover:border-outline-variant/30">
+                                <div class="theme-check absolute top-4 right-4 text-primary hidden">
+                                    <span class="material-symbols-outlined" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                </div>
                                 <div class="w-12 h-12 rounded-full bg-[#012169] flex items-center justify-center mb-4">
                                     <span class="material-symbols-outlined text-[#D4AF37]" data-icon="brightness_2">brightness_2</span>
                                 </div>
@@ -312,7 +296,6 @@
                             </div>
                         </div>
                     </section>
-
                     <!-- Notifications -->
                     <section>
                         <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
@@ -352,30 +335,16 @@
                             </div>
                         </div>
                     </section>
-
                     <div class="mt-12 flex justify-end">
                         <button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-medium px-6 py-2.5 rounded-lg hover:scale-[1.02] transition-transform duration-150 shadow-lg shadow-primary/20">
                             Save Preferences
                         </button>
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
-
-    <!-- Footer -->
-    <footer class="bg-[#10141a] w-full py-12 border-t border-[#181c22]">
-        <div class="flex flex-col md:flex-row justify-between items-center px-12 max-w-7xl mx-auto">
-            <span class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40">&copy; 2024 Canvas.APStudy.org. The Digital Monolith.</span>
-            <div class="flex gap-6 mt-4 md:mt-0">
-                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Support</a>
-                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Archive</a>
-                <a class="font-['Inter'] text-[11px] uppercase tracking-[0.05em] font-normal text-[#c0c7d4]/40 hover:text-[#a2c9ff] transition-colors" href="#">Privacy</a>
-            </div>
-        </div>
-    </footer>
-
+    <global class="thefooter"></global>
     <!-- Tab Switching Logic -->
     <script>
         function switchTab(tab) {
@@ -383,25 +352,17 @@
             const viewPreferences = document.getElementById('view-preferences');
             const navAccount = document.getElementById('nav-account');
             const navPreferences = document.getElementById('nav-preferences');
-
-            const activeClasses = ['bg-[#1c2026]', 'text-[#a2c9ff]', 'border-[#a2c9ff]'];
-            const inactiveClasses = ['text-[#c0c7d4]', 'opacity-70', 'border-transparent'];
-
             if (tab === 'account') {
                 viewAccount.classList.remove('hidden');
                 viewPreferences.classList.add('hidden');
-
-                // Sidebar active states
-                navAccount.className = 'nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer';
-                navPreferences.className = 'nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
+                navAccount.className = 'nav-link flex items-center gap-3 bg-surface-container text-primary border-l-4 border-primary px-4 py-3 hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer';
+                navPreferences.className = 'nav-link flex items-center gap-3 text-on-surface-variant px-4 py-3 opacity-70 hover:bg-surface-container-high hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
             } else {
                 viewAccount.classList.add('hidden');
                 viewPreferences.classList.remove('hidden');
-
-                navPreferences.className = 'nav-link flex items-center gap-3 bg-[#1c2026] text-[#a2c9ff] border-l-4 border-[#a2c9ff] px-4 py-3 hover:bg-[#262a31] transition-all duration-150 ease-in-out cursor-pointer';
-                navAccount.className = 'nav-link flex items-center gap-3 text-[#c0c7d4] px-4 py-3 opacity-70 hover:bg-[#262a31] hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
+                navPreferences.className = 'nav-link flex items-center gap-3 bg-surface-container text-primary border-l-4 border-primary px-4 py-3 hover:bg-surface-container-high transition-all duration-150 ease-in-out cursor-pointer';
+                navAccount.className = 'nav-link flex items-center gap-3 text-on-surface-variant px-4 py-3 opacity-70 hover:bg-surface-container-high hover:opacity-100 transition-all duration-150 ease-in-out cursor-pointer border-l-4 border-transparent';
             }
-
             // Mobile tabs
             document.querySelectorAll('.mobile-tab').forEach(btn => {
                 if (btn.dataset.tab === tab) {
@@ -412,6 +373,85 @@
             });
         }
     </script>
-
+    <!-- Theme Switching Logic -->
+    <script>
+        (function() {
+            const DARK_THEMES = ['obsidian-dark', 'emory-dark'];
+            const VALID_THEMES = ['obsidian-dark', 'parchment-light', 'system-match', 'emory-light', 'emory-dark'];
+            const STORAGE_KEY = 'apstudy-theme';
+            /**
+             * Apply a theme to the document and update card UI.
+             * @param {string} theme - one of VALID_THEMES
+             * @param {boolean} persist - whether to save to localStorage
+             */
+            function applyTheme(theme, persist) {
+                if (VALID_THEMES.indexOf(theme) === -1) theme = 'obsidian-dark';
+                // Set data-theme attribute on <html>
+                document.documentElement.setAttribute('data-theme', theme);
+                // Toggle Tailwind dark class
+                if (theme === 'system-match') {
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    document.documentElement.classList.toggle('dark', prefersDark);
+                } else {
+                    document.documentElement.classList.toggle('dark', DARK_THEMES.indexOf(theme) !== -1);
+                }
+                // Save to localStorage
+                if (persist) {
+                    localStorage.setItem(STORAGE_KEY, theme);
+                }
+                // Update card visual states
+                updateCardStates(theme);
+            }
+            /**
+             * Update the selected/unselected appearance of theme cards.
+             */
+            function updateCardStates(activeTheme) {
+                var cards = document.querySelectorAll('.theme-card');
+                cards.forEach(function(card) {
+                    var cardTheme = card.getAttribute('data-theme-value');
+                    var check = card.querySelector('.theme-check');
+                    if (cardTheme === activeTheme) {
+                        // Selected state
+                        card.classList.remove('border-outline-variant/15');
+                        card.classList.add('border-primary/30');
+                        if (check) check.classList.remove('hidden');
+                    } else {
+                        // Unselected state
+                        card.classList.remove('border-primary/30');
+                        card.classList.add('border-outline-variant/15');
+                        if (check) check.classList.add('hidden');
+                    }
+                });
+            }
+            /**
+             * Resolve the current theme from localStorage or system preference.
+             */
+            function resolveTheme() {
+                var stored = localStorage.getItem(STORAGE_KEY);
+                if (stored && VALID_THEMES.indexOf(stored) !== -1) return stored;
+                // No stored preference — detect system
+                if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'obsidian-dark';
+                if (window.matchMedia('(prefers-color-scheme: light)').matches) return 'parchment-light';
+                return 'obsidian-dark';
+            }
+            // --- Initialize on DOM ready ---
+            var currentTheme = resolveTheme();
+            applyTheme(currentTheme, false);
+            // --- Attach click handlers to theme cards ---
+            document.querySelectorAll('.theme-card').forEach(function(card) {
+                card.addEventListener('click', function() {
+                    var newTheme = card.getAttribute('data-theme-value');
+                    currentTheme = newTheme;
+                    applyTheme(newTheme, true);
+                });
+            });
+            // --- Listen for system preference changes (for "system-match" mode) ---
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
+                if (currentTheme === 'system-match') {
+                    document.documentElement.classList.toggle('dark', e.matches);
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
