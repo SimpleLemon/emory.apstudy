@@ -9,14 +9,13 @@ Requires: client_secret.json in project root,
           GOOGLE_CLIENT_ID and FLASK_SECRET_KEY in .env.
 """
 
-import os
 import secrets
 from datetime import datetime
 
 import requests as http_requests
 import google_auth_oauthlib.flow
 from flask import (
-    Blueprint, redirect, url_for, session, render_template, request, current_app
+    Blueprint, redirect, url_for, session, render_template, request
 )
 from flask_login import login_user, logout_user, current_user
 
@@ -31,9 +30,6 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
-ALLOWED_DOMAIN = os.environ.get("ALLOWED_EMAIL_DOMAIN", "emory.edu")
-
-
 @auth_bp.route("/")
 def index():
     """Root redirect: dashboard if authenticated, login if not."""
@@ -106,14 +102,8 @@ def oauth2callback():
 
     user_info = userinfo_response.json()
 
-    # Enforce email domain restriction
+    # Accept any Google account email
     email = user_info.get("email", "")
-    if not email.endswith(f"@{ALLOWED_DOMAIN}"):
-        session.clear()
-        return render_template(
-            "login.html",
-            error=f"Access restricted to @{ALLOWED_DOMAIN} accounts.",
-        )
 
     # Database lookup-or-create
     user = User.query.filter_by(google_id=user_info["id"]).first()
