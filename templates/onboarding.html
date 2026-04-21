@@ -36,7 +36,7 @@
     </main>
 
     <script>
-        const REDIRECT_DELAY_MS = 1000;
+        const REDIRECT_DELAY_MILLISECONDS = 1000;
 
         document.getElementById("onboarding-form").addEventListener("submit", async (event) => {
             event.preventDefault();
@@ -79,7 +79,7 @@
                 status.textContent = "Saved. Redirecting to dashboard...";
                 setTimeout(() => {
                     window.location.assign("/dashboard");
-                }, REDIRECT_DELAY_MS);
+                }, REDIRECT_DELAY_MILLISECONDS);
             } catch (error) {
                 status.textContent = error.message;
                 button.disabled = false;
