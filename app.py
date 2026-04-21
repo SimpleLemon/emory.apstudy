@@ -21,6 +21,9 @@ def create_app():
     from blueprints import register_blueprints
     register_blueprints(app)
 
+    from services.scheduler import init_scheduler
+    init_scheduler(app)
+
     # Create database tables on first run
     with app.app_context():
         from models import User, UserSettings, UserCourse, CalendarCache
