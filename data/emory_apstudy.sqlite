@@ -1,0 +1,47 @@
+-- User identity (populated on first Google OAuth login)
+CREATE TABLE users (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    google_id       TEXT UNIQUE NOT NULL,
+    email           TEXT UNIQUE NOT NULL,
+    name            TEXT,
+    picture_url     TEXT,
+    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login      TIMESTAMP
+);
+
+-- Per-user settings
+CREATE TABLE user_settings (
+    user_id                 INTEGER PRIMARY KEY REFERENCES users(id),
+    canvas_ical_url         TEXT,          -- Each user pastes their own feed URL
+    ics_secret_token        TEXT,          -- Per-user token for Apple Calendar subscription
+    feed_refresh_minutes    INTEGER DEFAULT 15,
+    created_at              TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at              TIMESTAMP
+);
+
+-- Per-user selected courses ("My Courses")
+CREATE TABLE user_courses (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER REFERENCES users(id),
+    term        TEXT NOT NULL,            -- e.g., "Fall_2026"
+    subject     TEXT NOT NULL,            -- e.g., "CHEM"
+    catalog     TEXT NOT NULL,            -- e.g., "150"
+    crn         TEXT,                     -- Specific section CRN if selected
+    added_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, term, subject, catalog, crn)
+);
+
+-- Per-user cached calendar events
+CREATE TABLE calendar_cache (
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id         INTEGER REFERENCES users(id),
+    event_uid       TEXT,                 -- iCal UID for deduplication
+    event_title     TEXT,
+    event_start     TIMESTAMP,
+    event_end       TIMESTAMP,
+    event_type      TEXT,                 -- "assignment", "event", "quiz"
+    course_name     TEXT,                 -- Parsed from event title
+    raw_description TEXT,
+    fetched_at      TIMESTAMP,
+    UNIQUE(user_id, event_uid)
+);
