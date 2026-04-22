@@ -112,7 +112,6 @@
     </style>
 </head>
 <body class="bg-background text-on-surface min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-    <global class="thenav"></global>
     <!-- Ambient background glow -->
     <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-surface-container-low/50 via-background to-background -z-10"></div>
 
@@ -143,7 +142,7 @@
 
             <!-- Google Sign-In Section -->
             <div class="flex flex-col gap-4">
-                <a href="{{ url_for('authorize') }}"
+                     <a href="{{ url_for('auth.authorize') }}"
                    class="w-full bg-surface-container-lowest text-on-surface font-headline font-medium py-3.5 rounded-lg ring-1 ring-outline-variant/30 hover:ring-primary/50 hover:bg-surface-container-low transition-all duration-150 flex items-center justify-center gap-3 group">
                     <!-- Google "G" logo SVG -->
                     <svg width="20" height="20" viewBox="0 0 48 48" class="shrink-0">

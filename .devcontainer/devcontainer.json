@@ -1,0 +1,5 @@
+{
+    "postCreateCommand": "pip install --user -r requirements.txt",
+    "postAttachCommand": "python -m flask --app app:create_app run --host 0.0.0.0 --port 8000",
+    "forwardPorts": [8000]
+}

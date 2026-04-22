@@ -13,6 +13,9 @@ import os
 import secrets
 from datetime import datetime
 
+# Must be set before OAuth flow objects are created during local HTTP testing.
+os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
 import requests as http_requests
 import google_auth_oauthlib.flow
 from flask import (
