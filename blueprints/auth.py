@@ -34,7 +34,6 @@ SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
-ALLOWED_DOMAIN = os.environ.get("ALLOWED_EMAIL_DOMAIN", "emory.edu")
 
 
 @auth_bp.route("/")
@@ -109,14 +108,7 @@ def oauth2callback():
 
     user_info = userinfo_response.json()
 
-    # Enforce email domain restriction
     email = user_info.get("email", "")
-    if not email.endswith(f"@{ALLOWED_DOMAIN}"):
-        session.clear()
-        return render_template(
-            "login.html",
-            error=f"Access restricted to @{ALLOWED_DOMAIN} accounts.",
-        )
 
     # Database lookup-or-create
     user = User.query.filter_by(google_id=user_info["id"]).first()
