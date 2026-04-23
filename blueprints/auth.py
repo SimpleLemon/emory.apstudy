@@ -138,8 +138,8 @@ def oauth2callback():
     login_user(user)
     session.pop("oauth_state", None)
 
-    # Redirect new users (no iCal URL yet) to onboarding
-    if not user.settings or not user.settings.canvas_ical_url:
+    # Redirect users who have not completed onboarding yet.
+    if not user.onboarding_complete:
         return redirect(url_for("settings.onboarding"))
 
     return redirect(url_for("dashboard.dashboard"))

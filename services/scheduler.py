@@ -14,6 +14,7 @@ instance runs scheduled jobs [8].
 """
 
 import os
+import json
 import logging
 from datetime import datetime
 
@@ -26,21 +27,40 @@ logger = logging.getLogger(__name__)
 _scheduler = None
 
 
+def _configured_feed_urls(settings):
+    """Return all configured calendar URLs from user settings."""
+    urls = []
+    if settings.canvas_ical_url:
+        urls.append(settings.canvas_ical_url.strip())
+
+    if settings.other_ical_urls_json:
+        try:
+            extras = json.loads(settings.other_ical_urls_json)
+            if isinstance(extras, list):
+                for item in extras:
+                    if isinstance(item, str) and item.strip():
+                        urls.append(item.strip())
+        except json.JSONDecodeError:
+            pass
+
+    return urls
+
+
 def _refresh_all_feeds(app):
     """
-    Iterate through all users with configured Canvas iCal feed URLs
+    Iterate through all users with configured calendar feed URLs
     and refresh their cached calendar events.
 
     Runs inside a Flask application context so that database access works.
     """
     with app.app_context():
         from models import User, UserSettings
-        from services.feed_fetcher import fetch_and_cache_feed
+        from services.feed_fetcher import fetch_and_cache_feeds
 
-        settings_with_feeds = UserSettings.query.filter(
-            UserSettings.canvas_ical_url.isnot(None),
-            UserSettings.canvas_ical_url != "",
-        ).all()
+        all_settings = UserSettings.query.all()
+        settings_with_feeds = [
+            settings for settings in all_settings if _configured_feed_urls(settings)
+        ]
 
         if not settings_with_feeds:
             logger.info("Feed refresh: no users with configured feeds.")
@@ -52,9 +72,9 @@ def _refresh_all_feeds(app):
 
         for settings in settings_with_feeds:
             try:
-                count = fetch_and_cache_feed(
+                count = fetch_and_cache_feeds(
                     settings.user_id,
-                    settings.canvas_ical_url,
+                    _configured_feed_urls(settings),
                 )
                 settings.updated_at = datetime.utcnow()
                 logger.info(

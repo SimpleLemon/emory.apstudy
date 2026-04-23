@@ -5,7 +5,6 @@
  * Each [data-theme] selector overrides the variables that Tailwind utilities reference.
  * Include this file on EVERY page via <link>.
  */
-
 /* ============================
    OBSIDIAN DARK (default dark)
    ============================ */
@@ -48,94 +47,94 @@
     --color-sidebar-bg: #181c22;
     --color-sidebar-border: #1c2026;
 }
-
 /* ============================
    PARCHMENT LIGHT
+   Inspired by Notion's warm white canvas.
+   Background is clean white; containers use
+   warm off-white/cream tones for layering.
    ============================ */
 [data-theme="parchment-light"] {
-    --color-surface-container: #eef1f6;
-    --color-surface: #fafcff;
-    --color-surface-bright: #fafcff;
-    --color-surface-dim: #d8dbe3;
-    --color-surface-container-low: #f3f5fa;
-    --color-surface-container-high: #e8ebf0;
-    --color-surface-container-highest: #e2e5ec;
+    --color-surface-container: #f0eeeb;
+    --color-surface: #ffffff;
+    --color-surface-bright: #ffffff;
+    --color-surface-dim: #d9d6d1;
+    --color-surface-container-low: #f7f6f3;
+    --color-surface-container-high: #e8e6e1;
+    --color-surface-container-highest: #e0ddd8;
     --color-surface-container-lowest: #ffffff;
-    --color-surface-variant: #dfe2eb;
-    --color-on-surface: #191c20;
-    --color-on-surface-variant: #414752;
-    --color-on-background: #191c20;
-    --color-background: #fafcff;
+    --color-surface-variant: #e3e0db;
+    --color-on-surface: #1f1f1e;
+    --color-on-surface-variant: #4b4a47;
+    --color-on-background: #1f1f1e;
+    --color-background: #ffffff;
     --color-primary: #0060aa;
     --color-primary-container: #d3e4ff;
     --color-on-primary: #ffffff;
     --color-on-primary-container: #001c38;
-    --color-secondary: #2e4869;
-    --color-secondary-container: #d3e4ff;
+    --color-secondary: #37474f;
+    --color-secondary-container: #d6e3ea;
     --color-on-secondary: #ffffff;
-    --color-on-secondary-container: #001c38;
+    --color-on-secondary-container: #0d1b22;
     --color-tertiary: #7a5900;
     --color-tertiary-container: #ffddaf;
     --color-on-tertiary: #ffffff;
     --color-on-tertiary-container: #281800;
-    --color-outline: #74777f;
-    --color-outline-variant: #c0c7d4;
+    --color-outline: #79786e;
+    --color-outline-variant: #c5c3ba;
     --color-error: #ba1a1a;
     --color-error-container: #ffdad6;
     --color-on-error: #ffffff;
     --color-on-error-container: #410002;
-    --color-inverse-surface: #2d3137;
-    --color-inverse-on-surface: #eff1f9;
+    --color-inverse-surface: #313130;
+    --color-inverse-on-surface: #f4f1ec;
     --color-inverse-primary: #a2c9ff;
     --color-surface-tint: #0060aa;
-    --color-sidebar-bg: #f3f5fa;
-    --color-sidebar-border: #e8ebf0;
+    --color-sidebar-bg: #f7f6f3;
+    --color-sidebar-border: #e8e6e1;
 }
-
 /* ============================
    SYSTEM MATCH
-   Default: light. Dark override via media query.
+   Default: Parchment Light. Dark override via media query.
    ============================ */
 [data-theme="system-match"] {
-    --color-surface-container: #eef1f6;
-    --color-surface: #fafcff;
-    --color-surface-bright: #fafcff;
-    --color-surface-dim: #d8dbe3;
-    --color-surface-container-low: #f3f5fa;
-    --color-surface-container-high: #e8ebf0;
-    --color-surface-container-highest: #e2e5ec;
+    --color-surface-container: #f0eeeb;
+    --color-surface: #ffffff;
+    --color-surface-bright: #ffffff;
+    --color-surface-dim: #d9d6d1;
+    --color-surface-container-low: #f7f6f3;
+    --color-surface-container-high: #e8e6e1;
+    --color-surface-container-highest: #e0ddd8;
     --color-surface-container-lowest: #ffffff;
-    --color-surface-variant: #dfe2eb;
-    --color-on-surface: #191c20;
-    --color-on-surface-variant: #414752;
-    --color-on-background: #191c20;
-    --color-background: #fafcff;
+    --color-surface-variant: #e3e0db;
+    --color-on-surface: #1f1f1e;
+    --color-on-surface-variant: #4b4a47;
+    --color-on-background: #1f1f1e;
+    --color-background: #ffffff;
     --color-primary: #0060aa;
     --color-primary-container: #d3e4ff;
     --color-on-primary: #ffffff;
     --color-on-primary-container: #001c38;
-    --color-secondary: #2e4869;
-    --color-secondary-container: #d3e4ff;
+    --color-secondary: #37474f;
+    --color-secondary-container: #d6e3ea;
     --color-on-secondary: #ffffff;
-    --color-on-secondary-container: #001c38;
+    --color-on-secondary-container: #0d1b22;
     --color-tertiary: #7a5900;
     --color-tertiary-container: #ffddaf;
     --color-on-tertiary: #ffffff;
     --color-on-tertiary-container: #281800;
-    --color-outline: #74777f;
-    --color-outline-variant: #c0c7d4;
+    --color-outline: #79786e;
+    --color-outline-variant: #c5c3ba;
     --color-error: #ba1a1a;
     --color-error-container: #ffdad6;
     --color-on-error: #ffffff;
     --color-on-error-container: #410002;
-    --color-inverse-surface: #2d3137;
-    --color-inverse-on-surface: #eff1f9;
+    --color-inverse-surface: #313130;
+    --color-inverse-on-surface: #f4f1ec;
     --color-inverse-primary: #a2c9ff;
     --color-surface-tint: #0060aa;
-    --color-sidebar-bg: #f3f5fa;
-    --color-sidebar-border: #e8ebf0;
+    --color-sidebar-bg: #f7f6f3;
+    --color-sidebar-border: #e8e6e1;
 }
-
 @media (prefers-color-scheme: dark) {
     [data-theme="system-match"] {
         --color-surface-container: #1c2026;
@@ -177,50 +176,51 @@
         --color-sidebar-border: #1c2026;
     }
 }
-
 /* ============================
    EMORY LIGHT
+   Drawn from emory.edu: crisp white base,
+   warm stone-gray containers, Emory Blue primary,
+   restrained Emory Gold tertiary.
    ============================ */
 [data-theme="emory-light"] {
-    --color-surface-container: #e8eaf2;
-    --color-surface: #f5f6fb;
-    --color-surface-bright: #f5f6fb;
-    --color-surface-dim: #cdd0d9;
-    --color-surface-container-low: #eff0f7;
-    --color-surface-container-high: #e0e2ec;
-    --color-surface-container-highest: #d8dae5;
+    --color-surface-container: #eae7e2;
+    --color-surface: #f9f7f4;
+    --color-surface-bright: #f9f7f4;
+    --color-surface-dim: #ccc9c3;
+    --color-surface-container-low: #f2f0eb;
+    --color-surface-container-high: #e2dfd9;
+    --color-surface-container-highest: #d9d6cf;
     --color-surface-container-lowest: #ffffff;
-    --color-surface-variant: #dddfe8;
-    --color-on-surface: #0e1b3d;
-    --color-on-surface-variant: #3a4260;
-    --color-on-background: #0e1b3d;
-    --color-background: #f5f6fb;
+    --color-surface-variant: #e0ddd6;
+    --color-on-surface: #141418;
+    --color-on-surface-variant: #3d3b3a;
+    --color-on-background: #141418;
+    --color-background: #f9f7f4;
     --color-primary: #012169;
-    --color-primary-container: #b6c5e8;
+    --color-primary-container: #c5d4f0;
     --color-on-primary: #ffffff;
     --color-on-primary-container: #001a4d;
-    --color-secondary: #3b5998;
-    --color-secondary-container: #c3d4f5;
+    --color-secondary: #2d4a7a;
+    --color-secondary-container: #c8d8f0;
     --color-on-secondary: #ffffff;
-    --color-on-secondary-container: #0d1b3a;
-    --color-tertiary: #9e7c0c;
-    --color-tertiary-container: #f5e6a8;
+    --color-on-secondary-container: #0c1a33;
+    --color-tertiary: #8a6b0a;
+    --color-tertiary-container: #f0e0a4;
     --color-on-tertiary: #ffffff;
-    --color-on-tertiary-container: #3a2e00;
-    --color-outline: #6b7394;
-    --color-outline-variant: #b0b7cf;
+    --color-on-tertiary-container: #332800;
+    --color-outline: #747069;
+    --color-outline-variant: #b8b4ac;
     --color-error: #ba1a1a;
     --color-error-container: #ffdad6;
     --color-on-error: #ffffff;
     --color-on-error-container: #410002;
     --color-inverse-surface: #1a2340;
-    --color-inverse-on-surface: #e8eaf2;
+    --color-inverse-on-surface: #eae7e2;
     --color-inverse-primary: #a2c0ff;
     --color-surface-tint: #012169;
-    --color-sidebar-bg: #eff0f7;
-    --color-sidebar-border: #e0e2ec;
+    --color-sidebar-bg: #f2f0eb;
+    --color-sidebar-border: #e2dfd9;
 }
-
 /* ============================
    EMORY DARK
    ============================ */

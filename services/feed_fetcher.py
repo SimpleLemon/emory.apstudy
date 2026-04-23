@@ -159,9 +159,9 @@ def fetch_and_parse_ical(feed_url, timeout=30):
 
 # ── Database caching ─────────────────────────────────────────────────────────
 
-def fetch_and_cache_feed(user_id, feed_url):
+def fetch_and_cache_feeds(user_id, feed_urls):
     """
-    Fetch a user's Canvas iCal feed, parse it, and replace their
+    Fetch one or more user calendar iCal feeds, parse them, and replace
     cached events in the database.
 
     Uses a delete-then-insert strategy rather than upsert, because
@@ -170,7 +170,7 @@ def fetch_and_cache_feed(user_id, feed_url):
 
     Args:
         user_id: Integer user ID from the users table.
-        feed_url: The user's Canvas iCal feed URL.
+        feed_urls: Iterable of calendar feed URLs.
 
     Returns:
         Integer count of events cached.
@@ -179,13 +179,40 @@ def fetch_and_cache_feed(user_id, feed_url):
         requests.RequestException on HTTP errors.
         ValueError on invalid iCal data.
     """
-    events = fetch_and_parse_ical(feed_url)
+    if not feed_urls:
+        raise ValueError("At least one feed URL is required.")
+
+    aggregated_events = []
+    for feed_url in feed_urls:
+        aggregated_events.extend(fetch_and_parse_ical(feed_url))
+
+    deduped_events = []
+    seen_uids = set()
+    seen_fallbacks = set()
+
+    for event in aggregated_events:
+        uid = event.get("uid")
+        if uid:
+            if uid in seen_uids:
+                continue
+            seen_uids.add(uid)
+        else:
+            fallback_key = (
+                event.get("title"),
+                event.get("start"),
+                event.get("end"),
+            )
+            if fallback_key in seen_fallbacks:
+                continue
+            seen_fallbacks.add(fallback_key)
+
+        deduped_events.append(event)
 
     # Delete all existing cached events for this user
     CalendarCache.query.filter_by(user_id=user_id).delete()
 
     # Insert fresh events
-    for event in events:
+    for event in deduped_events:
         cache_entry = CalendarCache(
             user_id=user_id,
             event_uid=event["uid"],
@@ -200,4 +227,9 @@ def fetch_and_cache_feed(user_id, feed_url):
         db.session.add(cache_entry)
 
     db.session.commit()
-    return len(events)
+    return len(deduped_events)
+
+
+def fetch_and_cache_feed(user_id, feed_url):
+    """Backward-compatible wrapper for single-feed callers."""
+    return fetch_and_cache_feeds(user_id, [feed_url])

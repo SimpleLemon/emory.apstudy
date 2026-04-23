@@ -13,6 +13,11 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False, index=True)
     name = db.Column(db.String(255), nullable=True)
     picture_url = db.Column(db.Text, nullable=True)
+    onboarding_complete = db.Column(db.Boolean, default=False, nullable=False)
+    onboarding_step = db.Column(db.Integer, default=1, nullable=False)
+    class_year = db.Column(db.String(64), nullable=True)
+    school_college = db.Column(db.String(255), nullable=True)
+    majors_json = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     last_login = db.Column(db.DateTime, nullable=True)
 
@@ -43,6 +48,7 @@ class UserSettings(db.Model):
         primary_key=True,
     )
     canvas_ical_url = db.Column(db.Text, nullable=True)
+    other_ical_urls_json = db.Column(db.Text, nullable=True)
     ics_secret_token = db.Column(db.String(255), unique=True, nullable=True, index=True)
     feed_refresh_minutes = db.Column(db.Integer, default=15, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
@@ -64,6 +70,10 @@ class UserCourse(db.Model):
     term = db.Column(db.String(64), nullable=False)
     subject = db.Column(db.String(64), nullable=False)
     catalog = db.Column(db.String(64), nullable=False)
+    course_name = db.Column(db.String(255), nullable=True)
+    section_number = db.Column(db.String(64), nullable=True)
+    instructor_name = db.Column(db.String(255), nullable=True)
+    source = db.Column(db.String(32), default="settings", nullable=False)
     crn = db.Column(db.String(64), nullable=True)
     added_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 

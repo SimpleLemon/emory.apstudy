@@ -10,6 +10,7 @@ Route stubs are functional; feed fetching returns empty until
 users configure their Canvas iCal URLs.
 """
 
+import json
 from datetime import datetime
 
 from flask import Blueprint, jsonify, request, Response
@@ -19,6 +20,28 @@ from extensions import db
 from models import User, UserSettings, CalendarCache
 
 calendar_bp = Blueprint("calendar", __name__)
+
+
+def _configured_feed_urls(settings):
+    """Return all configured calendar feed URLs for a user."""
+    if not settings:
+        return []
+
+    urls = []
+    if settings.canvas_ical_url:
+        urls.append(settings.canvas_ical_url.strip())
+
+    if settings.other_ical_urls_json:
+        try:
+            extras = json.loads(settings.other_ical_urls_json)
+            if isinstance(extras, list):
+                for item in extras:
+                    if isinstance(item, str) and item.strip():
+                        urls.append(item.strip())
+        except json.JSONDecodeError:
+            pass
+
+    return urls
 
 
 @calendar_bp.route("/events")
@@ -61,21 +84,22 @@ def refresh_feed():
     """
     POST /api/calendar/refresh
 
-    Triggers an immediate re-fetch of the user's Canvas iCal feed.
+    Triggers an immediate re-fetch of all configured user calendar feeds.
     Returns the updated event count.
     """
     settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+    feed_urls = _configured_feed_urls(settings)
 
-    if not settings or not settings.canvas_ical_url:
+    if not feed_urls:
         return jsonify({
-            "error": "No Canvas iCal feed URL configured. Visit Settings to add one."
+            "error": "No calendar feed URLs configured. Visit Settings to add one."
         }), 400
 
     # Import here to avoid circular dependency at module load time
-    from services.feed_fetcher import fetch_and_cache_feed
+    from services.feed_fetcher import fetch_and_cache_feeds
 
     try:
-        count = fetch_and_cache_feed(current_user.id, settings.canvas_ical_url)
+        count = fetch_and_cache_feeds(current_user.id, feed_urls)
         settings.updated_at = datetime.utcnow()
         db.session.commit()
         return jsonify({"status": "ok", "events_cached": count})
@@ -93,6 +117,7 @@ def feed_status():
     for the authenticated user.
     """
     settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+    feed_urls = _configured_feed_urls(settings)
 
     latest_event = CalendarCache.query.filter_by(
         user_id=current_user.id
@@ -101,7 +126,8 @@ def feed_status():
     ).first()
 
     return jsonify({
-        "feed_configured": bool(settings and settings.canvas_ical_url),
+        "feed_configured": bool(feed_urls),
+        "configured_feed_count": len(feed_urls),
         "refresh_interval_minutes": settings.feed_refresh_minutes if settings else None,
         "last_fetched": latest_event.fetched_at.isoformat() if latest_event else None,
         "cached_event_count": CalendarCache.query.filter_by(

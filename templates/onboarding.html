@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+	<script src="{{ url_for('static', filename='js/theme-init.js') }}"></script>
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+	<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+	<script src="{{ url_for('static', filename='js/global.js') }}" defer></script>
+	<title>Onboarding - APStudy</title>
+	<link rel="icon" href="https://resources.apstudy.org/images/AP-Resources-Logo.png" alt="APStudy Logo">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@48,400,0,0" />
+	<script>
+		tailwind = window.tailwind || {};
+		tailwind.config = {
+			darkMode: "class",
+			theme: {
+				extend: {
+					colors: {
+						"surface-container": "#1c2026",
+						"surface-container-high": "#262a31",
+						"surface-container-highest": "#31353c",
+						"surface-container-low": "#181c22",
+						"surface-container-lowest": "#0a0e14",
+						"surface": "#10141a",
+						"on-surface": "#dfe2eb",
+						"on-surface-variant": "#c0c7d4",
+						"primary": "#a2c9ff",
+						"primary-container": "#58a6ff",
+						"primary-fixed": "#d3e4ff",
+						"primary-fixed-dim": "#a2c9ff",
+						"on-primary": "#00315c",
+						"on-primary-container": "#003a6b",
+						"on-primary-fixed": "#001c38",
+						"on-primary-fixed-variant": "#004882",
+						"secondary": "#aec8ef",
+						"secondary-container": "#2e4869",
+						"secondary-fixed": "#d3e4ff",
+						"secondary-fixed-dim": "#aec8ef",
+						"on-secondary": "#163151",
+						"on-secondary-container": "#9db7dd",
+						"on-secondary-fixed": "#001c38",
+						"on-secondary-fixed-variant": "#2e4869",
+						"tertiary": "#ffba42",
+						"tertiary-container": "#da9600",
+						"tertiary-fixed": "#ffddaf",
+						"tertiary-fixed-dim": "#ffba42",
+						"on-tertiary": "#432c00",
+						"on-tertiary-container": "#4f3400",
+						"on-tertiary-fixed": "#281800",
+						"on-tertiary-fixed-variant": "#614000",
+						"error": "#ffb4ab",
+						"error-container": "#93000a",
+						"on-error": "#690005",
+						"on-error-container": "#ffdad6",
+						"outline": "#8b919d",
+						"outline-variant": "#414752",
+						"background": "#10141a",
+						"on-background": "#dfe2eb",
+						"inverse-surface": "#dfe2eb",
+						"inverse-on-surface": "#2d3137",
+						"inverse-primary": "#0060aa",
+						"surface-bright": "#353940",
+						"surface-dim": "#10141a",
+						"surface-tint": "#a2c9ff",
+						"surface-variant": "#31353c"
+					},
+					fontFamily: {
+						headline: ["Inter", "sans-serif"],
+						body: ["Inter", "sans-serif"],
+						label: ["Inter", "sans-serif"]
+					},
+					borderRadius: {
+						DEFAULT: "0.25rem",
+						lg: "0.5rem",
+						xl: "0.75rem",
+						full: "9999px"
+					}
+				}
+			}
+		};
+	</script>
+	<script src="https://cdn.tailwindcss.com"></script>
+	<style>
+		body { font-family: 'Inter', sans-serif; }
+		.wizard-step { transition: opacity 180ms ease, transform 180ms ease; }
+		.wizard-step.is-entering { opacity: 0; transform: translateY(10px); }
+		.wizard-step.is-active { opacity: 1; transform: translateY(0); }
+		.chip {
+			display: inline-flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 0.75rem;
+			border-radius: 9999px;
+			border: 1px solid rgba(164, 201, 255, 0.18);
+			background: rgba(28, 32, 38, 0.85);
+		}
+		.suggestion-panel {
+			position: absolute;
+			z-index: 20;
+			left: 0;
+			right: 0;
+			margin-top: 0.5rem;
+			border: 1px solid rgba(164, 201, 255, 0.18);
+			border-radius: 0.75rem;
+			background: #10141a;
+			box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+			overflow: hidden;
+		}
+	</style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen">
+	<global class="thenav" data-profile-picture="{{ user.picture }}"></global>
+	<main class="min-h-screen pt-20 pb-16 px-4 sm:px-6 lg:px-8">
+		<div class="max-w-6xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] gap-8 items-start">
+			<section class="bg-surface-container/95 border border-outline-variant/20 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-black/30 relative overflow-hidden">
+				<div class="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(162,201,255,0.14),_transparent_32%),radial-gradient(circle_at_bottom_left,_rgba(255,186,66,0.08),_transparent_28%)] pointer-events-none"></div>
+				<div class="relative z-10 flex flex-col gap-6">
+					<div class="flex items-center justify-between gap-4">
+						<div>
+							<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Onboarding</p>
+							<h1 class="mt-2 text-3xl sm:text-4xl font-headline font-semibold tracking-tight">Welcome, {{ first_name }}.</h1>
+							<p class="mt-2 text-sm sm:text-base text-on-surface-variant max-w-2xl">Complete a quick setup so APStudy can personalize your course planning and send you straight to the dashboard next time.</p>
+						</div>
+						<div class="hidden sm:flex items-center gap-3 rounded-2xl bg-surface-container-lowest/80 border border-outline-variant/20 p-3">
+							<img alt="Profile" class="w-14 h-14 rounded-2xl object-cover border border-outline-variant/30" src="{{ user.picture or 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIfYSsGVwQhSKDisBejBzu2WjfUSy7ZvB6EuSniyEVL0AFAL-zPWMSUf7nY7dcreb3wFIGRN0FldnYUKwUD8biMdNGR7mQgOBdpWxWYeAOZ3T6RxewSCPkDsTNfT9wHiMcWitHbciCn4Rdm0e4jxbaEEd1UxWduW8n_MF_2DUm_MfIUs2TnGVWHOV7I9vPjdY_PQYLR9EDW4JqkFUaA3SeQRORrzX7nb7lO2JSgUCGjY36VsPPGZjED0Zc56B7JbjQhDVVIa6TIdY' }}">
+							<div>
+								<p class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Signed in as</p>
+								<p class="text-sm font-medium">{{ user.email }}</p>
+							</div>
+						</div>
+					</div>
+
+					<div class="space-y-3">
+						<div class="flex items-center justify-between text-xs uppercase tracking-[0.18em] text-on-surface-variant">
+							<span id="step-label">Step {{ step }} of 4</span>
+							<span id="progress-label">{{ ((step / 4) * 100) | round(0, 'ceil') if step else 25 }}%</span>
+						</div>
+						<div class="h-2 rounded-full bg-surface-container-low overflow-hidden border border-outline-variant/10">
+							<div id="progress-bar" class="h-full rounded-full bg-gradient-to-r from-primary to-tertiary transition-all duration-300" style="width: {{ (step / 4 * 100) if step else 25 }}%;"></div>
+						</div>
+					</div>
+
+					<div id="wizard-status" class="hidden rounded-2xl border border-error/25 bg-error-container/15 p-4 text-sm text-error"></div>
+
+					<form id="onboarding-form" class="space-y-6">
+						<input type="hidden" id="active-step" value="{{ step }}" />
+						<input type="hidden" id="default-term" value="{{ default_term }}" />
+
+						<section class="wizard-step space-y-6" data-step="1">
+							<div class="grid md:grid-cols-[140px_1fr] gap-6 items-center">
+								<div class="flex justify-center md:justify-start">
+									<div class="relative">
+										<div class="absolute -inset-2 rounded-full bg-primary/20 blur-xl"></div>
+										<img alt="Profile picture" class="relative w-32 h-32 rounded-full object-cover border-4 border-surface-container-high shadow-[0_18px_40px_rgba(0,0,0,0.35)]" src="{{ user.picture or 'https://lh3.googleusercontent.com/aida-public/AB6AXuBIfYSsGVwQhSKDisBejBzu2WjfUSy7ZvB6EuSniyEVL0AFAL-zPWMSUf7nY7dcreb3wFIGRN0FldnYUKwUD8biMdNGR7mQgOBdpWxWYeAOZ3T6RxewSCPkDsTNfT9wHiMcWitHbciCn4Rdm0e4jxbaEEd1UxWduW8n_MF_2DUm_MfIUs2TnGVWHOV7I9vPjdY_PQYLR9EDW4JqkFUaA3SeQRORrzX7nb7lO2JSgUCGjY36VsPPGZjED0Zc56B7JbjQhDVVIa6TIdY' }}">
+									</div>
+								</div>
+								<div class="space-y-3 text-center md:text-left">
+									<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Step 1: Welcome</p>
+									<h2 class="text-2xl font-headline font-semibold">Let’s confirm your identity.</h2>
+									<p class="text-sm text-on-surface-variant">We pulled this from Google sign-in so you do not need to re-enter it.</p>
+								</div>
+							</div>
+							<div class="grid md:grid-cols-2 gap-4">
+								<label class="block space-y-2">
+									<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Name</span>
+									<input class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface opacity-90" readonly type="text" value="{{ user.name }}" />
+								</label>
+								<label class="block space-y-2">
+									<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Email</span>
+									<input class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface opacity-90" readonly type="email" value="{{ user.email }}" />
+								</label>
+							</div>
+							<div class="flex justify-end">
+								<button class="btn-next inline-flex items-center gap-2 rounded-xl bg-primary text-on-primary px-6 py-3 font-medium hover:scale-[1.01] transition-transform" type="button" data-next="2">
+									Continue
+									<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+								</button>
+							</div>
+						</section>
+
+						<section class="wizard-step hidden space-y-6" data-step="2">
+							<div class="space-y-2">
+								<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Step 2: Academic profile</p>
+								<h2 class="text-2xl font-headline font-semibold">Tell us how to personalize APStudy.</h2>
+								<p class="text-sm text-on-surface-variant">Use the dropdowns and keep it to the first pass. You can change these later in Settings.</p>
+							</div>
+							<div class="grid gap-4 md:grid-cols-2">
+								<label class="space-y-2">
+									<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Class year</span>
+									<select id="class-year" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface">
+										<option value="">Select your class year</option>
+										{% for option in year_options %}
+										<option value="{{ option }}" {% if option == class_year %}selected{% endif %}>{{ option }}</option>
+										{% endfor %}
+									</select>
+								</label>
+								<label class="space-y-2">
+									<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Primary school / college</span>
+									<select id="school-college" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface">
+										<option value="">Select your school</option>
+										{% for option in school_options %}
+										<option value="{{ option }}" {% if option == school_college %}selected{% endif %}>{{ option }}</option>
+										{% endfor %}
+									</select>
+								</label>
+							</div>
+
+							<div class="space-y-3">
+								<div class="flex items-center justify-between gap-3">
+									<div>
+										<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Intended or declared majors</span>
+										<p class="text-sm text-on-surface-variant">Search and choose up to 2.</p>
+									</div>
+									<span id="major-count" class="text-xs uppercase tracking-[0.18em] text-on-surface-variant">0/2 selected</span>
+								</div>
+								<div class="relative">
+									<input id="major-search" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface" placeholder="Search majors or select Undecided" type="text" autocomplete="off" />
+									<div id="major-suggestions" class="suggestion-panel hidden max-h-64 overflow-y-auto"></div>
+								</div>
+								<div id="major-chips" class="flex flex-wrap gap-2"></div>
+							</div>
+
+							<div class="flex justify-between gap-3">
+								<button class="btn-back inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-5 py-3 text-sm font-medium hover:bg-surface-container-high transition-colors" type="button" data-prev="1">
+									<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+									Back
+								</button>
+								<button class="btn-next inline-flex items-center gap-2 rounded-xl bg-primary text-on-primary px-6 py-3 font-medium hover:scale-[1.01] transition-transform" type="button" data-next="3">
+									Continue
+									<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+								</button>
+							</div>
+						</section>
+
+						<section class="wizard-step hidden space-y-6" data-step="3">
+							<div class="space-y-2">
+								<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Step 3: Courses</p>
+								<h2 class="text-2xl font-headline font-semibold">What courses are you taking this semester?</h2>
+								<p class="text-sm text-on-surface-variant">Search Emory’s catalog if available, then add courses one at a time. Manual entry is fine.</p>
+							</div>
+
+							<div class="grid gap-4 lg:grid-cols-[1.05fr_0.95fr] items-start">
+								<div class="space-y-4">
+									<div class="relative">
+										<label class="space-y-2 block">
+											<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Search catalog</span>
+											<input id="course-search" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface" placeholder="e.g. CHEM 150 or CS 171" type="text" autocomplete="off" />
+										</label>
+										<div id="course-suggestions" class="suggestion-panel hidden max-h-64 overflow-y-auto"></div>
+									</div>
+									<div class="grid gap-4 md:grid-cols-2">
+										<label class="space-y-2">
+											<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Course code</span>
+											<input id="course-code" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface uppercase" placeholder="CHEM 150" type="text" />
+										</label>
+										<label class="space-y-2">
+											<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Course name</span>
+											<input id="course-name" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface" placeholder="Structure and Properties" type="text" />
+										</label>
+										<label class="space-y-2">
+											<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Section number</span>
+											<input id="section-number" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface" placeholder="001" type="text" />
+										</label>
+										<label class="space-y-2">
+											<span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Instructor name</span>
+											<input id="instructor-name" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 px-4 py-3 text-sm text-on-surface" placeholder="Prof. Lee" type="text" />
+										</label>
+									</div>
+									<div class="flex flex-wrap gap-3">
+										<button id="add-course-button" class="inline-flex items-center gap-2 rounded-xl bg-tertiary text-on-tertiary px-5 py-3 font-medium hover:scale-[1.01] transition-transform" type="button">
+											Add course
+											<span class="material-symbols-outlined text-[18px]">add</span>
+										</button>
+										<p class="text-xs text-on-surface-variant self-center">Minimum 1 required before finishing.</p>
+									</div>
+								</div>
+
+								<div class="bg-surface-container-low rounded-2xl border border-outline-variant/15 p-4 sm:p-5">
+									<div class="flex items-center justify-between mb-4">
+										<h3 class="font-headline text-lg font-semibold">Added courses</h3>
+										<span id="course-count" class="text-xs uppercase tracking-[0.18em] text-on-surface-variant">0 added</span>
+									</div>
+									<div id="course-list" class="space-y-3"></div>
+								</div>
+							</div>
+
+							<div class="flex justify-between gap-3">
+								<button class="btn-back inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-5 py-3 text-sm font-medium hover:bg-surface-container-high transition-colors" type="button" data-prev="2">
+									<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+									Back
+								</button>
+								<button id="step-3-continue" class="btn-next inline-flex items-center gap-2 rounded-xl bg-primary text-on-primary px-6 py-3 font-medium hover:scale-[1.01] transition-transform" type="button" data-next="4">
+									Continue to review
+									<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+								</button>
+							</div>
+						</section>
+
+						<section class="wizard-step hidden space-y-6" data-step="4">
+							<div class="space-y-2">
+								<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Step 4: Confirm</p>
+								<h2 class="text-2xl font-headline font-semibold">Review everything before launch.</h2>
+								<p class="text-sm text-on-surface-variant">You can update any of this later in Settings.</p>
+							</div>
+
+							<div class="grid gap-4 lg:grid-cols-3">
+								<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5">
+									<div class="flex items-center justify-between gap-3 mb-3">
+										<h3 class="font-headline font-semibold">Academic profile</h3>
+										<button class="edit-step text-xs uppercase tracking-[0.16em] text-primary" type="button" data-go="2">Edit</button>
+									</div>
+									<p class="text-sm text-on-surface-variant">{{ class_year or 'Not set' }}</p>
+									<p class="text-sm text-on-surface-variant mt-1">{{ school_college or 'Not set' }}</p>
+									<p id="review-majors" class="text-sm text-on-surface-variant mt-1"></p>
+								</div>
+								<div class="bg-surface-container-lowest rounded-2xl border border-outline-variant/20 p-5 lg:col-span-2">
+									<div class="flex items-center justify-between gap-3 mb-3">
+										<h3 class="font-headline font-semibold">Courses</h3>
+										<button class="edit-step text-xs uppercase tracking-[0.16em] text-primary" type="button" data-go="3">Edit</button>
+									</div>
+									<div id="review-courses" class="grid gap-3 sm:grid-cols-2"></div>
+								</div>
+							</div>
+
+							<div class="flex items-start justify-between gap-4 flex-col sm:flex-row sm:items-center">
+								<div>
+									<p class="text-sm text-on-surface-variant">You can update these anytime in Settings.</p>
+								</div>
+								<div class="flex gap-3">
+									<button class="btn-back inline-flex items-center gap-2 rounded-xl border border-outline-variant/25 bg-surface-container-low px-5 py-3 text-sm font-medium hover:bg-surface-container-high transition-colors" type="button" data-prev="3">
+										<span class="material-symbols-outlined text-[18px]">arrow_back</span>
+										Back
+									</button>
+									<button id="finish-button" class="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-primary to-tertiary text-on-primary px-6 py-3 font-semibold hover:scale-[1.01] transition-transform shadow-lg shadow-primary/10" type="button">
+										Go to Dashboard
+										<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+									</button>
+								</div>
+							</div>
+						</section>
+					</form>
+				</div>
+			</section>
+
+			<aside class="space-y-6 lg:sticky lg:top-24">
+				<div class="bg-surface-container/90 border border-outline-variant/20 rounded-3xl p-6 shadow-2xl shadow-black/20">
+					<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Why this matters</p>
+					<h2 class="mt-2 text-xl font-headline font-semibold">A setup that keeps the app useful.</h2>
+					<ul class="mt-4 space-y-3 text-sm text-on-surface-variant">
+						<li>• Personalizes the first dashboard view.</li>
+						<li>• Saves your academic profile and course list to your account.</li>
+						<li>• Remembers where you left off if you close the tab.</li>
+					</ul>
+				</div>
+				<div class="bg-surface-container/90 border border-outline-variant/20 rounded-3xl p-6 shadow-2xl shadow-black/20">
+					<p class="text-xs uppercase tracking-[0.2em] text-on-surface-variant">Current progress</p>
+					<div class="mt-3 flex items-center gap-3">
+						<div class="w-12 h-12 rounded-2xl bg-primary/15 text-primary flex items-center justify-center">
+							<span id="sidebar-step-icon" class="material-symbols-outlined">looks_{{ step }}</span>
+						</div>
+						<div>
+							<p class="text-lg font-semibold">Step <span id="sidebar-step">{{ step }}</span> of 4</p>
+							<p id="sidebar-subtitle" class="text-sm text-on-surface-variant">{{ 'Welcome' if step == 1 else 'Academic profile' if step == 2 else 'Courses' if step == 3 else 'Review' }}</p>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+	</main>
+
+	<global class="thefooter"></global>
+
+	<script>
+		const onboardingState = {
+			step: Number(document.getElementById('active-step').value || 1),
+			majorOptions: {{ major_options | tojson }},
+			selectedMajors: {{ selected_majors | tojson }},
+			courses: {{ courses | tojson }},
+			defaultTerm: document.getElementById('default-term').value,
+		};
+
+		const stepTitles = {
+			1: 'Welcome',
+			2: 'Academic profile',
+			3: 'Courses',
+			4: 'Review',
+		};
+
+		const steps = Array.from(document.querySelectorAll('.wizard-step'));
+		const progressBar = document.getElementById('progress-bar');
+		const progressLabel = document.getElementById('progress-label');
+		const stepLabel = document.getElementById('step-label');
+		const sidebarStep = document.getElementById('sidebar-step');
+		const sidebarSubtitle = document.getElementById('sidebar-subtitle');
+		const majorSearch = document.getElementById('major-search');
+		const majorSuggestions = document.getElementById('major-suggestions');
+		const majorChips = document.getElementById('major-chips');
+		const majorCount = document.getElementById('major-count');
+		const courseSearch = document.getElementById('course-search');
+		const courseSuggestions = document.getElementById('course-suggestions');
+		const courseCode = document.getElementById('course-code');
+		const courseName = document.getElementById('course-name');
+		const sectionNumber = document.getElementById('section-number');
+		const instructorName = document.getElementById('instructor-name');
+		const courseList = document.getElementById('course-list');
+		const courseCount = document.getElementById('course-count');
+		const reviewMajors = document.getElementById('review-majors');
+		const reviewCourses = document.getElementById('review-courses');
+		const wizardStatus = document.getElementById('wizard-status');
+
+		function showError(message) {
+			wizardStatus.textContent = message;
+			wizardStatus.classList.remove('hidden');
+		}
+
+		function clearError() {
+			wizardStatus.classList.add('hidden');
+			wizardStatus.textContent = '';
+		}
+
+		function updateProgress(step) {
+			const percent = Math.round((step / 4) * 100);
+			progressBar.style.width = `${percent}%`;
+			progressLabel.textContent = `${percent}%`;
+			stepLabel.textContent = `Step ${step} of 4`;
+			sidebarStep.textContent = step;
+			sidebarSubtitle.textContent = stepTitles[step];
+			document.getElementById('sidebar-step-icon').textContent = `looks_${Math.min(step, 4)}`;
+		}
+
+		function setStep(step) {
+			onboardingState.step = step;
+			document.getElementById('active-step').value = step;
+			steps.forEach((panel) => {
+				const panelStep = Number(panel.dataset.step);
+				if (panelStep === step) {
+					panel.classList.remove('hidden');
+					panel.classList.add('is-active');
+				} else {
+					panel.classList.add('hidden');
+					panel.classList.remove('is-active');
+				}
+			});
+			updateProgress(step);
+			if (step === 4) {
+				renderReview();
+			}
+		}
+
+		function renderMajors() {
+			majorChips.innerHTML = '';
+			majorCount.textContent = `${onboardingState.selectedMajors.length}/2 selected`;
+			onboardingState.selectedMajors.forEach((major) => {
+				const chip = document.createElement('span');
+				chip.className = 'chip text-sm';
+				chip.innerHTML = `<span>${major}</span><button type="button" class="text-on-surface-variant hover:text-on-surface">&times;</button>`;
+				chip.querySelector('button').addEventListener('click', () => {
+					onboardingState.selectedMajors = onboardingState.selectedMajors.filter((item) => item !== major);
+					renderMajors();
+				});
+				majorChips.appendChild(chip);
+			});
+
+			if (onboardingState.selectedMajors.length === 0) {
+				const hint = document.createElement('div');
+				hint.className = 'text-sm text-on-surface-variant';
+				hint.textContent = 'No majors selected yet.';
+				majorChips.appendChild(hint);
+			}
+		}
+
+		function renderMajorSuggestions(query) {
+			const term = query.trim().toLowerCase();
+			if (!term) {
+				majorSuggestions.classList.add('hidden');
+				majorSuggestions.innerHTML = '';
+				return;
+			}
+
+			const matches = onboardingState.majorOptions.filter((major) =>
+				major.toLowerCase().includes(term)
+			).slice(0, 8);
+
+			majorSuggestions.innerHTML = '';
+			if (!matches.length) {
+				majorSuggestions.classList.add('hidden');
+				return;
+			}
+
+			matches.forEach((major) => {
+				const item = document.createElement('button');
+				item.type = 'button';
+				item.className = 'w-full text-left px-4 py-3 hover:bg-surface-container-high transition-colors text-sm';
+				item.textContent = major;
+				item.addEventListener('click', () => {
+					if (onboardingState.selectedMajors.length >= 2) {
+						showError('You can choose up to 2 majors.');
+						return;
+					}
+					if (!onboardingState.selectedMajors.includes(major)) {
+						onboardingState.selectedMajors.push(major);
+						clearError();
+					}
+					majorSearch.value = '';
+					renderMajors();
+					majorSuggestions.classList.add('hidden');
+				});
+				majorSuggestions.appendChild(item);
+			});
+
+			majorSuggestions.classList.remove('hidden');
+		}
+
+		async function fetchJson(url, options = {}) {
+			const response = await fetch(url, {
+				headers: { 'Content-Type': 'application/json' },
+				...options,
+			});
+			const data = await response.json();
+			if (!response.ok) {
+				throw new Error(data.error || 'Request failed');
+			}
+			return data;
+		}
+
+		async function saveStep(step, extra = {}) {
+			clearError();
+			const payload = { step, ...extra };
+			return fetchJson('{{ url_for("settings.onboarding") }}', {
+				method: 'POST',
+				body: JSON.stringify(payload),
+			});
+		}
+
+		function renderCourseList() {
+			courseList.innerHTML = '';
+			courseCount.textContent = `${onboardingState.courses.length} added`;
+			if (!onboardingState.courses.length) {
+				const empty = document.createElement('div');
+				empty.className = 'rounded-xl border border-dashed border-outline-variant/25 p-4 text-sm text-on-surface-variant';
+				empty.textContent = 'No courses added yet.';
+				courseList.appendChild(empty);
+				return;
+			}
+
+			onboardingState.courses.forEach((course, index) => {
+				const card = document.createElement('div');
+				card.className = 'rounded-2xl border border-outline-variant/20 bg-surface-container p-4';
+				card.innerHTML = `
+					<div class="flex items-start justify-between gap-4">
+						<div>
+							<p class="text-sm font-semibold text-on-surface">${course.course_code || 'Course'}</p>
+							<p class="text-xs text-on-surface-variant mt-1">${course.course_name || 'Course name not set'}</p>
+							<p class="text-xs text-on-surface-variant mt-1">${[course.section_number ? `Section ${course.section_number}` : '', course.instructor_name || ''].filter(Boolean).join(' • ') || 'No optional details yet'}</p>
+						</div>
+						<button type="button" class="text-sm text-primary hover:underline">Remove</button>
+					</div>
+				`;
+				card.querySelector('button').addEventListener('click', async () => {
+					try {
+						await removeCourse(course.id);
+						onboardingState.courses.splice(index, 1);
+						renderCourseList();
+						renderReview();
+					} catch (error) {
+						showError(error.message);
+					}
+				});
+				courseList.appendChild(card);
+			});
+		}
+
+		function renderReview() {
+			reviewMajors.textContent = onboardingState.selectedMajors.length
+				? onboardingState.selectedMajors.join(', ')
+				: 'No majors selected yet.';
+			reviewCourses.innerHTML = '';
+			if (!onboardingState.courses.length) {
+				reviewCourses.innerHTML = '<div class="text-sm text-on-surface-variant">No courses added yet.</div>';
+				return;
+			}
+			onboardingState.courses.forEach((course) => {
+				const item = document.createElement('div');
+				item.className = 'rounded-2xl border border-outline-variant/20 bg-surface-container p-4';
+				item.innerHTML = `
+					<div class="flex items-start justify-between gap-4">
+						<div>
+							<p class="font-semibold">${course.course_code || 'Course'}</p>
+							<p class="text-sm text-on-surface-variant mt-1">${course.course_name || 'No course name set'}</p>
+							<p class="text-xs text-on-surface-variant mt-1">${[course.section_number ? `Section ${course.section_number}` : '', course.instructor_name || ''].filter(Boolean).join(' • ') || 'No optional details yet'}</p>
+						</div>
+					</div>
+				`;
+				reviewCourses.appendChild(item);
+			});
+		}
+
+		async function addCourseFromInputs() {
+			const courseCodeValue = courseCode.value.trim().toUpperCase();
+			const courseNameValue = courseName.value.trim();
+			const sectionNumberValue = sectionNumber.value.trim();
+			const instructorNameValue = instructorName.value.trim();
+
+			if (!courseCodeValue) {
+				showError('Enter a course code first.');
+				return;
+			}
+
+			const saved = await saveStep(3, {
+				action: 'add_course',
+				course_code: courseCodeValue,
+				course_name: courseNameValue,
+				section_number: sectionNumberValue,
+				instructor_name: instructorNameValue,
+				term: onboardingState.defaultTerm,
+			});
+
+			onboardingState.courses.push({
+				id: saved.course.id,
+				course_code: saved.course.course_code,
+				course_name: saved.course.course_name,
+				section_number: saved.course.section_number,
+				instructor_name: saved.course.instructor_name,
+				term: saved.course.term,
+			});
+
+			courseCode.value = '';
+			courseName.value = '';
+			sectionNumber.value = '';
+			instructorName.value = '';
+			renderCourseList();
+			renderReview();
+		}
+
+		async function removeCourse(courseId) {
+			const response = await fetch(`{{ url_for('settings.remove_course', course_id=0) }}`.replace('/0', `/${courseId}`), {
+				method: 'DELETE',
+				headers: { 'Content-Type': 'application/json' },
+			});
+			const data = await response.json();
+			if (!response.ok) {
+				throw new Error(data.error || 'Failed to remove course');
+			}
+		}
+
+		async function searchCourses(query) {
+			const term = query.trim();
+			if (term.length < 2) {
+				courseSuggestions.classList.add('hidden');
+				courseSuggestions.innerHTML = '';
+				return;
+			}
+
+			try {
+				const data = await fetchJson(`{{ url_for('atlas.search') }}?query=${encodeURIComponent(term)}&term=${encodeURIComponent(onboardingState.defaultTerm)}`,
+					{ method: 'GET', headers: { 'Content-Type': 'application/json' } });
+
+				courseSuggestions.innerHTML = '';
+				const results = data.results || (data.course_code ? [data] : []);
+				if (data.course_title) {
+					results.unshift(data);
+				}
+
+				if (!results.length) {
+					courseSuggestions.classList.add('hidden');
+					return;
+				}
+
+				results.slice(0, 8).forEach((result) => {
+					const label = result.course_code || `${result.subject} ${result.catalog}`;
+					const item = document.createElement('button');
+					item.type = 'button';
+					item.className = 'w-full text-left px-4 py-3 hover:bg-surface-container-high transition-colors text-sm';
+					item.innerHTML = `<div class="font-medium">${label}</div><div class="text-xs text-on-surface-variant mt-1">${result.course_title || result.title || 'Select to autofill course name'}</div>`;
+					item.addEventListener('click', async () => {
+						try {
+							const details = await fetchJson(`{{ url_for('atlas.search') }}?query=${encodeURIComponent(label)}&term=${encodeURIComponent(onboardingState.defaultTerm)}`,
+								{ method: 'GET', headers: { 'Content-Type': 'application/json' } });
+							courseCode.value = label;
+							courseName.value = details.course_title || details.course_name || '';
+							if (details.subject && details.catalog) {
+								courseCode.value = `${details.subject} ${details.catalog}`;
+							}
+						} catch (error) {
+							courseCode.value = label;
+						}
+						courseSuggestions.classList.add('hidden');
+					});
+					courseSuggestions.appendChild(item);
+				});
+				courseSuggestions.classList.remove('hidden');
+			} catch (error) {
+				courseSuggestions.classList.add('hidden');
+			}
+		}
+
+		document.querySelectorAll('.btn-next').forEach((button) => {
+			button.addEventListener('click', async () => {
+				const nextStep = Number(button.dataset.next);
+				try {
+					if (onboardingState.step === 1) {
+						await saveStep(1);
+					} else if (onboardingState.step === 2) {
+						await saveStep(2, {
+							class_year: document.getElementById('class-year').value,
+							school_college: document.getElementById('school-college').value,
+							majors: onboardingState.selectedMajors,
+						});
+					} else if (onboardingState.step === 3 && nextStep === 4) {
+						if (!onboardingState.courses.length) {
+							showError('Please add at least one course before continuing.');
+							return;
+						}
+						await saveStep(3, { action: 'advance' });
+					}
+					setStep(nextStep);
+				} catch (error) {
+					showError(error.message);
+				}
+			});
+		});
+
+		document.querySelectorAll('.btn-back').forEach((button) => {
+			button.addEventListener('click', () => setStep(Number(button.dataset.prev)));
+		});
+
+		document.querySelectorAll('.edit-step').forEach((button) => {
+			button.addEventListener('click', () => setStep(Number(button.dataset.go)));
+		});
+
+		majorSearch.addEventListener('input', () => renderMajorSuggestions(majorSearch.value));
+		majorSearch.addEventListener('focus', () => renderMajorSuggestions(majorSearch.value));
+		courseSearch.addEventListener('input', () => searchCourses(courseSearch.value));
+		courseSearch.addEventListener('focus', () => searchCourses(courseSearch.value));
+
+		document.getElementById('add-course-button').addEventListener('click', async () => {
+			try {
+				await addCourseFromInputs();
+			} catch (error) {
+				showError(error.message);
+			}
+		});
+
+		document.getElementById('finish-button').addEventListener('click', async () => {
+			try {
+				await saveStep(4);
+				window.location.href = '{{ url_for("dashboard.dashboard") }}';
+			} catch (error) {
+				showError(error.message);
+			}
+		});
+
+		document.addEventListener('click', (event) => {
+			if (!majorSuggestions.contains(event.target) && event.target !== majorSearch) {
+				majorSuggestions.classList.add('hidden');
+			}
+			if (!courseSuggestions.contains(event.target) && event.target !== courseSearch) {
+				courseSuggestions.classList.add('hidden');
+			}
+		});
+
+		renderMajors();
+		renderCourseList();
+		updateProgress(onboardingState.step);
+		setStep(onboardingState.step);
+
+		if (onboardingState.selectedMajors.length) {
+			renderMajors();
+		}
+		if (onboardingState.courses.length) {
+			renderReview();
+		}
+	</script>
+</body>
+</html>
