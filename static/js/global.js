@@ -8,6 +8,70 @@ function renderGlobalChrome() {
             nav.dataset.profilePicture ||
             document.body?.dataset?.profilePicture ||
             "https://lh3.googleusercontent.com/aida-public/AB6AXuBIfYSsGVwQhSKDisBejBzu2WjfUSy7ZvB6EuSniyEVL0AFAL-zPWMSUf7nY7dcreb3wFIGRN0FldnYUKwUD8biMdNGR7mQgOBdpWxWYeAOZ3T6RxewSCPkDsTNfT9wHiMcWitHbciCn4Rdm0e4jxbaEEd1UxWduW8n_MF_2DUm_MfIUs2TnGVWHOV7I9vPjdY_PQYLR9EDW4JqkFUaA3SeQRORrzX7nb7lO2JSgUCGjY36VsPPGZjED0Zc56B7JbjQhDVVIa6TIdY";
+        let syncButton = null;
+        let syncIcon = null;
+        let syncLocked = false;
+        let syncSuccess = false;
+
+        function setSyncIcon(name) {
+            if (!syncIcon) {
+                return;
+            }
+            syncIcon.textContent = name;
+            syncIcon.dataset.icon = name;
+        }
+
+        function setSyncButtonLocked(locked) {
+            if (!syncButton) {
+                return;
+            }
+            syncButton.disabled = locked;
+            syncButton.setAttribute("aria-disabled", String(locked));
+            syncButton.classList.toggle("cursor-not-allowed", locked);
+            syncButton.classList.toggle("opacity-50", locked);
+        }
+
+        function showSyncSuccess() {
+            syncLocked = false;
+            syncSuccess = true;
+            setSyncButtonLocked(false);
+            setSyncIcon("check");
+        }
+
+        function showSyncFailure() {
+            syncLocked = false;
+            syncSuccess = false;
+            setSyncButtonLocked(false);
+            setSyncIcon("sync");
+        }
+
+        async function runSyncRefresh() {
+            if (syncLocked) {
+                return;
+            }
+
+            syncLocked = true;
+            syncSuccess = false;
+            setSyncButtonLocked(true);
+            setSyncIcon("sync");
+
+            window.setTimeout(async () => {
+                try {
+                    const response = await fetch("/api/calendar/refresh", {
+                        method: "POST",
+                        credentials: "same-origin",
+                    });
+                    if (!response.ok) {
+                        throw new Error("Refresh failed");
+                    }
+                    showSyncSuccess();
+                } catch (error) {
+                    console.error(error);
+                    showSyncFailure();
+                }
+            }, 10000);
+        }
+
         nav.innerHTML = `
 <header class="bg-surface-container/80 backdrop-blur-md top-0 w-full flex justify-between items-center h-16 px-8 shadow-2xl shadow-black/20 border-b border-outline-variant/30" style="position: relative; z-index: 9999;">
     <div class="flex items-center gap-4">
@@ -35,6 +99,8 @@ function renderGlobalChrome() {
     </div>
 </header>
 `;
+    syncButton = nav.querySelector('button[title="Reload"]');
+    syncIcon = syncButton?.querySelector(".material-symbols-outlined");
         const menuTrigger = nav.querySelector("#profile-menu-trigger");
         const menu = nav.querySelector("#profile-menu");
         const settingsButton = nav.querySelector("#profile-settings");
@@ -62,6 +128,24 @@ function renderGlobalChrome() {
                     window.location.assign(`${window.location.origin}/logout`);
                 });
             }
+        }
+        if (syncButton && syncIcon) {
+            syncButton.addEventListener("click", () => {
+                runSyncRefresh();
+            });
+
+            syncButton.addEventListener("mouseenter", () => {
+                if (syncSuccess) {
+                    setSyncIcon("check");
+                }
+            });
+
+            syncButton.addEventListener("mouseleave", () => {
+                if (syncSuccess) {
+                    syncSuccess = false;
+                    setSyncIcon("sync");
+                }
+            });
         }
     }
     const footer = document.querySelector("global.thefooter");

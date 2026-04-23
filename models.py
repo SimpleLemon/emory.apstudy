@@ -105,6 +105,7 @@ class CalendarCache(db.Model):
     event_title = db.Column(db.Text, nullable=True)
     event_start = db.Column(db.DateTime, nullable=True, index=True)
     event_end = db.Column(db.DateTime, nullable=True)
+    is_all_day = db.Column(db.Boolean, default=False, nullable=False)
     event_type = db.Column(db.String(64), nullable=True)
     course_name = db.Column(db.String(255), nullable=True)
     raw_description = db.Column(db.Text, nullable=True)

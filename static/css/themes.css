@@ -46,6 +46,7 @@
     --color-surface-tint: #a2c9ff;
     --color-sidebar-bg: #181c22;
     --color-sidebar-border: #1c2026;
+    --color-calendar-rule: #232830;
 }
 /* ============================
    PARCHMENT LIGHT
@@ -91,6 +92,7 @@
     --color-surface-tint: #0060aa;
     --color-sidebar-bg: #f7f6f3;
     --color-sidebar-border: #e8e6e1;
+    --color-calendar-rule: #c5c3ba;
 }
 /* ============================
    SYSTEM MATCH
@@ -134,6 +136,7 @@
     --color-surface-tint: #0060aa;
     --color-sidebar-bg: #f7f6f3;
     --color-sidebar-border: #e8e6e1;
+    --color-calendar-rule: #c5c3ba;
 }
 @media (prefers-color-scheme: dark) {
     [data-theme="system-match"] {
@@ -174,52 +177,55 @@
         --color-surface-tint: #a2c9ff;
         --color-sidebar-bg: #181c22;
         --color-sidebar-border: #1c2026;
+        --color-calendar-rule: #232830;
     }
 }
 /* ============================
    EMORY LIGHT
-   Drawn from emory.edu: crisp white base,
-   warm stone-gray containers, Emory Blue primary,
-   restrained Emory Gold tertiary.
+   Drawn from emory.edu brand guidelines:
+   Emory Blue #012169, Emory Gold #F2A900,
+   Emory Light Blue #007DBA, Emory Dark Blue #0C2344.
+   Crisp white base, warm stone-gray containers.
    ============================ */
 [data-theme="emory-light"] {
-    --color-surface-container: #eae7e2;
-    --color-surface: #f9f7f4;
-    --color-surface-bright: #f9f7f4;
-    --color-surface-dim: #ccc9c3;
-    --color-surface-container-low: #f2f0eb;
-    --color-surface-container-high: #e2dfd9;
-    --color-surface-container-highest: #d9d6cf;
-    --color-surface-container-lowest: #ffffff;
-    --color-surface-variant: #e0ddd6;
-    --color-on-surface: #141418;
-    --color-on-surface-variant: #3d3b3a;
-    --color-on-background: #141418;
-    --color-background: #f9f7f4;
+    --color-surface-container: #EAEAE4;
+    --color-surface: #FFFFFF;
+    --color-surface-bright: #FFFFFF;
+    --color-surface-dim: #D0CFC9;
+    --color-surface-container-low: #F6F6F2;
+    --color-surface-container-high: #E6E6E0;
+    --color-surface-container-highest: #DDDDD7;
+    --color-surface-container-lowest: #FFFFFF;
+    --color-surface-variant: #E6E6E0;
+    --color-on-surface: #222222;
+    --color-on-surface-variant: #4A4A48;
+    --color-on-background: #222222;
+    --color-background: #FFFFFF;
     --color-primary: #012169;
-    --color-primary-container: #c5d4f0;
-    --color-on-primary: #ffffff;
-    --color-on-primary-container: #001a4d;
-    --color-secondary: #2d4a7a;
-    --color-secondary-container: #c8d8f0;
-    --color-on-secondary: #ffffff;
-    --color-on-secondary-container: #0c1a33;
-    --color-tertiary: #8a6b0a;
-    --color-tertiary-container: #f0e0a4;
-    --color-on-tertiary: #ffffff;
-    --color-on-tertiary-container: #332800;
-    --color-outline: #747069;
-    --color-outline-variant: #b8b4ac;
-    --color-error: #ba1a1a;
-    --color-error-container: #ffdad6;
-    --color-on-error: #ffffff;
+    --color-primary-container: #C8D6F0;
+    --color-on-primary: #FFFFFF;
+    --color-on-primary-container: #001240;
+    --color-secondary: #007DBA;
+    --color-secondary-container: #C4E0F2;
+    --color-on-secondary: #FFFFFF;
+    --color-on-secondary-container: #002840;
+    --color-tertiary: #F2A900;
+    --color-tertiary-container: #FCEBC4;
+    --color-on-tertiary: #FFFFFF;
+    --color-on-tertiary-container: #3D2A00;
+    --color-outline: #74726C;
+    --color-outline-variant: #B8B6AE;
+    --color-error: #BA1A1A;
+    --color-error-container: #FFDAD6;
+    --color-on-error: #FFFFFF;
     --color-on-error-container: #410002;
-    --color-inverse-surface: #1a2340;
-    --color-inverse-on-surface: #eae7e2;
-    --color-inverse-primary: #a2c0ff;
+    --color-inverse-surface: #0C2344;
+    --color-inverse-on-surface: #EAEAE4;
+    --color-inverse-primary: #A2C0FF;
     --color-surface-tint: #012169;
-    --color-sidebar-bg: #f2f0eb;
-    --color-sidebar-border: #e2dfd9;
+    --color-sidebar-bg: #F6F6F2;
+    --color-sidebar-border: #E6E6E0;
+    --color-calendar-rule: #B8B6AE;
 }
 /* ============================
    EMORY DARK
@@ -262,4 +268,5 @@
     --color-surface-tint: #D4AF37;
     --color-sidebar-bg: #0d1328;
     --color-sidebar-border: #101730;
+    --color-calendar-rule: #171e38;
 }

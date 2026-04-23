@@ -125,6 +125,12 @@ def _ensure_sqlite_schema(database_uri):
             "other_ical_urls_json",
             "other_ical_urls_json TEXT",
         )
+        _ensure_sqlite_column(
+            connection,
+            "calendar_cache",
+            "is_all_day",
+            "is_all_day INTEGER NOT NULL DEFAULT 0",
+        )
         connection.commit()
 
 def create_app():

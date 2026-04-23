@@ -1,134 +1,253 @@
 """
 services/feed_fetcher.py
-
 Fetches and parses a user's Canvas iCal feed, then caches
 the parsed events in the database.
-
 Canvas iCal feeds are unauthenticated (the URL contains an opaque token)
-and return standard RFC 5545 iCalendar data [6] [7].
-
-Phase 5 (blocked until fall enrollment) [1] [3].
+and return standard RFC 5545 iCalendar data.
 Functional now against any valid .ics feed URL.
 """
-
+import logging
 import requests as http_requests
-from datetime import datetime, timezone
-
+from datetime import datetime, date as date_type, timezone
 import icalendar
-
 from extensions import db
 from models import CalendarCache
 
+logger = logging.getLogger(__name__)
+
 
 # ── Event type classification ────────────────────────────────────────────────
-
 def _classify_event(summary, description):
     """
-    Attempt to classify a Canvas calendar event by type based on
+    Attempt to classify a calendar event by type based on
     keywords in the summary and description fields.
-
-    Canvas iCal feeds embed event type information inconsistently.
-    Assignment due dates typically include "due" or the assignment name.
-    Quiz events may include "quiz" or "exam". Calendar events from
-    the course calendar are more generic.
-
     Returns one of: "assignment", "quiz", "event", "unknown"
     """
     text = f"{summary} {description}".lower()
-
     if "quiz" in text or "exam" in text or "test" in text:
         return "quiz"
     if "due" in text or "assignment" in text or "homework" in text or "hw" in text:
         return "assignment"
     if "office hour" in text or "review session" in text:
         return "event"
-
     return "unknown"
 
 
 def _extract_course_name(summary):
     """
     Attempt to extract the course name from a Canvas event summary.
-
     Canvas iCal event summaries typically follow patterns like:
         "Assignment Name [CHEM 150-001]"
         "Quiz 3 [BIOL 141]"
-        "Course Event Name"
-
     The bracketed portion, if present, contains the course identifier.
     """
     if not summary:
         return None
-
-    # Look for bracketed course identifier
     if "[" in summary and "]" in summary:
         start = summary.rfind("[")
         end = summary.rfind("]")
         if start < end:
             return summary[start + 1:end].strip()
-
     return None
+
+
+def _stringify_ical(value):
+    """Return a trimmed string value for an iCal property."""
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
+
+
+def _first_category_value(categories_prop):
+    """Extract the first category value from iCal CATEGORIES."""
+    if not categories_prop:
+        return None
+    cats = getattr(categories_prop, "cats", None)
+    if cats:
+        for item in cats:
+            text = _stringify_ical(item)
+            if text:
+                return text
+        return None
+    if isinstance(categories_prop, (list, tuple)):
+        for item in categories_prop:
+            text = _stringify_ical(item)
+            if text:
+                return text
+        return None
+    raw = _stringify_ical(categories_prop)
+    if not raw:
+        return None
+    if "," in raw:
+        first = raw.split(",", 1)[0].strip()
+        return first or None
+    return raw
+
+
+def _organizer_cn_value(organizer_prop):
+    """Extract ORGANIZER CN parameter when available."""
+    if not organizer_prop:
+        return None
+    params = getattr(organizer_prop, "params", None)
+    if not params:
+        return None
+    cn = params.get("CN")
+    return _stringify_ical(cn)
+
+
+def _resolve_course_label(component, calendar_name, is_canvas_feed):
+    """Resolve event course/source label using provider metadata priority."""
+    event_calname = _stringify_ical(component.get("X-WR-CALNAME"))
+    if event_calname:
+        return event_calname
+    if calendar_name:
+        return calendar_name
+    category = _first_category_value(component.get("CATEGORIES"))
+    if category:
+        return category
+    organizer_cn = _organizer_cn_value(component.get("ORGANIZER"))
+    if organizer_cn:
+        return organizer_cn
+    if is_canvas_feed:
+        return "Canvas"
+    return "Other"
 
 
 def _to_datetime(dt_value):
     """
     Convert an icalendar date/datetime value to a Python datetime.
+    Returns a tuple of (datetime, is_all_day).
 
     The icalendar library returns either datetime.date or datetime.datetime
     objects depending on whether the event is all-day or timed. This function
-    normalizes both to datetime for consistent database storage.
+    normalizes both to datetime for consistent database storage, and signals
+    whether the original value was a DATE (all-day) type.
     """
     if dt_value is None:
-        return None
+        return None, False
 
     # icalendar wraps values in vDate/vDatetime; extract the underlying dt
-    if hasattr(dt_value, "dt"):
-        dt_value = dt_value.dt
+    raw = dt_value.dt if hasattr(dt_value, "dt") else dt_value
 
-    # If it's a date (not datetime), treat it as midnight UTC
-    if isinstance(dt_value, datetime):
-        if dt_value.tzinfo is not None:
-            return dt_value.replace(tzinfo=None)  # Store as naive UTC
-        return dt_value
+    # DATE type (all-day event): raw is datetime.date, NOT datetime.datetime
+    # isinstance(datetime.datetime, datetime.date) is True, so check datetime first
+    if isinstance(raw, datetime):
+        # Timed event
+        if raw.tzinfo is not None:
+            return raw.astimezone(timezone.utc).replace(tzinfo=None), False
+        return raw, False
 
-    # date object (all-day event)
-    return datetime(dt_value.year, dt_value.month, dt_value.day)
+    if isinstance(raw, date_type):
+        # All-day event: store as midnight UTC, flag as all-day
+        return datetime(raw.year, raw.month, raw.day), True
+
+    return None, False
 
 
 # ── Core fetch and parse ─────────────────────────────────────────────────────
+def _normalize_feed_url(feed_url):
+    """Normalize feed URLs to a fetchable HTTPS URL."""
+    if feed_url is None:
+        return ""
+    normalized = str(feed_url).strip()
+    lower = normalized.lower()
+    if lower.startswith("webcal://"):
+        return "https://" + normalized[len("webcal://"):]
+    if lower.startswith("http://"):
+        return "https://" + normalized[len("http://"):]
+    return normalized
 
-def fetch_and_parse_ical(feed_url, timeout=30):
+
+def fetch_and_parse_ical(feed_url, timeout=20):
     """
     Fetch an iCal feed from a URL and parse it into a list of event dicts.
 
     Args:
-        feed_url: The full Canvas iCal feed URL.
+        feed_url: The full calendar iCal feed URL.
         timeout: HTTP request timeout in seconds.
 
     Returns:
         List of dicts, each containing:
             uid, title, start, end, event_type, course_name,
-            description, fetched_at
+            description, fetched_at, is_all_day
 
     Raises:
         requests.RequestException on HTTP errors.
         ValueError if the response is not valid iCalendar data.
     """
-    response = http_requests.get(feed_url, timeout=timeout)
-    response.raise_for_status()
+    normalized_url = _normalize_feed_url(feed_url)
+    if not normalized_url:
+        raise ValueError("Feed URL is empty after normalization.")
 
-    content_type = response.headers.get("Content-Type", "")
+    headers = {
+        "User-Agent": "APStudy-Calendar-Fetcher/1.0",
+    }
+
+    logger.info("Fetching calendar feed: url=%s", normalized_url)
+
+    try:
+        response = http_requests.get(
+            normalized_url,
+            headers=headers,
+            timeout=timeout,
+            allow_redirects=True,
+        )
+    except http_requests.RequestException as exc:
+        logger.error(
+            "Calendar feed fetch failed: url=%s error=%s",
+            normalized_url,
+            str(exc),
+            exc_info=True,
+        )
+        raise
+
+    raw_bytes = response.content
     raw_text = response.text
 
-    # Validate that the response looks like iCalendar data
-    if "BEGIN:VCALENDAR" not in raw_text[:500]:
+    if response.status_code != 200:
+        logger.error(
+            "Calendar feed returned non-200 status: url=%s status_code=%s",
+            normalized_url,
+            response.status_code,
+        )
         raise ValueError(
-            f"Response does not appear to be iCalendar data. "
-            f"Content-Type: {content_type}, "
-            f"First 200 chars: {raw_text[:200]}"
+            f"Feed fetch failed for {normalized_url}: HTTP {response.status_code}"
         )
 
-    cal = icalendar.Calendar.from_ical(raw_text)
+    if not raw_bytes:
+        logger.error("Calendar feed response body is empty: url=%s", normalized_url)
+        raise ValueError(f"Feed fetch failed for {normalized_url}: empty response body")
+
+    if "BEGIN:VCALENDAR" not in raw_text.upper():
+        content_type = response.headers.get("Content-Type", "")
+        logger.error(
+            "Calendar feed response is not iCalendar data: url=%s status_code=%s content_type=%s preview=%s",
+            normalized_url,
+            response.status_code,
+            content_type,
+            raw_text[:200],
+        )
+        raise ValueError(
+            f"Feed fetch failed for {normalized_url}: response is not iCalendar data"
+        )
+
+    try:
+        cal = icalendar.Calendar.from_ical(raw_bytes)
+    except Exception as exc:
+        logger.error(
+            "Calendar feed parse failed: url=%s status_code=%s error=%s",
+            normalized_url,
+            response.status_code,
+            str(exc),
+            exc_info=True,
+        )
+        raise ValueError(f"Feed parse failed for {normalized_url}: {exc}") from exc
+
+    calendar_name = _stringify_ical(cal.get("X-WR-CALNAME"))
+    prodid = _stringify_ical(cal.get("PRODID")) or ""
+    is_canvas_feed = "canvas" in prodid.lower()
+
     now = datetime.utcnow()
     events = []
 
@@ -140,8 +259,14 @@ def fetch_and_parse_ical(feed_url, timeout=30):
         description = str(component.get("DESCRIPTION", "")) if component.get("DESCRIPTION") else ""
         uid = str(component.get("UID", "")) if component.get("UID") else None
 
-        dtstart = _to_datetime(component.get("DTSTART"))
-        dtend = _to_datetime(component.get("DTEND"))
+        dtstart_raw = component.get("DTSTART")
+        dtend_raw = component.get("DTEND")
+
+        dtstart, start_is_all_day = _to_datetime(dtstart_raw)
+        dtend, end_is_all_day = _to_datetime(dtend_raw)
+
+        # An event is all-day if DTSTART was a DATE type
+        is_all_day = start_is_all_day
 
         events.append({
             "uid": uid,
@@ -149,16 +274,25 @@ def fetch_and_parse_ical(feed_url, timeout=30):
             "start": dtstart,
             "end": dtend,
             "event_type": _classify_event(summary, description),
-            "course_name": _extract_course_name(summary),
+            "course_name": _resolve_course_label(
+                component,
+                calendar_name=calendar_name,
+                is_canvas_feed=is_canvas_feed,
+            ),
             "description": description,
             "fetched_at": now,
+            "is_all_day": is_all_day,
         })
 
+    logger.info(
+        "Calendar feed parsed successfully: url=%s events_parsed=%s",
+        normalized_url,
+        len(events),
+    )
     return events
 
 
 # ── Database caching ─────────────────────────────────────────────────────────
-
 def fetch_and_cache_feeds(user_id, feed_urls):
     """
     Fetch one or more user calendar iCal feeds, parse them, and replace
@@ -184,12 +318,21 @@ def fetch_and_cache_feeds(user_id, feed_urls):
 
     aggregated_events = []
     for feed_url in feed_urls:
-        aggregated_events.extend(fetch_and_parse_ical(feed_url))
+        try:
+            aggregated_events.extend(fetch_and_parse_ical(feed_url))
+        except Exception as exc:
+            normalized_url = _normalize_feed_url(feed_url)
+            logger.error(
+                "Failed to fetch or parse calendar feed: url=%s error=%s",
+                normalized_url,
+                str(exc),
+                exc_info=True,
+            )
+            raise
 
     deduped_events = []
     seen_uids = set()
     seen_fallbacks = set()
-
     for event in aggregated_events:
         uid = event.get("uid")
         if uid:
@@ -205,7 +348,6 @@ def fetch_and_cache_feeds(user_id, feed_urls):
             if fallback_key in seen_fallbacks:
                 continue
             seen_fallbacks.add(fallback_key)
-
         deduped_events.append(event)
 
     # Delete all existing cached events for this user
@@ -223,6 +365,7 @@ def fetch_and_cache_feeds(user_id, feed_urls):
             course_name=event["course_name"],
             raw_description=event["description"],
             fetched_at=event["fetched_at"],
+            is_all_day=event["is_all_day"],
         )
         db.session.add(cache_entry)
 
