@@ -98,6 +98,9 @@ def _organizer_cn_value(organizer_prop):
 
 def _resolve_course_label(component, calendar_name, is_canvas_feed):
     """Resolve event course/source label using provider metadata priority."""
+    if is_canvas_feed:
+        return "Canvas"
+
     event_calname = _stringify_ical(component.get("X-WR-CALNAME"))
     if event_calname:
         return event_calname
@@ -109,8 +112,6 @@ def _resolve_course_label(component, calendar_name, is_canvas_feed):
     organizer_cn = _organizer_cn_value(component.get("ORGANIZER"))
     if organizer_cn:
         return organizer_cn
-    if is_canvas_feed:
-        return "Canvas"
     return "Other"
 
 

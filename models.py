@@ -122,6 +122,31 @@ class CalendarCache(db.Model):
     )
 
 
+class UserCalendarPreference(db.Model):
+    __tablename__ = "user_calendar_preferences"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    calendar_name = db.Column(db.String(255), nullable=False)
+    color_hex = db.Column(db.String(7), default="#6366f1", nullable=False)
+    visible = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=True)
+
+    __table_args__ = (
+        db.UniqueConstraint(
+            "user_id",
+            "calendar_name",
+            name="uq_user_calendar_pref_user_calendar",
+        ),
+    )
+
+
 @login_manager.user_loader
 def load_user(user_id):
     if not user_id:

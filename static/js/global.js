@@ -78,6 +78,9 @@ function renderGlobalChrome() {
         <a href="/dashboard" class="text-xl font-semibold tracking-tighter text-on-surface-variant hover:text-primary transition-colors no-underline">Emory.APStudy.org</a>
     </div>
     <div class="flex items-center gap-3">
+        <button id="courses-open-btn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-full border border-outline-variant/40 bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:border-primary/40 hover:bg-surface-container transition-colors" title="Search courses">
+            Courses
+        </button>
         <button aria-disabled="true" type="button" class="text-on-surface-variant/60 p-2 rounded-full cursor-default" title="Reload">
             <span class="material-symbols-outlined" data-icon="sync">sync</span>
         </button>

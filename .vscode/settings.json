@@ -3,6 +3,10 @@
         "/^python -m compileall app\\.py blueprints$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "/^node --check static/js/dashboard\\.js$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     }
 }

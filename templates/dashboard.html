@@ -128,16 +128,29 @@
 <span id="calendar-subtitle">Pulling events from your feed</span>
 </p>
 </div>
-<div class="flex flex-wrap items-center gap-3">
+<div class="flex flex-col lg:flex-row gap-3 lg:items-center">
+<!-- Weekly/Monthly Toggle -->
 <div class="inline-flex items-center rounded-lg border border-outline-variant/20 bg-surface-container-low p-1">
 <button id="calendar-view-week" type="button" class="px-3 py-1.5 text-sm rounded-md bg-primary text-on-primary font-medium">Weekly</button>
 <button id="calendar-view-month" type="button" class="px-3 py-1.5 text-sm rounded-md text-on-surface-variant hover:text-on-surface">Monthly</button>
 </div>
-<div class="flex items-center gap-2 bg-surface-container-low p-1.5 rounded-lg border border-outline-variant/10">
+
+<!-- Navigation Controls -->
+<div class="flex items-center gap-2 bg-surface-container-low p-1.5 rounded-lg border border-outline-variant/10 flex-wrap">
+<button id="calendar-today" type="button" class="text-sm font-medium text-on-surface px-3 py-1 rounded-md hover:bg-surface-container-high">Today</button>
+<div class="h-6 w-px bg-outline-variant/20"></div>
+<!-- Calendars Dropdown -->
+<div class="relative" id="calendar-popover-root">
+<button id="calendar-toggle-menu" type="button" class="px-3 py-1.5 text-sm flex items-center gap-2 text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span>
+<span>Calendars</span>
+</button>
+<div id="calendar-menu" style="display:none;"></div>
+</div>
+<div class="h-6 w-px bg-outline-variant/20"></div>
 <button id="calendar-prev" type="button" class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center" aria-label="Previous period">
 <span class="material-symbols-outlined text-[20px]">chevron_left</span>
 </button>
-<button id="calendar-today" type="button" class="text-sm font-medium text-on-surface px-3 py-1 rounded-md hover:bg-surface-container-high">Today</button>
 <button id="calendar-next" type="button" class="p-2 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center" aria-label="Next period">
 <span class="material-symbols-outlined text-[20px]">chevron_right</span>
 </button>
