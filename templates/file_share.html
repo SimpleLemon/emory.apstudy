@@ -1,5 +1,5 @@
 <!-- HTML Meta Tags -->
-<title>Dashboard - Emory University | APStudy</title>
+<title>File Share - Emory University | APStudy</title>
 <html lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
@@ -14,23 +14,27 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@48,400,1,0" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <script src="{{ url_for('static', filename='js/global.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/dashboard.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/calendar_context_menu.js') }}" defer></script>
-<script src="{{ url_for('static', filename='js/calendar_event_form.js') }}" defer></script>
+<script>
+    window.FILE_SHARE_CONFIG = {
+        allowedExpiryOptions: {{ allowed_expiry_options|tojson }},
+        defaultExpiryDays: {{ default_expiry_days }}
+    };
+</script>
+<script src="{{ url_for('static', filename='js/file_share.js') }}" defer></script>
 <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-<meta name="description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
+<meta name="description" content="Upload and share files securely with automatic expiration for APStudy."/>
 <!-- Facebook Meta Tags -->
-<meta property="og:url" content="https://emory.apstudy.org/">
+<meta property="og:url" content="https://emory.apstudy.org/files">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Emory University | APStudy">
-<meta property="og:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
+<meta property="og:title" content="File Share | APStudy">
+<meta property="og:description" content="Upload and share files securely with automatic expiration for APStudy."/>
 <meta property="og:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
 <!-- Twitter Meta Tags -->
 <meta name="twitter:card" content="summary_large_image">
 <meta property="twitter:domain" content="emory.apstudy.org">
-<meta property="twitter:url" content="https://emory.apstudy.org/">
-<meta name="twitter:title" content="Emory University | APStudy">
-<meta name="twitter:description" content="Track and plan assignments and class schedules. Built for Emory University by an Emory Student."/>
+<meta property="twitter:url" content="https://emory.apstudy.org/files">
+<meta name="twitter:title" content="File Share | APStudy">
+<meta name="twitter:description" content="Upload and share files securely with automatic expiration for APStudy."/>
 <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-0NT330ZX5L"></script>
@@ -117,59 +121,73 @@
     </style>
 </head>
 <global class="thenav" data-profile-picture="{{ user.picture }}"></global>
-<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary-fixed" data-default-dashboard-view="{{ preferred_calendar_view }}">
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased selection:bg-primary/30 selection:text-primary-fixed">
 
-<!-- Main Content Canvas -->
 <main class="flex-1 w-full max-w-[1600px] mx-auto px-6 md:px-8 pt-6 pb-10 flex flex-col gap-12 relative z-10">
 <section class="flex flex-col gap-4 w-full animate-fade-in-up">
-<div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
 <div>
-<h1 id="calendar-title" class="text-3xl font-headline font-semibold text-on-surface tracking-tight mb-1">Loading calendar...</h1>
+<h1 class="text-3xl font-headline font-semibold text-on-surface tracking-tight mb-1">File Share</h1>
 <p class="text-on-surface-variant text-sm flex items-center gap-2">
-<span class="material-symbols-outlined text-[18px]">calendar_today</span>
-<span id="calendar-subtitle">Pulling events from your feed</span>
+<span class="material-symbols-outlined text-[18px]">upload_file</span>
+<span>Upload and share files up to 50 MB</span>
 </p>
 </div>
-<div class="flex flex-col lg:flex-row gap-3 lg:items-center">
-<!-- Weekly/Monthly Toggle -->
-<div class="inline-flex items-center rounded-lg border border-outline-variant/20 bg-surface-container-low p-1">
-<button id="calendar-view-week" type="button" class="px-3 py-1.5 text-sm rounded-md bg-primary text-on-primary font-medium">Weekly</button>
-<button id="calendar-view-month" type="button" class="px-3 py-1.5 text-sm rounded-md text-on-surface-variant hover:text-on-surface">Monthly</button>
+
+<div class="flex items-center justify-between">
+    <div>
+        <button id="file-share-open-modal" type="button" class="inline-flex items-center gap-3 rounded-2xl bg-surface-container-high px-4 py-3 shadow-md hover:bg-surface-container transition-colors">
+            <span class="material-symbols-outlined text-[20px]">add</span>
+            <span class="font-medium">New</span>
+        </button>
+    </div>
+    <div class="text-sm text-on-surface-variant">Upload files or manage your existing files below.</div>
 </div>
 
-<!-- Navigation Controls -->
-<div class="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-lg border border-outline-variant/10 flex-wrap">
-<!-- Calendars Dropdown -->
-<div class="relative" id="calendar-popover-root">
-<button id="calendar-toggle-menu" type="button" class="px-3 py-1.5 text-sm flex items-center gap-2 text-on-surface-variant hover:text-on-surface rounded-md hover:bg-surface-container-high transition-colors">
-<span class="material-symbols-outlined text-[18px]">calendar_month</span>
-<span>Calendars</span>
-</button>
-<div id="calendar-menu" style="display:none;"></div>
-</div>
-<div class="h-6 w-px bg-outline-variant/20"></div>
-<button id="calendar-prev" type="button" class="h-8 w-8 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center" aria-label="Previous period">
-<span class="material-symbols-outlined text-[20px]">chevron_left</span>
-</button>
-<button id="calendar-next" type="button" class="h-8 w-8 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high rounded-md transition-colors flex items-center justify-center" aria-label="Next period">
-<span class="material-symbols-outlined text-[20px]">chevron_right</span>
-</button>
-</div>
-</div>
-</div>
-<div class="bg-surface-container-low p-4 sm:p-5 rounded-2xl border border-outline-variant/10">
-<div id="calendar-view-root"></div>
+<!-- Modal (hidden by default) -->
+<div id="file-share-modal" class="hidden fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-2xl bg-surface-container-low rounded-2xl p-6 border border-outline-variant/10 shadow-2xl">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Upload Files</h3>
+            <button id="file-share-close-modal" class="text-on-surface-variant">Close</button>
+        </div>
+
+        <input id="file-share-input" class="hidden" type="file" multiple />
+        <div id="file-share-dropzone" class="border-2 border-dashed border-outline-variant/30 rounded-2xl p-6 text-center bg-surface-container-lowest hover:bg-surface-container-low transition-colors cursor-pointer mb-4">
+            <div class="flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-4xl text-on-surface-variant/40">description</span>
+                <div>
+                    <h4 class="text-base font-semibold text-on-surface">Drag files here</h4>
+                    <p class="text-sm text-on-surface-variant mt-1">Or <button id="file-share-pick" type="button" class="text-primary hover:underline font-medium">choose files</button></p>
+                    <p class="text-xs text-on-surface-variant mt-2">You may upload up to 5 files at once. Each file is limited to 50 MB.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="file-share-selected-list" class="flex flex-col gap-3 max-h-64 overflow-auto mb-4"></div>
+
+        <div id="file-share-progress-wrap" class="hidden mb-4">
+            <div class="w-full rounded-full bg-surface-container-highest overflow-hidden h-2">
+                <div id="file-share-progress-bar" class="bg-primary h-full transition-all" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <div id="file-share-error" class="hidden text-sm text-error mb-3"></div>
+
+        <div class="flex justify-end">
+            <button id="file-share-upload" class="inline-flex items-center gap-2 rounded-md bg-primary text-on-primary px-4 py-2 text-sm font-medium hover:opacity-95 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed">Upload</button>
+        </div>
+    </div>
 </div>
 </section>
 
 <section class="flex flex-col gap-6 w-full animate-fade-in-up" style="animation-delay: 100ms;">
 <div class="flex items-center justify-between border-b border-surface-container-low pb-4">
 <h2 class="text-xl font-headline font-semibold text-on-surface tracking-tight flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">assignment</span>
-Upcoming Assignments
+<span class="material-symbols-outlined text-primary">folder_shared</span>
+My Files
 </h2>
 </div>
-<div id="assignments-root" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+<div id="file-share-files" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
 </section>
 </main>
 

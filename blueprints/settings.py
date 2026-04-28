@@ -507,6 +507,34 @@ def update_refresh_interval():
     return jsonify({"status": "ok", "refresh_interval_minutes": minutes})
 
 
+@settings_bp.route("/api/interface-preferences", methods=["POST"])
+@login_required
+def update_interface_preferences():
+    """Persist interface-level preferences such as the default dashboard calendar view."""
+    data = request.get_json(silent=True) or {}
+    preferred_calendar_view = (data.get("preferred_calendar_view") or "").strip().lower()
+
+    if preferred_calendar_view not in {"week", "month"}:
+        return jsonify({"error": "Preferred calendar view must be weekly or monthly."}), 400
+
+    settings = UserSettings.query.filter_by(user_id=current_user.id).first()
+    if not settings:
+        settings = UserSettings(
+            user_id=current_user.id,
+            ics_secret_token=secrets.token_urlsafe(32),
+        )
+        db.session.add(settings)
+
+    settings.preferred_calendar_view = preferred_calendar_view
+    settings.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({
+        "status": "ok",
+        "preferred_calendar_view": preferred_calendar_view,
+    })
+
+
 @settings_bp.route("/api/regenerate-token", methods=["POST"])
 @login_required
 def regenerate_ics_token():

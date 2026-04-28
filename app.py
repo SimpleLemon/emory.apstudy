@@ -127,6 +127,12 @@ def _ensure_sqlite_schema(database_uri):
         )
         _ensure_sqlite_column(
             connection,
+            "user_settings",
+            "preferred_calendar_view",
+            "preferred_calendar_view VARCHAR(16) NOT NULL DEFAULT 'week'",
+        )
+        _ensure_sqlite_column(
+            connection,
             "calendar_cache",
             "is_all_day",
             "is_all_day INTEGER NOT NULL DEFAULT 0",
@@ -136,6 +142,7 @@ def _ensure_sqlite_schema(database_uri):
 def create_app():
     app = Flask(__name__)
     app.secret_key = os.environ.get("FLASK_SECRET_KEY", "dev-fallback-key")
+    app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
     database_uri = _resolve_database_uri(
         os.environ.get(
             "DATABASE_URI",
@@ -145,6 +152,8 @@ def create_app():
     _repair_sqlite_database(database_uri)
     app.config["SQLALCHEMY_DATABASE_URI"] = database_uri
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["FILE_SHARE_UPLOAD_DIR"] = os.path.join(app.root_path, "uploads", "file_share")
+    os.makedirs(app.config["FILE_SHARE_UPLOAD_DIR"], exist_ok=True)
 
     # Initialize extensions
     from extensions import db, login_manager
@@ -155,12 +164,18 @@ def create_app():
     from blueprints import register_blueprints
     register_blueprints(app)
 
+    @app.cli.command("cleanup-files")
+    def cleanup_files_command():
+        from services.file_cleanup import cleanup_expired_files
+
+        cleanup_expired_files()
+
     from services.scheduler import init_scheduler
     init_scheduler(app)
 
     # Create database tables on first run
     with app.app_context():
-        from models import User, UserSettings, UserCourse, CalendarCache
+        from models import User, UserSettings, UserCourse, CalendarCache, SharedFile
         db.create_all()
         _ensure_sqlite_schema(database_uri)
 

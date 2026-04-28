@@ -341,13 +341,29 @@
                             </div>
                         </div>
                     </section>
-                    <!-- Notifications -->
+                    <!-- Interface Preferences -->
                     <section>
                         <h2 class="text-xl font-headline font-medium text-on-surface mb-6 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary-container" data-icon="notifications_active">notifications_active</span>
-                            Notifications
+                            <span class="material-symbols-outlined text-primary-container" data-icon="tune">tune</span>
+                            Interface Preferences
                         </h2>
                         <div class="bg-surface-container rounded-xl flex flex-col">
+                            <div class="p-6 border-b border-surface-container-low">
+                                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                                    <div>
+                                        <h3 class="font-headline font-medium text-on-surface">Preferred Calendar View</h3>
+                                        <p class="text-sm text-on-surface-variant mt-1">Dashboard opens in this view by default.</p>
+                                    </div>
+                                </div>
+                                <div id="preferred-calendar-view-toggle" data-default-calendar-view="{{ settings.preferred_calendar_view if settings and settings.preferred_calendar_view in ['week', 'month'] else 'week' }}" class="inline-flex items-center rounded-lg border border-outline-variant/20 bg-surface-container-low p-1">
+                                    <button type="button" data-calendar-view-option="week" class="js-calendar-view-option px-3 py-1.5 text-sm rounded-md {{ 'bg-primary text-on-primary font-medium' if not settings or settings.preferred_calendar_view != 'month' else 'text-on-surface-variant hover:text-on-surface' }}">Weekly</button>
+                                    <button type="button" data-calendar-view-option="month" class="js-calendar-view-option px-3 py-1.5 text-sm rounded-md {{ 'bg-primary text-on-primary font-medium' if settings and settings.preferred_calendar_view == 'month' else 'text-on-surface-variant hover:text-on-surface' }}">Monthly</button>
+                                </div>
+                            </div>
+                            <div class="px-6 pt-5 pb-4">
+                                <h3 class="font-headline font-medium text-on-surface mb-1">Notifications</h3>
+                                <p class="text-sm text-on-surface-variant">Choose which alerts you want to receive.</p>
+                            </div>
                             <!-- Assignment Reminders -->
                             <div class="flex items-center justify-between p-6">
                                 <div>
@@ -381,8 +397,8 @@
                         </div>
                     </section>
                     <div class="mt-12 flex justify-end">
-                        <button class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-medium px-6 py-2.5 rounded-lg hover:scale-[1.02] transition-transform duration-150 shadow-lg shadow-primary/20">
-                            Save Preferences
+                        <button id="save-interface-preferences" class="bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-medium px-6 py-2.5 rounded-lg hover:scale-[1.02] transition-transform duration-150 shadow-lg shadow-primary/20" type="button">
+                            Save Interface Preferences
                         </button>
                     </div>
                 </div>
@@ -461,6 +477,8 @@
         }
 
         const MAX_OTHER_CALENDARS = 10;
+        const preferredCalendarViewToggle = document.getElementById('preferred-calendar-view-toggle');
+        const DEFAULT_CALENDAR_VIEW = preferredCalendarViewToggle?.dataset.defaultCalendarView === 'month' ? 'month' : 'week';
 
         function updateOtherCalendarCount() {
             const count = document.querySelectorAll('input[data-other-calendar-url]').length;
@@ -516,6 +534,31 @@
                 .filter(Boolean);
         }
 
+        function updatePreferredCalendarView(view) {
+            const normalizedView = view === 'month' ? 'month' : 'week';
+            document.querySelectorAll('.js-calendar-view-option').forEach((button) => {
+                const buttonView = button.dataset.calendarViewOption;
+                const selected = buttonView === normalizedView;
+                button.className = selected
+                    ? 'js-calendar-view-option px-3 py-1.5 text-sm rounded-md bg-primary text-on-primary font-medium'
+                    : 'js-calendar-view-option px-3 py-1.5 text-sm rounded-md text-on-surface-variant hover:text-on-surface';
+            });
+        }
+
+        let selectedCalendarView = DEFAULT_CALENDAR_VIEW;
+        updatePreferredCalendarView(selectedCalendarView);
+
+        preferredCalendarViewToggle?.addEventListener('click', (event) => {
+            const button = event.target.closest('.js-calendar-view-option');
+            if (!button) {
+                return;
+            }
+
+            const nextView = button.dataset.calendarViewOption === 'month' ? 'month' : 'week';
+            selectedCalendarView = nextView;
+            updatePreferredCalendarView(selectedCalendarView);
+        });
+
         document.getElementById('add-other-calendar')?.addEventListener('click', () => {
             const container = document.getElementById('other-calendar-links');
             if (!container) {
@@ -555,6 +598,17 @@
                 nameInput.value = data.name;
                 document.getElementById('member-since').value = data.member_since;
                 showSettingsBanner('Profile saved.', 'success');
+            } catch (error) {
+                showSettingsBanner(error.message, 'error');
+            }
+        });
+
+        document.getElementById('save-interface-preferences')?.addEventListener('click', async () => {
+            try {
+                await postJson('{{ url_for("settings.update_interface_preferences") }}', {
+                    preferred_calendar_view: selectedCalendarView,
+                });
+                showSettingsBanner('Interface preferences saved.', 'success');
             } catch (error) {
                 showSettingsBanner(error.message, 'error');
             }

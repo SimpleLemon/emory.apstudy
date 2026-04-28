@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from flask import Blueprint, jsonify, request, Response
 from flask_login import login_required, current_user
 from extensions import db
-from models import User, UserSettings, CalendarCache, UserCalendarPreference
+from models import User, UserSettings, CalendarCache, UserCalendarPreference, UserEvent
 
 calendar_bp = Blueprint("calendar", __name__)
 logger = logging.getLogger(__name__)
@@ -89,6 +89,21 @@ def _serialize_event(e):
     }
 
 
+def _serialize_user_event(ev):
+    """Serialize a UserEvent row for API response."""
+    return {
+        "id": ev.id,
+        "title": ev.title,
+        "description": ev.description,
+        "start": _serialize_datetime(ev.start, ev.is_all_day),
+        "end": _serialize_datetime(ev.end, ev.is_all_day),
+        "is_all_day": bool(ev.is_all_day),
+        "color": ev.color,
+        "created_at": ev.created_at.isoformat() if ev.created_at else None,
+        "updated_at": ev.updated_at.isoformat() if ev.updated_at else None,
+    }
+
+
 def _configured_feed_urls(settings):
     """Return all configured calendar feed URLs for a user."""
     if not settings:
@@ -115,17 +130,150 @@ def get_events():
     GET /api/calendar/events
     Returns cached calendar events for the authenticated user.
     """
-    events = CalendarCache.query.filter_by(
+    cache_events = CalendarCache.query.filter_by(
         user_id=current_user.id
     ).order_by(
         CalendarCache.event_start.asc()
     ).all()
 
+    created_events = UserEvent.query.filter_by(
+        user_id=current_user.id
+    ).order_by(
+        UserEvent.start.asc()
+    ).all()
+
+    serialized = [_serialize_event(e) for e in cache_events] + [_serialize_user_event(e) for e in created_events]
+
     return jsonify({
         "user_id": current_user.id,
-        "count": len(events),
-        "events": [_serialize_event(e) for e in events],
+        "count": len(serialized),
+        "events": serialized,
     })
+
+
+def _parse_iso_like(s):
+    """Parse ISO-ish datetime or date strings into a naive UTC datetime for storage.
+
+    Accepts date-only strings (YYYY-MM-DD) and full ISO strings that may end with Z.
+    Returns a naive datetime in UTC for timed events, and local-midnight datetime for all-day.
+    """
+    if not s:
+        return None
+
+    s = str(s)
+    # date-only -> treat as local midnight (all-day semantics)
+    import re
+    from datetime import datetime, timezone
+
+    if re.match(r"^\d{4}-\d{2}-\d{2}$", s):
+        parts = s.split("-")
+        return datetime(int(parts[0]), int(parts[1]), int(parts[2]), 0, 0, 0)
+
+    # replace trailing Z with +00:00 for fromisoformat
+    if s.endswith("Z"):
+        s = s[:-1] + "+00:00"
+
+    try:
+        return datetime.fromisoformat(s)
+    except Exception:
+        return None
+
+
+@calendar_bp.route("/events", methods=["POST"])
+@login_required
+def create_event():
+    """POST /api/calendar/events - create a user event"""
+    data = request.get_json() or {}
+    title = (data.get("title") or "").strip()
+    description = data.get("description")
+    start_raw = data.get("start_date") or data.get("start")
+    end_raw = data.get("end_date") or data.get("end")
+    all_day = bool(data.get("all_day", False))
+    color = data.get("color")
+
+    if not title:
+        return jsonify({"error": "title is required"}), 400
+
+    start_dt = _parse_iso_like(start_raw)
+    end_dt = _parse_iso_like(end_raw)
+
+    if not start_dt or not end_dt:
+        return jsonify({"error": "start_date and end_date must be valid ISO datetimes"}), 400
+
+    if end_dt <= start_dt:
+        return jsonify({"error": "end_date must be after start_date"}), 400
+
+    ev = UserEvent(
+        user_id=current_user.id,
+        title=title,
+        description=description,
+        start=start_dt,
+        end=end_dt,
+        is_all_day=all_day,
+        color=color,
+    )
+    db.session.add(ev)
+    db.session.commit()
+
+    return jsonify({"success": True, "event": _serialize_user_event(ev)})
+
+
+@calendar_bp.route("/events/<int:event_id>", methods=["GET"])
+@login_required
+def get_single_event(event_id):
+    ev = UserEvent.query.filter_by(id=event_id, user_id=current_user.id).first()
+    if not ev:
+        return jsonify({"error": "not found"}), 404
+    return jsonify({"event": _serialize_user_event(ev)})
+
+
+@calendar_bp.route("/events/<int:event_id>", methods=["PUT"])
+@login_required
+def update_event(event_id):
+    ev = UserEvent.query.filter_by(id=event_id, user_id=current_user.id).first()
+    if not ev:
+        return jsonify({"error": "not found"}), 404
+
+    data = request.get_json() or {}
+    title = data.get("title")
+    description = data.get("description")
+    start_raw = data.get("start_date") or data.get("start")
+    end_raw = data.get("end_date") or data.get("end")
+    all_day = data.get("all_day")
+    color = data.get("color")
+
+    if title is not None:
+        ev.title = title
+    if description is not None:
+        ev.description = description
+    if start_raw is not None:
+        parsed = _parse_iso_like(start_raw)
+        if parsed:
+            ev.start = parsed
+    if end_raw is not None:
+        parsed = _parse_iso_like(end_raw)
+        if parsed:
+            ev.end = parsed
+    if all_day is not None:
+        ev.is_all_day = bool(all_day)
+    if color is not None:
+        ev.color = color
+
+    ev.updated_at = datetime.utcnow()
+    db.session.commit()
+
+    return jsonify({"success": True, "event": _serialize_user_event(ev)})
+
+
+@calendar_bp.route("/events/<int:event_id>", methods=["DELETE"])
+@login_required
+def delete_event(event_id):
+    ev = UserEvent.query.filter_by(id=event_id, user_id=current_user.id).first()
+    if not ev:
+        return jsonify({"error": "not found"}), 404
+    db.session.delete(ev)
+    db.session.commit()
+    return jsonify({"success": True})
 
 
 @calendar_bp.route("/refresh", methods=["POST"])

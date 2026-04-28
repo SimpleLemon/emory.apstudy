@@ -37,6 +37,11 @@ class User(UserMixin, db.Model):
         back_populates="user",
         cascade="all, delete-orphan",
     )
+    user_created_events = db.relationship(
+        "UserEvent",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
 
 
 class UserSettings(db.Model):
@@ -51,6 +56,7 @@ class UserSettings(db.Model):
     other_ical_urls_json = db.Column(db.Text, nullable=True)
     ics_secret_token = db.Column(db.String(255), unique=True, nullable=True, index=True)
     feed_refresh_minutes = db.Column(db.Integer, default=15, nullable=False)
+    preferred_calendar_view = db.Column(db.String(16), default="week", nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     updated_at = db.Column(db.DateTime, nullable=True)
 
@@ -132,6 +138,28 @@ class UserCalendarPreference(db.Model):
         nullable=False,
         index=True,
     )
+
+
+class UserEvent(db.Model):
+    __tablename__ = "user_events"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    start = db.Column(db.DateTime, nullable=False, index=True)
+    end = db.Column(db.DateTime, nullable=False)
+    is_all_day = db.Column(db.Boolean, default=False, nullable=False)
+    color = db.Column(db.String(7), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = db.Column(db.DateTime, nullable=True)
+
+    user = db.relationship("User", back_populates="user_created_events")
     calendar_name = db.Column(db.String(255), nullable=False)
     color_hex = db.Column(db.String(7), default="#6366f1", nullable=False)
     visible = db.Column(db.Boolean, default=True, nullable=False)
@@ -145,6 +173,27 @@ class UserCalendarPreference(db.Model):
             name="uq_user_calendar_pref_user_calendar",
         ),
     )
+
+
+class SharedFile(db.Model):
+    __tablename__ = "shared_files"
+
+    id = db.Column(db.String(36), primary_key=True)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    original_filename = db.Column(db.String(255), nullable=False)
+    stored_path = db.Column(db.String(512), nullable=False)
+    file_size_bytes = db.Column(db.Integer, nullable=False)
+    mime_type = db.Column(db.String(127), nullable=True)
+    share_code = db.Column(db.String(10), unique=True, nullable=True, index=True)
+    is_public = db.Column(db.Boolean, default=False, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False, index=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    downloaded_count = db.Column(db.Integer, default=0, nullable=False)
 
 
 @login_manager.user_loader

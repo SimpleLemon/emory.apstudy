@@ -78,9 +78,6 @@ function renderGlobalChrome() {
         <a href="/dashboard" class="text-xl font-semibold tracking-tighter text-on-surface-variant hover:text-primary transition-colors no-underline">Emory.APStudy.org</a>
     </div>
     <div class="flex items-center gap-3">
-        <button id="courses-open-btn" type="button" class="text-sm font-medium px-3 py-1.5 rounded-full border border-outline-variant/40 bg-surface-container-high text-on-surface-variant hover:text-on-surface hover:border-primary/40 hover:bg-surface-container transition-colors" title="Search courses">
-            Courses
-        </button>
         <button aria-disabled="true" type="button" class="text-on-surface-variant/60 p-2 rounded-full cursor-default" title="Reload">
             <span class="material-symbols-outlined" data-icon="sync">sync</span>
         </button>
@@ -89,7 +86,15 @@ function renderGlobalChrome() {
             <img alt="Profile" class="w-full h-full object-cover" src="${profileImage}"/>
         </button>
         <div id="profile-menu" class="hidden absolute right-0 mt-2 w-44 bg-surface border border-outline-variant/30 rounded-xl shadow-2xl shadow-black/20 overflow-hidden" style="z-index: 10001;">
-            <button id="profile-settings" type="button" class="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+            <button id="profile-my-courses" type="button" class="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+                <span class="material-symbols-outlined text-[18px]">school</span>
+                My Courses
+            </button>
+            <a href="/files" class="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors no-underline border-t border-outline-variant/30">
+                <span class="material-symbols-outlined text-[18px]">folder_shared</span>
+                My Files
+            </a>
+            <button id="profile-settings" type="button" class="w-full text-left flex items-center gap-2 px-4 py-3 text-sm text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors border-t border-outline-variant/30">
                 <span class="material-symbols-outlined text-[18px]">settings</span>
                 Settings
             </button>
@@ -121,6 +126,24 @@ function renderGlobalChrome() {
                     menuTrigger.setAttribute("aria-expanded", "false");
                 }
             });
+            const myCoursesButton = nav.querySelector("#profile-my-courses");
+            if (myCoursesButton) {
+                myCoursesButton.addEventListener("click", () => {
+                    const isDashboard = window.location.pathname === "/dashboard" || window.location.pathname === "/";
+                    if (isDashboard) {
+                        // Emit an event that the dashboard can listen to
+                        const event = new CustomEvent("profile-my-courses-click");
+                        document.dispatchEvent(event);
+                    } else {
+                        // Set flag to open courses panel on dashboard load
+                        sessionStorage.setItem("openCoursesPanelOnLoad", "true");
+                        window.location.assign(`${window.location.origin}/dashboard`);
+                    }
+                    // Close the menu
+                    menu.classList.add("hidden");
+                    menuTrigger.setAttribute("aria-expanded", "false");
+                });
+            }
             if (settingsButton) {
                 settingsButton.addEventListener("click", () => {
                     window.location.assign(`${window.location.origin}/settings`);

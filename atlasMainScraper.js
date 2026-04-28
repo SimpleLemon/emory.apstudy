@@ -50,31 +50,28 @@ const REQUIRED_HEADERS = {
 };
 
 /**
- * Emory subject codes. This list covers the major undergraduate departments
- * and graduate programs. Add or remove codes as needed.
- *
- * Source: Emory registrar department listing + manual verification.
- * Not all codes may be active in every term.
+ * Emory subject codes derived from local term folders.
+ * Source of truth: union of /Fall_2026 and /Spring_2026 subject directories.
  */
 const SUBJECT_CODES = [
   // A
-  'AAAS', 'ACCT', 'AMST', 'ANT', 'ARAB', 'ARTHIST', 'ARTS',
+  'AMST', 'ANT', 'ARAB', 'ARTHIST',
   // B
-  'BDS', 'BIOL', 'BIOS', 'BMED', 'BSHE', 'BUS',
+  'BIOL', 'BIOS', 'BMED', 'BUS',
   // C
-  'CHEM', 'CHIN', 'CL', 'CMPL', 'CPLT', 'CS',
+  'CHEM', 'CL', 'CPLT', 'CS',
   // D
-  'DANC', 'DTSC',
+  'DANC',
   // E
-  'ECON', 'ECS', 'EDUC', 'EH', 'EMBRYO', 'ENG', 'ENGRD', 'ENVS', 'EPID',
+  'ECON', 'ECS', 'EH', 'ENG', 'ENGRD', 'ENVS',
   // F
   'FILM', 'FIN', 'FREN',
   // G
-  'GERM', 'GH', 'GRAD', 'GRK', 'GRS',
+  'GH', 'GRAD', 'GRK',
   // H
-  'HEBR', 'HINDI', 'HIST', 'HLTH', 'HPM',
+  'HEBR', 'HIST', 'HLTH', 'HPM',
   // I
-  'IBS', 'IDS', 'INFO', 'INTA', 'ISOM', 'ITAL',
+  'IBS', 'IDS', 'ISOM', 'ITAL',
   // J
   'JPN', 'JS',
   // K
@@ -82,27 +79,21 @@ const SUBJECT_CODES = [
   // L
   'LACS', 'LAT', 'LING',
   // M
-  'MATH', 'MESAS', 'MKT', 'ML', 'MOT', 'MPHY', 'MUS',
+  'MATH', 'MESAS', 'MKT', 'MUS',
   // N
-  'NBB', 'NBIO', 'NRSG', 'NS',
+  'NBB', 'NRSG', 'NS',
   // O
   'OAM',
-  'OXAB', 'OXAS', 'OXBI', 'OXCH', 'OXCM', 'OXEC', 'OXEG',
-  'OXEN', 'OXES', 'OXHI', 'OXHU', 'OXIS', 'OXLA', 'OXMA', 'OXMU',
-  'OXNE', 'OXPH', 'OXPL', 'OXPS', 'OXRE', 'OXSO', 'OXSP',
-  'OXTH', 'OXWT',
   // P
-  'PACS', 'PATH', 'PE', 'PERS', 'PHAR', 'PHIL', 'PHYS', 'PLSH', 'POLS', 'PORT', 'PSYC',
-  // Q
-  'QSS', 'QTM',
+  'PE', 'PERS', 'PHIL', 'PHYS', 'POLS', 'PORT', 'PSYC',
   // R
-  'REL', 'RLGS', 'RUSS',
+  'REL', 'RUSS',
   // S
-  'SA', 'SOC', 'SPAN', 'SURG',
+  'SOC', 'SPAN',
   // T
-  'THEA', 'TIBTN',
+  'THEA',
   // W
-  'WGS', 'WRIT',
+  'WGS',
 ];
 
 // ── Day code mapping ─────────────────────────────────────────────────────────

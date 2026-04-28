@@ -11,14 +11,16 @@ const ALL_DAY_MIN_HEIGHT_PX = 44;
 const SIMULATED_CALENDAR_NAME = "Simulated Courses";
 const CANVAS_CALENDAR_NAME = "Canvas";
 const COURSES_SELECTION_STORAGE_KEY = "coursesSelectedSectionIds";
-const COURSES_SEARCH_DEBOUNCE_MS = 220;
 const COURSES_MODAL_ANIMATION_MS = 180;
+const THEME_LOADER_STYLE_ID = "apstudy-theme-loader-styles";
+const DEFAULT_DASHBOARD_VIEW = document.body?.dataset.defaultDashboardView === "month" ? "month" : "week";
 
 /* ── Application State ─────────────────────────────────────────────────────── */
 const state = {
     events: [],
     feedConfigured: false,
-    view: "week",
+    loadingDashboard: false,
+    view: DEFAULT_DASHBOARD_VIEW,
     anchorDate: new Date(),
     calendars: {},
     calendarColors: ["#ef4444", "#f97316", "#eab308", "#84cc16", "#0ea5e9", "#d946ef", "#b08968"],
@@ -26,17 +28,20 @@ const state = {
         terms: [],
         sections: [],
         sectionsById: {},
+        indexLoaded: false,
         selectedSectionIds: new Set(),
+        pinnedSectionIds: new Set(),
         modalOpen: false,
         isClosing: false,
         animateOnOpen: false,
+        showSelectedOnly: false,
         loading: false,
         error: "",
         searchQuery: "",
+        searchInput: "",
         termFilter: "",
         filteredSectionIds: [],
         expandedDetails: new Set(),
-        searchTimer: null,
     },
     ui: {
         calendarMenuOpen: false,
@@ -203,6 +208,9 @@ function parseEventDate(dateStr, isAllDay) {
 
 /* ── Data Loading ──────────────────────────────────────────────────────────── */
 async function loadCalendarData() {
+    state.loadingDashboard = true;
+    render();
+
     try {
         const statusRes = await fetch("/api/calendar/status", { credentials: "same-origin" });
         if (!statusRes.ok) throw new Error("Unable to fetch calendar status");
@@ -257,6 +265,9 @@ async function loadCalendarData() {
         render();
         hydrateSelectedSimulatedSections();
         console.error(err);
+    } finally {
+        state.loadingDashboard = false;
+        render();
     }
 }
 
@@ -333,6 +344,7 @@ async function refreshCalendarFeed() {
 function applyCoursesFiltersFromUrl() {
     const url = new URL(window.location.href);
     state.courses.searchQuery = (url.searchParams.get("search") || "").trim();
+    state.courses.searchInput = state.courses.searchQuery;
     state.courses.termFilter = (url.searchParams.get("term") || "").trim();
 }
 
@@ -371,11 +383,16 @@ function openCoursesModal() {
     state.courses.modalOpen = true;
     state.courses.isClosing = false;
     state.courses.animateOnOpen = true;
+    state.courses.searchInput = state.courses.searchQuery;
+    state.courses.pinnedSectionIds = new Set(state.courses.selectedSectionIds);
+    state.courses.showSelectedOnly = state.courses.pinnedSectionIds.size > 0;
+    applyCourseFilters();
     document.body.classList.add("overflow-hidden");
-    if (!state.courses.sections.length && !state.courses.loading) {
-        loadCoursesIndex();
-    }
     renderCoursesModal();
+
+    if (!state.courses.indexLoaded && !state.courses.loading) {
+        void loadCoursesIndex();
+    }
 }
 
 function closeCoursesModal() {
@@ -393,11 +410,88 @@ function closeCoursesModal() {
     }
 
     window.setTimeout(() => {
+        state.courses.pinnedSectionIds = new Set();
+        state.courses.showSelectedOnly = false;
         state.courses.modalOpen = false;
         state.courses.isClosing = false;
         document.body.classList.remove("overflow-hidden");
         renderCoursesModal();
     }, COURSES_MODAL_ANIMATION_MS);
+}
+
+function ensureThemeLoaderStyles() {
+    if (document.getElementById(THEME_LOADER_STYLE_ID)) return;
+
+    const style = document.createElement("style");
+    style.id = THEME_LOADER_STYLE_ID;
+    style.textContent = `
+        .loader {
+            width: 42px;
+            height: 42px;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            color: var(--color-primary, #3b82f6);
+            animation: apstudyLoaderRotation 1s linear infinite;
+        }
+
+        .loader::after,
+        .loader::before {
+            content: "";
+            box-sizing: border-box;
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            top: 0;
+            border-radius: 50%;
+            background-color: var(--color-error, #ef4444);
+            animation: apstudyLoaderScale50 1s infinite ease-in-out;
+        }
+
+        .loader::before {
+            top: auto;
+            bottom: 0;
+            background-color: var(--color-primary, #3b82f6);
+            animation-delay: 0.5s;
+        }
+
+        @keyframes apstudyLoaderRotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes apstudyLoaderScale50 {
+            0%, 100% { transform: scale(0); }
+            50% { transform: scale(1); }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+function buildLoadingIndicatorHtml(label = "Loading...", options = {}) {
+    ensureThemeLoaderStyles();
+    const sizePx = Number(options.sizePx) > 0 ? Number(options.sizePx) : 42;
+    const textToneClass = options.textToneClass || "text-on-surface-variant";
+    return `
+        <div class="flex w-full flex-col items-center justify-center gap-2 text-center text-sm ${textToneClass}">
+            <span class="loader" style="width:${sizePx}px; height:${sizePx}px;" aria-hidden="true"></span>
+            <span>${escapeHtml(label)}</span>
+        </div>
+    `;
+}
+
+async function submitCoursesSearch() {
+    state.courses.searchQuery = (state.courses.searchInput || "").trim();
+    state.courses.showSelectedOnly = false;
+
+    if (!state.courses.indexLoaded) {
+        await loadCoursesIndex();
+        return;
+    }
+
+    applyCourseFilters();
+    writeCourseFiltersToUrl();
+    renderCoursesModal();
 }
 
 function loadSelectedCourseSectionIds() {
@@ -420,6 +514,14 @@ function saveSelectedCourseSectionIds() {
 }
 
 async function loadCoursesIndex() {
+    if (state.courses.loading) return;
+    if (state.courses.indexLoaded) {
+        applyCourseFilters();
+        writeCourseFiltersToUrl();
+        renderCoursesModal();
+        return;
+    }
+
     state.courses.loading = true;
     state.courses.error = "";
     renderCoursesModal();
@@ -438,6 +540,7 @@ async function loadCoursesIndex() {
 
         state.courses.terms = Array.isArray(termsPayload.terms) ? termsPayload.terms : [];
         state.courses.sections = Array.isArray(sectionsPayload.sections) ? sectionsPayload.sections : [];
+        state.courses.indexLoaded = true;
         state.courses.sectionsById = {};
 
         for (const section of state.courses.sections) {
@@ -470,6 +573,7 @@ async function loadCoursesIndex() {
         saveCalendarState();
     } catch (err) {
         console.error(err);
+        state.courses.indexLoaded = false;
         state.courses.error = err?.message || "Failed to load courses";
     } finally {
         state.courses.loading = false;
@@ -478,6 +582,16 @@ async function loadCoursesIndex() {
 }
 
 function applyCourseFilters() {
+    if (state.courses.showSelectedOnly) {
+        state.courses.filteredSectionIds = Array.from(state.courses.pinnedSectionIds);
+        return;
+    }
+
+    if (!state.courses.indexLoaded) {
+        state.courses.filteredSectionIds = [];
+        return;
+    }
+
     const term = state.courses.termFilter;
     const query = state.courses.searchQuery.trim().toLowerCase();
 
@@ -614,17 +728,26 @@ function renderCoursesModal() {
     const terms = state.courses.terms;
     const selectedCount = state.courses.selectedSectionIds.size;
     const resultCount = state.courses.filteredSectionIds.length;
+    const isSelectedOnly = state.courses.showSelectedOnly;
+    const termDisabled = !state.courses.indexLoaded || isSelectedOnly || state.courses.loading;
+    const searchPlaceholder = isSelectedOnly
+        ? "Press Enter or Search to load and find more courses"
+        : "Search title, subject, code, or instructor";
 
-    const statusLine = state.courses.loading
+    const statusLine = state.courses.loading || (!state.courses.indexLoaded && !state.courses.error)
         ? "Loading courses..."
         : state.courses.error
             ? escapeHtml(state.courses.error)
-            : `${resultCount.toLocaleString()} sections · ${selectedCount.toLocaleString()} selected`;
+            : isSelectedOnly
+                ? `${resultCount.toLocaleString()} pinned in this session · ${selectedCount.toLocaleString()} selected`
+                : `${resultCount.toLocaleString()} sections · ${selectedCount.toLocaleString()} selected`;
 
     const content = state.courses.loading
-        ? `<div class="py-12 text-center text-sm text-on-surface-variant">Loading full course index...</div>`
+        ? `<div class="py-12">${buildLoadingIndicatorHtml("Loading full course index...", { sizePx: 54, textToneClass: "text-on-surface" })}</div>`
         : state.courses.error
             ? `<div class="py-12 text-center text-sm text-error">${escapeHtml(state.courses.error)}</div>`
+            : !state.courses.indexLoaded
+                ? `<div class="py-12">${buildLoadingIndicatorHtml("Loading full course index...", { sizePx: 54, textToneClass: "text-on-surface" })}</div>`
             : buildCourseCardsHtml();
 
     overlay.innerHTML = `
@@ -637,14 +760,15 @@ function renderCoursesModal() {
                 <div class="grid grid-cols-1 md:grid-cols-[1fr_220px] gap-3">
                     <label class="relative block">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-                        <input id="courses-search-input" type="text" value="${escapeHtml(state.courses.searchQuery)}" placeholder="Search title, subject, code, or instructor" class="w-full h-11 rounded-xl border border-outline-variant/35 bg-surface px-10 text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                        <input id="courses-search-input" type="text" value="${escapeHtml(state.courses.searchInput)}" placeholder="${escapeHtml(searchPlaceholder)}" class="w-full h-11 rounded-xl border border-outline-variant/35 bg-surface px-10 pr-[7.25rem] text-sm text-on-surface placeholder:text-on-surface-variant focus:outline-none focus:ring-2 focus:ring-primary/30" />
+                        <button id="courses-search-submit" type="button" class="absolute right-1.5 top-1/2 -translate-y-1/2 h-8 px-3 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:brightness-95 disabled:opacity-60 disabled:cursor-not-allowed" ${state.courses.loading ? "disabled" : ""}>Search</button>
                     </label>
-                    <select id="courses-term-select" class="h-11 rounded-xl border border-outline-variant/35 bg-surface px-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30">
+                    <select id="courses-term-select" ${termDisabled ? "disabled" : ""} class="h-11 rounded-xl border border-outline-variant/35 bg-surface px-3 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60 disabled:cursor-not-allowed">
                         <option value="" ${state.courses.termFilter ? "" : "selected"}>All Terms</option>
                         ${terms.map((term) => `<option value="${escapeHtml(term)}" ${state.courses.termFilter === term ? "selected" : ""}>${escapeHtml(formatTermLabel(term))}</option>`).join("")}
                     </select>
                 </div>
-                <p class="text-xs text-on-surface-variant mt-3">${statusLine}</p>
+                <div class="text-xs text-on-surface-variant mt-3">${statusLine}</div>
             </header>
             <div id="courses-modal-scroll" class="flex-1 overflow-auto px-5 sm:px-7 py-5 bg-surface">
                 ${content}
@@ -668,6 +792,9 @@ function renderCoursesModal() {
 
 function buildCourseCardsHtml() {
     if (!state.courses.filteredSectionIds.length) {
+        if (state.courses.showSelectedOnly) {
+            return '<div class="py-12 text-center text-sm text-on-surface-variant">No pinned courses to show in this session.</div>';
+        }
         return '<div class="py-12 text-center text-sm text-on-surface-variant">No sections match your filters.</div>';
     }
 
@@ -895,10 +1022,19 @@ function setCalendarColor(calendarName, color) {
 
 /* ── Controls ──────────────────────────────────────────────────────────────── */
 function wireControls() {
-    document.addEventListener("click", (event) => {
-        const coursesBtn = event.target.closest("#courses-open-btn");
-        if (!coursesBtn) return;
-        event.preventDefault();
+    // Check if courses panel should be opened on load (e.g., from redirect)
+    if (sessionStorage.getItem("openCoursesPanelOnLoad") === "true") {
+        sessionStorage.removeItem("openCoursesPanelOnLoad");
+        // Open courses modal after a short delay to ensure DOM is ready
+        setTimeout(() => {
+            if (!state.courses.modalOpen) {
+                openCoursesModal();
+            }
+        }, 100);
+    }
+
+    // Handle My Courses button from profile menu
+    document.addEventListener("profile-my-courses-click", () => {
         if (state.courses.modalOpen) {
             closeCoursesModal();
             return;
@@ -920,10 +1056,6 @@ function wireControls() {
     });
     document.getElementById("calendar-next")?.addEventListener("click", () => {
         state.anchorDate = shiftAnchorDate(1);
-        render();
-    });
-    document.getElementById("calendar-today")?.addEventListener("click", () => {
-        state.anchorDate = new Date();
         render();
     });
 
@@ -1010,19 +1142,27 @@ function wireControls() {
             toggleCourseSectionSelection(sectionId);
             return;
         }
+
+        const searchSubmitBtn = event.target.closest("#courses-search-submit");
+        if (searchSubmitBtn) {
+            event.preventDefault();
+            submitCoursesSearch();
+            return;
+        }
     });
 
     document.addEventListener("input", (event) => {
         const searchInput = event.target.closest("#courses-search-input");
         if (!searchInput) return;
-        const nextQuery = searchInput.value || "";
-        if (state.courses.searchTimer) clearTimeout(state.courses.searchTimer);
-        state.courses.searchTimer = setTimeout(() => {
-            state.courses.searchQuery = nextQuery;
-            applyCourseFilters();
-            writeCourseFiltersToUrl();
-            renderCoursesModal();
-        }, COURSES_SEARCH_DEBOUNCE_MS);
+        state.courses.searchInput = searchInput.value || "";
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter") return;
+        const searchInput = event.target.closest("#courses-search-input");
+        if (!searchInput) return;
+        event.preventDefault();
+        submitCoursesSearch();
     });
 
     document.addEventListener("change", (event) => {
@@ -1042,6 +1182,7 @@ function wireControls() {
 
     window.addEventListener("popstate", () => {
         applyCoursesFiltersFromUrl();
+        state.courses.searchInput = state.courses.searchQuery;
         applyCourseFilters();
         if (state.courses.modalOpen) {
             renderCoursesModal();
@@ -1095,8 +1236,8 @@ function buildCalendarMenuHtml() {
         const checked = data.visible ? "checked" : "";
         const busy = state.ui.pendingCalendars.has(cal);
         return `
-            <div class="flex items-center justify-between px-4 py-2.5 hover:bg-surface-container-high transition-colors gap-2 group">
-                <label class="flex items-center gap-3 flex-1 cursor-pointer">
+            <div class="flex items-center justify-between px-4 py-1.5 hover:bg-surface-container-high transition-colors gap-1.5 group">
+                <label class="flex items-center gap-2 flex-1 cursor-pointer">
                     <input type="checkbox" ${checked} ${busy ? "disabled" : ""}
                         class="js-calendar-checkbox w-5 h-5 rounded border border-black/30 appearance-none cursor-pointer disabled:cursor-not-allowed disabled:opacity-60"
                         data-calendar-name="${escapeHtml(cal)}"
@@ -1127,18 +1268,18 @@ function buildCalendarMenuHtml() {
     });
 
     const emorySection = `
-        <div class="px-4 pt-2 pb-1 text-[10px] uppercase tracking-[0.08em] text-on-surface-variant font-semibold">Emory</div>
+        <div class="px-4 pt-1.5 pb-0.5 text-[10px] uppercase tracking-[0.08em] text-on-surface-variant font-semibold">Emory</div>
         ${buildRows(emoryCalendars)}
     `;
 
     const otherSection = `
-        <div class="h-px bg-outline-variant/25 my-1"></div>
-        <div class="px-4 pt-2 pb-1 text-[10px] uppercase tracking-[0.08em] text-on-surface-variant font-semibold">Other</div>
-        ${otherCalendars.length ? buildRows(otherCalendars) : '<div class="px-4 py-2 text-sm text-on-surface-variant">No other calendars</div>'}
+        <div class="h-px bg-outline-variant/25 my-0.5"></div>
+        <div class="px-4 pt-1.5 pb-0.5 text-[10px] uppercase tracking-[0.08em] text-on-surface-variant font-semibold">Other</div>
+        ${otherCalendars.length ? buildRows(otherCalendars) : '<div class="px-4 py-1.5 text-sm text-on-surface-variant">No other calendars</div>'}
     `;
 
     return `
-        <div class="absolute top-full right-0 mt-1 w-64 rounded-lg border border-outline-variant/40 bg-surface shadow-xl shadow-black/20 z-50 py-1">
+        <div class="absolute top-full right-0 mt-1 w-64 rounded-lg border border-outline-variant/40 bg-surface shadow-xl shadow-black/20 z-50 py-0.5">
             ${emorySection}
             ${otherSection}
         </div>
@@ -1355,7 +1496,7 @@ function openRgbModal(calendarName) {
 
             if (saveButton) {
                 saveButton.disabled = true;
-                saveButton.textContent = "Saving...";
+                saveButton.innerHTML = `<span class="inline-flex flex-col items-center justify-center gap-1 leading-none"><span class="loader" style="width:16px; height:16px;" aria-hidden="true"></span><span class="text-[10px]">Saving...</span></span>`;
             }
 
             setCalendarColor(calendarName, hexValue);
@@ -1438,6 +1579,16 @@ function updateViewToggleButtons() {
 function renderCalendarView() {
     const root = document.getElementById("calendar-view-root");
     if (!root) return;
+
+    if (state.loadingDashboard) {
+        root.innerHTML = `
+            <div class="rounded-2xl border border-calendar-rule bg-surface-container shadow-2xl shadow-black/10 p-10 min-h-[420px] flex items-center justify-center">
+                ${buildLoadingIndicatorHtml("Loading calendar...", { sizePx: 54, textToneClass: "text-on-surface" })}
+            </div>
+        `;
+        return;
+    }
+
     root.innerHTML = state.view === "month" ? buildMonthViewHtml() : buildWeekViewHtml();
 
     if (state.view === "week") {
@@ -1485,7 +1636,7 @@ function buildMonthViewHtml() {
             : "";
 
         cells.push(`
-            <div class="rounded-lg border ${inMonth ? "border-outline-variant/10 bg-surface-container" : "border-outline-variant/5 bg-surface-container/40 opacity-70"} p-2.5 min-h-[98px] flex flex-col gap-1.5">
+            <div data-date="${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}" class="rounded-lg border ${inMonth ? "border-outline-variant/10 bg-surface-container" : "border-outline-variant/5 bg-surface-container/40 opacity-70"} p-2.5 min-h-[98px] flex flex-col gap-1.5">
                 <div class="relative inline-flex h-7 w-7 items-center justify-center text-xs font-semibold ${todayDateClass}">
                     ${todayDateOutline}
                     <span class="relative z-10">${day.getDate()}</span>
@@ -1549,10 +1700,9 @@ function buildWeekViewHtml() {
         const badgeStyle = getEventBadgeStyle(ev);
         const colStart = ev.gridColStart + 2;
         const colEnd = colStart + ev.gridSpan;
-        const details = [ev.title || "Untitled", formatAllDayRange(ev), ev.description || "No description"].join("\n");
         return `
             <div class="group relative" style="grid-column: ${colStart} / ${colEnd};">
-                <div class="text-[10px] px-2 py-1 rounded-md border truncate" style="${badgeStyle}" title="${escapeHtml(details)}">
+                <div class="text-[10px] px-2 py-1 rounded-md border truncate" style="${badgeStyle}">
                     ${escapeHtml(ev.title || "Untitled")}
                 </div>
                 <div class="hidden group-hover:block absolute left-0 top-full mt-1 z-40 w-64 rounded-lg border border-outline-variant/30 bg-surface p-2.5 shadow-xl shadow-black/20">
@@ -1580,13 +1730,14 @@ function buildWeekViewHtml() {
 
         const gridLines = [];
         for (let h = 0; h < 24; h++) {
-            gridLines.push(`<div class="border-b border-calendar-rule" style="height:${HOUR_HEIGHT_PX}px;"></div>`);
+            const timeLabel = `${String(h).padStart(2, "0")}:00`;
+            gridLines.push(`<div data-time="${timeLabel}" class="border-b border-calendar-rule" style="height:${HOUR_HEIGHT_PX}px;"></div>`);
         }
 
         const eventChips = positioned.map((e) => renderTimedEvent(e)).join("");
 
         return `
-            <div class="relative border-r border-calendar-rule last:border-r-0 ${todayBg} overflow-hidden">
+            <div data-date="${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, "0")}-${String(day.getDate()).padStart(2, "0")}" class="relative border-r border-calendar-rule last:border-r-0 ${todayBg} overflow-visible">
                 <div class="absolute inset-0 pointer-events-none">
                     ${gridLines.join("")}
                 </div>
@@ -1685,10 +1836,10 @@ function renderTimedEvent(event) {
     const badgeStyle = getEventBadgeStyle(event);
     const course = event.course ? `<div class="text-[10px] text-on-surface-variant mt-1">${escapeHtml(event.course)}</div>` : "";
     const timeDisplay = formatTimedEventRange(event);
-    const details = [event.title || "Untitled", timeDisplay, event.description || "No description"].join("\n");
 
+    const dataId = event.id || event.uid || "";
     return `
-        <div class="group absolute px-0.5" style="top:${topPx}px; left:${leftPct}%; width:calc(${widthPct}% - 0.25rem); height:${heightPx}px; z-index: 10;">
+        <div data-event-id="${dataId}" class="group absolute px-0.5" style="top:${topPx}px; left:${leftPct}%; width:calc(${widthPct}% - 0.25rem); height:${heightPx}px; z-index: 10;">
             <div class="h-full rounded-lg border overflow-hidden shadow-lg shadow-black/10" style="${badgeStyle}">
                 <div class="h-full px-2 py-1.5 flex flex-col gap-0.5 text-left">
                     <div class="text-[11px] font-semibold leading-tight line-clamp-2">${escapeHtml(event.title || "Untitled")}</div>
@@ -1714,12 +1865,12 @@ function buildEventChip(event, options = {}) {
     const isMonthTimedChip = Boolean(options.monthView) && !event.isAllDay;
     const course = event.course ? `<div class="text-[10px] text-on-surface-variant mt-1">${escapeHtml(event.course)}</div>` : "";
     const timeDisplay = event.isAllDay ? formatAllDayRange(event) : formatTimedEventRange(event);
-    const details = [event.title || "Untitled", timeDisplay, event.description || "No description"].join("\n");
 
     if (isMonthTimedChip) {
+        const dataId = event.id || event.uid || "";
         return `
-            <div class="group relative">
-                <div class="${sizeClass} rounded-md border bg-surface-container-high/50 truncate flex items-center gap-2" style="border-color: ${badgeColors.border};" title="${escapeHtml(details)}">
+            <div data-event-id="${dataId}" class="group relative">
+                <div class="${sizeClass} rounded-md border bg-surface-container-high/50 truncate flex items-center gap-2" style="border-color: ${badgeColors.border};">
                     <span class="inline-block h-4 w-1 rounded-full shrink-0" style="background-color: ${calendarColor};"></span>
                     <span class="truncate text-on-surface font-medium">${escapeHtml(event.title || "Untitled")}</span>
                 </div>
@@ -1733,9 +1884,10 @@ function buildEventChip(event, options = {}) {
         `;
     }
 
+    const dataId = event.id || event.uid || "";
     return `
-        <div class="group relative">
-            <div class="${sizeClass} rounded-md border truncate" style="${badgeStyle}" title="${escapeHtml(details)}">
+        <div data-event-id="${dataId}" class="group relative">
+            <div class="${sizeClass} rounded-md border truncate" style="${badgeStyle}">
                 ${escapeHtml(event.title || "Untitled")}
             </div>
             <div class="hidden group-hover:block absolute left-0 top-full mt-1 z-20 w-64 rounded-lg border border-outline-variant/30 bg-surface p-2.5 shadow-xl shadow-black/20">
@@ -1752,6 +1904,15 @@ function buildEventChip(event, options = {}) {
 function renderAssignments() {
     const root = document.getElementById("assignments-root");
     if (!root) return;
+
+    if (state.loadingDashboard) {
+        root.innerHTML = `
+            <div class="md:col-span-2 lg:col-span-3 rounded-xl border border-outline-variant/20 bg-surface-container p-10 text-center">
+                ${buildLoadingIndicatorHtml("Loading upcoming assignments...", { sizePx: 46, textToneClass: "text-on-surface" })}
+            </div>
+        `;
+        return;
+    }
 
     const now = new Date();
     const upcoming = getVisibleEvents()
