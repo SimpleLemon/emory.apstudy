@@ -28,7 +28,7 @@ test("representative touch controls meet the shared target contract without hori
             <button id="notes-control" class="notes-icon-button" aria-label="Notes menu">N</button>
             <button id="task-control" class="task-star-button" aria-label="Star task">T</button>
             <button id="dashboard-control" class="dashboard-icon-button" aria-label="Dashboard menu">D</button>
-            <button id="settings-control" class="settings-tier-export" aria-label="Export settings">S</button>
+            <button id="settings-control" class="settings-button settings-data-export" aria-label="Export settings">S</button>
             <button id="files-control" class="files-icon-button" aria-label="Files menu">F</button>
             <input id="settings-input" aria-label="Setting" value="value">
         </main>

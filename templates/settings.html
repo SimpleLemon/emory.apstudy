@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-{% set settings_assets_version = 'settings-theme-notifications-20260720-1' %}
+{% set settings_assets_version = 'settings-tier-invites-20260724-1' %}
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
@@ -32,6 +32,7 @@
     <script src="{{ url_for('static', filename='js/settings/preferences.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/settings/account.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/settings/notifications.js', v=settings_assets_version) }}" defer></script>
+    <script src="{{ url_for('static', filename='js/settings/invites.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/settings/index.js', v=settings_assets_version) }}" defer></script>
     <meta name="description" content="Settings for your APStudy account, data, and preferences." />
     <meta property="og:url" content="https://nest.apstudy.org/">
@@ -57,6 +58,7 @@
             </header>
             <nav class="settings-tabs" aria-label="Settings sections">
                 <a href="#account" class="settings-tab is-active" data-tab="account">Account</a>
+                <a href="#tier" class="settings-tab" data-tab="tier">Tier &amp; Invites</a>
                 <a href="#data" class="settings-tab" data-tab="data">Data</a>
                 <a href="#preferences" class="settings-tab" data-tab="preferences">Preferences</a>
                 <a href="#notifications" class="settings-tab" data-tab="notifications">Notifications</a>
@@ -79,6 +81,10 @@
                             <div class="settings-skeleton-card-head"><div class="flex flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-5 w-40"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-56"></div></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-8 w-20"></div></div>
                             <div class="settings-skeleton-fields settings-skeleton-fields-wide">{% for _ in range(3) %}<div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-24"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-10 w-full"></div></div>{% endfor %}</div>
                         </article>
+                        <section class="settings-skeleton-tier-grid">
+                            <article class="settings-card settings-skeleton-card"><div class="settings-skeleton-card-head"><div class="flex flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-5 w-32"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-48"></div></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-8 w-20"></div></div><div class="settings-skeleton-options">{% for _ in range(2) %}<div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-10 w-full"></div>{% endfor %}</div></article>
+                            <article class="settings-card settings-skeleton-card"><div class="settings-skeleton-card-head"><div class="flex flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-5 w-36"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-52"></div></div></div><div class="settings-skeleton-options">{% for _ in range(3) %}<div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-12 w-full"></div>{% endfor %}</div></article>
+                        </section>
                         <section class="settings-skeleton-data-grid">
                             <article class="settings-card settings-skeleton-card"><div class="settings-skeleton-card-head"><div class="flex flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-5 w-28"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-40"></div></div></div><div class="settings-skeleton-stat"><div data-slot="skeleton" class="bg-muted animate-pulse size-12 rounded-md"></div><div class="flex flex-1 flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-4 w-2/3"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-full"></div></div></div></article>
                             <article class="settings-card settings-skeleton-card"><div class="settings-skeleton-card-head"><div class="flex flex-col gap-2"><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-5 w-32"></div><div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-3 w-44"></div></div></div><div class="settings-skeleton-options">{% for _ in range(3) %}<div data-slot="skeleton" class="bg-muted rounded-md animate-pulse h-10 w-full"></div>{% endfor %}</div></article>
@@ -239,7 +245,7 @@
                         </aside>
                     </div>
                 </section>
-                <section id="data" class="settings-section scroll-mt-28 md:scroll-mt-32" data-section="data">
+                <section id="tier" class="settings-section scroll-mt-28 md:scroll-mt-32" data-section="tier">
                     <article class="settings-card settings-tier-card" aria-labelledby="settings-tier-title">
                         <div class="settings-card-body settings-tier-card-body">
                             <div class="settings-card-summary settings-tier-card-intro">
@@ -263,10 +269,6 @@
                                         </div>
                                     </div>
                                     <div class="settings-tier-heading-actions">
-                                        <button id="settings-export-data" type="button" class="settings-button settings-button-secondary settings-tier-export" aria-label="Export your account data">
-                                            <span class="material-symbols-outlined" aria-hidden="true">download</span>
-                                            <span>Export data</span>
-                                        </button>
                                         <span class="settings-tier-status" data-tier-status>Active</span>
                                     </div>
                                 </div>
@@ -301,6 +303,28 @@
                             </div>
                         </div>
                     </article>
+                    <article class="settings-card settings-invites-card" aria-labelledby="settings-invites-title">
+                        <div class="settings-card-body">
+                            <div class="settings-card-summary">
+                                <h3 id="settings-invites-title">Invite people to Nest</h3>
+                                <p>Create reusable links for classmates and friends. A person moves from Invited to Joined after onboarding and their first qualifying action.</p>
+                            </div>
+                            <div class="settings-card-content settings-invites-content">
+                                <form id="settings-invite-create" class="settings-invite-create">
+                                    <label class="settings-field settings-invite-label-field" for="settings-invite-label">
+                                        <span class="settings-field-label">Optional label</span>
+                                        <input id="settings-invite-label" name="label" type="text" maxlength="80" autocomplete="off" placeholder="Study group, roommate, class…" />
+                                    </label>
+                                    <button id="settings-invite-create-button" type="submit" class="settings-button settings-button-primary">Create invite</button>
+                                </form>
+                                <p id="settings-invite-create-hint" class="settings-help-text">You can keep up to five links without a signup.</p>
+                                <p id="settings-invites-status" class="settings-invites-status" role="status" aria-live="polite" hidden></p>
+                                <div id="settings-invites-list" class="settings-invite-list" aria-label="Your invite links"></div>
+                            </div>
+                        </div>
+                    </article>
+                </section>
+                <section id="data" class="settings-section scroll-mt-28 md:scroll-mt-32" data-section="data">
                     <article class="settings-card">
                         <div class="settings-card-body">
                             <div class="settings-card-summary">
@@ -350,10 +374,16 @@
                                 <h3>Your Data</h3>
                                 <p>Export your profile, settings, and saved records as JSON.</p>
                             </div>
-                            <div class="settings-stat-card">
-                                <span class="settings-field-label">Storage Used</span>
-                                <strong data-storage-used>0 B</strong>
-                                <p class="settings-storage-details" data-storage-details>0 notes, 0 files</p>
+                            <div class="settings-card-content settings-data-content">
+                                <div class="settings-stat-card">
+                                    <span class="settings-field-label">Storage Used</span>
+                                    <strong data-storage-used>0 B</strong>
+                                    <p class="settings-storage-details" data-storage-details>0 notes, 0 files</p>
+                                </div>
+                                <button id="settings-export-data" type="button" class="settings-button settings-button-secondary settings-data-export">
+                                    <span class="material-symbols-outlined" aria-hidden="true">download</span>
+                                    <span>Export data</span>
+                                </button>
                             </div>
                         </div>
                     </article>

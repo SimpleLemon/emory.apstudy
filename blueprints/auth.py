@@ -44,7 +44,7 @@ from avatar_images import DEFAULT_AVATAR_URL
 from services.avatar_storage import delete_avatar_file, store_avatar_from_url
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_server_log_event, emit_user_event, format_actor, format_user_target
-from services import discord_bridge, notes_collaboration
+from services import discord_bridge, invites, notes_collaboration
 from services.entitlements import TIER_BADGES, TIER_LABELS, normalize_tier
 from services.user_profile import (
     is_early_member as _is_early_member,
@@ -56,6 +56,9 @@ from app import AUTH_SESSION_DURATION
 
 auth_bp = Blueprint("auth", __name__)
 logger = logging.getLogger(__name__)
+
+INVITE_COOKIE = "nest_invite"
+INVITE_COOKIE_MAX_AGE = 30 * 24 * 60 * 60
 
 LOGIN_CSP = "; ".join([
     "default-src 'self'",
@@ -990,6 +993,13 @@ def _complete_appwrite_login(
                 "created_at": created_at,
             },
         )
+        try:
+            invites.attribute_signup(
+                request.cookies.get(INVITE_COOKIE),
+                appwrite_user_id,
+            )
+        except Exception:
+            logger.exception("Failed to attribute new user signup to invite")
     else:
         updates = {"last_login": format_datetime(datetime.utcnow())}
         if name:
@@ -1140,6 +1150,25 @@ def auth_entry_redirect():
     return redirect(url_for("auth.login"))
 
 
+@auth_bp.route("/join/<code>")
+def join_with_invite(code):
+    if current_user.is_authenticated:
+        return redirect(url_for("dashboard.dashboard"))
+
+    response = redirect(url_for("auth.login"))
+    normalized = invites.normalize_code(code)
+    if normalized and invites.invite_by_code(normalized):
+        response.set_cookie(
+            INVITE_COOKIE,
+            normalized,
+            max_age=INVITE_COOKIE_MAX_AGE,
+            httponly=True,
+            secure=current_app.config["SESSION_COOKIE_SECURE"],
+            samesite="Lax",
+        )
+    return response
+
+
 @auth_bp.route("/auth/appwrite/<provider>")
 def appwrite_oauth_start(provider):
     """Start an Appwrite OAuth token flow from the server."""
@@ -1266,7 +1295,9 @@ def appwrite_oauth_callback(state):
         })
 
     _clear_appwrite_oauth_state()
-    return redirect(result["redirect"])
+    response = redirect(result["redirect"])
+    response.delete_cookie(INVITE_COOKIE, path="/")
+    return response
 
 
 @auth_bp.route("/auth/appwrite/discord/link")
@@ -1521,7 +1552,15 @@ def appwrite_session():
         logger.exception("Failed to complete Appwrite session exchange")
         return jsonify({"error": "Unable to complete session exchange."}), 500
 
-    return jsonify({"status": "ok", "user_id": result["user_id"], "redirect": result["redirect"]})
+    response = jsonify(
+        {
+            "status": "ok",
+            "user_id": result["user_id"],
+            "redirect": result["redirect"],
+        }
+    )
+    response.delete_cookie(INVITE_COOKIE, path="/")
+    return response
 
 
 @auth_bp.route("/logout", methods=["POST"])

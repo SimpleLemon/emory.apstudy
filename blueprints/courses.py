@@ -35,6 +35,7 @@ from services.discord_audit import (
     emit_creation_event,
     format_actor,
 )
+from services import invites
 from services.entitlements import EntitlementError, EntitlementLimitError, TRACK_INTERVALS_KEY, check_limit, request_entitlements
 from services.user_profile import is_emory_or_oxford_user
 
@@ -491,6 +492,11 @@ def add_saved_course():
     except AppwriteException:
         logger.exception("Failed to add course")
         return jsonify({"error": "Unable to add course."}), 500
+
+    try:
+        invites.record_activation(user_id, "course")
+    except Exception:
+        logger.exception("Failed to record invite activation for saved course")
 
     emit_creation_event(
         "Saved Course Added",

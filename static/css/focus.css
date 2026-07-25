@@ -374,7 +374,7 @@
     width: 100%;
     padding: 10px 12px;
     border: 0;
-    border-radius: calc(var(--radius-control) - 2px);
+    border-radius: var(--radius-control);
     background: transparent;
     color: var(--color-on-surface);
     cursor: pointer;

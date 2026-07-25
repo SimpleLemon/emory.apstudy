@@ -22,7 +22,7 @@ from appwrite_helpers import (
 from services.discord_audit import emit_creation_event, format_actor
 from services.chat_formatting import _is_public_host, fetch_link_preview, safe_url, url_hash
 from services.database import db_connection
-from services import note_media, note_store, notes_collaboration
+from services import invites, note_media, note_store, notes_collaboration
 from services.appwrite_storage import note_media_upload_failure
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, check_storage, request_entitlements
 
@@ -455,6 +455,11 @@ def create_note():
     except AppwriteException:
         logger.exception("Failed to create note")
         return jsonify({"error": "Unable to create note."}), 500
+
+    try:
+        invites.record_activation(current_user.id, "note")
+    except Exception:
+        logger.exception("Failed to record invite activation for note creation")
 
     emit_creation_event(
         "New Note Created",

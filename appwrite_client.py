@@ -281,4 +281,7 @@ COLLECTIONS = {
 	"focus_routines": "focus_routines",
 	"focus_sessions": "focus_sessions",
 	"focus_session_events": "focus_session_events",
+	"user_invites": "user_invites",
+	"user_invite_attributions": "user_invite_attributions",
+	"user_invite_tier_events": "user_invite_tier_events",
 }

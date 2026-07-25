@@ -106,6 +106,7 @@
 }
 
 .settings-skeleton-account-layout,
+.settings-skeleton-tier-grid,
 .settings-skeleton-data-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -167,6 +168,7 @@
 
 @media (max-width: 760px) {
     .settings-skeleton-account-layout,
+    .settings-skeleton-tier-grid,
     .settings-skeleton-data-grid,
     .settings-skeleton-fields {
         grid-template-columns: 1fr;
@@ -1306,7 +1308,7 @@
   .settings-tabs {
     width: 100%;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .settings-tab {
@@ -1314,6 +1316,10 @@
     min-height: 3rem;
     padding-inline: 0.4rem;
     font-size: 0.85rem;
+  }
+
+  .settings-tab:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
   }
 
   .settings-card-body,
@@ -1786,47 +1792,6 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
     flex: 0 0 auto;
 }
 
-.settings-tier-export {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    min-height: 2.35rem;
-    padding: 0.45rem 0.7rem;
-    border-radius: var(--radius-control);
-    font-size: 0.78rem;
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-0.2rem);
-    transition: opacity 180ms ease, transform 180ms ease, background-color 180ms ease, color 180ms ease;
-}
-
-.settings-tier-export .material-symbols-outlined {
-    font-size: 1rem;
-}
-
-.settings-tier-card:hover .settings-tier-export,
-.settings-tier-card:focus-within .settings-tier-export,
-.settings-tier-export:focus-visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: none;
-}
-
-@media (hover: none), (pointer: coarse) {
-    .settings-tier-export {
-        opacity: 1;
-        pointer-events: auto;
-        transform: none;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .settings-tier-export {
-        transition: none;
-    }
-}
-
 .settings-tier-heading-label {
     display: flex;
     align-items: center;
@@ -1990,6 +1955,385 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
     margin-left: auto;
 }
 
+.settings-data-content {
+    align-items: flex-start;
+}
+
+.settings-data-content .settings-stat-card {
+    width: 100%;
+}
+
+.settings-data-export {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+}
+
+.settings-data-export .material-symbols-outlined {
+    font-size: 1.1rem;
+}
+
+.settings-invites-content {
+    gap: 0.7rem;
+}
+
+.settings-invite-create {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: 0.75rem;
+}
+
+.settings-invite-label-field {
+    min-width: 0;
+}
+
+.settings-invite-create .settings-button {
+    white-space: nowrap;
+}
+
+.settings-invite-create .settings-button:disabled {
+    cursor: not-allowed;
+}
+
+.settings-invites-status {
+    margin: 0.2rem 0 0;
+    color: var(--color-on-surface-variant);
+    font-size: 0.84rem;
+    font-weight: 650;
+    line-height: 1.45;
+}
+
+.settings-invites-status[data-type="success"] {
+    color: var(--color-success);
+}
+
+.settings-invites-status[data-type="error"] {
+    color: var(--color-error);
+}
+
+.settings-invite-list {
+    min-width: 0;
+    margin-top: 0.45rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 58%, transparent);
+}
+
+.settings-invite-row {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1.05rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 52%, transparent);
+}
+
+.settings-invite-row.is-inactive {
+    background: color-mix(in srgb, var(--color-on-surface-variant) 3%, transparent);
+}
+
+.settings-invite-row.is-inactive .settings-invite-code {
+    border-color: color-mix(in srgb, var(--color-outline-variant) 66%, transparent);
+    background: color-mix(in srgb, var(--color-on-surface-variant) 8%, transparent);
+}
+
+.settings-invite-row-head,
+.settings-invite-label-row,
+.settings-invite-actions,
+.settings-invite-identity,
+.settings-invite-counts {
+    display: flex;
+    align-items: center;
+}
+
+.settings-invite-row-head,
+.settings-invite-label-row {
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.settings-invite-identity,
+.settings-invite-counts,
+.settings-invite-actions {
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.settings-invite-code {
+    padding: 0.38rem 0.55rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 28%, var(--color-outline-variant));
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    color: var(--color-on-surface);
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+}
+
+.settings-invite-state,
+.settings-invite-counts span,
+.settings-invite-person-status {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.65rem;
+    padding: 0.2rem 0.5rem;
+    border-radius: var(--radius-pill);
+    font-size: 0.75rem;
+    font-weight: 750;
+    white-space: nowrap;
+}
+
+.settings-invite-state {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+}
+
+.settings-invite-row.is-inactive .settings-invite-state {
+    background: color-mix(in srgb, var(--color-on-surface-variant) 12%, transparent);
+    color: var(--color-on-surface-variant);
+}
+
+.settings-invite-counts span {
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    color: var(--color-on-surface-variant);
+}
+
+.settings-invite-counts .is-joined,
+.settings-invite-person-status.is-joined {
+    background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+}
+
+.settings-invite-label-row > div {
+    display: grid;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.settings-invite-label-row strong {
+    overflow: hidden;
+    color: var(--color-on-surface);
+    font-size: 0.92rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-invite-label-row small {
+    color: var(--color-on-surface-variant);
+    font-size: 0.75rem;
+}
+
+.settings-invite-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0.55rem 0.72rem;
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 58%, transparent);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-surface-container-high) 64%, transparent);
+    color: var(--color-on-surface);
+    font: inherit;
+    font-size: 0.79rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 150ms ease, color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-invite-action:hover {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+    color: var(--color-primary);
+    transform: translateY(-1px);
+}
+
+.settings-invite-action.is-primary {
+    border-color: color-mix(in srgb, var(--color-primary) 34%, transparent);
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    color: var(--color-primary);
+}
+
+.settings-invite-action:disabled {
+    cursor: wait;
+    opacity: 0.6;
+    transform: none;
+}
+
+.settings-invite-rename {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.45rem;
+}
+
+.settings-invite-rename[hidden] {
+    display: none;
+}
+
+.settings-invite-rename input {
+    min-width: 0;
+    min-height: 2.75rem;
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 72%, transparent);
+    border-radius: var(--radius-control);
+    background: var(--color-surface-container-low);
+    color: var(--color-on-surface);
+    padding: 0.55rem 0.7rem;
+    font: inherit;
+    font-size: 0.86rem;
+}
+
+.settings-invite-people {
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
+}
+
+.settings-invite-people summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 2.75rem;
+    color: var(--color-on-surface);
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.settings-invite-people summary span:last-child {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.7rem;
+    min-height: 1.7rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    color: var(--color-primary);
+    font-size: 0.75rem;
+}
+
+.settings-invite-person-list {
+    display: grid;
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 38%, transparent);
+}
+
+.settings-invite-person {
+    display: grid;
+    grid-template-columns: 2.5rem minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 3.9rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 34%, transparent);
+}
+
+.settings-invite-avatar {
+    position: relative;
+    display: inline-flex;
+    width: 2.5rem;
+    height: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 50%;
+    background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-container-high));
+    color: var(--color-primary);
+    font-size: 0.76rem;
+    font-weight: 800;
+}
+
+.settings-invite-avatar img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.settings-invite-person-copy {
+    display: grid;
+    gap: 0.1rem;
+    min-width: 0;
+}
+
+.settings-invite-person-copy strong,
+.settings-invite-person-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.settings-invite-person-copy strong {
+    color: var(--color-on-surface);
+    font-size: 0.86rem;
+}
+
+.settings-invite-person-copy small {
+    color: var(--color-on-surface-variant);
+    font-size: 0.75rem;
+}
+
+.settings-invite-person-status {
+    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+    color: var(--color-on-surface-variant);
+}
+
+.settings-invite-history-note {
+    margin: 0;
+    padding-top: 0.7rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 45%, transparent);
+    color: var(--color-on-surface-variant);
+    font-size: 0.78rem;
+    line-height: 1.45;
+}
+
+.settings-invite-empty {
+    display: grid;
+    justify-items: start;
+    gap: 0.35rem;
+    padding: 1rem 0;
+}
+
+.settings-invite-empty strong {
+    color: var(--color-on-surface);
+    font-size: 0.92rem;
+}
+
+.settings-invite-empty p {
+    margin: 0;
+    color: var(--color-on-surface-variant);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+.settings-invite-empty-error strong {
+    color: var(--color-error);
+}
+
+.settings-invite-loading {
+    display: grid;
+    gap: 0.65rem;
+    padding: 1rem 0;
+}
+
+.settings-invite-loading span {
+    display: block;
+    height: 3.7rem;
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-on-surface-variant) 12%, transparent);
+    animation: settings-invite-pulse 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes settings-invite-pulse {
+    to {
+        background: color-mix(in srgb, var(--color-on-surface-variant) 22%, transparent);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .settings-invite-action {
+        transition: none;
+    }
+
+    .settings-invite-loading span {
+        animation: none;
+    }
+}
+
 @media (max-width: 720px) {
     .settings-tier-card-body {
         grid-template-columns: 1fr;
@@ -1998,6 +2342,31 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 
     .settings-tier-limits {
         grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .settings-invite-create,
+    .settings-invite-rename {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-invite-create .settings-button,
+    .settings-invite-rename .settings-invite-action {
+        width: 100%;
+    }
+
+    .settings-invite-row-head,
+    .settings-invite-label-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .settings-invite-person {
+        grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+    }
+
+    .settings-invite-person .settings-invite-action {
+        grid-column: 2 / -1;
+        justify-self: start;
     }
 }
 .notification-permission-row,

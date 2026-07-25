@@ -57,7 +57,7 @@ from services.discord_bridge import (
 )
 from services.discord_audit import DiscordAuditEvent, emit_audit_event, format_actor
 from services.chat_presence import sync_chat_presence_labels_for_user, university_presence_label
-from services import notifications
+from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
 from services.universities import normalize_school_key, school_payload, search_universities
@@ -2775,6 +2775,11 @@ def send_channel_message(channel_id):
     except AppwriteException:
         logger.exception("Failed to finalize channel message")
         return jsonify({"error": "Unable to save message."}), 500
+    if created:
+        try:
+            invites.record_activation(_current_user_id(), "chat_message")
+        except Exception:
+            logger.exception("Failed to record invite activation for channel message")
     return jsonify({"message": _serialize_message(row)}), 201
 
 
@@ -3007,6 +3012,10 @@ def dm_thread_messages(thread_id):
             except AppwriteException:
                 logger.exception("Failed to roll back DM message")
         return jsonify({"error": "Unable to send message."}), 500
+    try:
+        invites.record_activation(_current_user_id(), "chat_message")
+    except Exception:
+        logger.exception("Failed to record invite activation for direct message")
     return jsonify({"message": _serialize_message(row)}), 201
 
 

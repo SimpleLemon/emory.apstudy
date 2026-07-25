@@ -42,7 +42,7 @@ from services.atlas_client import DEFAULT_TERM
 from services.avatar_storage import build_avatar_view_url, delete_avatar_file
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_creation_event, emit_user_event, format_actor
-from services import discord_bridge
+from services import discord_bridge, invites
 from services.calendar_store import delete_calendar_rows_by_user
 from services.calendar_urls import (
     MAX_OTHER_CALENDAR_URLS,
@@ -839,6 +839,11 @@ def save_onboarding():
                 logger.exception("Failed to add onboarding course")
                 return jsonify({"error": "Unable to save course."}), 500
 
+            try:
+                invites.record_activation(user_id, "course")
+            except Exception:
+                logger.exception("Failed to record invite activation for onboarding course")
+
             emit_creation_event(
                 "Onboarding Course Added",
                 actor=format_actor(current_user),
@@ -923,6 +928,10 @@ def save_onboarding():
             create_welcome_dm_for_user(user_id)
         except Exception:
             logger.exception("Failed to create welcome DM after onboarding")
+        try:
+            invites.promote_if_activated(user_id)
+        except Exception:
+            logger.exception("Failed to promote activated invite after onboarding")
         emit_user_event(
             "Onboarding Complete",
             actor=format_actor(current_user),
@@ -1365,6 +1374,12 @@ def update_feed_url():
     except AppwriteException:
         logger.exception("Failed to save feed URL")
         return jsonify({"error": "Unable to save feed URL."}), 500
+
+    if url or other_ical_urls:
+        try:
+            invites.record_activation(user_id, "calendar")
+        except Exception:
+            logger.exception("Failed to record invite activation for calendar feed")
 
     refresh_error = None
     refresh_count = 0
@@ -1828,6 +1843,11 @@ def add_course():
     except AppwriteException:
         logger.exception("Failed to add course")
         return jsonify({"error": "Unable to add course."}), 500
+
+    try:
+        invites.record_activation(user_id, "course")
+    except Exception:
+        logger.exception("Failed to record invite activation for settings course")
 
     emit_creation_event(
         "Settings Course Added",

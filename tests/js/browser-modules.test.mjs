@@ -82,6 +82,7 @@ if (false) {
     await import("../../static/js/settings/account.js");
     await import("../../static/js/settings/calendar.js");
     await import("../../static/js/settings/combobox.js");
+    await import("../../static/js/settings/invites.js");
     await import("../../static/js/settings/index.js");
     await import("../../static/js/settings/preferences.js");
     await import("../../static/js/settings/profile.js");
@@ -864,6 +865,7 @@ test("files page keeps upload limits, modal elements, and share/delete endpoints
 test("settings page keeps account, theme, calendar, and destructive endpoints centralized", async () => {
     const template = await sourceFor("templates/settings.html");
     const styles = await sourceFor("static/css/settings.css");
+    const invitesSource = await sourceFor("static/js/settings/invites.js");
     const source = [
         await sourceFor("static/js/settings/index.js"),
         await sourceFor("static/js/settings/utils.js"),
@@ -872,6 +874,7 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
         await sourceFor("static/js/settings/preferences.js"),
         await sourceFor("static/js/settings/account.js"),
         await sourceFor("static/js/settings/notifications.js"),
+        invitesSource,
       ].join("\n");
 
     for (const endpoint of [
@@ -883,6 +886,7 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
         "/settings/api/export",
         "/settings/api/account/delete",
         "/settings/api/account/recovery",
+        "/settings/api/invites",
     ]) {
         assert.match(source, new RegExp(endpoint.replaceAll("/", "\\/")));
     }
@@ -892,7 +896,7 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
     assert.match(template, /data-probe-appwrite-session="false"/);
     assert.match(template, /id="settings-skeleton"/);
     assert.match(template, /settings-sections[^"]*is-loading/);
-    assert.match(source, /const SETTINGS_SECTION_IDS = \['account', 'data', 'preferences', 'notifications'\]/);
+    assert.match(source, /const SETTINGS_SECTION_IDS = \['account', 'tier', 'data', 'preferences', 'notifications'\]/);
     assert.match(source, /section\.hidden = !isActive/);
     assert.match(styles, /\.settings-section\[hidden\]\s*\{\s*display:\s*none/);
     assert.doesNotMatch(source, /global\.alert|window\.alert/);
@@ -904,6 +908,7 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
     assert.match(template, /settings-page-skeleton/);
     assert.match(template, /settings-skeleton-account-layout/);
     assert.match(template, /settings-skeleton-data-grid/);
+    assert.match(template, /settings-skeleton-tier-grid/);
     assert.match(template, /settings-theme-preview/);
     assert.match(template, /<strong>System<\/strong><small>Match your device<\/small>/);
     assert.doesNotMatch(template, /class="settings-theme-choice theme-[^"]+"[^>]*><\/button>/);
@@ -925,6 +930,19 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
     assert.match(source, /function renderEntitlements\(\)/);
     assert.match(source, /data\.storage_limit_bytes/);
     assert.match(template, /settings-tier-card/);
+    assert.match(template, /data-tab="tier">Tier &amp; Invites/);
+    assert.match(template, /settings-invites-card/);
+    assert.match(template, /id="settings-invites-list"/);
+    assert.match(invitesSource, /function focusInviteAction\(inviteId, action\)/);
+    assert.match(invitesSource, /focusInviteAction\(inviteId, focusAction\)/);
+    assert.match(invitesSource, /data-invite-action="rename"]'\)\?\.focus\(\)/);
+    const tierSection = template.slice(template.indexOf('id="tier"'), template.indexOf('id="data"'));
+    const dataSection = template.slice(template.indexOf('id="data"'), template.indexOf('id="preferences"'));
+    assert.match(tierSection, /settings-tier-card/);
+    assert.match(tierSection, /settings-invites-card/);
+    assert.doesNotMatch(tierSection, /id="settings-export-data"/);
+    assert.match(dataSection, /id="settings-export-data"/);
+    assert.match(dataSection, /settings-stat-card/);
     assert.match(template, /settings-preview-tier-badge/);
 });
 

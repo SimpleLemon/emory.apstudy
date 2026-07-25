@@ -1,0 +1,120 @@
+{% set invite_groups = section_data.invites or [] %}
+{% set received_attribution = section_data.received_attribution %}
+<section class="admin-section">
+    <div class="admin-content-intro">
+        <div>
+            <p class="admin-eyebrow">Community</p>
+            <h2 class="admin-title admin-title--small">Invite history</h2>
+            <p class="admin-subtitle admin-subtitle--compact">Read-only invite links and signup attribution for this account.</p>
+        </div>
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-section-heading">
+            <div>
+                <h2 class="admin-title admin-title--small">Links created by this user</h2>
+                <p class="admin-subtitle admin-subtitle--compact">{{ invite_groups|length }} total invite link{% if invite_groups|length != 1 %}s{% endif %}.</p>
+            </div>
+        </div>
+        {% if invite_groups %}
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>Code</th>
+                        <th>Label</th>
+                        <th>Status</th>
+                        <th>Invited</th>
+                        <th>Joined</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in invite_groups %}
+                        {% set invitation = group.invite %}
+                        {% set attributions = group.attributions %}
+                        <tr>
+                            <td data-label="Code"><code>{{ invitation.get('code') }}</code></td>
+                            <td data-label="Label">{{ invitation.get('label') or 'No label' }}</td>
+                            <td data-label="Status">{{ 'Active' if invitation.get('is_active') else 'Inactive' }}</td>
+                            <td data-label="Invited">{{ attributions|length }}</td>
+                            <td data-label="Joined">{{ attributions|selectattr('status', 'equalto', 'joined')|list|length }}</td>
+                            <td data-label="Created">{{ invitation.get('created_at') or '--' }}</td>
+                        </tr>
+                        {% if attributions %}
+                            <tr>
+                                <td colspan="6">
+                                    <details class="admin-raw-details">
+                                        <summary>Attributed accounts · {{ attributions|length }}</summary>
+                                        <table class="admin-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>User ID</th>
+                                                    <th>Status</th>
+                                                    <th>Signed up</th>
+                                                    <th>Joined</th>
+                                                    <th>Anonymized</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for attribution in attributions %}
+                                                    <tr>
+                                                        <td data-label="User ID"><code>{{ attribution.get('invited_user_id') or 'Deleted account' }}</code></td>
+                                                        <td data-label="Status">{{ attribution.get('status')|capitalize }}</td>
+                                                        <td data-label="Signed up">{{ attribution.get('signed_up_at') or '--' }}</td>
+                                                        <td data-label="Joined">{{ attribution.get('joined_at') or '--' }}</td>
+                                                        <td data-label="Anonymized">{{ 'Yes' if attribution.get('is_anonymized') else 'No' }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </details>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="admin-empty-state">This user has not created an invite link.</p>
+        {% endif %}
+    </div>
+
+    <div class="admin-card">
+        <div class="admin-section-heading">
+            <div>
+                <h2 class="admin-title admin-title--small">How this user joined</h2>
+                <p class="admin-subtitle admin-subtitle--compact">A user can be attributed to at most one inviter.</p>
+            </div>
+        </div>
+        {% if received_attribution %}
+            <div class="admin-grid">
+                <div class="admin-field">
+                    <span class="admin-field-label">Inviter</span>
+                    <span class="admin-field-value"><code>{{ received_attribution.get('inviter_user_id') }}</code></span>
+                </div>
+                <div class="admin-field">
+                    <span class="admin-field-label">Invite ID</span>
+                    <span class="admin-field-value"><code>{{ received_attribution.get('invite_id') }}</code></span>
+                </div>
+                <div class="admin-field">
+                    <span class="admin-field-label">Status</span>
+                    <span class="admin-field-value">{{ received_attribution.get('status')|capitalize }}</span>
+                </div>
+                <div class="admin-field">
+                    <span class="admin-field-label">Signed up</span>
+                    <span class="admin-field-value">{{ received_attribution.get('signed_up_at') or '--' }}</span>
+                </div>
+                <div class="admin-field">
+                    <span class="admin-field-label">Joined</span>
+                    <span class="admin-field-value">{{ received_attribution.get('joined_at') or '--' }}</span>
+                </div>
+                <div class="admin-field">
+                    <span class="admin-field-label">Tier at signup</span>
+                    <span class="admin-field-value">{{ received_attribution.get('initial_tier') or '--' }}</span>
+                </div>
+            </div>
+        {% else %}
+            <p class="admin-empty-state">This user was not attributed to an invite.</p>
+        {% endif %}
+    </div>
+</section>

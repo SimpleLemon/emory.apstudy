@@ -47,6 +47,11 @@ _RELATION_TABLES = (
     (COLLECTIONS.get("user_notifications", "user_notifications"), ("user_id", "actor_user_id")),
     (COLLECTIONS.get("chat_dm_threads", "chat_dm_threads"), ("participant_a", "participant_b")),
     (COLLECTIONS.get("chat_blocks", "chat_blocks"), ("blocker_id", "blocked_id")),
+    (COLLECTIONS.get("user_invites", "user_invites"), ("owner_user_id",)),
+    (
+        COLLECTIONS.get("user_invite_attributions", "user_invite_attributions"),
+        ("inviter_user_id",),
+    ),
 )
 
 
@@ -71,6 +76,22 @@ def delete_user_data(user_id):
     """Delete local user-owned rows and upload artifacts. Returns error labels."""
     errors = []
     user_id = str(user_id)
+
+    try:
+        from services import invites
+
+        invites.delete_tier_events_for_user(user_id)
+    except Exception:
+        logger.exception("Failed to delete invite tier history for user %s", user_id)
+        errors.append("user_invite_tier_events")
+
+    try:
+        from services import invites
+
+        invites.anonymize_invitee(user_id)
+    except Exception:
+        logger.exception("Failed to anonymize invite attribution for user %s", user_id)
+        errors.append("user_invite_attributions")
 
     try:
         from services.note_media import NOTE_MEDIA_TABLE_ID, delete_media

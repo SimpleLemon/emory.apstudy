@@ -67,6 +67,7 @@ from services.entitlements import (
     normalize_tier,
     save_tier_definitions,
 )
+from services import invites
 
 try:
     import psutil
@@ -103,6 +104,7 @@ ALLOWED_SECTIONS = {
     "courses",
     "seat_tracks",
     "chat",
+    "invites",
 }
 
 
@@ -755,6 +757,53 @@ def _delete_user_rows(user_id):
 
 
 def _load_section(section, user_id):
+    if section == "invites":
+        try:
+            owned_invites = list_rows_all(
+                COLLECTIONS["user_invites"],
+                [
+                    Query.equal("owner_user_id", [user_id]),
+                    Query.order_desc("created_at"),
+                ],
+            )
+            owned_attributions = list_rows_all(
+                COLLECTIONS["user_invite_attributions"],
+                [
+                    Query.equal("inviter_user_id", [user_id]),
+                    Query.order_desc("signed_up_at"),
+                ],
+            )
+            received_attribution = first_row(
+                COLLECTIONS["user_invite_attributions"],
+                [Query.equal("invited_user_id", [user_id])],
+            )
+        except AppwriteException:
+            logger.exception("Failed to load invite records for admin")
+            return {
+                "invites": [],
+                "received_attribution": None,
+            }
+
+        attributions_by_invite = {}
+        for attribution in owned_attributions:
+            attributions_by_invite.setdefault(
+                str(attribution.get("invite_id") or ""),
+                [],
+            ).append(attribution)
+        return {
+            "invites": [
+                {
+                    "invite": invitation,
+                    "attributions": attributions_by_invite.get(
+                        str(_row_id(invitation) or ""),
+                        [],
+                    ),
+                }
+                for invitation in owned_invites
+            ],
+            "received_attribution": received_attribution,
+        }
+
     if section == "settings":
         try:
             return {
@@ -2007,6 +2056,7 @@ def update_user_tier(user_id):
     user_doc = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
     if not user_doc:
         abort(404)
+    previous_tier = normalize_tier(user_doc.get("tier"))
     try:
         updated = update_row_safe(COLLECTIONS["users"], user_id, {"tier": tier})
     except AppwriteException:
@@ -2015,11 +2065,16 @@ def update_user_tier(user_id):
             return jsonify({"error": "Unable to update user tier."}), 500
         return redirect(url_for("admin.admin_detail", user_id=user_id, error="tier-update-failed"))
 
+    try:
+        invites.record_tier_change(user_id, previous_tier, tier)
+    except Exception:
+        logger.exception("Failed to record invited user tier change")
+
     _log_admin_action(
         "update_user_tier",
         f"user:{user_id}",
         target_user=user_doc,
-        metadata={"previous_tier": normalize_tier(user_doc.get("tier")), "tier": tier},
+        metadata={"previous_tier": previous_tier, "tier": tier},
         color="green",
     )
     if request.is_json:

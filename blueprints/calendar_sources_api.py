@@ -12,6 +12,7 @@ from appwrite_client import COLLECTIONS
 from appwrite_helpers import format_datetime, update_row_safe
 from services.calendar_store import list_calendar_rows_all
 from services.calendar_urls import load_other_calendar_urls
+from services import invites
 from blueprints.calendar_api import (
     DEFAULT_CALENDAR_COLOR,
     DEFAULT_LOCAL_SOURCE_NAME,
@@ -100,6 +101,11 @@ def create_local_calendar_source():
         logger.exception("Failed to create local calendar source")
         return jsonify({"error": "Unable to create calendar."}), 500
 
+    try:
+        invites.record_activation(user_id, "calendar")
+    except Exception:
+        logger.exception("Failed to record invite activation for local calendar")
+
     sources = _configured_local_sources(local_sources, preferences)
     return jsonify({
         "status": "ok",
@@ -146,6 +152,11 @@ def create_url_calendar_source():
     except AppwriteException:
         logger.exception("Failed to create URL calendar source")
         return jsonify({"error": "Unable to add calendar."}), 500
+
+    try:
+        invites.record_activation(user_id, "calendar")
+    except Exception:
+        logger.exception("Failed to record invite activation for URL calendar")
 
     refresh_error = None
     try:

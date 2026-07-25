@@ -202,6 +202,7 @@
                 <span class="admin-record-nav__label">Community</span>
                 <div class="admin-record-nav__links">
                     <a class="admin-record-nav__link {% if section == 'chat' %}is-active{% endif %}" href="{{ url_for('admin.admin_detail', user_id=user.id, section='chat', return_to=return_to) }}" {% if section == 'chat' %}aria-current="page"{% endif %}>Chat history</a>
+                    <a class="admin-record-nav__link {% if section == 'invites' %}is-active{% endif %}" href="{{ url_for('admin.admin_detail', user_id=user.id, section='invites', return_to=return_to) }}" {% if section == 'invites' %}aria-current="page"{% endif %}>Invites</a>
                 </div>
             </div>
         </nav>
@@ -1078,6 +1079,10 @@
                     {% endif %}
                 </div>
             </section>
+        {% endif %}
+
+        {% if section == 'invites' %}
+            {% include "partials/admin_user_invites.html" %}
         {% endif %}
     </main>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>

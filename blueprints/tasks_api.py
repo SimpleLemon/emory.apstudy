@@ -22,6 +22,7 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.task_schedule import build_task_occurrences, next_task_occurrence_key
+from services import invites
 
 
 tasks_api_bp = Blueprint("tasks_api", __name__)
@@ -583,6 +584,10 @@ def create_task():
     except AppwriteException:
         logger.exception("Failed to create task")
         return jsonify({"error": "Unable to create task."}), 500
+    try:
+        invites.record_activation(current_user.id, "task")
+    except Exception:
+        logger.exception("Failed to record invite activation for task creation")
     return jsonify({"task": _task_to_payload(created)}), 201
 
 
