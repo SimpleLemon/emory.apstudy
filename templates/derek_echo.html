@@ -17,14 +17,31 @@
 </head>
 <body class="echo-body" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
     <main class="echo-dash" data-echo-dash data-mode="home">
-        <section class="echo-clock" data-echo-clock aria-label="Clock">
-            <div class="echo-clock-face">
-                <span class="echo-flip"><span class="echo-flip-glyph" data-echo-digit="h1">1</span></span>
-                <span class="echo-flip"><span class="echo-flip-glyph" data-echo-digit="h2">0</span></span>
+        <section class="echo-clock" data-echo-clock aria-labelledby="echo-clock-label">
+            <div class="echo-clock-face" aria-hidden="true">
+                <span class="echo-flip" data-echo-digit-slot="h1">
+                    <span class="echo-flip-face echo-flip-face--under"><span data-echo-flip-under>1</span></span>
+                    <span class="echo-flip-half echo-flip-half--top"><span data-echo-flip-top>1</span></span>
+                    <span class="echo-flip-half echo-flip-half--bottom"><span data-echo-flip-bottom>1</span></span>
+                </span>
+                <span class="echo-flip" data-echo-digit-slot="h2">
+                    <span class="echo-flip-face echo-flip-face--under"><span data-echo-flip-under>0</span></span>
+                    <span class="echo-flip-half echo-flip-half--top"><span data-echo-flip-top>0</span></span>
+                    <span class="echo-flip-half echo-flip-half--bottom"><span data-echo-flip-bottom>0</span></span>
+                </span>
                 <span class="echo-flip-colon" aria-hidden="true">:</span>
-                <span class="echo-flip"><span class="echo-flip-glyph" data-echo-digit="m1">1</span></span>
-                <span class="echo-flip"><span class="echo-flip-glyph" data-echo-digit="m2">6</span></span>
+                <span class="echo-flip" data-echo-digit-slot="m1">
+                    <span class="echo-flip-face echo-flip-face--under"><span data-echo-flip-under>1</span></span>
+                    <span class="echo-flip-half echo-flip-half--top"><span data-echo-flip-top>1</span></span>
+                    <span class="echo-flip-half echo-flip-half--bottom"><span data-echo-flip-bottom>1</span></span>
+                </span>
+                <span class="echo-flip" data-echo-digit-slot="m2">
+                    <span class="echo-flip-face echo-flip-face--under"><span data-echo-flip-under>6</span></span>
+                    <span class="echo-flip-half echo-flip-half--top"><span data-echo-flip-top>6</span></span>
+                    <span class="echo-flip-half echo-flip-half--bottom"><span data-echo-flip-bottom>6</span></span>
+                </span>
             </div>
+            <span id="echo-clock-label" class="echo-visually-hidden" data-echo-clock-label>Loading time</span>
             <p class="echo-date" data-echo-date>Thursday, July 23</p>
         </section>
 
@@ -60,7 +77,7 @@
 
     <div class="echo-modal" data-echo-agenda-modal hidden>
         <button type="button" class="echo-modal-backdrop" data-echo-agenda-close aria-label="Close upcoming events"></button>
-        <div class="echo-modal-panel" role="dialog" aria-modal="true" aria-labelledby="echo-agenda-title">
+        <div class="echo-modal-panel echo-modal-panel--agenda" role="dialog" aria-modal="true" aria-labelledby="echo-agenda-title">
             <header class="echo-modal-header">
                 <h2 id="echo-agenda-title">Upcoming</h2>
                 <button type="button" class="echo-modal-close" data-echo-agenda-close aria-label="Close">
@@ -88,6 +105,23 @@
             </header>
             <div class="echo-modal-body echo-playlist-list" data-echo-playlist-list>
                 <p class="echo-empty">Loading playlist…</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="echo-modal" data-echo-event-modal hidden>
+        <button type="button" class="echo-modal-backdrop" data-echo-event-close aria-label="Close event details"></button>
+        <div class="echo-modal-panel echo-modal-panel--event" role="dialog" aria-modal="true" aria-labelledby="echo-event-title" aria-describedby="echo-event-details">
+            <header class="echo-modal-header">
+                <h2 id="echo-event-title" data-echo-event-title>Event details</h2>
+                <button type="button" class="echo-modal-close" data-echo-event-close aria-label="Close event details">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false">
+                        <path fill="currentColor" d="M18.3 5.7a1 1 0 0 0-1.4 0L12 10.6 7.1 5.7a1 1 0 0 0-1.4 1.4L10.6 12l-4.9 4.9a1 1 0 1 0 1.4 1.4L12 13.4l4.9 4.9a1 1 0 0 0 1.4-1.4L13.4 12l4.9-4.9a1 1 0 0 0 0-1.4z"/>
+                    </svg>
+                </button>
+            </header>
+            <div class="echo-modal-body echo-event-details" id="echo-event-details" data-echo-event-details>
+                <p class="echo-empty">Select an event to view its details.</p>
             </div>
         </div>
     </div>

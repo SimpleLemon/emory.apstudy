@@ -1,32 +1,33 @@
+import {
+  calendarDayKey,
+  centerNowMarker,
+  normalizeEvents,
+  pickNextEvent,
+  renderAgendaList,
+  renderNextEvent,
+  renderTwoDayCalendar,
+  UPCOMING_DAYS,
+  updateNowMarker,
+} from "./echo-calendar.js";
+import { createEchoClock, isReducedMotion } from "./echo-clock.js";
+import { createEchoEventDetails } from "./echo-event-details.js";
+import {
+  addDays,
+  endOfDay,
+  escapeHtml,
+  getQuarterHourKey,
+  startOfDay,
+} from "./echo-utils.js";
+
 const PLAYLIST_ID = "PLRuGynt4aVsqpyBgcw7Yorrque_ZVmz4x";
 const VIDEO_ID = "BybOGhyJO5M";
-const DEFAULT_COLOR = "#6366f1";
-const HOUR_HEIGHT_PX = 36;
-const WEEKDAYS = [
-  "Sunday",
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-];
-const MONTHS = [
-  "January",
-  "February",
-  "March",
-  "April",
-  "May",
-  "June",
-  "July",
-  "August",
-  "September",
-  "October",
-  "November",
-  "December",
-];
 
 let cachedEvents = [];
+let calendarLoaded = false;
+let loadedCalendarDayKey = null;
+let lastQuarterHourKey = null;
+let echoClock = null;
+let eventDetails = null;
 let ytPlayer = null;
 let ytApiPromise = null;
 let playlistIds = [];
@@ -37,383 +38,24 @@ function $(selector) {
   return document.querySelector(selector);
 }
 
-function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
-
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
-
-function endOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999);
-}
-
-function addDays(date, days) {
-  const next = new Date(date);
-  next.setDate(next.getDate() + days);
-  return next;
-}
-
-function sameDay(a, b) {
-  return a.getFullYear() === b.getFullYear()
-    && a.getMonth() === b.getMonth()
-    && a.getDate() === b.getDate();
-}
-
-function parseEventDate(dateStr, isAllDay) {
-  if (!dateStr) return new Date();
-  if (isAllDay && /^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-    const [year, month, day] = dateStr.split("-").map((part) => parseInt(part, 10));
-    return new Date(year, month - 1, day, 0, 0, 0, 0);
-  }
-  return new Date(dateStr);
-}
-
-function formatTimeOnly(date) {
-  return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" });
-}
-
-function formatHourLabel(hour) {
-  if (hour === 0) return "12a";
-  if (hour < 12) return `${hour}a`;
-  if (hour === 12) return "12p";
-  return `${hour - 12}p`;
-}
-
-function formatEventTime(event) {
-  if (event.isAllDay) return "All day";
-  const start = event.startDate;
-  const end = event.endDate || event.startDate;
-  return `${formatTimeOnly(start)} – ${formatTimeOnly(end)}`;
-}
-
-function resolveColor(event, sourcesById) {
-  if (event.color) return event.color;
-  const source = sourcesById.get(String(event.calendar_id || ""));
-  return source?.color_hex || DEFAULT_COLOR;
-}
-
-function mixHex(accent, surface, amount) {
-  const parse = (hex) => {
-    const clean = String(hex || "").replace("#", "");
-    if (clean.length !== 6) return null;
-    return {
-      r: parseInt(clean.slice(0, 2), 16),
-      g: parseInt(clean.slice(2, 4), 16),
-      b: parseInt(clean.slice(4, 6), 16),
-    };
-  };
-  const a = parse(accent);
-  const s = parse(surface);
-  if (!a || !s) return accent || DEFAULT_COLOR;
-  const mix = (x, y) => Math.round(x + (y - x) * amount);
-  const toHex = (n) => n.toString(16).padStart(2, "0");
-  return `#${toHex(mix(s.r, a.r))}${toHex(mix(s.g, a.g))}${toHex(mix(s.b, a.b))}`;
-}
-
-function fitDateText(node) {
-  if (!node) return;
-  node.style.fontSize = "";
-  const parent = node.parentElement;
-  if (!parent) return;
-  const maxSize = Math.min(parent.clientWidth * 0.12, parent.clientHeight * 0.22, 30);
-  const minSize = 14;
-  let size = Math.max(minSize, maxSize);
-  node.style.fontSize = `${size}px`;
-  while (size > minSize && node.scrollWidth > parent.clientWidth) {
-    size -= 1;
-    node.style.fontSize = `${size}px`;
-  }
-}
-
-function updateClock() {
-  const now = new Date();
-  let hours = now.getHours() % 12;
-  if (hours === 0) hours = 12;
-  const hourStr = String(hours).padStart(2, "0");
-  const minuteStr = String(now.getMinutes()).padStart(2, "0");
-
-  const map = {
-    h1: hourStr[0],
-    h2: hourStr[1],
-    m1: minuteStr[0],
-    m2: minuteStr[1],
-  };
-  for (const [key, value] of Object.entries(map)) {
-    const node = document.querySelector(`[data-echo-digit="${key}"]`);
-    if (node) node.textContent = value;
-  }
-
-  const dateNode = $("[data-echo-date]");
-  if (dateNode) {
-    dateNode.textContent = `${WEEKDAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}`;
-    fitDateText(dateNode);
-  }
-}
-
-function normalizeEvents(payload) {
-  const sourcesById = new Map(
-    (payload?.calendar_sources || []).map((source) => [String(source.id), source]),
-  );
-  return (payload?.events || [])
-    .filter((event) => event?.start)
-    .map((event) => {
-      const isAllDay = Boolean(event.is_all_day);
-      const startDate = parseEventDate(event.start, isAllDay);
-      let endDate = event.end
-        ? parseEventDate(event.end, isAllDay)
-        : new Date(startDate);
-      if (isAllDay && endDate <= startDate) {
-        endDate = addDays(startDate, 1);
-      }
-      return {
-        ...event,
-        isAllDay,
-        startDate,
-        endDate,
-        color: resolveColor(event, sourcesById),
-      };
-    })
-    .sort((a, b) => a.startDate - b.startDate || String(a.title || "").localeCompare(String(b.title || "")));
-}
-
-function eventOverlapsDay(event, day) {
-  const dayStart = startOfDay(day);
-  const dayEnd = endOfDay(day);
-  return event.startDate <= dayEnd && event.endDate > dayStart;
-}
-
-function pickNextEvent(events, now = new Date()) {
-  const today = startOfDay(now);
-  const candidates = events.filter((event) => {
-    if (event.isAllDay) {
-      return event.endDate > today && event.startDate <= endOfDay(now);
-    }
-    return event.endDate > now;
-  });
-  return candidates[0] || null;
-}
-
-function layoutTimedEvents(events) {
-  const items = events.map((event, originalIndex) => {
-    const startMin = event.startDate.getHours() * 60 + event.startDate.getMinutes();
-    const endDate = event.endDate || event.startDate;
-    const durMin = Math.max(30, Math.ceil((endDate - event.startDate) / 60000));
-    return {
-      ...event,
-      layoutOriginalIndex: originalIndex,
-      layoutStartMinutes: startMin,
-      layoutDurationMinutes: durMin,
-      layoutLane: 0,
-      layoutLaneCount: 1,
-    };
-  }).sort((a, b) => (
-    a.layoutStartMinutes - b.layoutStartMinutes
-    || b.layoutDurationMinutes - a.layoutDurationMinutes
-    || a.layoutOriginalIndex - b.layoutOriginalIndex
-  ));
-
-  function assignGroupLanes(group) {
-    const laneEnds = [];
-    for (const item of group) {
-      let lane = laneEnds.findIndex((end) => end <= item.layoutStartMinutes);
-      if (lane < 0) {
-        lane = laneEnds.length;
-        laneEnds.push(0);
-      }
-      laneEnds[lane] = item.layoutStartMinutes + item.layoutDurationMinutes;
-      item.layoutLane = lane;
-    }
-    const laneCount = Math.max(1, laneEnds.length);
-    group.forEach((item) => { item.layoutLaneCount = laneCount; });
-  }
-
-  let groupStart = 0;
-  let groupEnd = -Infinity;
-  for (let index = 0; index < items.length; index++) {
-    const item = items[index];
-    if (index > groupStart && item.layoutStartMinutes >= groupEnd) {
-      assignGroupLanes(items.slice(groupStart, index));
-      groupStart = index;
-      groupEnd = -Infinity;
-    }
-    groupEnd = Math.max(groupEnd, item.layoutStartMinutes + item.layoutDurationMinutes);
-  }
-  if (items.length) assignGroupLanes(items.slice(groupStart));
-  return items;
-}
-
-function renderNextEvent(event) {
-  const root = $("[data-echo-next]");
-  if (!root) return;
-  if (!event) {
-    root.innerHTML = `<p class="echo-empty">No upcoming events</p>`;
-    return;
-  }
-  root.innerHTML = `
-    <article class="echo-next-row">
-      <span class="echo-next-color" style="background-color:${escapeHtml(event.color)}"></span>
-      <p class="echo-next-time">${escapeHtml(formatEventTime(event))}</p>
-      <h3 class="echo-next-title">${escapeHtml(event.title || "Untitled")}</h3>
-    </article>
-  `;
-}
-
-function renderDayGroup(label, events, { isToday = false } = {}) {
-  if (!events.length) return "";
-  const chips = events.map((event) => {
-    const accent = event.color || DEFAULT_COLOR;
-    const background = mixHex(accent, "#1a1a1a", 0.28);
-    const border = mixHex(accent, "#ffffff", 0.35);
-    return `
-      <article class="echo-chip" style="background:${escapeHtml(background)};color:#fff;border-color:${escapeHtml(border)}">
-        <span class="echo-chip-bar" style="background:${escapeHtml(accent)}"></span>
-        <div class="echo-chip-copy">
-          <p class="echo-chip-title">${escapeHtml(event.title || "Untitled")}</p>
-          <p class="echo-chip-time">${escapeHtml(formatEventTime(event))}</p>
-        </div>
-      </article>
-    `;
-  }).join("");
-  return `
-    <section class="echo-day">
-      <h3 class="echo-day-label${isToday ? " is-today" : ""}">${escapeHtml(label)}</h3>
-      ${chips}
-    </section>
-  `;
-}
-
-function renderAgendaList(events) {
-  const root = $("[data-echo-agenda]");
-  if (!root) return;
-  const now = new Date();
-  const today = startOfDay(now);
-  const tomorrow = addDays(today, 1);
-  const todayEvents = events.filter((event) => eventOverlapsDay(event, today));
-  const tomorrowEvents = events.filter((event) => eventOverlapsDay(event, tomorrow));
-
-  if (!todayEvents.length && !tomorrowEvents.length) {
-    root.innerHTML = `<p class="echo-empty">Nothing on the calendar for today or tomorrow.</p>`;
-    return;
-  }
-
-  root.innerHTML = [
-    renderDayGroup("Today", todayEvents, { isToday: true }),
-    renderDayGroup("Tomorrow", tomorrowEvents),
-  ].join("");
-}
-
-function renderTimedEvent(event) {
-  const topPx = (event.layoutStartMinutes / 60) * HOUR_HEIGHT_PX;
-  const heightPx = Math.max((event.layoutDurationMinutes / 60) * HOUR_HEIGHT_PX, 20);
-  const leftPct = (event.layoutLane / event.layoutLaneCount) * 100;
-  const widthPct = 100 / event.layoutLaneCount;
-  const accent = event.color || DEFAULT_COLOR;
-  const background = mixHex(accent, "#1a1a1a", 0.32);
-  const border = mixHex(accent, "#ffffff", 0.35);
-  const showTime = heightPx >= 36;
-  return `
-    <div class="echo-week-event" style="top:${topPx}px;left:${leftPct}%;width:calc(${widthPct}% - 0.15rem);height:${heightPx}px">
-      <div class="echo-week-event-inner" style="background:${escapeHtml(background)};border-color:${escapeHtml(border)}">
-        <p class="echo-week-event-title">${escapeHtml(event.title || "Untitled")}</p>
-        ${showTime ? `<p class="echo-week-event-time">${escapeHtml(formatEventTime(event))}</p>` : ""}
-      </div>
-    </div>
-  `;
-}
-
-function renderTwoDayWeek(events) {
+function centerCalendar(now, behavior = "auto") {
   const root = $("[data-echo-calendar]");
   if (!root) return;
-
-  const now = new Date();
-  const today = startOfDay(now);
-  const tomorrow = addDays(today, 1);
-  const days = [today, tomorrow];
-
-  const headers = days.map((day, index) => {
-    const isCurrent = index === 0;
-    const label = isCurrent
-      ? `${WEEKDAYS[day.getDay()]} (Today)`
-      : WEEKDAYS[day.getDay()];
-    return `
-      <div class="echo-week-dayhead${isCurrent ? " is-today" : ""}">
-        <span class="echo-week-weekday">${escapeHtml(label)}</span>
-      </div>
-    `;
-  }).join("");
-
-  const allDayBlocks = days.map((day) => {
-    const dayEvents = events.filter((event) => event.isAllDay && eventOverlapsDay(event, day));
-    if (!dayEvents.length) return `<div></div>`;
-    const chips = dayEvents.map((event) => {
-      const accent = event.color || DEFAULT_COLOR;
-      const background = mixHex(accent, "#1a1a1a", 0.28);
-      const border = mixHex(accent, "#ffffff", 0.35);
-      return `<div class="echo-week-allday-chip" style="background:${escapeHtml(background)};border-color:${escapeHtml(border)}">${escapeHtml(event.title || "Untitled")}</div>`;
-    }).join("");
-    return `<div>${chips}</div>`;
-  }).join("");
-
-  const hasAllDay = days.some((day) => events.some((event) => event.isAllDay && eventOverlapsDay(event, day)));
-
-  const axisHours = Array.from({ length: 24 }, (_, hour) => `
-    <div class="echo-week-hour">
-      ${hour === 0 ? "" : `<span class="echo-week-hour-label">${formatHourLabel(hour)}</span>`}
-    </div>
-  `).join("");
-
-  const columns = days.map((day, index) => {
-    const timed = layoutTimedEvents(
-      events.filter((event) => !event.isAllDay && eventOverlapsDay(event, day)),
-    );
-    const lines = Array.from({ length: 24 }, () => `<div class="echo-week-hour"></div>`).join("");
-    return `
-      <div class="echo-week-col${index === 0 ? " is-today" : ""}">
-        <div class="echo-week-events" aria-hidden="true">${lines}</div>
-        <div class="echo-week-events">${timed.map(renderTimedEvent).join("")}</div>
-      </div>
-    `;
-  }).join("");
-
-  root.innerHTML = `
-    <div class="echo-week-shell">
-      <div class="echo-week-header">
-        <div class="echo-week-corner"></div>
-        ${headers}
-      </div>
-      ${hasAllDay ? `
-        <div class="echo-week-allday">
-          <div class="echo-week-allday-label">All day</div>
-          ${allDayBlocks}
-        </div>
-      ` : ""}
-      <div class="echo-week-scroll" data-echo-week-scroll>
-        <div class="echo-week-grid">
-          <div class="echo-week-axis">${axisHours}</div>
-          ${columns}
-        </div>
-      </div>
-    </div>
-  `;
-
-  const scroller = root.querySelector("[data-echo-week-scroll]");
-  if (scroller) {
-    const targetMinutes = Math.max(0, now.getHours() * 60 + now.getMinutes() - 60);
-    scroller.scrollTop = Math.round((targetMinutes / 60) * HOUR_HEIGHT_PX);
-  }
+  const nextBehavior = isReducedMotion() ? "auto" : behavior;
+  const center = () => centerNowMarker(root, now, { behavior: nextBehavior });
+  if (typeof window.requestAnimationFrame === "function") window.requestAnimationFrame(center);
+  else center();
 }
 
-async function loadCalendar() {
+function openEventDetails(eventKey, trigger) {
+  const event = cachedEvents.find((candidate) => candidate.eventKey === eventKey);
+  if (event) eventDetails?.open(event, trigger);
+}
+
+async function loadCalendar({ center = true } = {}) {
   const now = new Date();
   const start = startOfDay(now);
-  const end = endOfDay(addDays(start, 1));
+  const end = endOfDay(addDays(start, UPCOMING_DAYS - 1));
   const url = `/api/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`;
 
   try {
@@ -424,17 +66,46 @@ async function loadCalendar() {
     if (!response.ok) throw new Error(`Calendar request failed (${response.status})`);
     const payload = await response.json();
     cachedEvents = normalizeEvents(payload);
-    renderNextEvent(pickNextEvent(cachedEvents, now));
-    renderTwoDayWeek(cachedEvents);
-    renderAgendaList(cachedEvents);
+    loadedCalendarDayKey = calendarDayKey(now);
+    lastQuarterHourKey = getQuarterHourKey(now);
+    calendarLoaded = true;
+
+    renderNextEvent($("[data-echo-next]"), pickNextEvent(cachedEvents, now), now);
+    renderTwoDayCalendar($("[data-echo-calendar]"), cachedEvents, {
+      now,
+      onEventActivate: openEventDetails,
+    });
+    renderAgendaList($("[data-echo-agenda]"), cachedEvents, now);
+    if (center) centerCalendar(now);
   } catch (error) {
     console.error(error);
+    calendarLoaded = true;
+    loadedCalendarDayKey = calendarDayKey(now);
+    lastQuarterHourKey = getQuarterHourKey(now);
     const next = $("[data-echo-next]");
     const calendar = $("[data-echo-calendar]");
     const agenda = $("[data-echo-agenda]");
     if (next) next.innerHTML = `<p class="echo-empty">Couldn’t load next event</p>`;
     if (calendar) calendar.innerHTML = `<p class="echo-empty">Couldn’t load calendar</p>`;
     if (agenda) agenda.innerHTML = `<p class="echo-empty">Couldn’t load calendar</p>`;
+  }
+}
+
+function handleClockTick(now, previousNow, { quarterHourKey } = {}) {
+  if (!calendarLoaded) return;
+  const root = $("[data-echo-calendar]");
+  updateNowMarker(root, now);
+
+  const currentDayKey = calendarDayKey(now);
+  if (currentDayKey !== loadedCalendarDayKey) {
+    calendarLoaded = false;
+    void loadCalendar({ center: true });
+    return;
+  }
+
+  if (previousNow && quarterHourKey !== lastQuarterHourKey) {
+    lastQuarterHourKey = quarterHourKey;
+    centerCalendar(now, "smooth");
   }
 }
 
@@ -574,7 +245,7 @@ function openMusic() {
     clock.setAttribute("aria-label", "Return to home view");
   }
 
-  fitDateText($("[data-echo-date]"));
+  echoClock?.fitDate();
   ensureYouTubePlayer().catch((error) => {
     console.error(error);
     frame.innerHTML = `<p class="echo-empty">Couldn’t load YouTube player</p>`;
@@ -597,8 +268,7 @@ function openPlaylistModal() {
 
 function closePlaylistModal() {
   const modal = $("[data-echo-playlist-modal]");
-  if (!modal) return;
-  modal.hidden = true;
+  if (modal) modal.hidden = true;
 }
 
 function playPlaylistIndex(index) {
@@ -612,17 +282,22 @@ function playPlaylistIndex(index) {
 function openAgendaModal() {
   const modal = $("[data-echo-agenda-modal]");
   if (!modal) return;
-  renderAgendaList(cachedEvents);
+  renderAgendaList($("[data-echo-agenda]"), cachedEvents);
   modal.hidden = false;
 }
 
 function closeAgendaModal() {
   const modal = $("[data-echo-agenda-modal]");
-  if (!modal) return;
-  modal.hidden = true;
+  if (modal) modal.hidden = true;
 }
 
 function bindInteractions() {
+  eventDetails = createEchoEventDetails({
+    modal: $("[data-echo-event-modal]"),
+    titleNode: $("[data-echo-event-title]"),
+    bodyNode: $("[data-echo-event-details]"),
+  });
+
   $("[data-echo-music-open]")?.addEventListener("click", (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -662,6 +337,7 @@ function bindInteractions() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (event.defaultPrevented) return;
     if (event.key !== "Escape") return;
     closeAgendaModal();
     closePlaylistModal();
@@ -680,21 +356,17 @@ function bindInteractions() {
       reloadHome();
     }
   });
-
-  window.addEventListener("resize", () => fitDateText($("[data-echo-date]")), { passive: true });
 }
 
-function startClock() {
-  updateClock();
-  const tick = () => {
-    updateClock();
-    const delay = 60000 - (Date.now() % 60000) + 50;
-    window.setTimeout(tick, delay);
-  };
-  const delay = 60000 - (Date.now() % 60000) + 50;
-  window.setTimeout(tick, delay);
+function startEcho() {
+  const clockRoot = $("[data-echo-clock]");
+  echoClock = createEchoClock({
+    root: clockRoot,
+    onTick: handleClockTick,
+  });
+  bindInteractions();
+  echoClock.start();
+  void loadCalendar();
 }
 
-startClock();
-bindInteractions();
-loadCalendar();
+startEcho();
