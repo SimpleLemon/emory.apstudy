@@ -936,6 +936,12 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
     assert.match(invitesSource, /function focusInviteAction\(inviteId, action\)/);
     assert.match(invitesSource, /focusInviteAction\(inviteId, focusAction\)/);
     assert.match(invitesSource, /data-invite-action="rename"]'\)\?\.focus\(\)/);
+    assert.match(invitesSource, /settings-invite-count--invited/);
+    assert.match(invitesSource, /People who signed up using this invite link\./);
+    assert.match(invitesSource, /People who completed onboarding and took a qualifying action\./);
+    assert.match(styles, /\.settings-invite-list\s*\{[^}]*grid-template-columns: repeat\(2/);
+    assert.match(styles, /\.settings-invite-row\s*\{[^}]*border-radius: var\(--radius-card\)/);
+    assert.match(styles, /\.settings-invite-count:hover/);
     const tierSection = template.slice(template.indexOf('id="tier"'), template.indexOf('id="data"'));
     const dataSection = template.slice(template.indexOf('id="data"'), template.indexOf('id="preferences"'));
     assert.match(tierSection, /settings-tier-card/);

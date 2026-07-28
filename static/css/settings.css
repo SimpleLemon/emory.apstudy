@@ -2014,20 +2014,38 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 }
 
 .settings-invite-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     min-width: 0;
     margin-top: 0.45rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 58%, transparent);
+    gap: 0.75rem;
 }
 
 .settings-invite-row {
+    position: relative;
     display: grid;
+    align-content: start;
     gap: 0.85rem;
-    padding: 1.05rem 0;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 52%, transparent);
+    min-width: 0;
+    padding: 1rem;
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 68%, transparent);
+    border-radius: var(--radius-card);
+    background: color-mix(in srgb, var(--color-surface-container-low) 82%, transparent);
+    transition: border-color 150ms ease, background-color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-invite-row:hover,
+.settings-invite-row:focus-within {
+    border-color: color-mix(in srgb, var(--color-primary) 42%, var(--color-outline-variant));
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface-container-low));
+}
+
+.settings-invite-row:hover {
+    transform: translateY(-2px);
 }
 
 .settings-invite-row.is-inactive {
-    background: color-mix(in srgb, var(--color-on-surface-variant) 3%, transparent);
+    background: color-mix(in srgb, var(--color-on-surface-variant) 5%, var(--color-surface-container-low));
 }
 
 .settings-invite-row.is-inactive .settings-invite-code {
@@ -2050,11 +2068,25 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
     gap: 0.75rem;
 }
 
+.settings-invite-row-head {
+    display: grid;
+    gap: 0.8rem;
+}
+
 .settings-invite-identity,
 .settings-invite-counts,
 .settings-invite-actions {
     gap: 0.45rem;
     flex-wrap: wrap;
+}
+
+.settings-invite-actions {
+    padding-top: 0.8rem;
+    border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 42%, transparent);
+}
+
+.settings-invite-identity {
+    min-width: 0;
 }
 
 .settings-invite-code {
@@ -2070,7 +2102,6 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 }
 
 .settings-invite-state,
-.settings-invite-counts span,
 .settings-invite-person-status {
     display: inline-flex;
     align-items: center;
@@ -2092,14 +2123,97 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
     color: var(--color-on-surface-variant);
 }
 
-.settings-invite-counts span {
-    background: color-mix(in srgb, var(--color-primary) 9%, transparent);
-    color: var(--color-on-surface-variant);
-}
-
-.settings-invite-counts .is-joined,
 .settings-invite-person-status.is-joined {
     background: color-mix(in srgb, var(--color-success) 12%, transparent);
+    color: var(--color-success);
+}
+
+.settings-invite-counts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.45rem;
+}
+
+.settings-invite-count {
+    width: auto;
+    min-width: 0;
+    min-height: 3.1rem;
+    padding: 0.55rem 0.65rem;
+    border: 1px solid color-mix(in srgb, var(--color-primary) 20%, var(--color-outline-variant));
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-primary) 7%, var(--color-surface-container-high));
+    color: var(--color-on-surface-variant);
+    cursor: help;
+    gap: 0.35rem;
+    justify-content: flex-start;
+    transition: background-color 150ms ease, border-color 150ms ease, transform 150ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.settings-invite-count:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 46%, var(--color-outline-variant));
+    background: color-mix(in srgb, var(--color-primary) 13%, var(--color-surface-container-high));
+    transform: translateY(-1px);
+}
+
+.settings-invite-count::before,
+.settings-invite-count::after {
+    left: 0;
+}
+
+.settings-invite-count::before {
+    border-top-color: var(--color-on-surface);
+    transform: translate(1.35rem, -3px);
+}
+
+.settings-invite-count::after {
+    max-width: min(190px, calc(100vw - 32px));
+    padding: 0.55rem 0.7rem;
+    border-color: color-mix(in srgb, var(--color-on-surface) 30%, transparent);
+    background: var(--color-on-surface);
+    color: var(--color-surface);
+    text-align: left;
+    transform: translate(0, calc(-100% - 9px));
+}
+
+.settings-invite-count:hover::before,
+.settings-invite-count:focus-visible::before,
+.settings-invite-count.is-tooltip-open::before {
+    transform: translate(1.35rem, 0);
+}
+
+.settings-invite-count:hover::after,
+.settings-invite-count:focus-visible::after,
+.settings-invite-count.is-tooltip-open::after {
+    transform: translate(0, calc(-100% - 6px));
+}
+
+.settings-invite-count strong {
+    color: var(--color-on-surface);
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 750;
+    line-height: 1;
+}
+
+.settings-invite-count > span {
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1.1;
+}
+
+.settings-invite-count--joined {
+    border-color: color-mix(in srgb, var(--color-success) 24%, var(--color-outline-variant));
+    background: color-mix(in srgb, var(--color-success) 8%, var(--color-surface-container-high));
+}
+
+.settings-invite-count--joined:hover {
+    border-color: color-mix(in srgb, var(--color-success) 48%, var(--color-outline-variant));
+    background: color-mix(in srgb, var(--color-success) 14%, var(--color-surface-container-high));
+}
+
+.settings-invite-count--joined strong,
+.settings-invite-count--joined > span {
     color: var(--color-success);
 }
 
@@ -2282,6 +2396,7 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 }
 
 .settings-invite-empty {
+    grid-column: 1 / -1;
     display: grid;
     justify-items: start;
     gap: 0.35rem;
@@ -2306,14 +2421,16 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 
 .settings-invite-loading {
     display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0.65rem;
     padding: 1rem 0;
 }
 
 .settings-invite-loading span {
     display: block;
-    height: 3.7rem;
-    border-radius: var(--radius-control);
+    min-height: 10rem;
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 48%, transparent);
+    border-radius: var(--radius-card);
     background: color-mix(in srgb, var(--color-on-surface-variant) 12%, transparent);
     animation: settings-invite-pulse 1.2s ease-in-out infinite alternate;
 }
@@ -2325,8 +2442,15 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .settings-invite-action {
+    .settings-invite-action,
+    .settings-invite-row,
+    .settings-invite-count {
         transition: none;
+    }
+
+    .settings-invite-row:hover,
+    .settings-invite-count:hover {
+        transform: none;
     }
 
     .settings-invite-loading span {
@@ -2335,6 +2459,14 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
 }
 
 @media (max-width: 720px) {
+    .settings-invite-list {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-invite-loading {
+        grid-template-columns: 1fr;
+    }
+
     .settings-tier-card-body {
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -2354,7 +2486,6 @@ html body .settings-combobox .settings-combobox-search:focus-visible {
         width: 100%;
     }
 
-    .settings-invite-row-head,
     .settings-invite-label-row {
         align-items: flex-start;
         flex-direction: column;

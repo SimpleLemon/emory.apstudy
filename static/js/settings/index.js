@@ -339,7 +339,6 @@ function cacheElements() {
   elements.inviteCreateForm = document.getElementById('settings-invite-create');
   elements.inviteLabel = document.getElementById('settings-invite-label');
   elements.inviteCreateButton = document.getElementById('settings-invite-create-button');
-  elements.inviteCreateHint = document.getElementById('settings-invite-create-hint');
   elements.invitesStatus = document.getElementById('settings-invites-status');
   elements.invitesList = document.getElementById('settings-invites-list');
   elements.toastHost = document.getElementById('settings-notifications');

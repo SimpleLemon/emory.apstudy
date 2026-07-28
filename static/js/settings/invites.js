@@ -127,6 +127,8 @@
       const statusClass = invitation.is_active ? '' : ' is-inactive';
       const nextAction = invitation.is_active ? 'deactivate' : 'reactivate';
       const nextActionLabel = invitation.is_active ? 'Deactivate' : 'Reactivate';
+      const invitedCount = Number(invitation.invited_count || 0);
+      const joinedCount = Number(invitation.joined_count || 0);
       const created = invitation.created_at
         ? `Created ${escapeHtml(formatDate(invitation.created_at))}`
         : '';
@@ -138,9 +140,27 @@
               <span class="settings-invite-code">${code}</span>
               <span class="settings-invite-state">${activeLabel}</span>
             </div>
-            <div class="settings-invite-counts" aria-label="${invitation.invited_count} invited, ${invitation.joined_count} joined">
-              <span>${invitation.invited_count} Invited</span>
-              <span class="is-joined">${invitation.joined_count} Joined</span>
+            <div class="settings-invite-counts" aria-label="${invitedCount} invited, ${joinedCount} joined">
+              <span
+                class="tier-badge-trigger settings-invite-count settings-invite-count--invited"
+                role="button"
+                tabindex="0"
+                aria-expanded="false"
+                aria-label="${invitedCount} invited. People who signed up using this invite link."
+                data-tooltip="People who signed up using this invite link."
+              >
+                <strong>${invitedCount}</strong><span>Invited</span>
+              </span>
+              <span
+                class="tier-badge-trigger settings-invite-count settings-invite-count--joined"
+                role="button"
+                tabindex="0"
+                aria-expanded="false"
+                aria-label="${joinedCount} joined. People who completed onboarding and took a qualifying action."
+                data-tooltip="People who completed onboarding and took a qualifying action."
+              >
+                <strong>${joinedCount}</strong><span>Joined</span>
+              </span>
             </div>
           </div>
           <div class="settings-invite-label-row" data-invite-label-display>
@@ -166,17 +186,18 @@
     }
 
     function syncCreateAvailability() {
-      if (!data || !elements.inviteCreateButton || !elements.inviteCreateHint) {
+      if (!data || !elements.inviteCreateButton || !elements.inviteLabel) {
         return;
       }
-      const emptyCount = Number(data.empty_invite_count || 0);
       const limit = Number(data.empty_invite_limit || 5);
-      const remaining = Math.max(0, limit - emptyCount);
       elements.inviteCreateButton.disabled = !data.can_create;
       elements.inviteLabel.disabled = !data.can_create;
-      elements.inviteCreateHint.textContent = data.can_create
-        ? `${remaining} unused ${remaining === 1 ? 'link' : 'links'} available. Links with a signup no longer count toward this limit.`
-        : `You have ${limit} links without a signup. Share an existing link before creating another.`;
+      if (!data.can_create) {
+        setStatus(
+          `You’ve reached the limit of ${limit} unused invite links. Share an existing link before creating another.`,
+          'error',
+        );
+      }
     }
 
     function bindAvatarFallbacks() {

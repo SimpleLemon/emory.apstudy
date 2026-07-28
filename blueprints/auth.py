@@ -1155,7 +1155,7 @@ def join_with_invite(code):
     if current_user.is_authenticated:
         return redirect(url_for("dashboard.dashboard"))
 
-    response = redirect(url_for("auth.login"))
+    response = redirect(url_for("auth.index"))
     normalized = invites.normalize_code(code)
     if normalized and invites.invite_by_code(normalized):
         response.set_cookie(

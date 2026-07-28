@@ -133,6 +133,7 @@ class InviteApiTests(unittest.TestCase):
         client = self.app.test_client()
         response = client.get(f"/join/{invitation['code']}")
         self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
         self.assertIsNone(client.get_cookie(auth.INVITE_COOKIE))
 
         payload = invites.list_invites_for_owner("owner")[0]
@@ -144,11 +145,14 @@ class InviteApiTests(unittest.TestCase):
         second = invites.create_invite("owner", "Second")
         client = self.app.test_client()
 
-        client.get(f"/join/{first['code']}")
+        first_response = client.get(f"/join/{first['code']}")
+        self.assertEqual(first_response.headers["Location"], "/")
         self.assertEqual(client.get_cookie(auth.INVITE_COOKIE).value, first["code"])
-        client.get(f"/join/{second['code'].lower()}")
+        second_response = client.get(f"/join/{second['code'].lower()}")
+        self.assertEqual(second_response.headers["Location"], "/")
         self.assertEqual(client.get_cookie(auth.INVITE_COOKIE).value, second["code"])
         invalid = client.get("/join/O0I1LL")
+        self.assertEqual(invalid.headers["Location"], "/")
         self.assertNotIn(auth.INVITE_COOKIE, invalid.headers.get("Set-Cookie", ""))
         self.assertEqual(client.get_cookie(auth.INVITE_COOKIE).value, second["code"])
 
