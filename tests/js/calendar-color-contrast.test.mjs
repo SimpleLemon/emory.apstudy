@@ -15,6 +15,7 @@ async function loadBrowserModule(relativePath) {
 
 await loadBrowserModule("static/js/calendar/utils.js");
 await loadBrowserModule("static/js/calendar/views/event-render.js");
+await loadBrowserModule("static/js/calendar/views/render-shell.js");
 
 const {
     contrastRatio,
@@ -117,4 +118,70 @@ test("calendar recomputes inline contrast colors after theme and system-scheme c
     assert.match(source, /window\.matchMedia\("\(prefers-color-scheme: dark\)"\)\.addEventListener\("change"/);
     assert.match(source, /document\.documentElement\.dataset\.theme === "system-match"/);
     assert.match(source, /renderCalendarView\(\);\s*renderAssignments\(\);/);
+});
+
+test("upcoming view keeps period arrows visible and disables them", () => {
+    const elements = new Map();
+    const makeElement = (id) => {
+        const attributes = new Map();
+        const element = {
+            className: "",
+            disabled: false,
+            hidden: false,
+            style: {},
+            textContent: "",
+            classList: { toggle() {} },
+            getAttribute(name) { return attributes.get(name) || null; },
+            setAttribute(name, value) { attributes.set(name, value); },
+        };
+        elements.set(id, element);
+        return element;
+    };
+    [
+        "calendar-title",
+        "calendar-subtitle",
+        "calendar-view-week",
+        "calendar-view-month",
+        "calendar-view-upcoming",
+        "calendar-period-controls",
+        "calendar-prev",
+        "calendar-next",
+        "calendar-view-root",
+    ].forEach(makeElement);
+    elements.get("calendar-view-root").closest = () => ({ classList: { toggle() {} } });
+    document.getElementById = (id) => elements.get(id) || null;
+
+    const state = {
+        anchorDate: new Date(2026, 6, 20),
+        loadingDashboard: false,
+        public: { readOnly: true, title: "Shared Calendar", rangeLabel: "Shared dates" },
+        ui: {},
+        view: "upcoming",
+    };
+    const shell = window.APStudyCalendarRenderShell.createCalendarRenderShell({
+        state,
+        constants: { compactCalendarQuery: { matches: false }, hourHeightPx: 60 },
+        callbacks: {
+            buildMobileCalendarAgendaHtml: () => "",
+            buildMonthViewHtml: () => "",
+            buildUpcomingAgendaHtml: () => "",
+            buildWeekViewHtml: () => "",
+            getStartOfWeek: (date) => new Date(date),
+            hideCalendarHoverCard() {},
+            renderAssignments() {},
+            renderCalendarMenu() {},
+        },
+    });
+
+    shell.render();
+    assert.equal(elements.get("calendar-period-controls").hidden, false);
+    assert.equal(elements.get("calendar-prev").disabled, true);
+    assert.equal(elements.get("calendar-next").disabled, true);
+    assert.equal(elements.get("calendar-prev").getAttribute("aria-disabled"), "true");
+    assert.equal(elements.get("calendar-next").getAttribute("aria-disabled"), "true");
+
+    state.view = "week";
+    shell.render();
+    assert.equal(elements.get("calendar-prev").disabled, false);
+    assert.equal(elements.get("calendar-next").disabled, false);
 });

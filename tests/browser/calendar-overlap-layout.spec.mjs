@@ -50,3 +50,54 @@ test("week rendering gives isolated groups full width and overlapping groups det
         - Math.min(widths["triple-a"], widths["triple-b"], widths["triple-c"])).toBeLessThan(1);
     expect(errors).toEqual([]);
 });
+
+test("timed events crossing calendar days render as one spanning band", async ({ page, baseURL }) => {
+    await page.goto(`${baseURL}/static/js/calendar/utils.js`);
+    await page.setContent(`<!doctype html><html><body><div id="calendar"></div></body></html>`);
+    await page.evaluate(async () => {
+        await import("/static/js/calendar/utils.js");
+        await import("/static/js/calendar/views/week-view.js");
+        const weekStart = new Date(2026, 6, 19);
+        const spanning = {
+            id: "spanning",
+            title: "TX > London",
+            startDate: new Date(2026, 6, 20, 22),
+            endDate: new Date(2026, 6, 22, 8),
+            isAllDay: false,
+        };
+        const sameDay = {
+            id: "same-day",
+            title: "Same day",
+            startDate: new Date(2026, 6, 20, 10),
+            endDate: new Date(2026, 6, 20, 11),
+            isAllDay: false,
+        };
+        const events = [spanning, sameDay];
+        const view = window.APStudyCalendarWeekView.createCalendarWeekView({
+            state: { anchorDate: weekStart },
+            constants: { allDayMinHeightPx: 44, hourHeightPx: 60, weekMinimumDayWidthPx: 148, weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+            callbacks: {
+                getEventBadgeColors: () => ({ background: "#234", text: "#fff", border: "#8cf", indicator: "#8cf" }),
+                getEventBadgeStyle: () => "background:#fff;color:#000;border-color:#000;",
+                getEventElementAttributes: (event) => `data-event-id="${event.id}"`,
+                getEventsForDay: (date) => events.filter((event) => event.startDate <= new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999) && event.endDate >= new Date(date.getFullYear(), date.getMonth(), date.getDate())),
+                getVisibleEvents: () => events,
+            },
+            formatters: {
+                ...window.APStudyCalendarUtils,
+                escapeHtml: String,
+                formatHourLabel: (hour) => String(hour),
+                isTaskEvent: () => false,
+                isToday: () => false,
+            },
+        });
+        document.getElementById("calendar").innerHTML = view.buildWeekViewHtml();
+    });
+
+    const spanning = page.locator('[data-event-id="spanning"]');
+    await expect(spanning).toHaveCount(1);
+    await expect(spanning).toHaveClass(/calendar-week-spanning-event-shell/);
+    await expect(spanning).toHaveAttribute("style", /grid-column: 3 \/ 6/);
+    await expect(page.locator('[data-event-id="spanning"] .calendar-week-spanning-event-title')).toHaveText("TX > London");
+    await expect(page.locator('[data-event-id="same-day"]')).toHaveClass(/absolute/);
+});

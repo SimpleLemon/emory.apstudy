@@ -47,6 +47,15 @@ const allDayEvent = {
     spanDays: 1,
     source_type: "event",
 };
+const spanningTimedEvent = {
+    id: "event-spanning",
+    event_ref: "event:event-spanning",
+    title: "TX > London",
+    startDate: new Date(2026, 6, 20, 22),
+    endDate: new Date(2026, 6, 22, 8),
+    isAllDay: false,
+    source_type: "event",
+};
 
 function createEventRenderer(readOnly = false) {
     return window.APStudyCalendarEventRender.createCalendarEventRender({
@@ -89,7 +98,7 @@ test("timed, all-day, task, and read-only events receive control semantics and u
 
 test("weekly, monthly, mobile, and upcoming renderers preserve event control attributes", () => {
     const attributes = (event) => `role="button" aria-label="${escapeHtml(event.title)} accessible" data-event-ref="${event.event_ref}" tabindex="0"`;
-    const visibleEvents = [timedEvent, allDayEvent];
+    const visibleEvents = [timedEvent, allDayEvent, spanningTimedEvent];
     const upcomingStart = new Date(Date.now() + 86400000);
     const upcomingEvent = {
         ...timedEvent,
@@ -118,6 +127,12 @@ test("weekly, monthly, mobile, and upcoming renderers preserve event control att
         state: { anchorDate: new Date(2026, 6, 20) },
         constants: { allDayMinHeightPx: 44, hourHeightPx: 60, weekMinimumDayWidthPx: 100, weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
         callbacks: {
+            getEventBadgeColors: () => ({
+                background: "#234",
+                text: "#fff",
+                border: "#8cf",
+                indicator: "#8cf",
+            }),
             getEventBadgeStyle: () => "",
             getEventElementAttributes: attributes,
             getEventsForDay: eventsForDay,
@@ -138,6 +153,8 @@ test("weekly, monthly, mobile, and upcoming renderers preserve event control att
     }).buildWeekViewHtml();
     assert.match(week, /aria-label="Office Hours &amp; &quot;Review&quot; accessible"/);
     assert.match(week, /aria-label="Registration Day accessible"/);
+    assert.match(week, /calendar-week-spanning-event/);
+    assert.match(week, /TX > London/);
 
     const month = window.APStudyCalendarMonthView.createCalendarMonthView({
         state: { anchorDate: new Date(2026, 6, 20) },

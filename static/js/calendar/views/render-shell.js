@@ -89,7 +89,14 @@
                 button.style.background = button.getAttribute("aria-pressed") === "true" ? "var(--color-primary)" : "";
             });
             const periodControls = document.getElementById("calendar-period-controls");
-            if (periodControls) periodControls.hidden = state.view === "upcoming";
+            if (periodControls) periodControls.hidden = false;
+            const periodDisabled = state.view === "upcoming";
+            ["calendar-prev", "calendar-next"].forEach((id) => {
+                const button = document.getElementById(id);
+                if (!button) return;
+                button.disabled = periodDisabled;
+                button.setAttribute("aria-disabled", String(periodDisabled));
+            });
             if (state.view !== "week") {
                 state.ui.weeklyAutoScrollKey = null;
             }

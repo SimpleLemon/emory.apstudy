@@ -12,6 +12,7 @@
             weekdays,
         } = constants;
         const {
+            getEventBadgeColors,
             getEventBadgeStyle,
             getEventElementAttributes,
             getEventsForDay,
@@ -38,7 +39,7 @@
             weekEnd.setHours(23, 59, 59, 999);
             const { events: allDayEvents, rowsCount: allDayRowsCount } = getAllDayEventsForWeek(days, weekStart, weekEnd);
             const hasAllDayEvents = allDayEvents.length > 0;
-            const timedByDay = days.map((d) => getEventsForDay(d).filter((e) => !e.isAllDay));
+            const timedByDay = days.map((d) => getEventsForDay(d).filter((e) => !e.isAllDay && !isTimedMultiDayEvent(e)));
             const totalHours = 24;
             const timeGridHeight = totalHours * hourHeightPx;
             const dayColTemplate = `minmax(${weekMinimumDayWidthPx}px, 1fr)`;
@@ -63,10 +64,13 @@
             const allDayRowCount = Math.max(1, allDayRowsCount || 0);
             const allDayRowHeight = Math.max(allDayMinHeightPx, allDayRowCount * 28 + 16);
             const allDayChips = allDayEvents.map((ev) => {
-                const badgeStyle = getEventBadgeStyle(ev);
                 const colStart = ev.gridColStart + 2;
                 const colEnd = colStart + ev.gridSpan;
                 const row = typeof ev.rowIndex === "number" ? ev.rowIndex + 1 : 1;
+                if (isTimedMultiDayEvent(ev)) {
+                    return renderTimedMultiDayEvent(ev, colStart, colEnd, row);
+                }
+                const badgeStyle = getEventBadgeStyle(ev);
                 return `
                     <div ${getEventElementAttributes(ev)} class="calendar-event-shell relative" style="grid-column: ${colStart} / ${colEnd}; grid-row: ${row};">
                         <div class="text-xs px-2 py-1 rounded-md border truncate" style="${badgeStyle}">
@@ -110,7 +114,7 @@
                         ${dayHeaders}
                     </div>
                     ${hasAllDayEvents ? `
-                    <div class="grid border-b border-calendar-rule bg-surface-container-low sticky top-[3.75rem] z-20 items-start gap-y-1 px-1 py-0.5" style="grid-template-columns: ${gridCols}; column-gap: 0.1rem; padding-right: var(--scrollbar-offset, 0px);">
+                    <div class="grid border-b border-calendar-rule bg-surface-container-low sticky top-[3.75rem] z-20 items-start gap-y-1 px-1 py-0.5" style="grid-template-columns: ${gridCols}; column-gap: 0.1rem; padding-right: var(--scrollbar-offset, 0px); min-height:${allDayRowHeight}px;">
                         <div class="px-2 py-1 text-xs uppercase tracking-[0.08em] text-on-surface-variant font-semibold border-r border-calendar-rule flex items-start justify-end" style="grid-row: 1 / span ${allDayRowCount};">All day</div>
                         ${allDayChips}
                     </div>
@@ -153,16 +157,22 @@
         function getAllDayEventsForWeek(days, weekStart, weekEnd) {
             const seen = new Set();
             const candidates = [];
+            const weekStartDay = new Date(weekStart.getFullYear(), weekStart.getMonth(), weekStart.getDate());
+            const weekEndExclusive = new Date(weekEnd.getFullYear(), weekEnd.getMonth(), weekEnd.getDate() + 1);
             for (const event of getVisibleEvents()) {
-                if (!event.isAllDay) continue;
-                const eStart = event.startDate;
+                if (!event.isAllDay && !isTimedMultiDayEvent(event)) continue;
+                const eStart = new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate());
                 const eEnd = event.endDate || event.startDate;
-                if (eStart > weekEnd || eEnd < weekStart) continue;
-                const key = event.uid || `${event.title}|${eStart.getTime()}`;
+                const eEndDay = new Date(eEnd.getFullYear(), eEnd.getMonth(), eEnd.getDate());
+                const eventEndExclusive = event.isAllDay
+                    ? eEndDay > eStart ? eEndDay : new Date(eStart.getFullYear(), eStart.getMonth(), eStart.getDate() + 1)
+                    : new Date(eEndDay.getFullYear(), eEndDay.getMonth(), eEndDay.getDate() + 1);
+                if (eStart >= weekEndExclusive || eventEndExclusive <= weekStartDay) continue;
+                const key = event.uid || event.id || `${event.title}|${eStart.getTime()}|${event.isAllDay ? "all-day" : "timed"}`;
                 if (seen.has(key)) continue;
                 seen.add(key);
                 const eventStartDay = dateToDayIndex(eStart, days);
-                const lastVisibleDay = new Date(eEnd);
+                const lastVisibleDay = new Date(eventEndExclusive);
                 lastVisibleDay.setDate(lastVisibleDay.getDate() - 1);
                 const eventEndDay = dateToDayIndex(lastVisibleDay, days);
                 const clampedStart = Math.max(0, eventStartDay);
@@ -202,6 +212,34 @@
                 events: candidates.sort((a, b) => (a.rowIndex - b.rowIndex) || (a.gridColStart - b.gridColStart)),
                 rowsCount: occupancy.length || 0,
             };
+        }
+
+        function isTimedMultiDayEvent(event) {
+            if (!event || event.isAllDay) return false;
+            const end = event.endDate || event.startDate;
+            return end > event.startDate
+                && (event.startDate.getFullYear() !== end.getFullYear()
+                    || event.startDate.getMonth() !== end.getMonth()
+                    || event.startDate.getDate() !== end.getDate());
+        }
+
+        function renderTimedMultiDayEvent(event, colStart, colEnd, row) {
+            const colors = getEventBadgeColors?.(event) || {
+                background: "var(--color-primary-container)",
+                text: "var(--color-on-primary-container)",
+                border: "var(--color-primary)",
+                indicator: "var(--color-primary)",
+            };
+            const isTask = isTaskEvent(event);
+            const taskClasses = isTask && event.completed ? " is-completed" : "";
+            return `
+                <div ${getEventElementAttributes(event)} class="calendar-event-shell calendar-week-spanning-event-shell relative${taskClasses}" style="grid-column: ${colStart} / ${colEnd}; grid-row: ${row};">
+                    <div class="calendar-week-spanning-event" style="background-color:${colors.background}; color:${colors.text}; border-color:${colors.border};">
+                        <span class="calendar-week-spanning-event-indicator" style="background-color:${colors.indicator};" aria-hidden="true"></span>
+                        <span class="calendar-week-spanning-event-title">${isTask && event.completed ? "✓ " : ""}${escapeHtml(event.title || "Untitled")}</span>
+                    </div>
+                </div>
+            `;
         }
 
         function renderTimedEvent(event) {

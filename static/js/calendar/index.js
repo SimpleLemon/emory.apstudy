@@ -329,6 +329,7 @@ const calendarWeekView = window.APStudyCalendarWeekView.createCalendarWeekView({
         weekdays: WEEKDAYS,
     },
     callbacks: {
+        getEventBadgeColors,
         getEventBadgeStyle,
         getEventElementAttributes,
         getEventsForDay,
