@@ -195,7 +195,13 @@ async function fetchJson(url, options = {}) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    throw new Error(payload.error || "Request failed.");
+    const error = new Error(payload.error || "Request failed.");
+    if (payload && typeof payload === "object") {
+      ["code", "resource", "limit", "current", "requested"].forEach((key) => {
+        if (payload[key] != null) error[key] = payload[key];
+      });
+    }
+    throw error;
   }
   return payload;
 }
@@ -573,7 +579,12 @@ async function setTrack(sectionId, enabled, intervalMinutes = null) {
     if (enabled && !wasEnabled) window.dispatchEvent(new CustomEvent('apstudy:notification-intent', { detail: { source: 'course-tracking' } }));
   } catch (error) {
     console.error(error);
-    showToast(error.message || "Try again in a moment.", true, { title: "Couldn’t update tracking" });
+    const limitReached = error?.code === "tier_limit";
+    showToast(
+      error.message || "Try again in a moment.",
+      true,
+      { title: limitReached ? "Tracking limit reached" : "Couldn’t update tracking" },
+    );
   } finally {
     state.trackingIds.delete(sectionId);
     render();

@@ -655,14 +655,6 @@ def upsert_track():
     live_stale = False
     if enabled:
         section, live_error, last_updated_at, live_stale = _merge_live_section(section, payload)
-        if not is_section_trackable(section):
-            return jsonify({
-                "error": "This section is not closed/full right now.",
-                "section": section,
-                "live_error": live_error,
-                "last_updated_at": last_updated_at,
-                "live_stale": live_stale,
-            }), 400
 
     user_id = _current_user_id()
     now = format_datetime(datetime.utcnow())

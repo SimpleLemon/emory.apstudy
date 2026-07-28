@@ -230,6 +230,13 @@
             : "Showing local catalog data.";
       const description = section.course_description || section.description || "Description unavailable.";
       const selectedInterval = Number(track?.interval_minutes || state.allowedTrackIntervals[0] || 30);
+      const trackDescription = section.is_cancelled
+        ? "This section is cancelled."
+        : trackEnabled
+          ? "Email alerts are on for class seats and waitlist openings."
+          : canTrack
+            ? "Email me when a class seat or waitlist place opens."
+            : "Email me if this section’s availability changes.";
       const waitlistTotal = section.waitlist_total !== null && section.waitlist_total !== undefined && Number.isFinite(Number(section.waitlist_total)) ? Number(section.waitlist_total) : null;
       const waitlistCapacity = section.waitlist_capacity !== null && section.waitlist_capacity !== undefined && Number.isFinite(Number(section.waitlist_capacity)) ? Number(section.waitlist_capacity) : null;
       const waitlistText = waitlistTotal === null || waitlistCapacity === null ? "Unavailable" : `${waitlistTotal} of ${waitlistCapacity} filled`;
@@ -250,34 +257,36 @@
             <span class="course-chip">${escapeHtml(formatTermLabel(section.term))}</span>
             <span class="course-chip ${statusClass}">${escapeHtml(status)}</span>
           </div>
-          ${canTrack || track ? `
-            <section class="track-control">
-              <div class="track-control-text">
-                <strong>Track availability</strong>
-                <span>${trackEnabled ? "Email alerts are on for class seats and waitlist openings." : "Email me when a class seat or waitlist place opens."}</span>
-              </div>
-              <button type="button" class="track-toggle" data-track-section-id="${escapeHtml(sectionId)}" aria-label="Track class" aria-pressed="${trackEnabled ? "true" : "false"}" ${tracking || (!canTrack && !trackEnabled) ? "disabled" : ""}></button>
+          <section class="track-control">
+            <div class="track-control-text">
+              <strong>Track availability</strong>
+              <span>${trackDescription}</span>
+            </div>
+            <div class="track-control-actions">
               ${track ? `
-                <div class="track-settings">
-                  <label>Check interval
-                    <select data-track-interval-section-id="${escapeHtml(sectionId)}" ${tracking || !trackEnabled ? "disabled" : ""}>
-                      ${[5, 15, 30].map((minutes) => {
-                        const allowed = state.allowedTrackIntervals.includes(minutes);
-                        return `<option value="${minutes}" ${minutes === selectedInterval ? "selected" : ""} ${allowed ? "" : "disabled"}>${minutes} min${allowed ? "" : " · higher tier"}</option>`;
-                      }).join("")}
-                    </select>
-                  </label>
-                  <span class="track-tier-note">${escapeHtml(state.trackingTier.label)} · ${state.trackingUsage}${state.trackingLimit === null ? "" : ` of ${state.trackingLimit}`} active</span>
-                  ${track.cooldown_until_closed ? `<span class="track-cooldown"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>Availability found; checking every 3 hours until it closes.</span>` : ""}
-                  <dl class="track-timing">
-                    <div><dt>Last checked</dt><dd>${escapeHtml(track.last_checked_at ? formatDateTime(track.last_checked_at) : "Pending")}</dd></div>
-                    <div><dt>Next check</dt><dd>${escapeHtml(track.next_check_at ? formatDateTime(track.next_check_at) : "Soon")}</dd></div>
-                  </dl>
-                  <button type="button" class="track-remove" data-remove-track-id="${escapeHtml(track.id)}" data-section-id="${escapeHtml(sectionId)}" ${tracking ? "disabled" : ""}>Remove tracker</button>
-                </div>
+                <label class="track-interval">
+                  <span>Every</span>
+                  <select data-track-interval-section-id="${escapeHtml(sectionId)}" aria-label="Check interval" ${tracking || !trackEnabled ? "disabled" : ""}>
+                    ${[5, 15, 30].map((minutes) => {
+                      const allowed = state.allowedTrackIntervals.includes(minutes);
+                      return `<option value="${minutes}" ${minutes === selectedInterval ? "selected" : ""} ${allowed ? "" : "disabled"}>${minutes} min${allowed ? "" : " · higher tier"}</option>`;
+                    }).join("")}
+                  </select>
+                </label>
               ` : ""}
-            </section>
-          ` : ""}
+              <button type="button" class="track-toggle" data-track-section-id="${escapeHtml(sectionId)}" aria-label="${trackEnabled ? "Turn off" : "Turn on"} availability tracking" aria-pressed="${trackEnabled ? "true" : "false"}" ${tracking || section.is_cancelled ? "disabled" : ""}></button>
+            </div>
+            ${track ? `
+              <div class="track-settings">
+                <span class="track-tier-note">${escapeHtml(state.trackingTier.label)} · ${state.trackingUsage}${state.trackingLimit === null ? "" : ` of ${state.trackingLimit}`} active</span>
+                ${track.cooldown_until_closed ? `<span class="track-cooldown"><span class="material-symbols-outlined" aria-hidden="true">schedule</span>Availability found; checking every 3 hours until it closes.</span>` : ""}
+                <dl class="track-timing">
+                  <div><dt>Last checked</dt><dd>${escapeHtml(track.last_checked_at ? formatDateTime(track.last_checked_at) : "Pending")}</dd></div>
+                  <div><dt>Next check</dt><dd>${escapeHtml(track.next_check_at ? formatDateTime(track.next_check_at) : "Soon")}</dd></div>
+                </dl>
+              </div>
+            ` : ""}
+          </section>
           <div class="courses-detail-actions">
             <button type="button" class="courses-secondary-action" data-refresh-section-id="${escapeHtml(sectionId)}" ${state.detailLoading ? "disabled" : ""}>
               <span class="material-symbols-outlined" aria-hidden="true">sync</span>

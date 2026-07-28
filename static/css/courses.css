@@ -642,9 +642,15 @@ body.courses-body {
   justify-content: center;
   border: 0;
   border-radius: var(--radius-control);
+  padding: 0;
   background: var(--color-surface-container);
   color: var(--color-on-surface-variant);
   cursor: pointer;
+}
+
+.courses-detail-close .material-symbols-outlined {
+  display: block;
+  line-height: 1;
 }
 
 .courses-detail-close:hover,
@@ -990,6 +996,7 @@ body.courses-body {
 }
 
 .track-control-text {
+  min-width: 0;
   display: grid;
   gap: 3px;
 }
@@ -1003,6 +1010,30 @@ body.courses-body {
   color: var(--color-on-surface-variant);
   font-size: 12px;
   line-height: 1.35;
+}
+
+.track-control-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-inline-start: auto;
+}
+
+.track-interval {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px !important;
+  color: var(--color-on-surface-variant);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.track-interval select {
+  width: 92px;
+  min-height: 34px;
+  padding: 0 8px;
 }
 
 .track-toggle {
@@ -1403,7 +1434,9 @@ body.courses-body {
 }
 
 .course-remove-button .material-symbols-outlined {
+  display: block;
   font-size: 12px;
+  line-height: 1;
 }
 
 .courses-event:hover .course-remove-button,

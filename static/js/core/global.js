@@ -436,7 +436,13 @@ window.APStudyHttp = window.APStudyHttp || {
         const payload = contentType.includes("application/json") ? await response.json() : null;
         if (!response.ok) {
             const message = payload?.error || payload?.message || response.statusText || "Request failed.";
-            throw new Error(message);
+            const error = new Error(message);
+            if (payload && typeof payload === "object") {
+                ["code", "resource", "limit", "current", "requested"].forEach((key) => {
+                    if (payload[key] != null) error[key] = payload[key];
+                });
+            }
+            throw error;
         }
         return payload ?? {};
     },
