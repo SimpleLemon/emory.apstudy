@@ -947,6 +947,7 @@
 
 .dashboard-loading {
     grid-column: 1 / -1;
+    grid-row: span 2;
     color: var(--color-on-surface-variant);
 }
 
@@ -1029,6 +1030,10 @@
 
     .dashboard-loading .contents {
         grid-template-columns: minmax(0, 1fr);
+    }
+
+    .dashboard-loading {
+        grid-row: span 4;
     }
 }
 

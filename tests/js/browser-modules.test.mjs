@@ -401,6 +401,8 @@ test("slow workspace pages reserve their loaded layout with page-specific skelet
 
     assert.match(dashboardTemplate, /dashboard-skeleton-tile/);
     assert.doesNotMatch(dashboardTemplate, /apstudy-skeleton-cards/);
+    assert.match(await sourceFor("static/css/dashboard.css"), /\.dashboard-loading\s*\{[^}]*grid-row:\s*span 2;/s);
+    assert.match(await sourceFor("static/css/dashboard.css"), /\.dashboard-loading\s*\{[^}]*grid-row:\s*span 4;/s);
     assert.match(taskTemplate, /task-skeleton-layout/);
     assert.match(calendarSource, /calendar-skeleton-week-frame/);
     assert.match(settingsTemplate, /settings-skeleton-account-layout/);
