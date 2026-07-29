@@ -854,18 +854,18 @@ html[data-theme="nest-dark"] .landing-app-demo {
     left: auto;
 }
 
-.landing-page .apstudy-consent-banner {
+.landing-page .apstudy-consent-dialog__panel {
     border-color: var(--landing-line);
     background: var(--landing-surface);
     color: var(--landing-ink);
     box-shadow: 0 8px 8px rgba(4, 11, 27, 0.12);
 }
 
-.landing-page .apstudy-consent-banner__copy p {
+.landing-page .apstudy-consent-dialog__panel p {
     color: var(--landing-muted);
 }
 
-.landing-page .apstudy-consent-banner a {
+.landing-page .apstudy-consent-dialog a {
     color: var(--landing-accent);
 }
 
@@ -875,18 +875,18 @@ html[data-theme="nest-dark"] .landing-app-demo {
     color: var(--landing-ink);
 }
 
-html[data-theme="nest-dark"] .landing-page .apstudy-consent-banner {
+html[data-theme="nest-dark"] .landing-page .apstudy-consent-dialog__panel {
     border-color: rgba(255, 255, 255, 0.14);
     background: var(--landing-navy);
     color: #ffffff;
     box-shadow: 0 8px 8px rgba(4, 11, 27, 0.24);
 }
 
-html[data-theme="nest-dark"] .landing-page .apstudy-consent-banner__copy p {
+html[data-theme="nest-dark"] .landing-page .apstudy-consent-dialog__panel p {
     color: rgba(255, 255, 255, 0.74);
 }
 
-html[data-theme="nest-dark"] .landing-page .apstudy-consent-banner a {
+html[data-theme="nest-dark"] .landing-page .apstudy-consent-dialog a {
     color: var(--landing-gold-bright);
 }
 

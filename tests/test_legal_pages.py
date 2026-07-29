@@ -46,7 +46,7 @@ class LegalPagesTestCase(unittest.TestCase):
         self.assertIn("withdrawal does not affect", body.lower())
         self.assertIn("Cookie settings", body)
         self.assertIn("six months", body)
-        self.assertIn("active by default", body)
+        self.assertIn("analytics remains off until you choose Allow analytics or Reject analytics", body)
         self.assertIn("authenticated application", body)
         self.assertIn('data-analytics-mode="public-choice"', body)
         self.assertNotIn('class="thesidebar"', body)

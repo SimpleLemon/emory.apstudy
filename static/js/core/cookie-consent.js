@@ -114,55 +114,49 @@
 
     function ui() {
         return {
-            banner: document.getElementById("apstudy-consent-banner"),
             dialog: document.getElementById("apstudy-consent-dialog"),
+            settings: document.querySelector("[data-apstudy-consent-settings]"),
         };
     }
 
     function syncUi(decision = readStoredDecision()) {
-        const { banner, dialog } = ui();
-        if (banner) banner.hidden = Boolean(decision);
+        const { dialog, settings } = ui();
         const closeButton = dialog?.querySelector("[data-apstudy-consent-close]");
-        if (closeButton) closeButton.hidden = !decision;
+        if (closeButton) closeButton.hidden = false;
+        if (settings) {
+            settings.setAttribute("aria-expanded", String(preferencesOpen));
+            settings.setAttribute("aria-label", preferencesOpen ? "Close cookie settings" : "Open cookie settings");
+            settings.setAttribute("title", preferencesOpen ? "Close cookie settings" : "Open cookie settings");
+        }
         document.querySelectorAll("[data-apstudy-consent-choice]").forEach((button) => {
             button.setAttribute("aria-pressed", String(button.dataset.apstudyConsentChoice === decision?.choice));
         });
     }
 
     function closePreferences() {
-        const { dialog } = ui();
-        if (!dialog || !preferencesOpen || !readStoredDecision()) return;
+        const { dialog, settings } = ui();
+        if (!dialog || !preferencesOpen) return;
+        const returnFocus = previousFocus || settings;
         preferencesOpen = false;
         dialog.hidden = true;
-        document.body.classList.remove("apstudy-consent-open");
-        previousFocus?.focus?.({ preventScroll: true });
+        syncUi();
+        returnFocus?.focus?.({ preventScroll: true });
         previousFocus = null;
     }
 
-    function openPreferences() {
+    function openPreferences({ focus = true } = {}) {
         const { dialog } = ui();
         if (!dialog || preferencesOpen) return;
         preferencesOpen = true;
-        previousFocus = document.activeElement;
+        previousFocus = focus ? document.activeElement : null;
         dialog.hidden = false;
-        document.body.classList.add("apstudy-consent-open");
         syncUi();
-        dialog.querySelector("[data-apstudy-consent-choice]")?.focus();
+        if (focus) dialog.querySelector("[data-apstudy-consent-choice]")?.focus();
     }
 
-    function keepDialogFocus(event) {
-        if (event.key !== "Tab" || !preferencesOpen) return;
-        const focusable = [...ui().dialog.querySelectorAll("a[href], button:not([disabled])")];
-        if (!focusable.length) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (event.shiftKey && document.activeElement === first) {
-            event.preventDefault();
-            last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-            event.preventDefault();
-            first.focus();
-        }
+    function togglePreferences() {
+        if (preferencesOpen) closePreferences();
+        else openPreferences();
     }
 
     function setChoice(choice) {
@@ -189,17 +183,19 @@
         root.id = "apstudy-consent-root";
         root.innerHTML = `
             <div class="apstudy-consent-stack">
-                <section id="apstudy-consent-banner" class="apstudy-consent-banner" role="region" aria-label="Analytics preference" hidden>
-                    <div class="apstudy-consent-banner__copy">
-                        <strong>Choose your analytics preference</strong>
-                        <p>Google Analytics is active by default on public pages to help improve Nest. You can reject it now or change this choice later. <a href="/privacy-policy#cookie-policy">Privacy details</a>.</p>
+                <div id="apstudy-consent-dialog" class="apstudy-consent-dialog" role="dialog" aria-labelledby="apstudy-consent-title" aria-describedby="apstudy-consent-description" hidden>
+                    <div class="apstudy-consent-dialog__panel">
+                        <button class="apstudy-consent-dialog__close" type="button" data-apstudy-consent-close aria-label="Close cookie settings">&times;</button>
+                        <h2 id="apstudy-consent-title">Analytics preferences</h2>
+                        <p id="apstudy-consent-description">Google Analytics may use cookies to help us understand how Nest is used. It is not required to use the site, and we do not sell your personal data.</p>
+                        <div class="apstudy-consent-actions" aria-label="Analytics preference">
+                            <button type="button" data-apstudy-consent-choice="rejected">Reject analytics</button>
+                            <button type="button" data-apstudy-consent-choice="accepted">Allow analytics</button>
+                        </div>
+                        <a class="apstudy-consent-dialog__privacy" href="/privacy-policy#cookie-policy">Read the Privacy Policy</a>
                     </div>
-                    <div class="apstudy-consent-actions" aria-label="Analytics preference options">
-                        <button type="button" data-apstudy-consent-choice="rejected">Reject analytics</button>
-                        <button type="button" data-apstudy-consent-choice="accepted">Accept analytics</button>
-                    </div>
-                </section>
-                <button class="apstudy-consent-settings" type="button" data-apstudy-consent-settings aria-haspopup="dialog" aria-label="Cookie settings" title="Cookie settings">
+                </div>
+                <button class="apstudy-consent-settings" type="button" data-apstudy-consent-settings aria-haspopup="dialog" aria-expanded="false" aria-controls="apstudy-consent-dialog" aria-label="Open cookie settings" title="Open cookie settings">
                     <svg class="apstudy-consent-settings__icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                         <path d="M20.75 12.3a8.75 8.75 0 1 1-9.05-9.05 3.35 3.35 0 0 0 4.05 4.05 3.35 3.35 0 0 0 4.05 4.05c.39.29.7.62.95.95Z" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" />
                         <circle cx="8.5" cy="12" r="1" fill="currentColor" />
@@ -208,19 +204,6 @@
                     </svg>
                     <span class="apstudy-consent-settings__label">Cookie settings</span>
                 </button>
-            </div>
-            <div id="apstudy-consent-dialog" class="apstudy-consent-dialog" role="dialog" aria-modal="true" aria-labelledby="apstudy-consent-title" hidden>
-                <div class="apstudy-consent-dialog__panel">
-                    <button class="apstudy-consent-dialog__close" type="button" data-apstudy-consent-close aria-label="Close cookie settings">&times;</button>
-                    <h2 id="apstudy-consent-title">Cookie settings</h2>
-                    <p><strong>Essential storage:</strong> Always active where needed for authentication, security, and preferences.</p>
-                    <p><strong>Public-page analytics:</strong> Google Analytics is active by default on public content. Rejecting disables it on public pages without limiting core features.</p>
-                    <div class="apstudy-consent-actions" aria-label="Analytics preference">
-                        <button type="button" data-apstudy-consent-choice="rejected">Reject analytics</button>
-                        <button type="button" data-apstudy-consent-choice="accepted">Accept analytics</button>
-                    </div>
-                    <a class="apstudy-consent-dialog__privacy" href="/privacy-policy#cookie-policy">Read the Privacy Policy</a>
-                </div>
             </div>
         `;
         document.body.appendChild(root);
@@ -231,12 +214,11 @@
                 setChoice(choiceButton.dataset.apstudyConsentChoice);
                 return;
             }
-            if (event.target.closest?.("[data-apstudy-consent-settings]")) openPreferences();
+            if (event.target.closest?.("[data-apstudy-consent-settings]")) togglePreferences();
             if (event.target.closest?.("[data-apstudy-consent-close]")) closePreferences();
         });
         root.addEventListener("keydown", (event) => {
             if (event.key === "Escape") closePreferences();
-            keepDialogFocus(event);
         });
     }
 
@@ -253,9 +235,10 @@
         syncUi(decision);
         if (decision?.choice === REJECTED) {
             removeAnalyticsRuntime();
-        } else {
+        } else if (decision?.choice === ACCEPTED) {
             loadAnalytics();
-            if (!decision) openPreferences();
+        } else {
+            openPreferences({ focus: false });
         }
     }
 
@@ -285,8 +268,8 @@
         const decision = readStoredDecision();
         syncUi(decision);
         if (!decision) {
-            openPreferences();
-            loadAnalytics();
+            openPreferences({ focus: false });
+            removeAnalyticsRuntime();
             return;
         }
         if (decision?.choice === REJECTED) {
