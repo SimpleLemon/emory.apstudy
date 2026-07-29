@@ -57,14 +57,14 @@ const spanningTimedEvent = {
     source_type: "event",
 };
 
-function createEventRenderer(readOnly = false) {
+function createEventRenderer(readOnly = false, events = [timedEvent, allDayEvent]) {
     return window.APStudyCalendarEventRender.createCalendarEventRender({
         state: { public: { readOnly } },
         callbacks: {
             getCalendarEventColor: () => "#336699",
             getCalendarEventRef: (event) => event.event_ref,
             getEventCalendarLabel: () => "Personal Calendar",
-            getVisibleEvents: () => [timedEvent, allDayEvent],
+            getVisibleEvents: () => events,
         },
         formatters: {
             adjustHexLuminance: (color) => color,
@@ -94,6 +94,20 @@ test("timed, all-day, task, and read-only events receive control semantics and u
     assert.match(editable.getEventElementAttributes(allDayEvent), /Jul 21 \(All day\)/);
     assert.match(editable.getEventElementAttributes(task), /Open task/);
     assert.match(readOnly.getEventElementAttributes(timedEvent), /View event/);
+});
+
+test("timed events ending at midnight do not occupy the following day", () => {
+    const midnightEnd = {
+        ...timedEvent,
+        id: "event-midnight",
+        event_ref: "event:event-midnight",
+        startDate: new Date(2026, 6, 23, 22),
+        endDate: new Date(2026, 6, 24, 0),
+    };
+    const renderer = createEventRenderer(false, [midnightEnd]);
+
+    assert.equal(renderer.getEventsForDay(new Date(2026, 6, 23)).length, 1);
+    assert.equal(renderer.getEventsForDay(new Date(2026, 6, 24)).length, 0);
 });
 
 test("weekly, monthly, mobile, and upcoming renderers preserve event control attributes", () => {
@@ -153,7 +167,7 @@ test("weekly, monthly, mobile, and upcoming renderers preserve event control att
     }).buildWeekViewHtml();
     assert.match(week, /aria-label="Office Hours &amp; &quot;Review&quot; accessible"/);
     assert.match(week, /aria-label="Registration Day accessible"/);
-    assert.match(week, /calendar-week-spanning-event/);
+    assert.doesNotMatch(week, /calendar-week-spanning-event/);
     assert.match(week, /TX > London/);
 
     const month = window.APStudyCalendarMonthView.createCalendarMonthView({
@@ -161,6 +175,12 @@ test("weekly, monthly, mobile, and upcoming renderers preserve event control att
         constants: { weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
         callbacks: {
             buildEventChip: (event) => `<div ${attributes(event)}></div>`,
+            getEventBadgeColors: () => ({
+                background: "#234",
+                text: "#fff",
+                border: "#8cf",
+                indicator: "#8cf",
+            }),
             getEventBadgeStyle: () => "",
             getEventElementAttributes: attributes,
             getEventsForDay: eventsForDay,
@@ -174,6 +194,8 @@ test("weekly, monthly, mobile, and upcoming renderers preserve event control att
     }).buildMonthViewHtml();
     assert.match(month, /aria-label="Office Hours &amp; &quot;Review&quot; accessible"/);
     assert.match(month, /aria-label="Registration Day accessible"/);
+    assert.match(month, /calendar-month-spanning-event/);
+    assert.equal((month.match(/data-event-ref="event:event-spanning"/g) || []).length, 1);
 
     const agendaRenderer = window.APStudyCalendarAgenda.createCalendarAgenda({
         state: { anchorDate: new Date(2026, 6, 20), view: "week", loadingDashboard: false, ui: { expandedUpcomingRefs: new Set() } },

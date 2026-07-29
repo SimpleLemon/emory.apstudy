@@ -51,13 +51,12 @@ test("week rendering gives isolated groups full width and overlapping groups det
     expect(errors).toEqual([]);
 });
 
-test("timed events crossing calendar days render as one spanning band", async ({ page, baseURL }) => {
+test("month rendering turns a timed cross-day event into one compact spanning band", async ({ page, baseURL }) => {
     await page.goto(`${baseURL}/static/js/calendar/utils.js`);
-    await page.setContent(`<!doctype html><html><body><div id="calendar"></div></body></html>`);
+    await page.setContent(`<!doctype html><html><head><link rel="stylesheet" href="${baseURL}/static/css/tailwind.css"></head><body><div id="calendar"></div></body></html>`);
     await page.evaluate(async () => {
         await import("/static/js/calendar/utils.js");
-        await import("/static/js/calendar/views/week-view.js");
-        const weekStart = new Date(2026, 6, 19);
+        await import("/static/js/calendar/views/month-view.js");
         const spanning = {
             id: "spanning",
             title: "TX > London",
@@ -72,15 +71,84 @@ test("timed events crossing calendar days render as one spanning band", async ({
             endDate: new Date(2026, 6, 20, 11),
             isAllDay: false,
         };
-        const events = [spanning, sameDay];
-        const view = window.APStudyCalendarWeekView.createCalendarWeekView({
-            state: { anchorDate: weekStart },
-            constants: { allDayMinHeightPx: 44, hourHeightPx: 60, weekMinimumDayWidthPx: 148, weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+        const midnightEnd = {
+            id: "midnight-end",
+            title: "Ends at midnight",
+            startDate: new Date(2026, 6, 23, 22),
+            endDate: new Date(2026, 6, 24, 0),
+            isAllDay: false,
+        };
+        const events = [spanning, sameDay, midnightEnd];
+        const overlapsDay = (event, date) => (
+            event.startDate <= new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
+            && event.endDate > new Date(date.getFullYear(), date.getMonth(), date.getDate())
+        );
+        const view = window.APStudyCalendarMonthView.createCalendarMonthView({
+            state: { anchorDate: new Date(2026, 6, 20) },
+            constants: { weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
             callbacks: {
                 getEventBadgeColors: () => ({ background: "#234", text: "#fff", border: "#8cf", indicator: "#8cf" }),
                 getEventBadgeStyle: () => "background:#fff;color:#000;border-color:#000;",
                 getEventElementAttributes: (event) => `data-event-id="${event.id}"`,
-                getEventsForDay: (date) => events.filter((event) => event.startDate <= new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999) && event.endDate >= new Date(date.getFullYear(), date.getMonth(), date.getDate())),
+                getEventsForDay: (date) => events.filter((event) => overlapsDay(event, date)),
+                getVisibleEvents: () => events,
+                buildEventChip: (event) => `<div data-month-chip-id="${event.id}">${event.title}</div>`,
+            },
+            formatters: {
+                ...window.APStudyCalendarUtils,
+                escapeHtml: String,
+                formatDateKey: (date) => date.toISOString().slice(0, 10),
+                formatMonthGridDayLabel: (date) => String(date.getDate()),
+                isToday: () => false,
+            },
+        });
+        document.getElementById("calendar").innerHTML = view.buildMonthViewHtml();
+    });
+
+    const spanning = page.locator('[data-event-id="spanning"]');
+    await expect(spanning).toHaveCount(1);
+    await expect(spanning).toHaveClass(/calendar-month-spanning-event-shell/);
+    await expect(spanning).toHaveAttribute("style", /grid-column:2 \/ 5/);
+    await expect(spanning.locator(".calendar-month-spanning-event")).toHaveText("TX > London");
+    await expect(page.locator('[data-month-chip-id="spanning"]')).toHaveCount(0);
+    await expect(page.locator('[data-month-chip-id="same-day"]')).toHaveCount(1);
+    await expect(page.locator('[data-event-id="midnight-end"]')).toHaveCount(0);
+    await expect(page.locator('[data-month-chip-id="midnight-end"]')).toHaveCount(1);
+    expect(await spanning.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThanOrEqual(27);
+});
+
+test("week rendering keeps cross-day bands at compact all-day density", async ({ page, baseURL }) => {
+    await page.goto(`${baseURL}/static/js/calendar/utils.js`);
+    await page.setContent(`<!doctype html><html><head><link rel="stylesheet" href="${baseURL}/static/css/tailwind.css"></head><body><div id="calendar"></div></body></html>`);
+    await page.evaluate(async () => {
+        await import("/static/js/calendar/utils.js");
+        await import("/static/js/calendar/views/week-view.js");
+        const weekStart = new Date(2026, 6, 19);
+        const spanning = {
+            id: "spanning",
+            title: "TX > London",
+            startDate: new Date(2026, 6, 20, 22),
+            endDate: new Date(2026, 6, 22, 8),
+            isAllDay: false,
+        };
+        const midnightEnd = {
+            id: "midnight-end",
+            title: "Ends at midnight",
+            startDate: new Date(2026, 6, 23, 22),
+            endDate: new Date(2026, 6, 24, 0),
+            isAllDay: false,
+        };
+        const events = [spanning, midnightEnd];
+        const view = window.APStudyCalendarWeekView.createCalendarWeekView({
+            state: { anchorDate: weekStart },
+            constants: { allDayMinHeightPx: 44, hourHeightPx: 60, weekMinimumDayWidthPx: 148, weekdays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] },
+            callbacks: {
+                getEventBadgeStyle: () => "background:#234;color:#fff;border-color:#8cf;",
+                getEventElementAttributes: (event) => `data-event-id="${event.id}"`,
+                getEventsForDay: (date) => events.filter((event) => (
+                    event.startDate <= new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
+                    && event.endDate > new Date(date.getFullYear(), date.getMonth(), date.getDate())
+                )),
                 getVisibleEvents: () => events,
             },
             formatters: {
@@ -96,8 +164,11 @@ test("timed events crossing calendar days render as one spanning band", async ({
 
     const spanning = page.locator('[data-event-id="spanning"]');
     await expect(spanning).toHaveCount(1);
-    await expect(spanning).toHaveClass(/calendar-week-spanning-event-shell/);
+    await expect(spanning).not.toHaveClass(/calendar-week-spanning-event-shell/);
     await expect(spanning).toHaveAttribute("style", /grid-column: 3 \/ 6/);
-    await expect(page.locator('[data-event-id="spanning"] .calendar-week-spanning-event-title')).toHaveText("TX > London");
-    await expect(page.locator('[data-event-id="same-day"]')).toHaveClass(/absolute/);
+    expect(await spanning.evaluate((element) => element.getBoundingClientRect().height)).toBeLessThan(32);
+    const midnightEnd = page.locator('[data-event-id="midnight-end"]');
+    await expect(midnightEnd).toHaveCount(1);
+    await expect(midnightEnd).toHaveClass(/absolute/);
+    await expect(midnightEnd).toHaveAttribute("style", /height:120px/);
 });

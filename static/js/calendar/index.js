@@ -304,6 +304,7 @@ const calendarMonthView = window.APStudyCalendarMonthView.createCalendarMonthVie
     },
     callbacks: {
         buildEventChip,
+        getEventBadgeColors,
         getEventBadgeStyle,
         getEventElementAttributes,
         getEventsForDay,
@@ -329,7 +330,6 @@ const calendarWeekView = window.APStudyCalendarWeekView.createCalendarWeekView({
         weekdays: WEEKDAYS,
     },
     callbacks: {
-        getEventBadgeColors,
         getEventBadgeStyle,
         getEventElementAttributes,
         getEventsForDay,

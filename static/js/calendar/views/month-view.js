@@ -8,6 +8,7 @@
         const { weekdays } = constants;
         const {
             buildEventChip,
+            getEventBadgeColors,
             getEventBadgeStyle,
             getEventElementAttributes,
             getEventsForDay,
@@ -37,19 +38,19 @@
                     day.setDate(weekStart.getDate() + dayIndex);
                     return day;
                 });
-                const { events: allDayEvents, rowsCount } = getAllDayEventsForMonthWeek(days);
-                const allDayRowCount = rowsCount || 0;
-                const gridEndLine = allDayRowCount + 3;
-                const occupiedAllDayRowsByDay = days.map((_, dayIndex) => allDayEvents.reduce((max, event) => {
+                const { events: spanningEvents, rowsCount } = getSpanningEventsForMonthWeek(days);
+                const spanningRowCount = rowsCount || 0;
+                const gridEndLine = spanningRowCount + 3;
+                const occupiedSpanningRowsByDay = days.map((_, dayIndex) => spanningEvents.reduce((max, event) => {
                     const start = event.gridColStart;
                     const end = event.gridColStart + event.gridSpan - 1;
                     if (dayIndex < start || dayIndex > end) return max;
                     return Math.max(max, (event.rowIndex || 0) + 1);
                 }, 0));
-                const rowTemplate = allDayRowCount > 0
-                    ? `2.75rem repeat(${allDayRowCount}, 1.65rem) minmax(3.25rem, 1fr)`
+                const rowTemplate = spanningRowCount > 0
+                    ? `2.75rem repeat(${spanningRowCount}, 1.65rem) minmax(3.25rem, 1fr)`
                     : "2.75rem minmax(4.9rem, 1fr)";
-                const rowMinHeight = Math.max(120, 96 + allDayRowCount * 26);
+                const rowMinHeight = Math.max(120, 96 + spanningRowCount * 26);
                 const dayCells = days.map((day, dayIndex) => {
                     const inMonth = day >= monthStart && day <= monthEnd;
                     const bgClass = inMonth ? "bg-surface-container" : "opacity-70";
@@ -74,10 +75,16 @@
                         </div>
                     `;
                 }).join("");
-                const allDayBars = allDayEvents.map((event) => renderMonthAllDayEvent(event)).join("");
+                const spanningBars = spanningEvents.map((event) => (
+                    isTimedMultiDayEvent(event)
+                        ? renderMonthTimedMultiDayEvent(event)
+                        : renderMonthAllDayEvent(event)
+                )).join("");
                 const timedEventColumns = days.map((day, dayIndex) => {
-                    const dayEvents = getEventsForDay(day).filter((event) => !event.isAllDay);
-                    const dayTimedRowStart = (occupiedAllDayRowsByDay[dayIndex] || 0) + 2;
+                    const dayEvents = getEventsForDay(day).filter((event) => (
+                        !event.isAllDay && !isTimedMultiDayEvent(event)
+                    ));
+                    const dayTimedRowStart = (occupiedSpanningRowsByDay[dayIndex] || 0) + 2;
                     return `
                         <div class="relative px-1 pb-2.5 space-y-1" style="grid-column:${dayIndex + 1}; grid-row:${dayTimedRowStart} / ${gridEndLine}; z-index:10;">
                             ${dayEvents.slice(0, 3).map((e) => buildEventChip(e, { monthView: true })).join("")}
@@ -89,7 +96,7 @@
                     <div class="grid relative" style="grid-template-columns:repeat(7, minmax(0, 1fr)); grid-template-rows:${rowTemplate}; min-height:${rowMinHeight}px;">
                         ${dayCells}
                         ${dayNumbers}
-                        ${allDayBars}
+                        ${spanningBars}
                         ${timedEventColumns}
                     </div>
                 `);
@@ -104,23 +111,20 @@
             `;
         }
 
-        function getAllDayEventsForMonthWeek(days) {
+        function getSpanningEventsForMonthWeek(days) {
             const weekStart = new Date(days[0].getFullYear(), days[0].getMonth(), days[0].getDate());
             const weekEndExclusive = new Date(days[6].getFullYear(), days[6].getMonth(), days[6].getDate() + 1);
             const seen = new Set();
             const candidates = [];
             for (const event of getVisibleEvents()) {
-                if (!event.isAllDay) continue;
+                if (!event.isAllDay && !isTimedMultiDayEvent(event)) continue;
                 const eStart = new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate());
-                const rawEnd = event.endDate && event.endDate > event.startDate
-                    ? new Date(event.endDate.getFullYear(), event.endDate.getMonth(), event.endDate.getDate())
-                    : new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate() + 1);
-                const eEnd = rawEnd > eStart ? rawEnd : new Date(eStart.getFullYear(), eStart.getMonth(), eStart.getDate() + 1);
-                if (eStart >= weekEndExclusive || eEnd <= weekStart) continue;
-                const key = event.uid || `${event.title}|${event.startDate.getTime()}`;
+                const eventEndExclusive = getEventEndDayExclusive(event);
+                if (eStart >= weekEndExclusive || eventEndExclusive <= weekStart) continue;
+                const key = event.uid || event.id || `${event.title}|${event.startDate.getTime()}|${event.isAllDay ? "all-day" : "timed"}`;
                 if (seen.has(key)) continue;
                 seen.add(key);
-                const lastVisibleDay = new Date(eEnd);
+                const lastVisibleDay = new Date(eventEndExclusive);
                 lastVisibleDay.setDate(lastVisibleDay.getDate() - 1);
                 const clampedStart = Math.max(0, dateToDayIndex(eStart, days));
                 const clampedEnd = Math.min(6, dateToDayIndex(lastVisibleDay, days));
@@ -131,10 +135,10 @@
                     gridColStart: clampedStart,
                     gridSpan: span,
                     continuesFromPreviousWeek: eStart < weekStart,
-                    continuesToNextWeek: eEnd > weekEndExclusive,
+                    continuesToNextWeek: eventEndExclusive > weekEndExclusive,
                 });
             }
-            packAllDayEvents(candidates);
+            packSpanningEvents(candidates);
             const rowsCount = candidates.reduce((max, event) => Math.max(max, (event.rowIndex || 0) + 1), 0);
             return {
                 events: candidates.sort((a, b) => (a.rowIndex - b.rowIndex) || (a.gridColStart - b.gridColStart)),
@@ -142,7 +146,37 @@
             };
         }
 
-        function packAllDayEvents(events) {
+        function getEventEndDayExclusive(event) {
+            const startDay = new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate());
+            const end = event.endDate instanceof Date && !Number.isNaN(event.endDate.getTime()) && event.endDate > event.startDate
+                ? event.endDate
+                : null;
+            if (!end) return new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + 1);
+            if (event.isAllDay) {
+                const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                return endDay > startDay
+                    ? endDay
+                    : new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + 1);
+            }
+            const lastOccupiedInstant = new Date(end.getTime() - 1);
+            return new Date(
+                lastOccupiedInstant.getFullYear(),
+                lastOccupiedInstant.getMonth(),
+                lastOccupiedInstant.getDate() + 1,
+            );
+        }
+
+        function isTimedMultiDayEvent(event) {
+            if (!event || event.isAllDay || !(event.startDate instanceof Date) || Number.isNaN(event.startDate.getTime())) return false;
+            const end = event.endDate;
+            if (!(end instanceof Date) || Number.isNaN(end.getTime()) || end <= event.startDate) return false;
+            const lastOccupiedInstant = new Date(end.getTime() - 1);
+            return event.startDate.getFullYear() !== lastOccupiedInstant.getFullYear()
+                || event.startDate.getMonth() !== lastOccupiedInstant.getMonth()
+                || event.startDate.getDate() !== lastOccupiedInstant.getDate();
+        }
+
+        function packSpanningEvents(events) {
             events.sort((a, b) => a.gridColStart - b.gridColStart || b.gridSpan - a.gridSpan || (a.title || "").localeCompare(b.title || ""));
             const occupancy = [];
             for (const event of events) {
@@ -181,6 +215,24 @@
                 <div ${getEventElementAttributes(event)} class="calendar-event-shell relative" style="grid-column:${colStart} / ${colEnd}; grid-row:${row}; z-index:20; padding-left:${padLeft}; padding-right:${padRight};">
                     <div class="text-xs px-2 py-1 border truncate leading-none" style="${badgeStyle}; ${radiusStyle}">
                         ${escapeHtml(event.title || "Untitled")}
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMonthTimedMultiDayEvent(event) {
+            const colors = getEventBadgeColors(event);
+            const colStart = event.gridColStart + 1;
+            const colEnd = colStart + event.gridSpan;
+            const row = (event.rowIndex || 0) + 2;
+            const radiusStyle = `border-top-left-radius:${event.continuesFromPreviousWeek ? "0" : "0.375rem"}; border-bottom-left-radius:${event.continuesFromPreviousWeek ? "0" : "0.375rem"}; border-top-right-radius:${event.continuesToNextWeek ? "0" : "0.375rem"}; border-bottom-right-radius:${event.continuesToNextWeek ? "0" : "0.375rem"};`;
+            const padLeft = event.continuesFromPreviousWeek ? "0" : "0.25rem";
+            const padRight = event.continuesToNextWeek ? "0" : "0.25rem";
+            return `
+                <div ${getEventElementAttributes(event)} class="calendar-event-shell calendar-month-spanning-event-shell relative" style="grid-column:${colStart} / ${colEnd}; grid-row:${row}; z-index:20; padding-left:${padLeft}; padding-right:${padRight};">
+                    <div class="calendar-month-spanning-event flex h-full min-w-0 items-center gap-2 overflow-hidden border px-2 py-1 text-xs leading-none" style="background-color:${colors.background}; color:${colors.text}; border-color:${colors.border}; ${radiusStyle}">
+                        ${event.continuesFromPreviousWeek ? "" : `<span class="inline-block h-4 w-1 shrink-0 rounded-full" style="background-color:${colors.indicator};" aria-hidden="true"></span>`}
+                        <span class="min-w-0 truncate font-medium">${escapeHtml(event.title || "Untitled")}</span>
                     </div>
                 </div>
             `;

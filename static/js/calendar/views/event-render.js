@@ -49,7 +49,8 @@
                     const nextDayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1);
                     return eventStartDay < nextDayStart && eventEndDay > dayStart;
                 }
-                return eStart <= dayEnd && eEnd >= dayStart;
+                if (eEnd <= eStart) return eStart >= dayStart && eStart <= dayEnd;
+                return eStart <= dayEnd && eEnd > dayStart;
             });
         }
 

@@ -12,7 +12,6 @@
             weekdays,
         } = constants;
         const {
-            getEventBadgeColors,
             getEventBadgeStyle,
             getEventElementAttributes,
             getEventsForDay,
@@ -67,9 +66,6 @@
                 const colStart = ev.gridColStart + 2;
                 const colEnd = colStart + ev.gridSpan;
                 const row = typeof ev.rowIndex === "number" ? ev.rowIndex + 1 : 1;
-                if (isTimedMultiDayEvent(ev)) {
-                    return renderTimedMultiDayEvent(ev, colStart, colEnd, row);
-                }
                 const badgeStyle = getEventBadgeStyle(ev);
                 return `
                     <div ${getEventElementAttributes(ev)} class="calendar-event-shell relative" style="grid-column: ${colStart} / ${colEnd}; grid-row: ${row};">
@@ -162,11 +158,7 @@
             for (const event of getVisibleEvents()) {
                 if (!event.isAllDay && !isTimedMultiDayEvent(event)) continue;
                 const eStart = new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate());
-                const eEnd = event.endDate || event.startDate;
-                const eEndDay = new Date(eEnd.getFullYear(), eEnd.getMonth(), eEnd.getDate());
-                const eventEndExclusive = event.isAllDay
-                    ? eEndDay > eStart ? eEndDay : new Date(eStart.getFullYear(), eStart.getMonth(), eStart.getDate() + 1)
-                    : new Date(eEndDay.getFullYear(), eEndDay.getMonth(), eEndDay.getDate() + 1);
+                const eventEndExclusive = getEventEndDayExclusive(event);
                 if (eStart >= weekEndExclusive || eventEndExclusive <= weekStartDay) continue;
                 const key = event.uid || event.id || `${event.title}|${eStart.getTime()}|${event.isAllDay ? "all-day" : "timed"}`;
                 if (seen.has(key)) continue;
@@ -214,32 +206,34 @@
             };
         }
 
-        function isTimedMultiDayEvent(event) {
-            if (!event || event.isAllDay) return false;
-            const end = event.endDate || event.startDate;
-            return end > event.startDate
-                && (event.startDate.getFullYear() !== end.getFullYear()
-                    || event.startDate.getMonth() !== end.getMonth()
-                    || event.startDate.getDate() !== end.getDate());
+        function getEventEndDayExclusive(event) {
+            const startDay = new Date(event.startDate.getFullYear(), event.startDate.getMonth(), event.startDate.getDate());
+            const end = event.endDate instanceof Date && !Number.isNaN(event.endDate.getTime()) && event.endDate > event.startDate
+                ? event.endDate
+                : null;
+            if (!end) return new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + 1);
+            if (event.isAllDay) {
+                const endDay = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+                return endDay > startDay
+                    ? endDay
+                    : new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + 1);
+            }
+            const lastOccupiedInstant = new Date(end.getTime() - 1);
+            return new Date(
+                lastOccupiedInstant.getFullYear(),
+                lastOccupiedInstant.getMonth(),
+                lastOccupiedInstant.getDate() + 1,
+            );
         }
 
-        function renderTimedMultiDayEvent(event, colStart, colEnd, row) {
-            const colors = getEventBadgeColors?.(event) || {
-                background: "var(--color-primary-container)",
-                text: "var(--color-on-primary-container)",
-                border: "var(--color-primary)",
-                indicator: "var(--color-primary)",
-            };
-            const isTask = isTaskEvent(event);
-            const taskClasses = isTask && event.completed ? " is-completed" : "";
-            return `
-                <div ${getEventElementAttributes(event)} class="calendar-event-shell calendar-week-spanning-event-shell relative${taskClasses}" style="grid-column: ${colStart} / ${colEnd}; grid-row: ${row};">
-                    <div class="calendar-week-spanning-event" style="background-color:${colors.background}; color:${colors.text}; border-color:${colors.border};">
-                        <span class="calendar-week-spanning-event-indicator" style="background-color:${colors.indicator};" aria-hidden="true"></span>
-                        <span class="calendar-week-spanning-event-title">${isTask && event.completed ? "✓ " : ""}${escapeHtml(event.title || "Untitled")}</span>
-                    </div>
-                </div>
-            `;
+        function isTimedMultiDayEvent(event) {
+            if (!event || event.isAllDay || !(event.startDate instanceof Date) || Number.isNaN(event.startDate.getTime())) return false;
+            const end = event.endDate;
+            if (!(end instanceof Date) || Number.isNaN(end.getTime()) || end <= event.startDate) return false;
+            const lastOccupiedInstant = new Date(end.getTime() - 1);
+            return event.startDate.getFullYear() !== lastOccupiedInstant.getFullYear()
+                || event.startDate.getMonth() !== lastOccupiedInstant.getMonth()
+                || event.startDate.getDate() !== lastOccupiedInstant.getDate();
         }
 
         function renderTimedEvent(event) {

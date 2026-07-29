@@ -102,7 +102,7 @@
             if (!upcoming.length) {
                 return `
                     <div class="calendar-upcoming-empty">
-                        <span class="material-symbols-outlined" aria-hidden="true">event_available</span>
+                        <span class="material-symbols-outlined" aria-hidden="true">event_upcoming</span>
                         <div>
                             <h2>Your next 30 days are clear</h2>
                             <p>New events and deadlines will appear here as they are added.</p>
