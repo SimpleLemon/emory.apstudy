@@ -137,15 +137,40 @@ export function createAttachmentManager() {
     render();
   }
 
-  async function remove(localId) {
+  async function remove(localId, options = {}) {
     const index = items.findIndex((item) => item.localId === localId);
     if (index < 0) return;
     const [item] = items.splice(index, 1);
     item.xhr?.abort();
     render();
-    if (item.attachment?.id) {
-      fetch(`/api/chat/attachments/${encodeURIComponent(item.attachment.id)}`, { method: "DELETE" }).catch(() => {});
+    const commit = ({ reason } = {}) => {
+      if (!item.attachment?.id) return Promise.resolve();
+      return fetch(`/api/chat/attachments/${encodeURIComponent(item.attachment.id)}`, {
+        method: "DELETE",
+        keepalive: reason === "pagehide",
+      }).then((response) => {
+        if (!response.ok) throw new Error("Unable to remove attachment.");
+      });
+    };
+    if (options.notify !== false && window.APStudyUndo?.stage) {
+      window.APStudyUndo.stage({
+        message: `${item.file.name} removed from this message.`,
+        commit,
+        restore: () => {
+          items.splice(Math.min(index, items.length), 0, item);
+          if (!item.attachment && ["queued", "uploading"].includes(item.status)) {
+            item.status = "queued";
+            item.progress = 0;
+            void upload(item);
+          } else {
+            render();
+          }
+        },
+        errorTitle: "Couldn’t remove attachment",
+      });
+      return;
     }
+    await commit();
   }
 
   return {
@@ -206,6 +231,6 @@ export function createAttachmentManager() {
     hasContent() { return items.length > 0; },
     isBusy() { return items.some((item) => item.status !== "uploaded"); },
     clear() { items.splice(0); render(); },
-    resetForRoom() { items.slice().forEach((item) => void remove(item.localId)); },
+    resetForRoom() { items.slice().forEach((item) => void remove(item.localId, { notify: false })); },
   };
 }

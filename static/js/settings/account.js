@@ -43,12 +43,26 @@
         return;
       }
 
+      if (global.APStudyUndo?.stage) {
+        global.APStudyUndo.stage({
+          title: 'Account deletion scheduled',
+          message: 'Your account will be deleted when this notice closes.',
+          type: 'warning',
+          commit: ({ reason }) => fetchJson(endpoints.deleteAccount, {
+            method: 'POST',
+            keepalive: reason === 'pagehide',
+          }),
+          restore: () => {},
+          onUndo: () => showToast('Your account was kept.', 'success'),
+          onCommit: () => global.location.assign('/logout'),
+          errorTitle: 'Couldn’t delete account',
+        });
+        return;
+      }
+
       try {
         await fetchJson(endpoints.deleteAccount, { method: 'POST' });
-        showToast('Account deleted.', 'success');
-        global.setTimeout(() => {
-          global.location.assign('/logout');
-        }, 500);
+        global.location.assign('/logout');
       } catch (error) {
         showToast(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete account' });
       }

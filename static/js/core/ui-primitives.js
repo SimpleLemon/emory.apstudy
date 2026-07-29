@@ -156,12 +156,34 @@
             action.type = 'button';
             action.className = 'apstudy-toast__action';
             action.textContent = String(options.action.label || options.action.text);
-            action.addEventListener('click', () => {
-                const keepOpen = typeof options.action.onClick === 'function'
-                    ? options.action.onClick() === true
-                    : false;
-                if (options.action.href) window.location.assign(options.action.href);
-                if (!keepOpen && !options.action.href) dismiss();
+            action.addEventListener('click', async () => {
+                let keepOpen = false;
+                try {
+                    const result = typeof options.action.onClick === 'function'
+                        ? options.action.onClick()
+                        : false;
+                    if (result && typeof result.then === 'function') {
+                        action.disabled = true;
+                        action.setAttribute('aria-busy', 'true');
+                        keepOpen = await result === true;
+                    } else {
+                        keepOpen = result === true;
+                    }
+                } catch (error) {
+                    keepOpen = true;
+                    if (typeof options.action.onError === 'function') {
+                        options.action.onError(error);
+                    }
+                } finally {
+                    action.disabled = false;
+                    action.removeAttribute('aria-busy');
+                }
+                if (options.action.href) {
+                    dismiss('action');
+                    window.location.assign(options.action.href);
+                } else if (!keepOpen) {
+                    dismiss('action');
+                }
             });
             copy.appendChild(action);
         }
@@ -183,14 +205,21 @@
         let remaining = duration;
         let startedAt = 0;
         const pauseReasons = new Set();
-        const dismiss = () => {
+        const dismiss = (reason = 'programmatic') => {
             if (dismissed) return;
             dismissed = true;
             if (timer) window.clearTimeout(timer);
+            if (typeof options.onDismiss === 'function') {
+                try {
+                    options.onDismiss(reason);
+                } catch (error) {
+                    console.error('Toast dismissal handler failed.', error);
+                }
+            }
             toast.classList.add('is-leaving');
             window.setTimeout(() => toast.remove(), 400);
         };
-        close.addEventListener('click', dismiss);
+        close.addEventListener('click', () => dismiss('close'));
         const pauseTimer = () => {
             if (!timer) return;
             remaining = Math.max(0, remaining - (performance.now() - startedAt));
@@ -201,12 +230,12 @@
         const resumeTimer = () => {
             if (dismissed || duration <= 0 || timer || pauseReasons.size) return;
             if (remaining <= 0) {
-                dismiss();
+                dismiss('timeout');
                 return;
             }
             toast.classList.remove('is-paused');
             startedAt = performance.now();
-            timer = window.setTimeout(dismiss, remaining);
+            timer = window.setTimeout(() => dismiss('timeout'), remaining);
         };
         const setPaused = (reason, paused) => {
             if (paused) pauseReasons.add(reason);
@@ -235,6 +264,115 @@
         warning: (message, options = {}) => showToast({ ...options, message, type: 'warning' }),
         error: (message, options = {}) => showToast({ ...options, message, type: 'error' }),
     };
+
+    const pendingUndoOperations = new Set();
+
+    function undoErrorMessage(error, fallback) {
+        const message = error instanceof Error ? error.message : String(error || '');
+        return message.trim() || fallback;
+    }
+
+    function stageUndoableAction(options = {}) {
+        if (!options || typeof options !== 'object') return null;
+        const message = toastText(options.message);
+        if (!message) return null;
+
+        const record = {
+            settled: false,
+            restored: false,
+            toast: null,
+        };
+
+        const restore = async (reason) => {
+            if (record.restored) return;
+            record.restored = true;
+            if (typeof options.restore === 'function') {
+                await options.restore({ reason });
+            }
+        };
+
+        const undo = async (reason = 'action') => {
+            if (record.settled) return;
+            record.settled = true;
+            pendingUndoOperations.delete(record);
+            try {
+                await restore(reason);
+                if (typeof options.onUndo === 'function') options.onUndo({ reason });
+            } catch (error) {
+                window.APStudyToast?.error?.(
+                    undoErrorMessage(error, options.undoErrorMessage || 'Refresh the page to recover the item.'),
+                    { title: options.undoErrorTitle || 'Couldn’t undo removal' },
+                );
+            }
+        };
+
+        const commit = async (reason = 'timeout') => {
+            if (record.settled) return;
+            record.settled = true;
+            pendingUndoOperations.delete(record);
+            try {
+                if (typeof options.commit === 'function') {
+                    await options.commit({ reason });
+                }
+                if (typeof options.onCommit === 'function') options.onCommit({ reason });
+            } catch (error) {
+                try {
+                    await restore('commit-error');
+                } catch (restoreError) {
+                    console.error('Unable to restore an item after deletion failed.', restoreError);
+                }
+                if (typeof options.onCommitError === 'function') {
+                    options.onCommitError(error);
+                } else {
+                    window.APStudyToast?.error?.(
+                        undoErrorMessage(error, options.errorMessage || 'The item was restored. Try again in a moment.'),
+                        { title: options.errorTitle || 'Couldn’t delete item' },
+                    );
+                }
+            }
+        };
+
+        pendingUndoOperations.add(record);
+        record.commit = commit;
+        record.toast = showToast({
+            message,
+            title: options.title,
+            type: options.type || 'info',
+            duration: options.duration == null ? 10_000 : options.duration,
+            action: {
+                label: options.actionLabel || 'Undo',
+                onClick: () => {
+                    void undo('action');
+                },
+            },
+            onDismiss: (reason) => {
+                if (reason !== 'action') void commit(reason);
+            },
+        });
+        return {
+            commit: () => {
+                record.toast?.dismiss?.('commit');
+            },
+            dismiss: () => {
+                record.toast?.dismiss?.('programmatic');
+            },
+            undo: () => {
+                void undo('programmatic');
+                record.toast?.dismiss?.('action');
+            },
+        };
+    }
+
+    window.APStudyUndo = window.APStudyUndo || {
+        stage: stageUndoableAction,
+        pendingCount: () => pendingUndoOperations.size,
+    };
+
+    window.addEventListener('pagehide', () => {
+        [...pendingUndoOperations].forEach((record) => {
+            void record.commit?.('pagehide');
+        });
+    });
 
     let activeConfirm = null;
     function ensureConfirm() {
@@ -289,6 +427,7 @@
         loader: window.APStudyLoader,
         skeleton: window.APStudySkeleton,
         toast: window.APStudyToast,
+        undo: window.APStudyUndo,
         confirm: window.APStudyConfirm,
     });
 })();

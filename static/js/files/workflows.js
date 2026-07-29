@@ -102,8 +102,17 @@
                     item.expiryDays = event.target.value;
                 });
                 row.querySelector("[data-upload-remove]")?.addEventListener("click", () => {
-                    state.uploadItems = state.uploadItems.filter((candidate) => candidate.id !== item.id);
+                    const index = state.uploadItems.findIndex((candidate) => candidate.id === item.id);
+                    if (index < 0) return;
+                    const [removedItem] = state.uploadItems.splice(index, 1);
                     renderUploadItems();
+                    window.APStudyUndo?.stage?.({
+                        message: `${removedItem.name || removedItem.file?.name || "File"} removed from this upload.`,
+                        restore: () => {
+                            state.uploadItems.splice(Math.min(index, state.uploadItems.length), 0, removedItem);
+                            renderUploadItems();
+                        },
+                    });
                 });
             });
         }

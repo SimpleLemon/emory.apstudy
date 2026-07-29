@@ -64,6 +64,31 @@
     try { config.preferences = (await global.APStudyNotifications.api('/api/notifications/preferences', { method: 'PATCH', body: JSON.stringify(preferences) })).preferences; toast('Notification preferences saved.'); render(); } catch (error) { toast(error.message || 'Try again in a moment.', 'error', 'Couldn’t save notification preferences'); }
   }
   async function test() { try { const result = await global.APStudyNotifications.api('/api/notifications/test', { method: 'POST', body: '{}' }); toast(`Test accepted by ${result.accepted} device${result.accepted === 1 ? '' : 's'}.`); } catch (error) { setActionStatus(error.message, 'error'); toast(error.message || 'Try again in a moment.', 'error', 'Couldn’t send test notification'); } }
+  async function revokeDevice(id) {
+    const index = config?.devices?.findIndex((device) => String(device.id) === String(id)) ?? -1;
+    const device = index >= 0 ? config.devices[index] : null;
+    if (!device) return;
+    config.devices.splice(index, 1);
+    render();
+    if (!global.APStudyUndo?.stage) {
+      await global.APStudyNotifications.api(`/api/notifications/subscriptions/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      await load();
+      return;
+    }
+    global.APStudyUndo.stage({
+      message: `${device.device_name || 'Browser'} revoked.`,
+      commit: ({ reason }) => global.APStudyNotifications.api(`/api/notifications/subscriptions/${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        keepalive: reason === 'pagehide',
+      }),
+      restore: () => {
+        config.devices.splice(Math.min(index, config.devices.length), 0, device);
+        render();
+      },
+      onCommit: () => { void load(); },
+      errorTitle: 'Couldn’t revoke browser',
+    });
+  }
   function escape(value) { const node = document.createElement('span'); node.textContent = value || ''; return node.innerHTML; }
   document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('notification-enable')?.addEventListener('click', enable);
@@ -72,7 +97,10 @@
     document.querySelectorAll('[data-push-toggle]').forEach((button) => button.addEventListener('click', () => {
       if (!button.disabled) selected(button, !button.classList.contains('is-active'));
     }));
-    document.getElementById('notification-devices')?.addEventListener('click', async (event) => { const id = event.target.closest('[data-revoke]')?.dataset.revoke; if (!id) return; await global.APStudyNotifications.api(`/api/notifications/subscriptions/${encodeURIComponent(id)}`, { method: 'DELETE' }); await load(); });
+    document.getElementById('notification-devices')?.addEventListener('click', (event) => {
+      const id = event.target.closest('[data-revoke]')?.dataset.revoke;
+      if (id) void revokeDevice(id).catch((error) => toast(error.message || 'Try again in a moment.', 'error', 'Couldn’t revoke browser'));
+    });
     void load();
   });
 })(window);

@@ -326,7 +326,7 @@
                 <div class="admin-card admin-danger-zone">
                     <h2 class="admin-title admin-title--small">Danger zone</h2>
                     <p class="admin-subtitle">Deleting an account removes the Appwrite user and all related data.</p>
-                    <form class="admin-form" method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}">
+                    <form class="admin-form" method="post" action="{{ url_for('admin.delete_user', user_id=user.id) }}" data-undoable-delete="User account">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                         <input type="hidden" name="return_to" value="{{ return_to }}" />
                         <label>
@@ -445,7 +445,7 @@
                                         <td data-label="Shared">{{ 'Yes' if folder.get('is_public') else 'No' }}</td>
                                         <td data-label="Created">{{ folder.get('created_at') or '--' }}</td>
                                         <td data-label="Actions">
-                                            <form method="post" action="{{ url_for('admin.delete_shared_folder', user_id=user.id, folder_id=folder_id) }}">
+                                            <form method="post" action="{{ url_for('admin.delete_shared_folder', user_id=user.id, folder_id=folder_id) }}" data-undoable-delete="Folder">
                                                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                                 <input type="hidden" name="section" value="files" />
                                                 <input type="hidden" name="return_to" value="{{ return_to }}" />
@@ -495,7 +495,7 @@
                                         <td data-label="Actions">
                                             <div class="admin-action-row">
                                                 <a class="admin-button admin-button--ghost" href="{{ url_for('admin.download_shared_file', user_id=user.id, file_id=file_id) }}">Download</a>
-                                                <form method="post" action="{{ url_for('admin.delete_shared_file', user_id=user.id, file_id=file_id) }}">
+                                                <form method="post" action="{{ url_for('admin.delete_shared_file', user_id=user.id, file_id=file_id) }}" data-undoable-delete="File">
                                                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
                                                     <input type="hidden" name="section" value="files" />
                                                     <input type="hidden" name="return_to" value="{{ return_to }}" />
@@ -1088,5 +1088,6 @@
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-nav.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-timezone.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/admin-delete-undo.js') }}" defer></script>
 </body>
 </html>

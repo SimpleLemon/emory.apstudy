@@ -219,8 +219,10 @@ test("dashboard daily quote fetches Flask endpoint and uses one smooth egg card"
         assert.match(source, new RegExp(`reportQuoteError\\("${reason}"`));
     }
     assert.match(source, /dashboard-egg-shell/);
-    assert.match(source, /function addFractureGeometry\(root\)/);
-    assert.match(source, /addFractureGeometry\(root\);\s*root\.dataset\.phase = "fracture"/);
+    assert.match(source, /function addEggSplitGeometry\(root\)/);
+    assert.match(source, /addEggSplitGeometry\(root\);\s*root\.dataset\.phase = "fracture"/);
+    assert.match(source, /dashboard-egg-half-left\{clip-path:polygon\(/);
+    assert.doesNotMatch(source, /dashboard-egg-crack/);
     assert.doesNotMatch(source, /\.dashboard-egg-quote\{[^}]*border:1px/);
     assert.doesNotMatch(source, /\.dashboard-egg-quote\{[^}]*box-shadow/);
     assert.doesNotMatch(source, /@radix-ui\/react-dialog|Dialog\.(?:Title|Description)/);
@@ -234,6 +236,17 @@ test("calendar deletion reports errors through the object-based toast API", asyn
 
     assert.match(source, /APStudyToast\?\.show\?\.\(\{\s*title: "Couldn’t delete event",\s*message: "Try again in a moment\.",\s*type: "error"/);
     assert.doesNotMatch(source, /APStudyToast\?\.show\?\.\("Unable to delete event", "error"\)/);
+});
+
+test("settings calendar-link removal offers an undo toast and restores position", async () => {
+    const source = await sourceFor("static/js/settings/calendar.js");
+
+    assert.match(source, /showToast\('Save to apply this change\.', 'success', \{/);
+    assert.match(source, /title: 'Calendar link removed'/);
+    assert.match(source, /duration: 10000/);
+    assert.match(source, /label: 'Undo'/);
+    assert.match(source, /addOtherCalendarRow\(removedUrl, \{ before: referenceRow \}\)/);
+    assert.match(source, /showToast\('Calendar link restored\.', 'success'\)/);
 });
 
 test("dashboard tile customization previews live and keeps contextual controls synchronized", async () => {
@@ -966,7 +979,7 @@ test("task app shell keeps data-layer wiring, destructive confirms, and mount co
     assert.match(helperSource, /function requestDestructiveAction\(\{ title, message, acceptLabel \}\)/);
     assert.match(helperSource, /window\.APStudyConfirm\?\.request\?\.\(\{/);
     assert.match(helperSource, /function groupTasksByList\(lists, tasks, listById\)/);
-    assert.match(helperSource, /function PrintSheet\(\{ list, tasks \}\)/);
+    assert.match(helperSource, /function PrintSheet\(\{ list, tasks(?:, includeCompleted = false)? \}\)/);
     assert.match(source, /const \{ lists: nextLists, tasks: nextTasks, preferences \} = await fetchTaskBoard\(\)/);
     assert.match(source, /buildCompletedTaskOptimistic\(task, completed\)/);
     assert.match(source, /completeTaskRecord\(task\.id, completed, optimistic\.occurrenceKey\)/);
@@ -1106,13 +1119,14 @@ test("landing page keeps product proof visible and wires the new signup journey 
     assert.match(template, /data-landing-tab="tasks"/);
     assert.match(template, /data-landing-panel="tasks"/);
     assert.match(template, /landing-app-demo-dashboard/);
+    assert.match(demoStyles, /\.demo-dashboard-icon\s*\{[\s\S]*font-size:\s*14px;[\s\S]*font-variation-settings:[\s\S]*height:\s*18px;[\s\S]*line-height:\s*1;[\s\S]*width:\s*18px;/);
     assert.match(template, /landing-app-demo-calendar/);
     assert.match(template, /landing-app-demo-tasks/);
     assert.match(template, /landing-app-demo-workspace/);
     assert.match(template, /course-planner-demo/);
     assert.match(template, /See your week\. Then get to work\./);
     assert.match(template, /At Emory, course planning goes deeper\./);
-    assert.match(template, /Good to know before you start\./);
+    assert.match(template, /Frequently Asked Questions/);
     assert.match(template, /Ready for a better week\?/);
     assert.doesNotMatch(template, /class="course-metadata"/);
     assert.match(template, /data-landing-faq/);

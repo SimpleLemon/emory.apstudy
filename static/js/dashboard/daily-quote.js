@@ -49,8 +49,6 @@
         .dashboard-egg-half{opacity:0}
         .dashboard-egg-half-left{clip-path:polygon(0 0,53% 0,48% 31%,55% 39%,46% 48%,53% 58%,45% 68%,52% 100%,0 100%)}
         .dashboard-egg-half-right{clip-path:polygon(48% 0,100% 0,100% 100%,48% 100%,55% 68%,47% 58%,56% 48%,49% 39%,57% 31%)}
-        .dashboard-egg-crack{position:absolute;left:15%;top:40%;width:70%;height:28%;overflow:visible;opacity:0;filter:drop-shadow(0 0 10px rgba(255,235,155,0.72));transition:opacity 90ms linear}
-        .dashboard-egg-crack path{fill:none;stroke:#fff1a7;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:240;stroke-dashoffset:240;transition:stroke-dashoffset 180ms steps(5,end)}
         .dashboard-egg-aura,.dashboard-egg-core{position:absolute;left:50%;top:50%;border-radius:999px;transform:translate3d(-50%,-50%,0) scale3d(0.35,0.35,1);opacity:0;pointer-events:none;will-change:transform,opacity}
         .dashboard-egg-aura{width:clamp(110px,16vw,180px);height:clamp(110px,16vw,180px);background:radial-gradient(circle,rgba(255,242,170,0.72) 0 14%,rgba(92,211,202,0.26) 32%,transparent 68%);filter:blur(2px);transition:transform 760ms cubic-bezier(0.16,1,0.3,1),opacity 560ms ease}
         .dashboard-egg-core{width:clamp(46px,6vw,70px);height:clamp(46px,6vw,70px);background:radial-gradient(circle,#fff7ba 0 18%,rgba(255,215,106,0.72) 38%,rgba(67,214,202,0.24) 70%,transparent 72%);box-shadow:0 0 24px rgba(255,232,137,0.76),0 0 58px rgba(61,212,201,0.36)}
@@ -59,8 +57,6 @@
         .dashboard-egg-loading-text{position:relative;z-index:1;color:var(--color-on-surface-variant);font-size:13px;font-weight:720;letter-spacing:0}
         .dashboard-egg-experience[data-phase="fracture"] .dashboard-egg-shell,.dashboard-egg-experience[data-phase="split"] .dashboard-egg-shell,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-shell{opacity:0}
         .dashboard-egg-experience[data-phase="fracture"] .dashboard-egg-half{opacity:1}
-        .dashboard-egg-experience[data-phase="fracture"] .dashboard-egg-crack,.dashboard-egg-experience[data-phase="split"] .dashboard-egg-crack,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-crack{opacity:1}
-        .dashboard-egg-experience[data-phase="fracture"] .dashboard-egg-crack path,.dashboard-egg-experience[data-phase="split"] .dashboard-egg-crack path,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-crack path{stroke-dashoffset:0}
         .dashboard-egg-experience[data-phase="split"] .dashboard-egg-half-left,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-half-left{opacity:0;transform:translate3d(-28px,-5px,0) rotate3d(0,0,1,-18deg) scale3d(0.88,0.88,1)}
         .dashboard-egg-experience[data-phase="split"] .dashboard-egg-half-right,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-half-right{opacity:0;transform:translate3d(28px,3px,0) rotate3d(0,0,1,18deg) scale3d(0.88,0.88,1)}
         .dashboard-egg-experience[data-phase="split"] .dashboard-egg-aura,.dashboard-egg-experience[data-phase="hold"] .dashboard-egg-aura{opacity:1;transform:translate3d(-50%,-50%,0) scale3d(1,1,1)}
@@ -87,7 +83,7 @@
         @keyframes dashboardEggCorePulse{0%,100%{transform:translate3d(-50%,-50%,0) scale3d(0.82,0.82,1);opacity:0.76}
         50%{transform:translate3d(-50%,-50%,0) scale3d(1.08,1.08,1);opacity:1}
         }
-        @media (prefers-reduced-motion:reduce){.dashboard-egg-experience,.dashboard-egg-drop,.dashboard-egg-figure,.dashboard-egg-shell,.dashboard-egg-half,.dashboard-egg-crack,.dashboard-egg-crack path,.dashboard-egg-aura,.dashboard-egg-core,.dashboard-egg-quote{animation:none !important;transition:none !important}
+        @media (prefers-reduced-motion:reduce){.dashboard-egg-experience,.dashboard-egg-drop,.dashboard-egg-figure,.dashboard-egg-shell,.dashboard-egg-half,.dashboard-egg-aura,.dashboard-egg-core,.dashboard-egg-quote{animation:none !important;transition:none !important}
         }
         @media (max-width:640px){.dashboard-egg-experience{min-height:136px}
         .dashboard-egg-experience.is-complete{min-height:100px}
@@ -130,23 +126,16 @@
         return slot.querySelector(".dashboard-egg-experience");
     }
 
-    function addFractureGeometry(root) {
+    function addEggSplitGeometry(root) {
         const figure = root.querySelector(".dashboard-egg-figure");
-        if (!figure || figure.querySelector(".dashboard-egg-crack")) return;
+        if (!figure || figure.querySelector(".dashboard-egg-half")) return;
         const particles = figure.querySelector(".dashboard-egg-particles");
         const fragment = document.createDocumentFragment();
         const left = document.createElement("div");
         left.className = "dashboard-egg-half dashboard-egg-half-left";
         const right = document.createElement("div");
         right.className = "dashboard-egg-half dashboard-egg-half-right";
-        const crack = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        crack.setAttribute("class", "dashboard-egg-crack");
-        crack.setAttribute("viewBox", "0 0 180 80");
-        crack.setAttribute("focusable", "false");
-        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        path.setAttribute("d", "M8 42 L34 34 L54 48 L74 28 L96 45 L116 31 L139 47 L172 38");
-        crack.appendChild(path);
-        fragment.append(left, right, crack);
+        fragment.append(left, right);
         figure.insertBefore(fragment, particles);
     }
 
@@ -165,6 +154,10 @@
             event.preventDefault();
             event.stopPropagation();
             hideQuote(slot);
+            window.APStudyUndo?.stage?.({
+                message: "Daily quote hidden.",
+                restore: () => showQuote(slot),
+            });
         });
     }
 
@@ -213,7 +206,7 @@
         if (persist) setVisible(true);
         slot.hidden = false;
         slot.innerHTML = "";
-        slot.dataset.eggCrackInitialized = "";
+        slot.dataset.eggInitialized = "";
         init({ skipAnimation: true, forceVisible: true });
     }
 
@@ -282,13 +275,13 @@
 
     function init(options = {}) {
         const slot = document.getElementById(SLOT_ID);
-        if (!slot || slot.dataset.eggCrackInitialized === "true") return;
+        if (!slot || slot.dataset.eggInitialized === "true") return;
         if (!options.forceVisible && !isVisible()) {
             slot.innerHTML = "";
             window.APStudyDashboardDailyQuote = api;
             return;
         }
-        slot.dataset.eggCrackInitialized = "true";
+        slot.dataset.eggInitialized = "true";
         injectStyles();
 
         const dateKey = getDailyKey();
@@ -358,7 +351,7 @@
         }
 
         setTimer(() => {
-            addFractureGeometry(root);
+            addEggSplitGeometry(root);
             root.dataset.phase = "fracture";
             clearParticles = runParticles(root);
         }, PHASE_FRACTURE_MS);

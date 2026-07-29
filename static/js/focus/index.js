@@ -716,16 +716,45 @@ async function deleteRoutine() {
     })
     : window.confirm(`Delete “${routine.name}”?`);
   if (!accepted) return;
+  const routineIndex = state.routines.findIndex((item) => item.id === routine.id);
+  const previousSpotifySource = state.spotifySource;
+  state.routines = state.routines.filter((item) => item.id !== routine.id);
+  view.renderRoutines(state.routines);
+  view.fillRoutine(null);
+  view.renderSpotify(null, state.playlistEntitlements);
+  state.spotifySource = null;
+  renderSuggestions();
+  view.setSettingsStatus('Routine deleted.');
+  if (window.APStudyUndo?.stage) {
+    window.APStudyUndo.stage({
+      message: `“${routine.name}” deleted.`,
+      commit: ({ reason }) => focusApi.deleteRoutine(routine.id, { keepalive: reason === 'pagehide' }),
+      restore: () => {
+        if (!state.routines.some((item) => item.id === routine.id)) {
+          state.routines.splice(Math.min(Math.max(0, routineIndex), state.routines.length), 0, routine);
+        }
+        if (!state.spotifySource) state.spotifySource = previousSpotifySource;
+        view.renderRoutines(state.routines, routine.id);
+        view.fillRoutine(routine);
+        view.renderSpotify(state.spotifySource, state.playlistEntitlements);
+        renderSuggestions();
+        view.setSettingsStatus('Routine restored.', 'success');
+      },
+      errorTitle: 'Couldn’t delete focus setup',
+    });
+    return;
+  }
   try {
     await focusApi.deleteRoutine(routine.id);
-    state.routines = state.routines.filter((item) => item.id !== routine.id);
-    view.renderRoutines(state.routines);
-    view.fillRoutine(null);
-    view.renderSpotify(null, state.playlistEntitlements);
-    state.spotifySource = null;
-    renderSuggestions();
-    view.setSettingsStatus('Routine deleted.');
   } catch (error) {
+    if (!state.routines.some((item) => item.id === routine.id)) {
+      state.routines.splice(Math.min(Math.max(0, routineIndex), state.routines.length), 0, routine);
+    }
+    if (!state.spotifySource) state.spotifySource = previousSpotifySource;
+    view.renderRoutines(state.routines, routine.id);
+    view.fillRoutine(routine);
+    view.renderSpotify(state.spotifySource, state.playlistEntitlements);
+    renderSuggestions();
     showError(error, 'Couldn’t delete focus setup');
   }
 }

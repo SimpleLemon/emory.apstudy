@@ -262,7 +262,8 @@
         function toggleCourseSectionSelection(sectionId) {
             const section = state.courses.sectionsById[sectionId];
             if (!section || section.is_cancelled) return;
-            if (state.courses.selectedSectionIds.has(sectionId)) {
+            const removing = state.courses.selectedSectionIds.has(sectionId);
+            if (removing) {
                 state.courses.selectedSectionIds.delete(sectionId);
             } else {
                 state.courses.selectedSectionIds.add(sectionId);
@@ -271,6 +272,18 @@
             saveSelectedCourseSectionIds();
             saveCalendarState();
             render();
+            if (removing) {
+                window.APStudyUndo?.stage?.({
+                    message: `${section.course_code || section.course_title || "Course"} removed from the simulated calendar.`,
+                    restore: () => {
+                        state.courses.selectedSectionIds.add(sectionId);
+                        ensureSimulatedCalendarPreference();
+                        saveSelectedCourseSectionIds();
+                        saveCalendarState();
+                        render();
+                    },
+                });
+            }
         }
 
         function formatMeetingTime(timeToken) {

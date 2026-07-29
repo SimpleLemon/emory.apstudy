@@ -161,10 +161,19 @@ export function createMediaPicker() {
     pending.hidden = false;
     selection.insertAdjacentHTML("beforeend", `<article id="chat-selected-gif" class="chat-selected-gif"><img src="${escapeHtml(selectedGif.preview)}" alt="${escapeHtml(selectedGif.title)}"><span><strong>GIF</strong><small>${escapeHtml(selectedGif.title)}</small></span><button type="button" aria-label="Remove GIF"><span class="material-symbols-outlined" aria-hidden="true">close</span></button></article>`);
     selection.querySelector("#chat-selected-gif button")?.addEventListener("click", () => {
+      const removedGif = selectedGif;
       selectedGif = null;
       renderSelection();
       if (!document.getElementById("chat-upload-list")?.children.length) pending.hidden = true;
       onComposerChange?.();
+      window.APStudyUndo?.stage?.({
+        message: "GIF removed from this message.",
+        restore: () => {
+          selectedGif = removedGif;
+          renderSelection();
+          onComposerChange?.();
+        },
+      });
     });
   }
 

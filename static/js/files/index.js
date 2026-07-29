@@ -65,6 +65,13 @@
     const initialFolderId = initialParams.get("folder");
     let pendingFileId = initialParams.get("file");
 
+    function restoreAtIndex(items, item, index) {
+        if (!item || index < 0 || items.some((candidate) => candidate.id === item.id)) return items;
+        const next = [...items];
+        next.splice(Math.min(Math.max(0, index), next.length), 0, item);
+        return next;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
         els = getElements();
         modals = window.APStudyFilesModals.createFilesModals({
@@ -372,13 +379,34 @@
     function openFileDeleteConfirm(file) {
         openConfirm({
             title: "Delete file?",
-            message: `${file.filename} will be permanently deleted.`,
+            message: `${file.filename} will be deleted. You’ll have a short time to undo.`,
             submitLabel: "Delete",
             onConfirm: async () => {
-                await apiJson(`/api/files/my/${encodeURIComponent(file.id)}`, { method: "DELETE" });
+                const fileIndex = state.files.findIndex((item) => item.id === file.id);
+                state.files = state.files.filter((item) => item.id !== file.id);
                 state.selectedFileIds.delete(file.id);
-                await loadFolder(state.currentFolderId);
-                showAlert("File deleted.");
+                renderManager();
+                window.APStudyUndo?.stage?.({
+                    message: `${file.filename} deleted.`,
+                    commit: ({ reason }) => apiJson(`/api/files/my/${encodeURIComponent(file.id)}`, {
+                        method: "DELETE",
+                        keepalive: reason === "pagehide",
+                    }),
+                    restore: () => {
+                        state.files = restoreAtIndex(state.files, file, fileIndex);
+                        renderManager();
+                    },
+                    errorTitle: "Couldn’t delete file",
+                });
+                if (!window.APStudyUndo?.stage) {
+                    try {
+                        await apiJson(`/api/files/my/${encodeURIComponent(file.id)}`, { method: "DELETE" });
+                    } catch (error) {
+                        state.files = restoreAtIndex(state.files, file, fileIndex);
+                        renderManager();
+                        throw error;
+                    }
+                }
             },
         });
     }
@@ -386,15 +414,41 @@
     function openFolderDeleteConfirm(folder) {
         openConfirm({
             title: "Delete folder?",
-            message: `${folder.name} and everything inside it will be permanently deleted. Type the folder name to confirm.`,
+            message: `${folder.name} and everything inside it will be deleted. Type the folder name to confirm.`,
             submitLabel: "Delete",
             requiredText: folder.name,
             requiredLabel: "Type the folder name",
             onConfirm: async () => {
-                await apiJson(`/api/files/folders/${encodeURIComponent(folder.id)}`, { method: "DELETE" });
+                const folderIndex = state.folders.findIndex((item) => item.id === folder.id);
+                const allFolderIndex = state.allFolders.findIndex((item) => item.id === folder.id);
+                const allFolder = state.allFolders[allFolderIndex] || folder;
+                state.folders = state.folders.filter((item) => item.id !== folder.id);
+                state.allFolders = state.allFolders.filter((item) => item.id !== folder.id);
                 state.selectedFolderIds.delete(folder.id);
-                await loadFolder(state.currentFolderId);
-                showAlert("Folder deleted.");
+                renderManager();
+                window.APStudyUndo?.stage?.({
+                    message: `${folder.name} and its contents deleted.`,
+                    commit: ({ reason }) => apiJson(`/api/files/folders/${encodeURIComponent(folder.id)}`, {
+                        method: "DELETE",
+                        keepalive: reason === "pagehide",
+                    }),
+                    restore: () => {
+                        state.folders = restoreAtIndex(state.folders, folder, folderIndex);
+                        state.allFolders = restoreAtIndex(state.allFolders, allFolder, allFolderIndex);
+                        renderManager();
+                    },
+                    errorTitle: "Couldn’t delete folder",
+                });
+                if (!window.APStudyUndo?.stage) {
+                    try {
+                        await apiJson(`/api/files/folders/${encodeURIComponent(folder.id)}`, { method: "DELETE" });
+                    } catch (error) {
+                        state.folders = restoreAtIndex(state.folders, folder, folderIndex);
+                        state.allFolders = restoreAtIndex(state.allFolders, allFolder, allFolderIndex);
+                        renderManager();
+                        throw error;
+                    }
+                }
             },
         });
     }
@@ -407,21 +461,75 @@
         openConfirm({
             title: "Delete selected items?",
             message: requiresText
-                ? "Selected folders and files will be permanently deleted. Type DELETE to confirm."
-                : "Selected files will be permanently deleted.",
+                ? "Selected folders and files will be deleted. Type DELETE to confirm."
+                : "Selected files will be deleted. You’ll have a short time to undo.",
             submitLabel: "Delete",
             requiredText: requiresText ? "DELETE" : "",
             requiredLabel: "Type DELETE",
             onConfirm: async () => {
-                for (const fileId of fileIds) {
-                    await apiJson(`/api/files/my/${encodeURIComponent(fileId)}`, { method: "DELETE" });
-                }
-                for (const folderId of folderIds) {
-                    await apiJson(`/api/files/folders/${encodeURIComponent(folderId)}`, { method: "DELETE" });
-                }
+                const fileIdSet = new Set(fileIds);
+                const folderIdSet = new Set(folderIds);
+                const removedFiles = state.files
+                    .map((item, index) => ({ item, index }))
+                    .filter((record) => fileIdSet.has(record.item.id));
+                const removedFolders = state.folders
+                    .map((item, index) => ({ item, index }))
+                    .filter((record) => folderIdSet.has(record.item.id));
+                const removedAllFolders = state.allFolders
+                    .map((item, index) => ({ item, index }))
+                    .filter((record) => folderIdSet.has(record.item.id));
+                state.files = state.files.filter((item) => !fileIdSet.has(item.id));
+                state.folders = state.folders.filter((item) => !folderIdSet.has(item.id));
+                state.allFolders = state.allFolders.filter((item) => !folderIdSet.has(item.id));
                 clearSelection();
-                await loadFolder(state.currentFolderId);
-                showAlert("Selected items deleted.");
+                renderManager();
+                const total = fileIds.length + folderIds.length;
+                window.APStudyUndo?.stage?.({
+                    message: `${formatCount(total, "item")} deleted.`,
+                    commit: async ({ reason }) => {
+                        for (const fileId of fileIds) {
+                            await apiJson(`/api/files/my/${encodeURIComponent(fileId)}`, {
+                                method: "DELETE",
+                                keepalive: reason === "pagehide",
+                            });
+                        }
+                        for (const folderId of folderIds) {
+                            await apiJson(`/api/files/folders/${encodeURIComponent(folderId)}`, {
+                                method: "DELETE",
+                                keepalive: reason === "pagehide",
+                            });
+                        }
+                    },
+                    restore: async ({ reason }) => {
+                        if (reason === "commit-error") {
+                            await loadFolder(state.currentFolderId);
+                            return;
+                        }
+                        state.files = removedFiles.reduce(
+                            (items, record) => restoreAtIndex(items, record.item, record.index),
+                            state.files,
+                        );
+                        state.folders = removedFolders.reduce(
+                            (items, record) => restoreAtIndex(items, record.item, record.index),
+                            state.folders,
+                        );
+                        state.allFolders = removedAllFolders.reduce(
+                            (items, record) => restoreAtIndex(items, record.item, record.index),
+                            state.allFolders,
+                        );
+                        renderManager();
+                    },
+                    errorTitle: "Couldn’t delete every selected item",
+                    errorMessage: "The folder was refreshed to show what remains.",
+                });
+                if (!window.APStudyUndo?.stage) {
+                    for (const fileId of fileIds) {
+                        await apiJson(`/api/files/my/${encodeURIComponent(fileId)}`, { method: "DELETE" });
+                    }
+                    for (const folderId of folderIds) {
+                        await apiJson(`/api/files/folders/${encodeURIComponent(folderId)}`, { method: "DELETE" });
+                    }
+                }
             },
         });
     }

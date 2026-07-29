@@ -530,29 +530,47 @@ async function removeCourse(courseId, sectionId) {
   }) ?? Promise.resolve(false));
   if (!accepted) return;
   if (sectionId) state.savingIds.add(sectionId);
+  const savedCourse = sectionId ? state.savedCoursesBySection.get(String(sectionId)) : null;
+  const removedSection = sectionId ? getSection(sectionId) : null;
+  const previousDetailSectionId = state.detailSectionId;
+  const previousEditingSectionId = state.editingSectionId;
+  if (sectionId) state.savedCoursesBySection.delete(String(sectionId));
+  if (sectionId && state.activeCourseView === "selected" && removedSection) {
+    state.removedSelectedSections.set(String(sectionId), { ...removedSection, id: String(sectionId) });
+  }
+  if (state.detailSectionId === sectionId) state.detailSectionId = null;
+  if (state.editingSectionId === sectionId) state.editingSectionId = null;
   render();
-  try {
-    const removedSection = sectionId ? getSection(sectionId) : null;
-    await fetchJson(`/api/courses/saved/${encodeURIComponent(courseId)}`, { method: "DELETE" });
-    if (sectionId) state.savedCoursesBySection.delete(sectionId);
-    if (sectionId && state.activeCourseView === "selected" && removedSection) {
-      state.removedSelectedSections.set(String(sectionId), { ...removedSection, id: String(sectionId) });
+  window.APStudyUndo?.stage?.({
+    message: `${removedSection?.course_code || removedSection?.course_title || "Class"} removed.`,
+    commit: ({ reason }) => fetchJson(`/api/courses/saved/${encodeURIComponent(courseId)}`, {
+      method: "DELETE",
+      keepalive: reason === "pagehide",
+    }),
+    restore: () => {
+      if (sectionId && savedCourse) state.savedCoursesBySection.set(String(sectionId), savedCourse);
+      if (sectionId) state.removedSelectedSections.delete(String(sectionId));
+      state.detailSectionId = previousDetailSectionId;
+      state.editingSectionId = previousEditingSectionId;
+      if (sectionId) state.savingIds.delete(sectionId);
+      render();
+    },
+    onCommit: () => {
+      if (sectionId) state.savingIds.delete(sectionId);
+      render();
+    },
+    errorTitle: "Couldn’t remove class",
+  });
+  if (!window.APStudyUndo?.stage) {
+    try {
+      await fetchJson(`/api/courses/saved/${encodeURIComponent(courseId)}`, { method: "DELETE" });
+    } catch (error) {
+      if (sectionId && savedCourse) state.savedCoursesBySection.set(String(sectionId), savedCourse);
+      showToast(error.message || "Try again in a moment.", true, { title: "Couldn’t remove class" });
+    } finally {
+      if (sectionId) state.savingIds.delete(sectionId);
+      render();
     }
-    if (state.detailSectionId === sectionId) {
-      state.detailSectionId = null;
-    }
-    if (state.editingSectionId === sectionId) {
-      state.editingSectionId = null;
-    }
-    showToast("Class removed.", false, {
-      action: sectionId ? { label: "Undo", onClick: () => addCourse(sectionId) } : undefined,
-    });
-  } catch (error) {
-    console.error(error);
-    showToast(error.message || "Try again in a moment.", true, { title: "Couldn’t remove class" });
-  } finally {
-    if (sectionId) state.savingIds.delete(sectionId);
-    render();
   }
 }
 
@@ -593,19 +611,42 @@ async function setTrack(sectionId, enabled, intervalMinutes = null) {
 
 async function removeTrack(trackId, sectionId) {
   if (!trackId || !sectionId) return;
+  const track = state.tracksBySection.get(String(sectionId));
+  const wasEnabled = Boolean(track?.enabled);
+  const previousUsage = state.trackingUsage;
   state.trackingIds.add(sectionId);
+  state.tracksBySection.delete(String(sectionId));
+  if (wasEnabled) state.trackingUsage = Math.max(0, state.trackingUsage - 1);
   renderPanel();
-  try {
-    const wasEnabled = Boolean(state.tracksBySection.get(String(sectionId))?.enabled);
-    await fetchJson(`/api/courses/tracks/${encodeURIComponent(trackId)}`, { method: "DELETE" });
-    state.tracksBySection.delete(String(sectionId));
-    if (wasEnabled) state.trackingUsage = Math.max(0, state.trackingUsage - 1);
-    showToast("Tracker removed.");
-  } catch (error) {
-    showToast(error.message || "Try again in a moment.", true, { title: "Couldn’t remove tracker" });
-  } finally {
-    state.trackingIds.delete(sectionId);
-    render();
+  window.APStudyUndo?.stage?.({
+    message: "Course tracker removed.",
+    commit: ({ reason }) => fetchJson(`/api/courses/tracks/${encodeURIComponent(trackId)}`, {
+      method: "DELETE",
+      keepalive: reason === "pagehide",
+    }),
+    restore: () => {
+      if (track) state.tracksBySection.set(String(sectionId), track);
+      state.trackingUsage = previousUsage;
+      state.trackingIds.delete(sectionId);
+      render();
+    },
+    onCommit: () => {
+      state.trackingIds.delete(sectionId);
+      render();
+    },
+    errorTitle: "Couldn’t remove tracker",
+  });
+  if (!window.APStudyUndo?.stage) {
+    try {
+      await fetchJson(`/api/courses/tracks/${encodeURIComponent(trackId)}`, { method: "DELETE" });
+    } catch (error) {
+      if (track) state.tracksBySection.set(String(sectionId), track);
+      state.trackingUsage = previousUsage;
+      showToast(error.message || "Try again in a moment.", true, { title: "Couldn’t remove tracker" });
+    } finally {
+      state.trackingIds.delete(sectionId);
+      render();
+    }
   }
 }
 

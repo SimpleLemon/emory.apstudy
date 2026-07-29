@@ -168,6 +168,13 @@
       updateSelectionUi();
     }
 
+    function restoreItemAtIndex(items, item, index) {
+      if (!item || items.some((candidate) => String(candidate.id) === String(item.id))) return items;
+      const next = [...items];
+      next.splice(Math.min(Math.max(0, index), next.length), 0, item);
+      return next;
+    }
+
     function updateSelectionUi() {
       const visibleIds = state.items.map((item) => String(item.id));
       const selectedVisible = visibleIds.filter((id) => state.selected.has(id));
@@ -242,13 +249,42 @@
         tone: 'danger',
       });
       if (!confirmed) return;
-      const data = await dependencies.api('/api/notifications', { method: 'DELETE', body: JSON.stringify({ ids }) });
       const idSet = new Set(ids);
+      const removedItems = state.items
+        .map((item, index) => ({ item, index }))
+        .filter((record) => idSet.has(String(record.item.id)));
+      const removedUnreadCount = removedItems.filter((record) => !record.item.is_read).length;
       state.items = state.items.filter((item) => !idSet.has(String(item.id)));
       state.selected.clear();
-      setUnreadCount(data.unread_count);
-      dependencies.setUnreadCount(data.unread_count);
+      setUnreadCount(Math.max(0, previousUnreadCount - removedUnreadCount));
+      dependencies.setUnreadCount(state.unreadCount);
       renderItems();
+      if (!global.APStudyUndo?.stage) {
+        const data = await dependencies.api('/api/notifications', { method: 'DELETE', body: JSON.stringify({ ids }) });
+        setUnreadCount(data.unread_count);
+        dependencies.setUnreadCount(data.unread_count);
+        return;
+      }
+      global.APStudyUndo.stage({
+        message: `${ids.length} notification${ids.length === 1 ? '' : 's'} deleted.`,
+        commit: ({ reason }) => dependencies.api('/api/notifications', {
+          method: 'DELETE',
+          body: JSON.stringify({ ids }),
+          keepalive: reason === 'pagehide',
+        }),
+        restore: () => {
+          state.items = removedItems.reduce(
+            (items, record) => restoreItemAtIndex(items, record.item, record.index),
+            state.items,
+          );
+          ids.forEach((id) => state.selected.add(String(id)));
+          setUnreadCount(state.unreadCount + removedUnreadCount);
+          dependencies.setUnreadCount(state.unreadCount);
+          renderItems();
+        },
+        onCommit: () => { if (state.open) void load({ quiet: true }); },
+        errorTitle: 'Couldn’t delete notifications',
+      });
     }
 
     function resetFilters() {

@@ -286,8 +286,10 @@
                     else state.shares.items.unshift(share);
                 }
                 state.shares.notice = options.notice || "Share link updated.";
+                return share || true;
             } catch (err) {
                 state.shares.error = err.message || "Unable to update share link.";
+                return null;
             } finally {
                 renderCalendarShareModal();
             }
@@ -362,7 +364,30 @@
             const revokeBtn = event.target.closest(".js-share-revoke");
             if (revokeBtn) {
                 const shareId = revokeBtn.getAttribute("data-share-id");
-                await updateCalendarShare(shareId, `/api/calendar/shares/${encodeURIComponent(shareId)}`, { method: "DELETE", notice: "Share link revoked." });
+                const share = state.shares.items.find((item) => item.id === shareId);
+                const revoked = await updateCalendarShare(shareId, `/api/calendar/shares/${encodeURIComponent(shareId)}`, { method: "DELETE", notice: "Share link revoked." });
+                if (revoked) {
+                    window.APStudyToast?.show?.({
+                        message: "Share link revoked.",
+                        type: "info",
+                        duration: 10_000,
+                        action: {
+                            label: "Undo",
+                            onClick: async () => {
+                                const restored = await updateCalendarShare(shareId, `/api/calendar/shares/${encodeURIComponent(shareId)}`, {
+                                    method: "PATCH",
+                                    body: { ...share, isActive: true },
+                                    notice: "Share link restored.",
+                                });
+                                if (restored) {
+                                    window.APStudyToast?.success?.("Share link restored.");
+                                    return false;
+                                }
+                                return true;
+                            },
+                        },
+                    });
+                }
                 return;
             }
             const activateBtn = event.target.closest(".js-share-activate");

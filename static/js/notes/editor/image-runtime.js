@@ -3,6 +3,7 @@ import {
     droppedImageFiles,
     noteImageError,
     removeInlineImage,
+    restoreInlineImage,
     updateInlineImage,
 } from './images.js';
 
@@ -175,7 +176,15 @@ export function bindImageRuntime({ editor, editorPage, noteId, onChange, openDia
         }
     };
     const remove = (event) => {
-        if (removeInlineImage(editor, event.detail?.clientId)) onChange();
+        const removed = removeInlineImage(editor, event.detail?.clientId);
+        if (!removed) return;
+        onChange();
+        window.APStudyUndo?.stage?.({
+            message: 'Image deleted from note.',
+            restore: () => {
+                if (restoreInlineImage(editor, removed)) onChange();
+            },
+        });
     };
     const replace = (event) => {
         const input = document.createElement('input');

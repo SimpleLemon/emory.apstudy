@@ -9,7 +9,7 @@ const primitives = fs.readFileSync(path.join(repoRoot, 'static/js/core/ui-primit
 const feedbackOverlays = fs.readFileSync(path.join(repoRoot, 'static/css/core/feedback-overlays.css'), 'utf8');
 
 test('shared UI primitive module has substantive owned APIs', () => {
-    for (const api of ['APStudyFormField', 'APStudyLoader', 'APStudySkeleton', 'APStudyToast', 'APStudyConfirm']) {
+    for (const api of ['APStudyFormField', 'APStudyLoader', 'APStudySkeleton', 'APStudyToast', 'APStudyUndo', 'APStudyConfirm']) {
         assert.match(primitives, new RegExp(`window\\.${api}`));
     }
     assert.match(primitives, /window\.APStudyUIPrimitives = Object\.freeze/);
@@ -27,6 +27,15 @@ test('toast primitive normalizes content, timing, and accessibility states', () 
     assert.match(primitives, /return 4_000/);
     assert.match(primitives, /remaining = Math\.max\(0, remaining - \(performance\.now\(\) - startedAt\)\)/);
     assert.doesNotMatch(primitives, /host\.setAttribute\('aria-live'/);
+});
+
+test('undo primitive delays commits, restores failures, and flushes on navigation', () => {
+    assert.match(primitives, /function stageUndoableAction\(options = \{\}\)/);
+    assert.match(primitives, /actionLabel \|\| 'Undo'/);
+    assert.match(primitives, /if \(reason !== 'action'\) void commit\(reason\)/);
+    assert.match(primitives, /await restore\('commit-error'\)/);
+    assert.match(primitives, /window\.addEventListener\('pagehide'/);
+    assert.match(primitives, /pendingUndoOperations/);
 });
 
 test('toast presentation follows the shared spacing, target-size, and viewport contracts', () => {

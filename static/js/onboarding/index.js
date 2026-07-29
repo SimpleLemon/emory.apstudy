@@ -576,13 +576,27 @@ function renderCourseList() {
             </div>
         `;
         card.querySelector('button').addEventListener('click', async () => {
+            markDirty();
+            const [removedCourse] = onboardingState.courses.splice(index, 1);
+            clearDirty();
+            renderCourseList();
+            if (window.APStudyUndo?.stage) {
+                window.APStudyUndo.stage({
+                    message: `${removedCourse.course_code || 'Course'} removed.`,
+                    commit: ({ reason }) => removeCourse(removedCourse.id, { keepalive: reason === 'pagehide' }),
+                    restore: () => {
+                        onboardingState.courses.splice(Math.min(index, onboardingState.courses.length), 0, removedCourse);
+                        renderCourseList();
+                    },
+                    errorTitle: 'Couldn’t remove course',
+                });
+                return;
+            }
             try {
-                markDirty();
-                await removeCourse(course.id);
-                onboardingState.courses.splice(index, 1);
-                clearDirty();
-                renderCourseList();
+                await removeCourse(removedCourse.id);
             } catch (error) {
+                onboardingState.courses.splice(Math.min(index, onboardingState.courses.length), 0, removedCourse);
+                renderCourseList();
                 showError(error.message);
             }
         });
@@ -688,10 +702,11 @@ async function addCourseFromInputs() {
     renderCourseList();
     updateAddCourseButtonState();
 }
-async function removeCourse(courseId) {
+async function removeCourse(courseId, options = {}) {
     const response = await fetch(onboardingData.endpoints.removeCourseTemplate.replace('/0', `/${courseId}`), {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
+        keepalive: options.keepalive === true,
     });
     const data = await response.json();
     if (!response.ok) {
@@ -1045,8 +1060,22 @@ document.getElementById('other-calendar-links')?.addEventListener('click', (even
     }
     const row = button.closest('.other-calendar-row');
     if (row) {
+        const container = row.parentElement;
+        const rowIndex = Array.from(container?.children || []).indexOf(row);
+        const removedUrl = row.querySelector('input[data-other-calendar-url]')?.value || '';
         row.remove();
         updateOtherCalendarCount();
+        window.APStudyUndo?.stage?.({
+            title: 'Calendar link removed',
+            message: 'Save your setup to apply this change.',
+            restore: () => {
+                if (!container) return;
+                const restored = createOtherCalendarRow(removedUrl);
+                const reference = container.children[rowIndex] || null;
+                container.insertBefore(restored, reference);
+                updateOtherCalendarCount();
+            },
+        });
     }
 });
 updateOtherCalendarCount();

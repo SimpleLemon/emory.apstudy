@@ -89,6 +89,13 @@
         return note?.$id || note?.id || '';
     }
 
+    function restoreAtIndex(items, item, index) {
+        if (!item || items.some((candidate) => noteIdOf(candidate) === noteIdOf(item))) return items;
+        const next = [...items];
+        next.splice(Math.min(Math.max(0, index), next.length), 0, item);
+        return next;
+    }
+
     function notesByFolderMap(notes = state.notes) {
         const grouped = {};
         notes.forEach((note) => {
@@ -560,21 +567,37 @@
         const title = note?.title || 'Untitled';
         const accepted = await (window.APStudyConfirm?.request?.({
             title: 'Delete note?',
-            message: `"${title}" will be permanently removed.`,
+            message: `"${title}" will be deleted. You’ll have a short time to undo.`,
             acceptLabel: 'Delete note',
             danger: true,
         }) ?? Promise.resolve(false));
         if (!accepted) return;
-        setButtonBusy(button, true);
-        try {
-            await apiJson(`/api/notes/${encodeURIComponent(noteId)}`, { method: 'DELETE' });
-            state.notes = state.notes.filter((item) => noteIdOf(item) !== noteId);
-            renderCurrentView();
-            showAlert('Note deleted.');
-        } catch (error) {
-            showAlert(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete note' });
-        } finally {
-            setButtonBusy(button, false);
+        const noteIndex = state.notes.findIndex((item) => noteIdOf(item) === noteId);
+        state.notes = state.notes.filter((item) => noteIdOf(item) !== noteId);
+        renderCurrentView();
+        window.APStudyUndo?.stage?.({
+            message: `"${title}" deleted.`,
+            commit: ({ reason }) => apiJson(`/api/notes/${encodeURIComponent(noteId)}`, {
+                method: 'DELETE',
+                keepalive: reason === 'pagehide',
+            }),
+            restore: () => {
+                state.notes = restoreAtIndex(state.notes, note, noteIndex);
+                renderCurrentView();
+            },
+            errorTitle: 'Couldn’t delete note',
+        });
+        if (!window.APStudyUndo?.stage) {
+            setButtonBusy(button, true);
+            try {
+                await apiJson(`/api/notes/${encodeURIComponent(noteId)}`, { method: 'DELETE' });
+            } catch (error) {
+                state.notes = restoreAtIndex(state.notes, note, noteIndex);
+                renderCurrentView();
+                showAlert(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete note' });
+            } finally {
+                setButtonBusy(button, false);
+            }
         }
     }
 
@@ -585,22 +608,49 @@
         const noteCount = state.notes.filter((note) => note.folder_id === folderId).length;
         const accepted = await (window.APStudyConfirm?.request?.({
             title: 'Delete folder?',
-            message: `"${folder?.name || 'This folder'}" and ${formatCount(noteCount, 'note')} inside it will be permanently removed.`,
+            message: `"${folder?.name || 'This folder'}" and ${formatCount(noteCount, 'note')} inside it will be deleted.`,
             acceptLabel: 'Delete folder',
             danger: true,
         }) ?? Promise.resolve(false));
         if (!accepted) return;
-        setButtonBusy(button, true);
-        try {
-            await apiJson(`/api/notes/folders/${encodeURIComponent(folderId)}`, { method: 'DELETE' });
-            state.notes = state.notes.filter((note) => note.folder_id !== folderId);
-            state.folders = state.folders.filter((item) => noteIdOf(item) !== folderId);
-            renderCurrentView();
-            showAlert('Folder deleted.');
-        } catch (error) {
-            showAlert(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete folder' });
-        } finally {
-            setButtonBusy(button, false);
+        const folderIndex = state.folders.findIndex((item) => noteIdOf(item) === folderId);
+        const removedNotes = state.notes
+            .map((note, index) => ({ note, index }))
+            .filter((record) => record.note.folder_id === folderId);
+        state.notes = state.notes.filter((note) => note.folder_id !== folderId);
+        state.folders = state.folders.filter((item) => noteIdOf(item) !== folderId);
+        renderCurrentView();
+        window.APStudyUndo?.stage?.({
+            message: `"${folder?.name || 'Folder'}" and ${formatCount(noteCount, 'note')} deleted.`,
+            commit: ({ reason }) => apiJson(`/api/notes/folders/${encodeURIComponent(folderId)}`, {
+                method: 'DELETE',
+                keepalive: reason === 'pagehide',
+            }),
+            restore: () => {
+                state.notes = removedNotes.reduce(
+                    (items, record) => restoreAtIndex(items, record.note, record.index),
+                    state.notes,
+                );
+                state.folders = restoreAtIndex(state.folders, folder, folderIndex);
+                renderCurrentView();
+            },
+            errorTitle: 'Couldn’t delete folder',
+        });
+        if (!window.APStudyUndo?.stage) {
+            setButtonBusy(button, true);
+            try {
+                await apiJson(`/api/notes/folders/${encodeURIComponent(folderId)}`, { method: 'DELETE' });
+            } catch (error) {
+                state.notes = removedNotes.reduce(
+                    (items, record) => restoreAtIndex(items, record.note, record.index),
+                    state.notes,
+                );
+                state.folders = restoreAtIndex(state.folders, folder, folderIndex);
+                renderCurrentView();
+                showAlert(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete folder' });
+            } finally {
+                setButtonBusy(button, false);
+            }
         }
     }
 

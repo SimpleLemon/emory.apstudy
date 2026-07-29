@@ -2033,9 +2033,18 @@ export function startChatRuntime(extensions = {}) {
   }
 
   function removeMessageFromCaches(messageId) {
-    if (!messageId) return;
+    if (!messageId) return [];
+    const removed = [];
     for (const [key, cache] of state.roomCache.entries()) {
-      cache.messages = cache.messages.filter((message) => message.id !== messageId);
+      const nextMessages = [];
+      cache.messages.forEach((message, index) => {
+        if (message.id === messageId) {
+          removed.push({ key, cache, message, index });
+        } else {
+          nextMessages.push(message);
+        }
+      });
+      cache.messages = nextMessages;
       updateCacheCursors(cache);
       const [type, id] = key.split(":");
       if (type && id) schedulePersistentRoomSave({ type, id });
@@ -2049,6 +2058,19 @@ export function startChatRuntime(extensions = {}) {
         updateHistoryBannerVisibility();
       }
     }
+    return removed;
+  }
+
+  function restoreMessagesToCaches(removed = []) {
+    for (const record of removed) {
+      if (!record?.cache || record.cache.messages.some((message) => message.id === record.message?.id)) continue;
+      record.cache.messages.splice(Math.min(record.index, record.cache.messages.length), 0, record.message);
+      updateCacheCursors(record.cache);
+      const [type, id] = String(record.key || "").split(":");
+      if (type && id) schedulePersistentRoomSave({ type, id });
+    }
+    const activeCache = cacheFor(state.activeRoom);
+    if (activeCache) renderMessages(activeCache.messages);
   }
 
   async function selectRoom(room, options = {}) {
@@ -2600,10 +2622,24 @@ export function startChatRuntime(extensions = {}) {
       })
       : window.confirm("Delete this message?");
     if (!ok) return;
+    const removed = removeMessageFromCaches(messageId);
+    if (window.APStudyUndo?.stage) {
+      window.APStudyUndo.stage({
+        message: "Message deleted.",
+        duration: 8_000,
+        commit: ({ reason }) => fetchJson(`/api/chat/messages/${encodeURIComponent(messageId)}`, {
+          method: "DELETE",
+          keepalive: reason === "pagehide",
+        }),
+        restore: () => restoreMessagesToCaches(removed),
+        errorTitle: "Couldn’t delete message",
+      });
+      return;
+    }
     try {
       await fetchJson(`/api/chat/messages/${encodeURIComponent(messageId)}`, { method: "DELETE" });
-      removeMessageFromCaches(messageId);
     } catch (error) {
+      restoreMessagesToCaches(removed);
       setStatus(error.message || "Unable to delete message.", "error");
     }
   }
@@ -2673,6 +2709,17 @@ export function startChatRuntime(extensions = {}) {
         renderHeader();
         renderDmProfile(thread);
         schedulePersistentBootstrapSave();
+      }
+      if (currentlyBlocked && payload.blocked === false) {
+        window.APStudyToast?.show?.({
+          message: "User unblocked.",
+          type: "info",
+          duration: 10_000,
+          action: {
+            label: "Undo",
+            onClick: () => toggleBlock(userId, false),
+          },
+        });
       }
     } catch (error) {
       setStatus(error.message || "Unable to update block.", "error");

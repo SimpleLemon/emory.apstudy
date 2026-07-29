@@ -282,6 +282,37 @@
         window.openCalendarEventForm?.({ mode: "create", data, opener: context.anchorEl });
     }
 
+    function hideEventElements(event, context) {
+        const refs = new Set([
+            event?.event_ref,
+            event?.id,
+            context?.eventRef,
+            context?.eventId,
+        ].filter(Boolean).map(String));
+        const hidden = [];
+        document.querySelectorAll(eventSelector).forEach((element) => {
+            const ref = element.getAttribute("data-event-ref") || element.getAttribute("data-event-id");
+            if (!refs.has(String(ref || ""))) return;
+            hidden.push({ element, wasHidden: element.hidden });
+            element.hidden = true;
+        });
+        return hidden;
+    }
+
+    function restoreEventElements(hidden) {
+        hidden.forEach(({ element, wasHidden }) => {
+            if (element?.isConnected) element.hidden = wasHidden;
+        });
+    }
+
+    function showEventDeleteError() {
+        window.APStudyToast?.show?.({
+            title: "Couldn’t delete event",
+            message: "Try again in a moment.",
+            type: "error",
+        });
+    }
+
     async function deleteEvent(context) {
         const event = context.event;
         if (!event) return;
@@ -295,23 +326,37 @@
             danger: true,
         }) ?? Promise.resolve(false));
         if (!accepted) return;
-        try {
+        const hiddenElements = hideEventElements(event, context);
+        const commit = async ({ reason } = {}) => {
             const response = imported
                 ? await fetch("/api/calendar/event-overrides/hide", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ event_ref: event.event_ref }),
+                    keepalive: reason === "pagehide",
                 })
-                : await fetch(`/api/calendar/events/${encodeURIComponent(event.id || context.eventId)}`, { method: "DELETE" });
+                : await fetch(`/api/calendar/events/${encodeURIComponent(event.id || context.eventId)}`, {
+                    method: "DELETE",
+                    keepalive: reason === "pagehide",
+                });
             if (!response.ok) throw new Error("delete failed");
             localStorage.removeItem("calendarEventsCache");
             window.loadCalendarData?.();
-        } catch (_) {
-            window.APStudyToast?.show?.({
-                title: "Couldn’t delete event",
-                message: "Try again in a moment.",
-                type: "error",
+        };
+        if (window.APStudyUndo?.stage) {
+            window.APStudyUndo.stage({
+                message: imported ? "Imported event hidden." : "Event deleted.",
+                commit,
+                restore: () => restoreEventElements(hiddenElements),
+                onCommitError: showEventDeleteError,
             });
+            return;
+        }
+        try {
+            await commit();
+        } catch (_) {
+            restoreEventElements(hiddenElements);
+            showEventDeleteError();
         }
     }
 

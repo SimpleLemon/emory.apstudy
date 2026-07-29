@@ -71,8 +71,9 @@ export const focusApi = {
     routineId ? `/api/focus/routines/${encodeURIComponent(routineId)}` : '/api/focus/routines',
     { method: routineId ? 'PATCH' : 'POST', body: JSON.stringify(payload) },
   ),
-  deleteRoutine: (routineId) => request(`/api/focus/routines/${encodeURIComponent(routineId)}`, {
+  deleteRoutine: (routineId, options = {}) => request(`/api/focus/routines/${encodeURIComponent(routineId)}`, {
     method: 'DELETE',
+    keepalive: options.keepalive === true,
   }),
   savePlayerPreferences: (preferences) => request('/api/focus/player-preferences', {
     method: 'PATCH',

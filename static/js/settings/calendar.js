@@ -35,9 +35,9 @@
       updateOtherCalendarCount();
     }
 
-    function addOtherCalendarRow(value) {
+    function addOtherCalendarRow(value, options = {}) {
       if (!elements.otherCalendarLinks) {
-        return;
+        return null;
       }
 
       const row = document.createElement('div');
@@ -62,10 +62,36 @@
         window.APStudyFormField?.bindAutoClear?.(input);
       }
       row.querySelector('.settings-calendar-remove')?.addEventListener('click', () => {
+        const rowIndex = Array.from(elements.otherCalendarLinks.children).indexOf(row);
+        const removedUrl = input?.value.trim() || '';
         row.remove();
         updateOtherCalendarCount();
+        showToast('Save to apply this change.', 'success', {
+          title: 'Calendar link removed',
+          duration: 10000,
+          action: {
+            label: 'Undo',
+            onClick: () => {
+              const currentRows = getOtherCalendarInputValues({ includeBlank: true });
+              if (currentRows.length >= maxOtherCalendars) {
+                showToast('Remove another row before restoring this link.', 'error');
+                return false;
+              }
+              const referenceRow = elements.otherCalendarLinks.children[rowIndex] || null;
+              addOtherCalendarRow(removedUrl, { before: referenceRow });
+              updateOtherCalendarCount();
+              showToast('Calendar link restored.', 'success');
+              return false;
+            },
+          },
+        });
       });
-      elements.otherCalendarLinks.appendChild(row);
+      if (options.before) {
+        elements.otherCalendarLinks.insertBefore(row, options.before);
+      } else {
+        elements.otherCalendarLinks.appendChild(row);
+      }
+      return row;
     }
 
     function updateOtherCalendarCount() {

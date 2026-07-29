@@ -731,13 +731,30 @@ function closeDiscordModal() {
 }
 
 async function handleDiscordUnlink() {
+  const previousDiscord = { ...(SETTINGS_STATE.discord || {}) };
+  SETTINGS_STATE.discord = { linked: false, username: null };
+  renderDiscordButton();
+  closeDiscordModal();
+  if (window.APStudyUndo?.stage) {
+    window.APStudyUndo.stage({
+      message: 'Discord account unlinked.',
+      commit: ({ reason }) => fetchJson(SETTINGS_ENDPOINTS.discordUnlink, {
+        method: 'POST',
+        keepalive: reason === 'pagehide',
+      }),
+      restore: () => {
+        SETTINGS_STATE.discord = previousDiscord;
+        renderDiscordButton();
+      },
+      errorTitle: 'Couldn’t unlink Discord',
+    });
+    return;
+  }
   try {
     await fetchJson(SETTINGS_ENDPOINTS.discordUnlink, { method: 'POST' });
-    SETTINGS_STATE.discord = { linked: false, username: null };
-    renderDiscordButton();
-    closeDiscordModal();
-    showToast('Discord account unlinked.', 'success');
   } catch (error) {
+    SETTINGS_STATE.discord = previousDiscord;
+    renderDiscordButton();
     showToast(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t unlink Discord' });
   }
 }

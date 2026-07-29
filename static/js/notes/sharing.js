@@ -193,6 +193,7 @@
         modal.setAttribute('aria-modal', 'true');
         modal.setAttribute('aria-labelledby', 'notes-share-title');
         modal._shareAddRole = 'viewer';
+        modal._shareUndoOperations = new Set();
         modal.innerHTML = `
             <div class="notes-modal-panel notes-share-panel">
                 <header class="notes-modal-header">
@@ -283,15 +284,45 @@
             const remove = event.target.closest('[data-remove-user]');
             if (remove) {
                 const index = users.findIndex((user) => String(user.id) === remove.dataset.removeUser);
-                if (index >= 0) users.splice(index, 1);
+                const [removedUser] = index >= 0 ? users.splice(index, 1) : [];
                 renderSelected(modal, users);
+                if (removedUser && global.APStudyUndo?.stage) {
+                    let undoController = null;
+                    const forget = () => modal._shareUndoOperations.delete(undoController);
+                    undoController = global.APStudyUndo.stage({
+                        message: `Access removed for ${removedUser.name || removedUser.username || 'user'}.`,
+                        restore: () => {
+                            if (!modal.isConnected) return;
+                            users.splice(Math.min(index, users.length), 0, removedUser);
+                            renderSelected(modal, users);
+                        },
+                        onUndo: forget,
+                        onCommit: forget,
+                    });
+                    modal._shareUndoOperations.add(undoController);
+                }
                 return;
             }
             const removePending = event.target.closest('[data-remove-pending]');
             if (removePending) {
                 const index = pending.findIndex((invite) => String(invite.email) === removePending.dataset.removePending);
-                if (index >= 0) pending.splice(index, 1);
+                const [removedInvite] = index >= 0 ? pending.splice(index, 1) : [];
                 renderPending(modal, pending);
+                if (removedInvite && global.APStudyUndo?.stage) {
+                    let undoController = null;
+                    const forget = () => modal._shareUndoOperations.delete(undoController);
+                    undoController = global.APStudyUndo.stage({
+                        message: `Invitation for ${removedInvite.email} removed.`,
+                        restore: () => {
+                            if (!modal.isConnected) return;
+                            pending.splice(Math.min(index, pending.length), 0, removedInvite);
+                            renderPending(modal, pending);
+                        },
+                        onUndo: forget,
+                        onCommit: forget,
+                    });
+                    modal._shareUndoOperations.add(undoController);
+                }
                 return;
             }
             const add = event.target.closest('[data-add-user]');
@@ -328,6 +359,8 @@
             }
             const save = event.target.closest('[data-share-save]');
             if (!save) return;
+            modal._shareUndoOperations.forEach((operation) => operation?.commit?.());
+            modal._shareUndoOperations.clear();
             save.disabled = true;
             setError(modal);
             try {

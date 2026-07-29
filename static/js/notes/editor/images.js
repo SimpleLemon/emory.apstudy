@@ -70,6 +70,13 @@ export function removeInlineImage(editor, clientId) {
     });
     if (!target) return false;
     editor.dispatch(editor._tiptapEditor.state.tr.delete(target.pos, target.pos + target.node.nodeSize));
+    return target;
+}
+
+export function restoreInlineImage(editor, removed) {
+    if (!removed?.node || !Number.isFinite(removed.pos)) return false;
+    const position = Math.min(removed.pos, editor?._tiptapEditor?.state?.doc?.content?.size || removed.pos);
+    editor.dispatch(editor._tiptapEditor.state.tr.insert(position, removed.node));
     return true;
 }
 
