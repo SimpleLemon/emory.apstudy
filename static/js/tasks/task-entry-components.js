@@ -58,7 +58,7 @@ function menuTrigger({ id, kind, className, label, onOpen, getPosition = menuAnc
 function PriorityBadge({ priority }) {
     if (!priority || priority === "none") return null;
     return h("span", { className: `task-priority task-priority-${priority}` },
-        h(MaterialIcon, { name: priority === "high" ? "priority_high" : "flag" }),
+        h(MaterialIcon, { name: "flag" }),
         priority
     );
 }
@@ -124,7 +124,7 @@ function TaskDetails({ task, updateTask }) {
                 "aria-expanded": detailPopover?.type === "due" ? "true" : "false",
                 "data-task-add-popover-trigger": "due-detail",
             },
-                h(MaterialIcon, { name: task.deadline_at ? "event_available" : "event" }),
+                h(MaterialIcon, { name: task.deadline_at ? "event_upcoming" : "event" }),
                 h("span", null, task.deadline_at ? formatTaskDeadline(task) : "Add deadline")
             )
         ),
@@ -137,7 +137,7 @@ function TaskDetails({ task, updateTask }) {
                 "aria-expanded": detailPopover?.type === "repeat" ? "true" : "false",
                 "data-task-add-popover-trigger": "repeat-detail",
             },
-                h(MaterialIcon, { name: task.recurrence ? "repeat_on" : "repeat" }),
+                h(MaterialIcon, { name: "sync" }),
                 h("span", null, task.recurrence ? formatRepeat(task.recurrence) : "Repeat")
             )
         ),
@@ -156,7 +156,8 @@ function TaskDetails({ task, updateTask }) {
             }) : h(RepeatMenuContent, {
                 recurrence: repeatDraft,
                 onChange: setRepeatDraft,
-                onCancel: clearRepeat,
+                onCancel: closeDetailPopover,
+                onClear: clearRepeat,
                 onDone: saveRepeat,
             })
         )
@@ -209,7 +210,7 @@ export const TaskRow = React.memo(function TaskRow({ task, isExpanded, setExpand
                     "aria-label": reminderLabel(task.reminder_minutes, !task.deadline_time),
                 }, "notifications_active") : null
             ) : null,
-            task.recurrence ? h("span", { className: "task-row-meta" }, h(MaterialIcon, { name: "repeat" }), formatRepeat(task.recurrence)) : null,
+            task.recurrence ? h("span", { className: "task-row-meta" }, h(MaterialIcon, { name: "sync" }), formatRepeat(task.recurrence)) : null,
             h("button", {
                 type: "button",
                 className: cx("task-star-button", task.starred && "is-starred"),
@@ -326,11 +327,15 @@ export function AddTaskForm({ listId, createTask }) {
             recurrence: repeatDraft,
             onChange: setRepeatDraft,
             onCancel: () => {
+                setRepeatDraft(recurrence);
+                setPopover(null);
+            },
+            onClear: repeatEnabled ? () => {
                 setRepeatEnabled(false);
                 setRecurrence(createDefaultRecurrence());
                 setRepeatDraft(createDefaultRecurrence());
                 setPopover(null);
-            },
+            } : undefined,
             onDone: () => {
                 setRepeatEnabled(true);
                 setRecurrence(repeatDraft);
@@ -367,7 +372,7 @@ export function AddTaskForm({ listId, createTask }) {
         },
     },
         h("div", { className: "task-add-primary" },
-            h(MaterialIcon, { name: "add_task" }),
+            h(MaterialIcon, { name: "add" }),
             h("input", {
                 value: title,
                 onChange: (event) => setTitle(event.target.value),
@@ -379,21 +384,21 @@ export function AddTaskForm({ listId, createTask }) {
         expanded ? h("div", { className: "task-add-entrybar" },
             controlButton({
                 type: "due",
-                icon: deadline.deadline_at ? "event_available" : "event",
+                icon: deadline.deadline_at ? "event_upcoming" : "event",
                 label: "Due date",
                 active: Boolean(deadline.deadline_at),
                 value: deadline.deadline_at ? formatTaskDeadline(deadline) : "",
             }),
             controlButton({
                 type: "priority",
-                icon: priority !== "none" ? "flag" : "outlined_flag",
+                icon: "flag",
                 label: "Priority",
                 active: priority !== "none",
                 value: priority !== "none" ? PRIORITY_OPTIONS.find((option) => option.value === priority)?.label : "",
             }),
             controlButton({
                 type: "repeat",
-                icon: repeatEnabled ? "repeat_on" : "repeat",
+                icon: "sync",
                 label: "Repeat",
                 active: repeatEnabled,
                 value: repeatEnabled ? formatRepeat(recurrence) : "",

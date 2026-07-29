@@ -31,6 +31,7 @@ import {
     updateTaskRecord,
 } from "./task-data.js";
 import {
+    isRepeatingTaskCompleted,
     normalizeList,
     normalizeTask,
     sortedLists,
@@ -40,6 +41,13 @@ import * as React from "react";
 import { createRoot } from "react-dom/client";
 
 const h = React.createElement;
+
+function restoreItemAtIndex(items, item, index) {
+    if (!item || items.some((candidate) => candidate.id === item.id)) return items;
+    const next = [...items];
+    next.splice(Math.min(Math.max(0, index), next.length), 0, item);
+    return next;
+}
 
 function promptForTaskNotifications(task, previousTask = null) {
     const enabled = Boolean(task?.deadline_at) && Number(task?.reminder_minutes) !== -1;
@@ -110,6 +118,7 @@ function TaskApp({ completeSound, uncompleteSound }) {
     const [listDialog, setListDialog] = React.useState(null);
     const [actionMenu, setActionMenu] = React.useState(null);
     const [printListId, setPrintListId] = React.useState("");
+    const [completedOpenListIds, setCompletedOpenListIds] = React.useState(() => new Set());
     const highlightTaskId = React.useMemo(() => new URLSearchParams(window.location.search).get("task") || "", []);
     const sounds = React.useMemo(() => createTaskSounds({ completeSound, uncompleteSound }), [completeSound, uncompleteSound]);
 
@@ -252,23 +261,34 @@ function TaskApp({ completeSound, uncompleteSound }) {
         const list = listByIdRef.current.get(listId);
         const accepted = await requestDestructiveAction({
             title: "Delete list?",
-            message: `Delete "${list?.name || "this list"}" and every task inside it? This cannot be undone.`,
+            message: `Delete "${list?.name || "this list"}" and every task inside it?`,
             acceptLabel: "Delete list",
         });
         if (!accepted) return;
         const previousLists = listsRef.current;
         const previousTasks = tasksRef.current;
+        const listIndex = previousLists.findIndex((item) => item.id === listId);
+        const removedTasks = previousTasks
+            .map((task, index) => ({ task, index }))
+            .filter((record) => record.task.list_id === listId);
+        const previousSelectedListId = selectedListId;
         setListsAndRef((current) => removeById(current, listId));
         setTasksAndRef((current) => current.filter((task) => task.list_id !== listId));
         setSelectedListId((current) => current === listId ? "all" : current);
-        try {
-            await destroyTaskList(listId);
-        } catch (err) {
-            setError(err.message || "Unable to delete list.");
-            setListsAndRef(previousLists);
-            setTasksAndRef(previousTasks);
-        }
-    }, [setListsAndRef, setTasksAndRef]);
+        window.APStudyUndo?.stage?.({
+            message: `"${list?.name || "List"}" and its tasks were deleted.`,
+            commit: ({ reason }) => destroyTaskList(listId, { keepalive: reason === "pagehide" }),
+            restore: () => {
+                setListsAndRef((current) => restoreItemAtIndex(current, list, listIndex));
+                setTasksAndRef((current) => removedTasks.reduce(
+                    (items, record) => restoreItemAtIndex(items, record.task, record.index),
+                    current,
+                ));
+                setSelectedListId(previousSelectedListId);
+            },
+            errorTitle: "Couldn’t delete list",
+        });
+    }, [selectedListId, setListsAndRef, setTasksAndRef]);
 
     const deleteCompletedTasks = React.useCallback(async (listId) => {
         const list = listByIdRef.current.get(listId);
@@ -279,13 +299,31 @@ function TaskApp({ completeSound, uncompleteSound }) {
         });
         if (!accepted) return;
         const previousTasks = tasksRef.current;
+        const removedTasks = previousTasks
+            .map((task, index) => ({ task, index }))
+            .filter((record) => (
+                record.task.list_id === listId && (
+                    record.task.recurrence ? record.task.completed_occurrences?.length : record.task.completed
+                )
+            ));
         setTasksAndRef((current) => removeCompletedTasksFromList(current, listId));
-        try {
-            await destroyCompletedTasks(listId);
-        } catch (err) {
-            setError(err.message || "Unable to delete completed tasks.");
-            setTasksAndRef(previousTasks);
-        }
+        window.APStudyUndo?.stage?.({
+            message: `${removedTasks.length} completed task${removedTasks.length === 1 ? "" : "s"} deleted from "${list?.name || "this list"}".`,
+            commit: ({ reason }) => destroyCompletedTasks(listId, { keepalive: reason === "pagehide" }),
+            restore: () => setTasksAndRef((current) => removedTasks.reduce((items, record) => {
+                const existingIndex = items.findIndex((task) => task.id === record.task.id);
+                if (existingIndex < 0) return restoreItemAtIndex(items, record.task, record.index);
+                const next = [...items];
+                next[existingIndex] = {
+                    ...next[existingIndex],
+                    completed: record.task.completed,
+                    completed_at: record.task.completed_at,
+                    completed_occurrences: record.task.completed_occurrences,
+                };
+                return next;
+            }, current)),
+            errorTitle: "Couldn’t delete completed tasks",
+        });
     }, [setTasksAndRef]);
 
     const createTask = React.useCallback(async (listId, draft) => {
@@ -320,18 +358,19 @@ function TaskApp({ completeSound, uncompleteSound }) {
         const task = tasksRef.current.find((item) => item.id === taskId);
         const accepted = await requestDestructiveAction({
             title: "Delete task?",
-            message: `Delete "${task?.title || "this task"}"? This cannot be undone.`,
+            message: `Delete "${task?.title || "this task"}"?`,
             acceptLabel: "Delete task",
         });
         if (!accepted) return;
         const previous = tasksRef.current;
+        const taskIndex = previous.findIndex((item) => item.id === taskId);
         setTasksAndRef((current) => removeById(current, taskId));
-        try {
-            await destroyTaskRecord(taskId);
-        } catch (err) {
-            setError(err.message || "Unable to delete task.");
-            setTasksAndRef(previous);
-        }
+        window.APStudyUndo?.stage?.({
+            message: `"${task?.title || "Task"}" deleted.`,
+            commit: ({ reason }) => destroyTaskRecord(taskId, { keepalive: reason === "pagehide" }),
+            restore: () => setTasksAndRef((current) => restoreItemAtIndex(current, task, taskIndex)),
+            errorTitle: "Couldn’t delete task",
+        });
     }, [setTasksAndRef]);
 
     const completeTask = React.useCallback(async (task, completed) => {
@@ -438,6 +477,17 @@ function TaskApp({ completeSound, uncompleteSound }) {
         setPrintListId(listId);
     }, []);
 
+    const setCompletedListOpen = React.useCallback((listId, open) => {
+        setCompletedOpenListIds((current) => {
+            const hasList = current.has(listId);
+            if (hasList === open) return current;
+            const next = new Set(current);
+            if (open) next.add(listId);
+            else next.delete(listId);
+            return next;
+        });
+    }, []);
+
     const openListMenu = React.useCallback((listId, position) => {
         const list = listByIdRef.current.get(listId);
         if (!list) return;
@@ -490,6 +540,7 @@ function TaskApp({ completeSound, uncompleteSound }) {
 
     const printListRecord = listById.get(printListId);
     const printTasks = printListRecord ? tasksByList.get(printListRecord.id) || [] : [];
+    const printCompletedOpen = Boolean(printListId && completedOpenListIds.has(printListId));
 
     if (loading) {
         return h("div", {
@@ -550,6 +601,7 @@ function TaskApp({ completeSound, uncompleteSound }) {
                                         highlightTaskId,
                                         openListMenu,
                                         openTaskMenu,
+                                        onCompletedOpenChange: setCompletedListOpen,
                                     });
                                 })
                     )
@@ -557,7 +609,11 @@ function TaskApp({ completeSound, uncompleteSound }) {
         ),
         h(ActionMenu, { menu: actionMenu, onClose: () => setActionMenu(null) }),
         h(ListEditorDialog, { dialog: listDialog, onClose: () => setListDialog(null), onSubmit: submitListDialog }),
-        h(PrintSheet, { list: printListRecord, tasks: printTasks })
+        h(PrintSheet, {
+            list: printListRecord,
+            tasks: printTasks.filter((task) => printCompletedOpen || !isRepeatingTaskCompleted(task)),
+            includeCompleted: printCompletedOpen,
+        })
     );
 }
 

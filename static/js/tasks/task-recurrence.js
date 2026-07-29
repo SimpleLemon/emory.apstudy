@@ -9,7 +9,11 @@ function cx(...parts) {
 }
 
 export function RecurrenceFields({ recurrence, onChange, compact = false }) {
-    const update = (updates) => onChange({ ...recurrence, ...updates });
+    const update = (updates) => {
+        const next = { ...recurrence, ...updates };
+        if (next.endDate && next.startDate && next.endDate < next.startDate) next.endDate = next.startDate;
+        onChange(next);
+    };
     const onDate = Boolean(recurrence.endDate);
     const endDate = recurrence.endDate || defaultRecurrenceEndDate();
 
@@ -20,8 +24,12 @@ export function RecurrenceFields({ recurrence, onChange, compact = false }) {
                 type: "number",
                 min: "1",
                 max: "365",
+                step: "1",
                 value: recurrence.every || 1,
-                onChange: (event) => update({ every: Number(event.target.value || 1) }),
+                onChange: (event) => {
+                    const value = Number(event.target.value);
+                    update({ every: Number.isFinite(value) ? Math.min(365, Math.max(1, value)) : 1 });
+                },
                 "aria-label": compact ? "Repeat every" : undefined,
             })
         ),
@@ -67,10 +75,11 @@ export function RecurrenceFields({ recurrence, onChange, compact = false }) {
     );
 }
 
-export function RepeatMenuContent({ recurrence, onChange, onCancel, onDone }) {
+export function RepeatMenuContent({ recurrence, onChange, onCancel, onClear, onDone }) {
     return h("div", { className: "task-add-repeat-popover" },
         h(RecurrenceFields, { recurrence, onChange, compact: true }),
         h("div", { className: "task-add-popover-actions" },
+            onClear ? h("button", { type: "button", className: "task-secondary-button task-repeat-clear", onClick: onClear }, "Clear") : null,
             h("button", { type: "button", className: "task-secondary-button", onClick: onCancel }, "Cancel"),
             h("button", { type: "button", className: "task-primary-button", onClick: onDone }, "Done")
         )

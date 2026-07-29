@@ -27,7 +27,10 @@ globalThis.window = {
 const utilsSource = await readFile(path.join(repoRoot, "static/js/tasks/task-utils.js"), "utf8");
 const controlsSource = (await readFile(path.join(repoRoot, "static/js/tasks/task-form-controls.js"), "utf8"))
     .replace('import * as React from "react";', reactStub);
-const controls = await import(moduleUrl(controlsSource));
+const controlsForDataUrl = controlsSource
+    .replace('import { createPortal } from "react-dom";', "const createPortal = (node) => node;")
+    .replace('import { getFloatingPosition } from "./task-floating.js";', "const getFloatingPosition = () => ({ top: 0, left: 0 });");
+const controls = await import(moduleUrl(controlsForDataUrl));
 const deadlineSource = (await readFile(path.join(repoRoot, "static/js/tasks/task-deadline.js"), "utf8"))
     .replace('import * as React from "react";', reactStub)
     .replace('import { TaskCalendar, TaskListbox } from "./task-form-controls.js";', "const TaskCalendar = () => null; const TaskListbox = () => null;")

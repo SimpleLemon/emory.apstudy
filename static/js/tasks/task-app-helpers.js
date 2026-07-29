@@ -10,23 +10,27 @@ import * as React from "react";
 
 const h = React.createElement;
 
-export function PrintSheet({ list, tasks }) {
+export function PrintSheet({ list, tasks, includeCompleted = false }) {
     if (!list) return null;
+    const printableTasks = (tasks || []).filter((task) => includeCompleted || !isRepeatingTaskCompleted(task));
     return h("section", { className: "task-print-sheet", "aria-hidden": "true" },
         h("header", null,
             h("h1", null, list.name),
             list.description ? h("p", null, list.description) : null
         ),
-        tasks.length
-            ? h("ol", null, tasks.map((task) => {
+        printableTasks.length
+            ? h("ul", { className: "task-print-list" }, printableTasks.map((task) => {
                 const completed = isRepeatingTaskCompleted(task);
                 return h("li", { key: task.id, className: completed ? "is-completed" : "" },
-                    h("div", { className: "task-print-title" }, task.title),
-                    h("div", { className: "task-print-meta" },
-                        task.priority && task.priority !== "none" ? h("span", null, `Priority: ${task.priority}`) : null,
-                        task.deadline_at ? h("span", null, `Deadline: ${formatTaskDeadline(task)}`) : null,
-                        task.recurrence ? h("span", null, formatRepeat(task.recurrence)) : null,
-                        completed ? h("span", null, "Completed") : null
+                    h("span", { className: "task-print-checkbox", "aria-hidden": "true" }, completed ? "✓" : ""),
+                    h("div", { className: "task-print-content" },
+                        h("div", { className: "task-print-title" }, task.title),
+                        h("div", { className: "task-print-meta" },
+                            task.priority && task.priority !== "none" ? h("span", null, `Priority: ${task.priority}`) : null,
+                            task.deadline_at ? h("span", null, `Deadline: ${formatTaskDeadline(task)}`) : null,
+                            task.recurrence ? h("span", null, formatRepeat(task.recurrence)) : null,
+                            completed ? h("span", null, "Completed") : null
+                        )
                     )
                 );
             }))

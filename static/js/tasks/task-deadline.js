@@ -68,8 +68,10 @@ export function deadlinePayload(draft, timezone = Intl.DateTimeFormat().resolved
     }
     const deadlineTime = draft.hasTime ? parseDisplayTime(draft.timeText, draft.period) : null;
     if (draft.hasTime && !deadlineTime) return null;
+    const deadlineAt = localInputToIso(`${draft.date}T${deadlineTime || "00:00"}`);
+    if (!deadlineAt) return null;
     return {
-        deadline_at: localInputToIso(`${draft.date}T${deadlineTime || "00:00"}`),
+        deadline_at: deadlineAt,
         deadline_time: deadlineTime,
         reminder_minutes: Number(draft.reminderMinutes),
         timezone,

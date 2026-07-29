@@ -44,8 +44,11 @@ export async function updateTaskList(listId, updates) {
     return normalizeList(payload.list);
 }
 
-export async function destroyTaskList(listId) {
-    await fetchJson(`/api/task-lists/${encodeURIComponent(listId)}`, { method: "DELETE" });
+export async function destroyTaskList(listId, options = {}) {
+    await fetchJson(`/api/task-lists/${encodeURIComponent(listId)}`, {
+        method: "DELETE",
+        keepalive: options.keepalive === true,
+    });
     clearCalendarCache();
 }
 
@@ -57,8 +60,11 @@ export function removeCompletedTasksFromList(tasks, listId) {
     });
 }
 
-export async function destroyCompletedTasks(listId) {
-    await fetchJson(`/api/task-lists/${encodeURIComponent(listId)}/completed-tasks`, { method: "DELETE" });
+export async function destroyCompletedTasks(listId, options = {}) {
+    await fetchJson(`/api/task-lists/${encodeURIComponent(listId)}/completed-tasks`, {
+        method: "DELETE",
+        keepalive: options.keepalive === true,
+    });
     clearCalendarCache();
 }
 
@@ -100,8 +106,11 @@ export async function updateTaskRecord(taskId, updates) {
     return normalizeTask(response.task);
 }
 
-export async function destroyTaskRecord(taskId) {
-    await fetchJson(`/api/tasks/${encodeURIComponent(taskId)}`, { method: "DELETE" });
+export async function destroyTaskRecord(taskId, options = {}) {
+    await fetchJson(`/api/tasks/${encodeURIComponent(taskId)}`, {
+        method: "DELETE",
+        keepalive: options.keepalive === true,
+    });
     clearCalendarCache();
 }
 

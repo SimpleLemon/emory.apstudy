@@ -1,6 +1,8 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import Sortable from "sortablejs";
 import { AddTaskForm, TaskRow } from "./task-entry-components.js";
+import { getFloatingPosition } from "./task-floating.js";
 
 import {
     DEFAULT_LIST_NAMES,
@@ -108,8 +110,13 @@ export function EmptyStarter({ onCreate }) {
 export function ActionMenu({ menu, onClose }) {
     const menuRef = React.useRef(null);
     const previousFocusRef = React.useRef(null);
+    const onCloseRef = React.useRef(onClose);
     const menuKey = menu ? `${menu.type || "menu"}:${menu.id || "none"}:${menu.nonce || 0}` : "";
     const [position, setPosition] = React.useState({ key: "", top: 0, left: 0, ready: false });
+
+    React.useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
 
     React.useEffect(() => {
         if (!menu) return undefined;
@@ -117,58 +124,52 @@ export function ActionMenu({ menu, onClose }) {
         const onPointerDown = (event) => {
             if (menuRef.current?.contains(event.target)) return;
             if (event.target?.closest?.("[data-task-menu-trigger]")) return;
-            onClose();
+            onCloseRef.current();
         };
         const onKeyDown = (event) => {
-            if (event.key === "Escape") onClose();
+            if (event.key === "Escape") onCloseRef.current();
         };
         const onScroll = (event) => {
             if (menuRef.current?.contains(event.target)) return;
-            onClose();
+            onCloseRef.current();
         };
-        const onResize = () => onClose();
+        const onResize = () => onCloseRef.current();
         document.addEventListener("pointerdown", onPointerDown);
         document.addEventListener("keydown", onKeyDown);
         window.addEventListener("scroll", onScroll, true);
         window.addEventListener("resize", onResize);
+        window.visualViewport?.addEventListener("resize", onResize);
         return () => {
             document.removeEventListener("pointerdown", onPointerDown);
             document.removeEventListener("keydown", onKeyDown);
             window.removeEventListener("scroll", onScroll, true);
             window.removeEventListener("resize", onResize);
+            window.visualViewport?.removeEventListener("resize", onResize);
             if (menuRef.current?.contains(document.activeElement)) {
                 previousFocusRef.current?.focus?.({ preventScroll: true });
             }
         };
-    }, [menu, onClose]);
+    }, [menu]);
 
     React.useLayoutEffect(() => {
         if (!menu || !menuRef.current) return;
-        const menuRect = menuRef.current.getBoundingClientRect();
-        const anchor = menu.anchor || {
-            top: menu.top || 0,
-            bottom: menu.top || 0,
-            left: menu.left || 0,
-            right: menu.left || 0,
+        const reposition = () => {
+            const menuRect = menuRef.current?.getBoundingClientRect();
+            if (!menuRect) return;
+            const anchor = menu.anchor || {
+                top: menu.top || 0,
+                bottom: menu.top || 0,
+                left: menu.left || 0,
+                right: menu.left || 0,
+            };
+            const next = getFloatingPosition(anchor, menuRect, { align: "end", gap: 8 });
+            setPosition({ key: menuKey, ...next, ready: true });
         };
-        const gap = 6;
-        const margin = 8;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        let left = anchor.right - menuRect.width;
-        if (left < margin && anchor.left + menuRect.width <= viewportWidth - margin) {
-            left = anchor.left;
-        }
-        left = Math.max(margin, Math.min(viewportWidth - menuRect.width - margin, left));
-
-        let top = anchor.bottom + gap;
-        const aboveTop = anchor.top - menuRect.height - gap;
-        if (top + menuRect.height > viewportHeight - margin && aboveTop >= margin) {
-            top = aboveTop;
-        }
-        top = Math.max(margin, Math.min(viewportHeight - menuRect.height - margin, top));
-
-        setPosition({ key: menuKey, top, left, ready: true });
+        reposition();
+        if (typeof ResizeObserver === "undefined") return undefined;
+        const observer = new ResizeObserver(reposition);
+        observer.observe(menuRef.current);
+        return () => observer.disconnect();
     }, [menu, menuKey]);
 
     const ready = Boolean(menu && position.key === menuKey && position.ready);
@@ -189,11 +190,12 @@ export function ActionMenu({ menu, onClose }) {
         else if (event.key === 'ArrowDown') items[(index + 1 + items.length) % items.length].focus();
         else items[(index - 1 + items.length) % items.length].focus();
     };
-    return h("div", {
+    const layer = h("div", {
         ref: menuRef,
         className: "task-action-menu",
         role: "menu",
         "aria-label": menu.title || "Task actions",
+        "data-task-floating-layer": "action-menu",
         onKeyDown: handleMenuKeyDown,
         style: {
             top: `${ready ? position.top : 0}px`,
@@ -202,8 +204,9 @@ export function ActionMenu({ menu, onClose }) {
         },
     },
         menu.title ? h("div", { className: "task-action-menu-title" }, menu.title) : null,
-        menu.items.map((item, index) => actionMenuItem(item, index, onClose))
+        menu.items.map((item, index) => actionMenuItem(item, index, onCloseRef.current))
     );
+    return document.body ? createPortal(layer, document.body) : layer;
 }
 
 export function ListEditorDialog({ dialog, onClose, onSubmit }) {
@@ -408,7 +411,8 @@ function taskSectionPropsEqual(previous, next) {
         && previous.setExpandedTaskId === next.setExpandedTaskId
         && previous.reorderTasks === next.reorderTasks
         && previous.openListMenu === next.openListMenu
-        && previous.openTaskMenu === next.openTaskMenu;
+        && previous.openTaskMenu === next.openTaskMenu
+        && previous.onCompletedOpenChange === next.onCompletedOpenChange;
 }
 
 export const TaskSection = React.memo(function TaskSection(props) {
@@ -426,6 +430,7 @@ export const TaskSection = React.memo(function TaskSection(props) {
         highlightTaskId,
         openListMenu,
         openTaskMenu,
+        onCompletedOpenChange,
     } = props;
     const [nameDraft, setNameDraft] = React.useState(list.name);
     const [completedOpen, setCompletedOpen] = React.useState(false);
@@ -437,6 +442,11 @@ export const TaskSection = React.memo(function TaskSection(props) {
     React.useEffect(() => {
         setNameDraft(list.name);
     }, [list.name]);
+
+    React.useEffect(() => {
+        onCompletedOpenChange?.(list.id, !list.collapsed && completedOpen);
+        return () => onCompletedOpenChange?.(list.id, false);
+    }, [completedOpen, list.collapsed, list.id, onCompletedOpenChange]);
 
     useSortable(bodyRef, () => ({
             group: { name: "tasks", pull: true, put: true },

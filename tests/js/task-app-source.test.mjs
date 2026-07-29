@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = await readFile(path.join(repoRoot, "static/js/tasks/task.js"), "utf8");
+const helpersSource = await readFile(path.join(repoRoot, "static/js/tasks/task-app-helpers.js"), "utf8");
 
 test("task app keeps list visibility mutations latest-write-wins", () => {
     assert.match(source, /const listsRef = React\.useRef\(lists\)/);
@@ -14,4 +15,13 @@ test("task app keeps list visibility mutations latest-write-wins", () => {
     assert.match(source, /if \(versions\.get\(listId\) !== version\) return/);
     assert.match(source, /const toggleListVisibility = React\.useCallback/);
     assert.match(source, /hidden: !currentList\.hidden/);
+});
+
+test("task printing follows the completed-list disclosure state and includes printable checkboxes", () => {
+    assert.match(source, /completedOpenListIds, setCompletedOpenListIds\] = React\.useState/);
+    assert.match(source, /onCompletedOpenChange: setCompletedListOpen/);
+    assert.match(source, /const printCompletedOpen = Boolean\(printListId && completedOpenListIds\.has\(printListId\)\)/);
+    assert.match(source, /includeCompleted: printCompletedOpen/);
+    assert.match(helpersSource, /includeCompleted \|\| !isRepeatingTaskCompleted\(task\)/);
+    assert.match(helpersSource, /className: "task-print-checkbox"/);
 });

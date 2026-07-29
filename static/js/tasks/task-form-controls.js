@@ -1,4 +1,6 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
+import { getFloatingPosition } from "./task-floating.js";
 
 const h = React.createElement;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -67,11 +69,44 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
     React.useEffect(() => {
         if (!open) return undefined;
         const closeOutside = (event) => {
-            if (!rootRef.current?.contains(event.target)) setOpen(false);
+            if (rootRef.current?.contains(event.target) || listRef.current?.contains(event.target)) return;
+            setOpen(false);
         };
         document.addEventListener("pointerdown", closeOutside);
         return () => document.removeEventListener("pointerdown", closeOutside);
     }, [open]);
+
+    const [position, setPosition] = React.useState({ top: 0, left: 0, width: 190, ready: false });
+
+    React.useLayoutEffect(() => {
+        if (!open || !triggerRef.current || !listRef.current) return undefined;
+        const reposition = () => {
+            const triggerRect = triggerRef.current?.getBoundingClientRect();
+            if (!triggerRect || !listRef.current) return;
+            const width = Math.min(
+                Math.max(triggerRect.width, 190),
+                Math.max(1, window.innerWidth - 20),
+            );
+            listRef.current.style.width = `${width}px`;
+            const next = getFloatingPosition(triggerRect, listRef.current.getBoundingClientRect(), {
+                align: "start",
+                gap: 5,
+            });
+            setPosition({ ...next, width, ready: true });
+        };
+        reposition();
+        window.addEventListener("scroll", reposition, true);
+        window.addEventListener("resize", reposition);
+        window.visualViewport?.addEventListener("resize", reposition);
+        const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(reposition);
+        observer?.observe(listRef.current);
+        return () => {
+            window.removeEventListener("scroll", reposition, true);
+            window.removeEventListener("resize", reposition);
+            window.visualViewport?.removeEventListener("resize", reposition);
+            observer?.disconnect();
+        };
+    }, [open, selectedIndex, options.length]);
 
     React.useEffect(() => {
         if (!open) return;
@@ -100,6 +135,34 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
         }
     };
 
+    const menu = open ? h("div", {
+        ref: listRef,
+        id: listId,
+        className: "task-custom-select-menu",
+        role: "listbox",
+        "aria-label": label,
+        "data-task-floating-layer": "listbox",
+        "data-task-listbox-menu": "true",
+        onKeyDown: onListKeyDown,
+        style: {
+            top: `${position.ready ? position.top : 0}px`,
+            left: `${position.ready ? position.left : 0}px`,
+            width: `${position.width}px`,
+            visibility: position.ready ? "visible" : "hidden",
+        },
+    }, options.map((option, index) => h("button", {
+        key: option.value,
+        type: "button",
+        role: "option",
+        className: cx(option.value === value && "is-selected"),
+        "aria-selected": String(option.value === value),
+        "data-option-index": index,
+        onClick: () => choose(option),
+    },
+        h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, option.value === value ? "check" : option.icon || "radio_button_unchecked"),
+        h("span", null, option.label)
+    ))) : null;
+
     return h("div", { ref: rootRef, className: cx("task-custom-select", className, open && "is-open") },
         h("button", {
             ref: triggerRef,
@@ -122,25 +185,7 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
             h("span", null, selected?.label || "Select"),
             h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, "expand_more")
         ),
-        open ? h("div", {
-            ref: listRef,
-            id: listId,
-            className: "task-custom-select-menu",
-            role: "listbox",
-            "aria-label": label,
-            onKeyDown: onListKeyDown,
-        }, options.map((option, index) => h("button", {
-            key: option.value,
-            type: "button",
-            role: "option",
-            className: cx(option.value === value && "is-selected"),
-            "aria-selected": String(option.value === value),
-            "data-option-index": index,
-            onClick: () => choose(option),
-        },
-            h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, option.value === value ? "check" : option.icon || "radio_button_unchecked"),
-            h("span", null, option.label)
-        ))) : null
+        menu && (document.body ? createPortal(menu, document.body) : menu)
     );
 }
 
@@ -218,18 +263,70 @@ export function TaskCalendar({ value, onChange, label = "Choose date" }) {
 export function TaskDatePicker({ value, onChange, label, placeholder = "Choose date", disabled = false }) {
     const [open, setOpen] = React.useState(false);
     const rootRef = React.useRef(null);
+    const triggerRef = React.useRef(null);
+    const menuRef = React.useRef(null);
+    const [position, setPosition] = React.useState({ top: 0, left: 0, width: 318, ready: false });
+
     React.useEffect(() => {
         if (!open) return undefined;
         const closeOutside = (event) => {
-            if (!rootRef.current?.contains(event.target)) setOpen(false);
+            if (rootRef.current?.contains(event.target) || menuRef.current?.contains(event.target)) return;
+            setOpen(false);
         };
         document.addEventListener("pointerdown", closeOutside);
         return () => document.removeEventListener("pointerdown", closeOutside);
     }, [open]);
+
+    React.useLayoutEffect(() => {
+        if (!open || !triggerRef.current || !menuRef.current) return undefined;
+        const reposition = () => {
+            const triggerRect = triggerRef.current?.getBoundingClientRect();
+            if (!triggerRect || !menuRef.current) return;
+            const width = Math.min(318, Math.max(0, window.innerWidth - 20));
+            menuRef.current.style.width = `${width}px`;
+            const next = getFloatingPosition(triggerRect, menuRef.current.getBoundingClientRect(), {
+                align: "start",
+                gap: 5,
+            });
+            setPosition({ ...next, width, ready: true });
+        };
+        reposition();
+        window.addEventListener("scroll", reposition, true);
+        window.addEventListener("resize", reposition);
+        window.visualViewport?.addEventListener("resize", reposition);
+        const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(reposition);
+        observer?.observe(menuRef.current);
+        return () => {
+            window.removeEventListener("scroll", reposition, true);
+            window.removeEventListener("resize", reposition);
+            window.visualViewport?.removeEventListener("resize", reposition);
+            observer?.disconnect();
+        };
+    }, [open, value]);
+
+    const menu = open ? h("div", {
+        ref: menuRef,
+        className: "task-date-picker-menu",
+        role: "dialog",
+        "aria-label": label,
+        "data-task-floating-layer": "date-picker",
+        style: {
+            top: `${position.ready ? position.top : 0}px`,
+            left: `${position.ready ? position.left : 0}px`,
+            width: `${position.width}px`,
+            visibility: position.ready ? "visible" : "hidden",
+        },
+    }, h(TaskCalendar, {
+        value,
+        onChange: (next) => { onChange(next); setOpen(false); },
+        label,
+    })) : null;
+
     return h("div", { ref: rootRef, className: cx("task-date-picker", open && "is-open") },
         h("button", {
             type: "button",
             className: "task-date-picker-trigger",
+            ref: triggerRef,
             disabled,
             "aria-label": label,
             "aria-haspopup": "dialog",
@@ -239,8 +336,6 @@ export function TaskDatePicker({ value, onChange, label, placeholder = "Choose d
             h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, "calendar_today"),
             h("span", null, displayDate(value, placeholder))
         ),
-        open ? h("div", { className: "task-date-picker-menu", role: "dialog", "aria-label": label },
-            h(TaskCalendar, { value, onChange: (next) => { onChange(next); setOpen(false); }, label })
-        ) : null
+        menu && (document.body ? createPortal(menu, document.body) : menu)
     );
 }
