@@ -30,6 +30,7 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.calendar_urls import iter_valid_other_calendar_urls, load_other_calendar_urls
+from services.feed_fetcher import derive_feed_status
 from blueprints.settings import (
     _normalize_calendar_url,
     _normalize_canvas_calendar_url,
@@ -411,6 +412,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
     sources = []
     canvas_url = (settings.get("canvas_ical_url") or "").strip()
     if canvas_url:
+        canvas_hash = _feed_url_hash(canvas_url)
+        canvas_meta = feed_metadata.get(canvas_hash) or {}
         sources.append({
             "id": CANVAS_SOURCE_ID,
             "kind": "canvas",
@@ -418,6 +421,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
             "url": canvas_url,
             "editable": True,
             "legacy_names": ["Canvas"],
+            "status": derive_feed_status(canvas_meta),
+            "last_error_message": canvas_meta.get("last_error_message") or "",
         })
 
     for raw_url, url in iter_valid_other_calendar_urls(settings):
@@ -443,6 +448,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
             "url": url,
             "editable": True,
             "legacy_names": legacy_names,
+            "status": derive_feed_status(metadata),
+            "last_error_message": metadata.get("last_error_message") or "",
         })
 
     for source in sources:
@@ -1891,7 +1898,7 @@ def refresh_feed():
     from services.feed_fetcher import fetch_and_cache_feeds
 
     try:
-        count = fetch_and_cache_feeds(user_id, feed_urls)
+        count = fetch_and_cache_feeds(user_id, feed_urls, force=True)
         update_row_safe(
             COLLECTIONS["user_settings"],
             settings.get("$id"),

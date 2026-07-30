@@ -28,7 +28,8 @@ TABLE_COLUMNS = {
     "calendar_feeds": {
         "id", "user_id", "feed_url", "feed_url_hash", "calendar_name", "etag_header",
         "last_modified_header", "last_fetch_http_code", "last_fetched", "created_at",
-        "updated_at",
+        "updated_at", "consecutive_failures", "last_error_type", "last_error_message",
+        "last_error_at", "disabled_at",
     },
     "user_calendar_preferences": {
         "id", "user_id", "calendar_name", "display_name", "color_hex", "visible",
@@ -62,7 +63,7 @@ BOOLEAN_COLUMNS = {
 }
 
 INTEGER_COLUMNS = {
-    "calendar_feeds": {"last_fetch_http_code"},
+    "calendar_feeds": {"last_fetch_http_code", "consecutive_failures"},
     "user_events": {"reminder_minutes"},
     "user_event_overrides": {"reminder_minutes"},
     "calendar_shares": {"rolling_days"},
@@ -100,6 +101,11 @@ SCHEMA_STATEMENTS = (
         last_fetched TEXT,
         created_at TEXT NOT NULL,
         updated_at TEXT,
+        consecutive_failures INTEGER NOT NULL DEFAULT 0,
+        last_error_type TEXT,
+        last_error_message TEXT,
+        last_error_at TEXT,
+        disabled_at TEXT,
         UNIQUE(user_id, feed_url_hash)
     )
     """,

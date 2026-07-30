@@ -462,6 +462,8 @@ class TestCalendarSources(unittest.TestCase):
         payload = update_row.call_args.args[2]
         self.assertEqual(payload["last_fetched"], "2026-06-01T17:00:00Z")
         self.assertEqual(payload["updated_at"], "2026-06-01T17:00:00Z")
+        self.assertEqual(payload["consecutive_failures"], 0)
+        self.assertIsNone(payload["disabled_at"])
 
 
 if __name__ == "__main__":

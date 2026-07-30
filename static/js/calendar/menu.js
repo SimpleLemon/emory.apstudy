@@ -45,6 +45,20 @@
                 const eventCount = getCalendarEventCount(cal);
                 const kindLabel = data.kind === "local" ? "Local" : (data.editable ? "Feed" : "");
                 const meta = `${eventCount} event${eventCount === 1 ? "" : "s"}${kindLabel ? ` · ${kindLabel}` : ""}`;
+                const feedStatus = String(data.status || "");
+                const showFeedWarning = feedStatus === "quarantined" || feedStatus === "failing";
+                const warningText = data.lastErrorMessage
+                    || (feedStatus === "quarantined"
+                        ? "This calendar feed was paused after repeated fetch failures."
+                        : "This calendar feed failed to refresh.");
+                const warning = showFeedWarning ? `
+                        <div class="calendar-source-warning" role="status" title="${escapeHtml(warningText)}">
+                            <svg class="calendar-source-warning-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>
+                            </svg>
+                            <span class="calendar-source-warning-text">${escapeHtml(warningText)}</span>
+                        </div>
+                ` : "";
                 const moreButton = state.public.readOnly ? "" : `
                         <button type="button"
                             class="js-calendar-more calendar-source-more"
@@ -63,6 +77,7 @@
                             <span class="calendar-source-text">
                                 <span class="calendar-source-name">${escapeHtml(label)}</span>
                                 <span class="calendar-source-meta">${escapeHtml(meta)}</span>
+                                ${warning}
                             </span>
                         </label>
                         ${moreButton}

@@ -13,6 +13,7 @@ from appwrite_helpers import format_datetime, update_row_safe
 from services.calendar_store import list_calendar_rows_all
 from services.calendar_urls import load_other_calendar_urls
 from services import invites
+from services.entitlements import EntitlementError, EntitlementLimitError, request_entitlements
 from blueprints.calendar_api import (
     DEFAULT_CALENDAR_COLOR,
     DEFAULT_LOCAL_SOURCE_NAME,
@@ -129,11 +130,26 @@ def create_url_calendar_source():
 
     user_id = str(current_user.id)
     try:
+        from services.feed_fetcher import ensure_fetchable_calendar_url, fetch_and_cache_feeds
+
         settings = _ensure_user_settings(user_id)
         current_canvas_url = (settings.get("canvas_ical_url") or "").strip()
         other_urls = load_other_calendar_urls(settings)
         validated_other_urls = _validate_other_calendar_urls(other_urls + [raw_url], current_canvas_url)
         new_url = validated_other_urls[-1]
+        ensure_fetchable_calendar_url(new_url)
+
+        entitlements = request_entitlements(current_user)
+        feed_limit = entitlements["limits"].get("max_calendar_feeds")
+        feed_count = (1 if current_canvas_url else 0) + len(validated_other_urls)
+        if feed_limit is not None and feed_count > feed_limit:
+            raise EntitlementLimitError(
+                "calendar feeds",
+                entitlements["usage"]["calendar_feeds"],
+                feed_count,
+                feed_limit,
+            )
+
         settings = update_row_safe(
             COLLECTIONS["user_settings"],
             settings.get("$id"),
@@ -147,6 +163,11 @@ def create_url_calendar_source():
         if color_hex:
             pref_updates["color_hex"] = color_hex
         _upsert_calendar_preference(user_id, source_id, pref_updates)
+    except EntitlementLimitError as exc:
+        return jsonify(exc.payload()), 403
+    except EntitlementError:
+        logger.exception("Failed to verify calendar feed limits")
+        return jsonify({"error": "Unable to verify your calendar limits right now.", "code": "tier_check_unavailable"}), 503
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
     except AppwriteException:
@@ -160,9 +181,7 @@ def create_url_calendar_source():
 
     refresh_error = None
     try:
-        from services.feed_fetcher import fetch_and_cache_feeds
-
-        fetch_and_cache_feeds(user_id, [new_url])
+        fetch_and_cache_feeds(user_id, [new_url], force=True)
     except Exception as exc:
         logger.exception("Failed to fetch new URL calendar source", extra={"user_id": user_id})
         refresh_error = str(exc)
