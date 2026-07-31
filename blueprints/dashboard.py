@@ -23,7 +23,7 @@ from appwrite_helpers import (
 from services.discord_audit import emit_server_log_event
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
-from services.calendar_store import list_calendar_rows_all
+from services.calendar_store import first_calendar_row, list_calendar_rows_all
 from services.dashboard_summary import (
     DASHBOARD_CALENDAR_UPCOMING_LIMIT,
     DASHBOARD_LIST_LIMIT,
@@ -175,6 +175,26 @@ def _ensure_user_settings(user_id):
 
 def _theme_from_settings(user_settings):
     return theme_from_settings(user_settings)
+
+
+def _resolve_calendar_share_by_code(share_code, active_only=True):
+    from services.calendar_events import (
+        _resolve_calendar_share_by_code as resolve_calendar_share_by_code,
+    )
+
+    return resolve_calendar_share_by_code(
+        share_code,
+        active_only,
+        first_calendar_row_fn=first_calendar_row,
+    )
+
+
+def _public_calendar_share_context(share):
+    from services.calendar_events import (
+        _public_calendar_share_context as public_calendar_share_context,
+    )
+
+    return public_calendar_share_context(share)
 
 
 def _as_utc(value):
@@ -807,8 +827,6 @@ def calendar():
 @dashboard_bp.route("/calendar/share/<share_code>")
 def public_calendar_share(share_code):
     """Render a public read-only shared calendar page."""
-    from blueprints.calendar_api import _public_calendar_share_context, _resolve_calendar_share_by_code
-
     try:
         share = _resolve_calendar_share_by_code(share_code, active_only=True)
     except AppwriteException:
