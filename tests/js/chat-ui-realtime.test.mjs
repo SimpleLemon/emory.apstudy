@@ -11,6 +11,7 @@ async function sourceFor(relativePath) {
     const paths = [
       "static/js/chat/runtime.js",
       "static/js/chat/realtime.js",
+      "static/js/chat/presence.js",
     ];
     return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
       .then((sources) => sources.join("\n"));
