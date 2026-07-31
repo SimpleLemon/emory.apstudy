@@ -97,7 +97,8 @@ def create_app():
     login_manager.login_view = "auth.login"
     from flask_login import current_user
     from flask_wtf.csrf import CSRFError, generate_csrf
-    from blueprints.auth import LOGIN_NEXT_SESSION_KEY, _is_safe_login_next_url
+    with app.app_context():
+        from blueprints.auth import LOGIN_NEXT_SESSION_KEY, _is_safe_login_next_url
     from services.database import close_db, init_db
     init_db(app)
     app.teardown_appcontext(close_db)

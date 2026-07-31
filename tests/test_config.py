@@ -14,7 +14,14 @@ class EnvironmentConfigTests(unittest.TestCase):
             {
                 "FLASK_SECRET_KEY": "configured-secret",
                 "FLASK_ENV": "  PRODUCTION ",
+                "APPWRITE_ENDPOINT": "https://appwrite.example/v1",
+                "APPWRITE_PROJECT_ID": "project-id",
+                "APPWRITE_API_KEY": "api-key",
                 "APPWRITE_DATABASE_ID": "database-id",
+                "APPWRITE_PROFILE_AVATAR_BUCKET_ID": "avatars",
+                "APPWRITE_FILE_SHARE_BUCKET_ID": "files",
+                "APPWRITE_NOTES_MEDIA_BUCKET_ID": "note-media",
+                "APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "chat-files",
                 "APSTUDY_ALLOW_INSECURE_HTTP": "0",
                 "FLASK_DEBUG": "1",
                 "FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED": " YeS ",
@@ -25,7 +32,15 @@ class EnvironmentConfigTests(unittest.TestCase):
 
         self.assertEqual(configured.flask_secret_key, "configured-secret")
         self.assertEqual(configured.flask_env, "production")
+        self.assertEqual(configured.appwrite_endpoint, "https://appwrite.example/v1")
+        self.assertEqual(configured.appwrite_project_id, "project-id")
+        self.assertEqual(configured.appwrite_api_key, "api-key")
         self.assertEqual(configured.appwrite_database_id, "database-id")
+        self.assertEqual(configured.appwrite_database_id_raw, "database-id")
+        self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "avatars")
+        self.assertEqual(configured.appwrite_file_share_bucket_id, "files")
+        self.assertEqual(configured.appwrite_notes_media_bucket_id, "note-media")
+        self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "chat-files")
         self.assertTrue(configured.allow_insecure_http)
         self.assertTrue(configured.frontend_console_diagnostics_enabled)
 
@@ -35,9 +50,44 @@ class EnvironmentConfigTests(unittest.TestCase):
 
         self.assertIsNone(configured.flask_secret_key)
         self.assertEqual(configured.flask_env, "")
+        self.assertIsNone(configured.appwrite_endpoint)
+        self.assertIsNone(configured.appwrite_project_id)
+        self.assertIsNone(configured.appwrite_api_key)
         self.assertEqual(configured.appwrite_database_id, "")
+        self.assertIsNone(configured.appwrite_database_id_raw)
+        self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "profile_avatars")
+        self.assertEqual(configured.appwrite_file_share_bucket_id, "file_share_files")
+        self.assertEqual(configured.appwrite_notes_media_bucket_id, "notes_media")
+        self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "chat_attachments")
         self.assertFalse(configured.allow_insecure_http)
         self.assertFalse(configured.frontend_console_diagnostics_enabled)
+
+    def test_preserves_explicit_empty_appwrite_values(self):
+        with patch.dict(
+            os.environ,
+            {
+                "APPWRITE_ENDPOINT": "",
+                "APPWRITE_PROJECT_ID": "",
+                "APPWRITE_API_KEY": "",
+                "APPWRITE_DATABASE_ID": "",
+                "APPWRITE_PROFILE_AVATAR_BUCKET_ID": "",
+                "APPWRITE_FILE_SHARE_BUCKET_ID": "",
+                "APPWRITE_NOTES_MEDIA_BUCKET_ID": "",
+                "APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "",
+            },
+            clear=True,
+        ):
+            configured = load_environment_config()
+
+        self.assertEqual(configured.appwrite_endpoint, "")
+        self.assertEqual(configured.appwrite_project_id, "")
+        self.assertEqual(configured.appwrite_api_key, "")
+        self.assertEqual(configured.appwrite_database_id, "")
+        self.assertEqual(configured.appwrite_database_id_raw, "")
+        self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "")
+        self.assertEqual(configured.appwrite_file_share_bucket_id, "")
+        self.assertEqual(configured.appwrite_notes_media_bucket_id, "")
+        self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "")
 
     def test_snapshot_is_read_only(self):
         configured = EnvironmentConfig(
