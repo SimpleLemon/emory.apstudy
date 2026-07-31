@@ -17,7 +17,7 @@ test('entity deletion flows stage a real shared undo window', () => {
         'static/js/notes/list.js',
         'static/js/files/index.js',
         'static/js/calendar/events/context-menu.js',
-        'static/js/chat/runtime.js',
+        'static/js/chat/messages-dom.js',
         'static/js/core/notification-tray.js',
         'static/js/settings/account.js',
         'static/js/settings/index.js',

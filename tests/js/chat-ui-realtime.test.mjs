@@ -12,6 +12,7 @@ async function sourceFor(relativePath) {
       "static/js/chat/runtime.js",
       "static/js/chat/realtime.js",
       "static/js/chat/presence.js",
+      "static/js/chat/messages-dom.js",
     ];
     return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
       .then((sources) => sources.join("\n"));

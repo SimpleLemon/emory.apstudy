@@ -15,18 +15,20 @@ test("onboarding keeps executable behavior out of the server-rendered template",
   assert.match(entry, /import \{ createThemeSelector \} from '\.\/theme-selector\.js'/);
 });
 
-test("chat runtime delegates cache, presentation, realtime, and presence responsibilities", async () => {
-  const [runtime, cache, presentation, realtime, presence] = await Promise.all([
+test("chat runtime delegates cache, presentation, realtime, presence, and message DOM responsibilities", async () => {
+  const [runtime, cache, presentation, realtime, presence, messagesDom] = await Promise.all([
     read("static/js/chat/runtime.js"),
     read("static/js/chat/cache.js"),
     read("static/js/chat/presentation.js"),
     read("static/js/chat/realtime.js"),
     read("static/js/chat/presence.js"),
+    read("static/js/chat/messages-dom.js"),
   ]);
   assert.match(runtime, /from "\.\/cache\.js"/);
   assert.match(runtime, /from "\.\/presentation\.js"/);
   assert.match(runtime, /from "\.\/realtime\.js"/);
   assert.match(runtime, /from "\.\/presence\.js"/);
+  assert.match(runtime, /from "\.\/messages-dom\.js"/);
   assert.doesNotMatch(runtime, /function openChatCacheDb|function groupMessages|function escapeHtml/);
   assert.match(cache, /export function createPersistentChatCache/);
   assert.match(presentation, /import \{ escapeHtml \} from "\.\.\/core\/ui-primitives-module\.js"/);
@@ -38,6 +40,9 @@ test("chat runtime delegates cache, presentation, realtime, and presence respons
   assert.match(presence, /export function createChatPresence/);
   assert.match(presence, /function renderPresenceDrivenUi/);
   assert.match(presence, /function scheduleTypingPresence/);
+  assert.match(messagesDom, /export function createChatMessagesDom/);
+  assert.match(messagesDom, /function syncMessagesToDom/);
+  assert.match(messagesDom, /function renderLeadMessage/);
 });
 
 test("shared and feature stylesheets load their extracted responsibilities in cascade order", async () => {
