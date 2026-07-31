@@ -1,5 +1,6 @@
 import { avatarAttrs, avatarUrl, escapeHtml, plural } from "./presentation.js";
 import { CHAT_CACHE_SCHEMA, createPersistentChatCache, deltaLoadParams, mergeMessages, roomCachePayload, trimMessagesForPersistentCache, updateCacheCursors } from "./cache.js";
+import { createChatComposer } from "./composer.js";
 import { createChatMessagesDom } from "./messages-dom.js";
 import { createChatPresence } from "./presence.js";
 import { createChatRealtime } from "./realtime.js";
@@ -390,34 +391,6 @@ export function startChatRuntime(extensions = {}) {
     chatSoundCooldownTimer = window.setTimeout(() => {
       chatSoundCooldownTimer = null;
     }, 1500);
-  }
-
-  function composerIsWritable() {
-    const channel = activeChannel();
-    if (channel) return channelIsWritable(channel);
-    const thread = activeThread();
-    return Boolean(thread && !thread.blocked);
-  }
-
-  function updateComposerSubmitState() {
-    if (!els.sendButton) return;
-    const hasText = Boolean(els.input?.value.trim());
-    const hasAttachment = Boolean(extensions.attachments?.readyIds?.().length);
-    const hasGif = Boolean(extensions.mediaPicker?.hasSelection?.());
-    const attachmentsBusy = Boolean(extensions.attachments?.isBusy?.());
-    els.sendButton.disabled = !composerIsWritable()
-      || (!hasText && !hasAttachment && !hasGif)
-      || attachmentsBusy
-      || state.messageSendInFlight;
-  }
-
-  function setComposer(enabled, placeholder) {
-    if (!els.composer || !els.input || !els.sendButton) return;
-    els.composer.hidden = false;
-    els.input.disabled = !enabled;
-    els.input.placeholder = placeholder || "Message";
-    autosizeComposer();
-    updateComposerSubmitState();
   }
 
   function renderMembers(users) {
@@ -824,125 +797,6 @@ export function startChatRuntime(extensions = {}) {
     scheduleRoomPrefetches();
   }
 
-  async function sendActiveMessage(event) {
-    event.preventDefault();
-    const room = state.activeRoom;
-    if (!room || !els.input) return;
-    const content = els.input.value.trim();
-    const attachmentIds = extensions.attachments?.readyIds?.() || [];
-    const gifSelection = extensions.mediaPicker?.selection?.() || {};
-    if (!content && !attachmentIds.length && !gifSelection.gif_id) return;
-    if (extensions.attachments?.isBusy?.()) {
-      setStatus("Wait for attachments to finish uploading before sending.", "error");
-      return;
-    }
-    if (state.messageSendInFlight) return;
-    const channel = activeChannel();
-    const thread = activeThread();
-    if (channel && !channelIsWritable(channel)) return;
-    if (thread?.blocked) return;
-
-    state.messageSendInFlight = true;
-    els.sendButton.disabled = true;
-    clearTypingPresence(room);
-    const localId = `pending-${crypto.randomUUID()}`;
-    const payloadBody = { content, attachment_ids: attachmentIds, ...gifSelection };
-    const optimistic = {
-      id: localId,
-      user_id: state.user?.id,
-      author_name: state.user?.name || state.user?.username || "You",
-      author_username: state.user?.username || "",
-      author_avatar_url: state.user?.picture_url || state.user?.picture || "",
-      content: content || (gifSelection.gif_id ? "GIF" : "Attachment"),
-      rendered_html: escapeHtml(content || ""),
-      created_at: new Date().toISOString(),
-      delivery_state: "sending",
-      can_delete: false,
-      attachments: [],
-    };
-    applyIncomingMessages(room, [optimistic], { toBottom: true, markRead: false });
-    try {
-      const url = currentRoomUrl(room);
-      const payload = await fetchJson(url, {
-        method: "POST",
-        body: JSON.stringify(payloadBody),
-      });
-      removeMessageFromCaches(localId);
-      els.input.value = "";
-      autosizeComposer();
-      extensions.attachments?.clear?.();
-      extensions.mediaPicker?.clear?.(true);
-      const cache = cacheFor(room);
-      if (cache && payload.message) {
-        applyIncomingMessages(room, [payload.message], { toBottom: true });
-      }
-      refreshViewingPresence();
-      schedulePersistentBootstrapSave();
-    } catch (error) {
-      const cache = cacheFor(room);
-      const failed = cache?.messages?.find((message) => message.id === localId);
-      if (failed) {
-        failed.delivery_state = "failed";
-        state.failedMessages.set(localId, { room, payload: payloadBody });
-        patchMessageInDom(failed);
-        schedulePersistentRoomSave(room);
-      }
-      setStatus(error.message || "Unable to send message.", "error");
-    } finally {
-      state.messageSendInFlight = false;
-      updateComposerSubmitState();
-    }
-  }
-
-  async function retryMessage(messageId) {
-    const failed = state.failedMessages.get(messageId);
-    if (!failed || state.messageSendInFlight) return;
-    const cache = cacheFor(failed.room);
-    const message = cache?.messages?.find((row) => row.id === messageId);
-    if (message) { message.delivery_state = "sending"; patchMessageInDom(message); }
-    state.messageSendInFlight = true;
-    els.sendButton.disabled = true;
-    try {
-      const response = await fetchJson(currentRoomUrl(failed.room), { method: "POST", body: JSON.stringify(failed.payload) });
-      state.failedMessages.delete(messageId);
-      removeMessageFromCaches(messageId);
-      if (response.message) applyIncomingMessages(failed.room, [response.message], { toBottom: true });
-      extensions.attachments?.clear?.();
-      extensions.mediaPicker?.clear?.(true);
-    } catch (error) {
-      if (message) { message.delivery_state = "failed"; patchMessageInDom(message); }
-      setStatus(error.message || "Unable to send message.", "error");
-    } finally {
-      state.messageSendInFlight = false;
-      updateComposerSubmitState();
-    }
-  }
-
-  function handleComposerKeydown(event) {
-    if (event.key !== "Enter" || event.isComposing) return;
-    if (event.shiftKey) {
-      scheduleTransientTimeout(() => {
-        autosizeComposer();
-        scheduleTypingPresence();
-      }, 0);
-      return;
-    }
-    event.preventDefault();
-    if (state.messageSendInFlight) return;
-    if (els.composer?.requestSubmit) {
-      els.composer.requestSubmit();
-    } else {
-      void sendActiveMessage(event);
-    }
-  }
-
-  function autosizeComposer() {
-    if (!els.input) return;
-    els.input.style.height = "auto";
-    const nextHeight = Math.min(112, Math.max(24, els.input.scrollHeight));
-    els.input.style.height = `${nextHeight}px`;
-  }
-
   function stopChatRuntime({ dispose = false } = {}) {
     if (chatRuntimeDisposed || (chatRuntimePaused && !dispose)) return;
     chatRuntimePaused = true;
@@ -990,13 +844,7 @@ export function startChatRuntime(extensions = {}) {
   }
 
   function bindEvents() {
-    els.composer?.addEventListener("submit", sendActiveMessage);
-    els.input?.addEventListener("keydown", handleComposerKeydown);
-    els.input?.addEventListener("input", () => {
-      autosizeComposer();
-      scheduleTypingPresence();
-      updateComposerSubmitState();
-    });
+    bindComposerEvents();
     bindMessagePaneEvents();
     bindRoomDmEvents();
     bindMessageDocumentEvents();
@@ -1096,6 +944,13 @@ export function startChatRuntime(extensions = {}) {
     updateRoomLists,
     updateThread,
   } = rooms;
+  const composer = createChatComposer(runtimeContext);
+  const {
+    bindEvents: bindComposerEvents,
+    retryMessage,
+    setComposer,
+    updateComposerSubmitState,
+  } = composer;
   Object.assign(actions, {
     applyIncomingMessages,
     bootstrap,
@@ -1105,6 +960,7 @@ export function startChatRuntime(extensions = {}) {
     clearTypingPresence,
     closeRoomContextMenu,
     clearRoomUnread,
+    currentRoomUrl,
     currentUserId,
     deltaLoadParams,
     fetchThread,
@@ -1122,6 +978,7 @@ export function startChatRuntime(extensions = {}) {
     restoreMessagesToCaches,
     roomKey,
     schedulePersistentRoomSave,
+    scheduleTransientTimeout,
     scheduleTransientFrame,
     scheduleUnreadSummaryRefresh,
     threadExists,
@@ -1141,6 +998,7 @@ export function startChatRuntime(extensions = {}) {
     renderCachedRoom,
     renderPresenceDrivenUi,
     schedulePersistentBootstrapSave,
+    scheduleTypingPresence,
     setComposer,
     setHistoryBanner,
     memberTierBadgeMarkup,

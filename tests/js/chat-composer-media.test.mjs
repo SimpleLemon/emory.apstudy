@@ -54,7 +54,7 @@ test("emoji trigger rotates through five colored smile reactions on hover", asyn
 });
 
 test("chat send stays disabled until the composer has sendable content", async () => {
-  const runtime = await source("static/js/chat/runtime.js");
+  const runtime = await source("static/js/chat/composer.js");
   const template = await source("templates/chat.html");
   const styles = await source("static/css/chat.css");
   assert.match(runtime, /function updateComposerSubmitState/);

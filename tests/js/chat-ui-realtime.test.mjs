@@ -14,6 +14,7 @@ async function sourceFor(relativePath) {
       "static/js/chat/presence.js",
       "static/js/chat/messages-dom.js",
       "static/js/chat/rooms.js",
+      "static/js/chat/composer.js",
     ];
     return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
       .then((sources) => sources.join("\n"));
@@ -384,7 +385,7 @@ test("chat composer ignores duplicate sends while a message is in flight", async
   const script = await sourceFor("static/js/chat.js");
 
   assert.match(script, /messageSendInFlight: false/);
-  assert.match(script, /if \(state\.messageSendInFlight\) return;\s+const channel = activeChannel\(\)/);
+  assert.match(script, /if \(state\.messageSendInFlight\) return;\s+const channel = actions\.activeChannel\(\)/);
   assert.match(script, /state\.messageSendInFlight = true;\s+els\.sendButton\.disabled = true/);
   assert.match(script, /finally \{\s+state\.messageSendInFlight = false;/);
 });
