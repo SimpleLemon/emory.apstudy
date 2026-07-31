@@ -30,8 +30,8 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from extensions import csrf
-from blueprints.settings import _settings_defaults
-from blueprints.chat_api import create_university_channel, emit_chat_event
+from services.chat_events import create_university_channel, emit_chat_event
+from services.settings_defaults import settings_defaults as _settings_defaults
 from services.chat_presence import sync_chat_presence_labels_for_school
 from services.redaction import SECRET_TEXT_RE
 from services.row_utils import row_id as _row_id

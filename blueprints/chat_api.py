@@ -57,6 +57,10 @@ from services.discord_bridge import (
 )
 from services.discord_audit import DiscordAuditEvent, emit_audit_event, format_actor
 from services.chat_presence import sync_chat_presence_labels_for_user, university_presence_label
+from services.chat_events import (
+    create_university_channel as _create_university_channel_service,
+    emit_chat_event as _emit_chat_event_service,
+)
 from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
@@ -585,37 +589,23 @@ def emit_chat_event(
     readable_user_ids=None,
     channel=None,
 ):
-    if not scope_type or not scope_id or not event_type:
-        return None
-    now = format_datetime(_now())
-    event_id = ID.unique()
-    data = {
-        "scope_type": str(scope_type),
-        "scope_id": str(scope_id),
-        "event_type": str(event_type),
-        "message_id": str(message_id) if message_id else None,
-        "thread_id": str(thread_id) if thread_id else None,
-        "channel_id": str(channel_id) if channel_id else None,
-        "actor_id": str(actor_id) if actor_id else None,
-        "created_at": now,
-    }
-    permissions = _event_read_permissions(
+    return _emit_chat_event_service(
         scope_type,
-        channel=channel,
+        scope_id,
+        event_type,
+        message_id=message_id,
+        thread_id=thread_id,
+        channel_id=channel_id,
+        actor_id=actor_id,
         readable_user_ids=readable_user_ids,
+        channel=channel,
+        now_fn=_now,
+        id_fn=ID.unique,
+        create_row_fn=create_row_safe,
+        event_read_permissions_fn=_event_read_permissions,
+        notify_fn=_notify_chat_event_waiters,
+        error_logger=logger,
     )
-    try:
-        row = create_row_safe(
-            COLLECTIONS["chat_events"],
-            row_id=event_id,
-            data=data,
-            permissions=permissions,
-        )
-    except AppwriteException:
-        logger.exception("Failed to emit chat event to SQLite")
-        return None
-    _notify_chat_event_waiters()
-    return row
 
 
 def _message_timestamp(row):
@@ -759,26 +749,14 @@ def _find_university_channel(school_key):
 
 
 def create_university_channel(school_key, school_name):
-    now = format_datetime(_now())
-    channel_id = _university_channel_id(school_key)
-    existing = get_row_safe(COLLECTIONS["chat_channels"], channel_id, allow_missing=True)
-    payload = {
-        "kind": "university",
-        "name": school_name or "University",
-        "label": school_name or "University",
-        "section": "nest",
-        "school_key": school_key,
-        "school_name": school_name,
-        "read_only": False,
-        "approved": True,
-        "updated_at": now,
-    }
-    if existing:
-        return update_row_safe(COLLECTIONS["chat_channels"], channel_id, payload)
-    return create_row_safe(
-        COLLECTIONS["chat_channels"],
-        row_id=channel_id,
-        data={**payload, "created_at": now},
+    return _create_university_channel_service(
+        school_key,
+        school_name,
+        now_fn=_now,
+        normalize_school_key_fn=normalize_school_key,
+        get_row_fn=get_row_safe,
+        create_row_fn=create_row_safe,
+        update_row_fn=update_row_safe,
     )
 
 

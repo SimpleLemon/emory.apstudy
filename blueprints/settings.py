@@ -77,6 +77,7 @@ from services.onboarding import (
     save_onboarding_step_three,
     save_onboarding_step_two,
 )
+from services.settings_defaults import settings_defaults as _settings_defaults_service
 
 settings_bp = Blueprint("settings", __name__)
 logger = logging.getLogger(__name__)
@@ -315,25 +316,7 @@ def _profile_doc_payload():
 
 
 def _settings_defaults(user_id):
-    return {
-        "user_id": user_id,
-        "ics_secret_token": secrets.token_urlsafe(32),
-        "feed_refresh_minutes": 15,
-        "preferred_calendar_view": "week",
-        "interface_theme": "obsidian-dark",
-        "theme": "dark",
-        "sidebar_default": "expanded",
-        "email_notifications": True,
-        "product_updates": True,
-        "task_sound_enabled": True,
-        "chat_sound_enabled": True,
-        "language": "en",
-        "timezone": "",
-        "dashboard_layout_json": "[]",
-        "dashboard_checklist_hidden_signature": "",
-        "notes_page_setup_json": "{}",
-        "created_at": format_datetime(datetime.utcnow()),
-    }
+    return _settings_defaults_service(user_id)
 
 
 def _settings_payload(settings):
