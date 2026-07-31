@@ -47,6 +47,12 @@ from services.dashboard_summary import (
     task_payload,
     task_priority_rank,
 )
+from services.dashboard_context import (
+    is_emory_or_oxford_user,
+    load_user_settings,
+    theme_from_settings,
+    user_payload,
+)
 from services.row_utils import row_id as _row_id
 from services.toasts import pop_toasts
 from services import note_store
@@ -84,23 +90,10 @@ DASHBOARD_CALENDAR_UPCOMING_DAYS = (7, 14, 30)
 DASHBOARD_TASK_DEADLINE_DAYS = (7, 30)
 DASHBOARD_TASK_PRIORITIES = ("high", "medium", "low", "none")
 DASHBOARD_TITLE_MAX_LENGTH = 60
+
+
 def _is_emory_or_oxford_user():
-    school = str(getattr(current_user, "school", "") or "").strip().lower()
-    school_key = str(getattr(current_user, "school_key", "") or "").strip().lower()
-    return bool(getattr(current_user, "emory_student", False)) or school in {
-        "emory",
-        "emory university",
-        "emory university-oxford",
-        "emory university oxford",
-        "oxford college",
-        "oxford college of emory university",
-    } or school_key in {
-        "emory",
-        "emory-university",
-        "emory-university-oxford",
-        "oxford-college",
-        "oxford-college-of-emory-university",
-    }
+    return is_emory_or_oxford_user(current_user)
 
 
 def _default_courses_campus():
@@ -147,32 +140,16 @@ def _daily_quote_error_metadata(payload):
 
 
 def _user_payload():
-    return {
-        "id": str(current_user.id),
-        "name": current_user.name,
-        "username": current_user.username,
-        "email": current_user.email,
-        "picture": current_user.picture_url,
-        "emory_student": _is_emory_or_oxford_user(),
-        "school": current_user.school,
-        "school_key": getattr(current_user, "school_key", None),
-    }
+    return user_payload(current_user, emory_predicate=_is_emory_or_oxford_user)
 
 
 def _load_user_settings():
-    if hasattr(g, "_apstudy_user_settings"):
-        return g._apstudy_user_settings
-    try:
-        settings = first_row(
-            COLLECTIONS["user_settings"],
-            [Query.equal("user_id", [str(current_user.id)])],
-        )
-        g._apstudy_user_settings = settings
-        return settings
-    except AppwriteException:
-        logger.exception("Failed to load user settings")
-        g._apstudy_user_settings = None
-        return None
+    return load_user_settings(
+        current_user,
+        g,
+        first_row_fn=first_row,
+        error_logger=logger,
+    )
 
 
 def _settings_row_id(settings):
@@ -197,7 +174,7 @@ def _ensure_user_settings(user_id):
 
 
 def _theme_from_settings(user_settings):
-    return user_settings.get("interface_theme") if user_settings else None
+    return theme_from_settings(user_settings)
 
 
 def _as_utc(value):

@@ -3,16 +3,32 @@
 import logging
 import sqlite3
 
-from flask import Blueprint, jsonify, make_response, render_template, request
+from flask import Blueprint, g, jsonify, make_response, render_template, request
 from flask_login import current_user, login_required
 
-from blueprints.dashboard import _load_user_settings, _theme_from_settings, _user_payload
+from services.dashboard_context import (
+    load_user_settings,
+    theme_from_settings,
+    user_payload,
+)
 from services import focus_mode
 from services.entitlements import EntitlementError, EntitlementLimitError, request_entitlements
 
 
 focus_bp = Blueprint("focus", __name__)
 logger = logging.getLogger(__name__)
+
+
+def _load_user_settings():
+    return load_user_settings(current_user, g, error_logger=logger)
+
+
+def _theme_from_settings(user_settings):
+    return theme_from_settings(user_settings)
+
+
+def _user_payload():
+    return user_payload(current_user)
 
 
 def _error_response(error):
