@@ -13,6 +13,7 @@ async function sourceFor(relativePath) {
       "static/js/chat/realtime.js",
       "static/js/chat/presence.js",
       "static/js/chat/messages-dom.js",
+      "static/js/chat/rooms.js",
     ];
     return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
       .then((sources) => sources.join("\n"));
@@ -123,7 +124,7 @@ test("chat hydrates cached rooms before silent refresh and limits persisted mess
   assert.match(script, /function hydrateFromPersistentCache\(\)/);
   assert.match(script, /await hydrateRoomFromPersistentCache\(room\)/);
   assert.match(script, /await selectRoom\(room, \{ fromCacheHydration: true, quiet: true \}\)/);
-  assert.match(script, /if \(renderCachedRoom\(room\)\)/);
+  assert.match(script, /if \(actions\.renderCachedRoom\(room\)\)/);
   assert.match(script, /scheduleRoomPrefetches/);
   assert.match(script, /requestIdleCallback/);
 });
@@ -131,11 +132,11 @@ test("chat hydrates cached rooms before silent refresh and limits persisted mess
 test("chat marks selected cached rooms and sent messages as read", async () => {
   const script = await sourceFor("static/js/chat.js");
 
-  assert.match(script, /function markRoomRead\(room, cache = cacheFor\(room\), \{ force = false \} = \{\}\)/);
+  assert.match(script, /function markRoomRead\(room, cache = actions\.cacheFor\(room\), \{ force = false \} = \{\}\)/);
   assert.match(script, /fetchJson\("\/api\/chat\/read"/);
   assert.match(script, /if \(!force && latest\?\.id\) body\.message_id = latest\.id/);
   assert.match(script, /clearRoomUnread\(room\)/);
-  assert.match(script, /if \(!cache\.stale \|\| latestMessageForRead\(cache\)\) \{\s*markRoomRead\(room, cache\)/);
+  assert.match(script, /if \(!cache\.stale \|\| actions\.latestMessageForRead\(cache\)\) markRoomRead\(room, cache\)/);
   assert.match(script, /applyIncomingMessages\(room, \[payload\.message\], \{ toBottom: true \}\)/);
   assert.match(script, /refreshViewingPresence\(\)/);
   assert.match(script, /\.finally\(\(\) => \{\s*actions\.markRoomRead\(room, cache\);\s*void actions\.refreshChatSummary\(\);\s*\}\)/);
@@ -173,10 +174,10 @@ test("chat room context menu supports mark read", async () => {
   assert.doesNotMatch(script, /function markRoomUnread\(/);
   assert.match(script, /addEventListener\("contextmenu", \(event\) => openRoomContextMenu/);
   assert.match(script, /event\.key !== "ContextMenu" && !\(event\.shiftKey && event\.key === "F10"\)/);
-  assert.match(script, /markRoomRead\(room, cacheFor\(room\), \{ force: true \}\)/);
+  assert.match(script, /markRoomRead\(room, actions\.cacheFor\(room\), \{ force: true \}\)/);
   assert.match(script, /clearedReadRooms/);
   assert.match(script, /cancelUnreadSummaryRefresh\(\)/);
-  assert.match(script, /function markRoomRead\(room, cache = cacheFor\(room\), \{ force = false \} = \{\}\)/);
+  assert.match(script, /function markRoomRead\(room, cache = actions\.cacheFor\(room\), \{ force = false \} = \{\}\)/);
   assert.match(script, /closeRoomContextMenu\(\)/);
   assert.match(styles, /\.chat-room-context-menu/);
   assert.match(styles, /\.chat-room-context-menu\[hidden\]/);
