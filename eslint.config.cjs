@@ -7,7 +7,12 @@ module.exports = [
             "Fall_2026/**",
             "Spring_2026/**",
             "data/**",
+            ".desloppify/**",
+            ".agents/**",
+            "docs/**",
             "static/css/**",
+            "static/js/notes/dist/**",
+            "static/js/tasks/dist/**",
         ],
     },
     {
@@ -16,6 +21,10 @@ module.exports = [
             ecmaVersion: "latest",
             sourceType: "module",
         },
-        rules: {},
+        rules: {
+            "no-unused-vars": "warn",
+            "no-undef": "warn",
+            "no-implicit-globals": "warn",
+        },
     },
 ];
