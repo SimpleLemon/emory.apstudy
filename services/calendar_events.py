@@ -41,6 +41,11 @@ from services.calendar_urls import (
     load_other_calendar_urls,
 )
 from services.row_utils import row_id as _row_id
+from services.task_calendar import (
+    task_calendar_events_for_user,
+    task_calendar_source,
+    user_has_tasks,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -521,8 +526,6 @@ def _configured_calendar_sources(settings, cache_events=None, preferences=None, 
 
 def _task_calendar_payload(user_id, preferences, range_start=None, range_end=None):
     try:
-        from blueprints.tasks_api import task_calendar_events_for_user, task_calendar_source, user_has_tasks
-
         task_events = task_calendar_events_for_user(user_id, range_start, range_end)
         source = task_calendar_source(preferences) if task_events or user_has_tasks(user_id) else None
         return task_events, source

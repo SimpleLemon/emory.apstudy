@@ -173,6 +173,65 @@ def _ensure_user_settings(user_id):
     )
 
 
+def _configured_feed_urls(settings):
+    from services.calendar_events import _configured_feed_urls as service_fn
+
+    return service_fn(settings)
+
+
+def _load_calendar_feed_metadata(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_calendar_feed_metadata as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _load_local_calendar_sources(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_local_calendar_sources as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _load_calendar_preferences(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_calendar_preferences as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _configured_calendar_sources(*args, **kwargs):
+    from services.calendar_events import _configured_calendar_sources as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _filter_configured_cache_events(*args, **kwargs):
+    from services.calendar_events import _filter_configured_cache_events as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _serialize_event(*args, **kwargs):
+    from services.calendar_events import _serialize_event as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _serialize_user_event(*args, **kwargs):
+    from services.calendar_events import _serialize_user_event as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _task_calendar_events_for_user(user_id, range_start=None, range_end=None):
+    from services.task_calendar import task_calendar_events_for_user as service_fn
+
+    return service_fn(
+        user_id,
+        range_start,
+        range_end,
+        list_rows_fn=list_rows_all,
+    )
+
+
 def _theme_from_settings(user_settings):
     return theme_from_settings(user_settings)
 
@@ -540,9 +599,15 @@ def _dashboard_summary_dependencies():
     return {
         "as_utc": _as_utc,
         "can_access_channel": _dashboard_can_access_channel,
+        "configured_calendar_sources": _configured_calendar_sources,
+        "configured_feed_urls": _configured_feed_urls,
         "dashboard_task_bucket": _dashboard_task_bucket,
         "date_key": _date_key,
+        "filter_configured_cache_events": _filter_configured_cache_events,
         "format_datetime": format_datetime,
+        "load_calendar_feed_metadata": _load_calendar_feed_metadata,
+        "load_calendar_preferences": _load_calendar_preferences,
+        "load_local_calendar_sources": _load_local_calendar_sources,
         "list_calendar_rows_all": list_calendar_rows_all,
         "list_rows_all": list_rows_all,
         "list_rows_safe": list_rows_safe,
@@ -550,6 +615,9 @@ def _dashboard_summary_dependencies():
         "normalize_task_list_ids": _normalize_task_list_ids,
         "row_id": _row_id,
         "sort_key": _sort_key,
+        "serialize_event": _serialize_event,
+        "serialize_user_event": _serialize_user_event,
+        "task_calendar_events_for_user": _task_calendar_events_for_user,
         "task_is_complete": _task_is_complete,
         "task_list_payload": _task_list_payload,
         "task_payload": _task_payload,

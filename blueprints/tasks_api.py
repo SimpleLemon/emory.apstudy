@@ -21,7 +21,13 @@ from appwrite_helpers import (
     parse_datetime,
     update_row_safe,
 )
-from services.task_schedule import build_task_occurrences, next_task_occurrence_key
+from services.task_schedule import next_task_occurrence_key
+from services.task_calendar import (
+    build_task_calendar_events as _build_task_calendar_events_service,
+    task_calendar_events_for_user as _task_calendar_events_for_user_service,
+    task_calendar_source as _task_calendar_source_service,
+    user_has_tasks as _user_has_tasks_service,
+)
 from services.row_utils import row_id as _row_id
 from services.time_utils import utcnow as _utcnow, utcnow_iso as _utcnow_iso
 from services import invites
@@ -751,84 +757,27 @@ def _next_occurrence_key(task, now=None):
 
 
 def build_task_calendar_events(tasks, completions=None, range_start=None, range_end=None):
-    return [
-        _task_event_payload(
-            occurrence["task"],
-            occurrence["start"],
-            occurrence["end"],
-            occurrence["occurrence_key"],
-            occurrence["completed"],
-            occurrence["is_all_day"],
-        )
-        for occurrence in build_task_occurrences(tasks, completions, range_start, range_end)
-    ]
-
-
-def _task_event_payload(task, start_dt, end_dt, occurrence_key, completed, is_all_day=False):
-    task_id = _row_id(task)
-    priority = _normalize_priority(task.get("priority"))
-    title = task.get("title") or "Untitled Task"
-    priority_label = "" if priority == "none" else priority.title()
-    description_parts = ["Task"]
-    if priority_label:
-        description_parts.append(f"Priority: {priority_label}")
-    recurrence = _task_recurrence(task)
-    if recurrence:
-        description_parts.append("Repeating task")
-    return {
-        "id": f"task:{task_id}:{occurrence_key}",
-        "uid": f"task:{task_id}:{occurrence_key}",
-        "event_ref": f"task:{task_id}:{occurrence_key}",
-        "source_type": "task",
-        "editable": False,
-        "title": title,
-        "description": " | ".join(description_parts),
-        "start": format_datetime(start_dt),
-        "end": format_datetime(end_dt),
-        "type": "task",
-        "course": TASK_CALENDAR_NAME,
-        "is_multi_day": False,
-        "span_days": 1,
-        "is_all_day": bool(is_all_day),
-        "calendar_id": TASK_CALENDAR_ID,
-        "original_calendar_id": TASK_CALENDAR_ID,
-        "color": None,
-        "task_id": task_id,
-        "occurrence_key": occurrence_key,
-        "priority": priority,
-        "completed": bool(completed),
-        "reminder_minutes": int(task.get("reminder_minutes") if task.get("reminder_minutes") is not None else _default_task_reminder(is_all_day)),
-    }
+    return _build_task_calendar_events_service(
+        tasks,
+        completions,
+        range_start,
+        range_end,
+    )
 
 
 def task_calendar_events_for_user(user_id, range_start=None, range_end=None):
-    tasks = list_rows_all(
-        TASKS_TABLE_ID,
-        [Query.equal("user_id", [str(user_id)]), Query.order_asc("deadline_at")],
+    return _task_calendar_events_for_user_service(
+        user_id,
+        range_start,
+        range_end,
+        list_rows_fn=list_rows_all,
+        build_events_fn=build_task_calendar_events,
     )
-    completions = list_rows_all(
-        TASK_COMPLETIONS_TABLE_ID,
-        [Query.equal("user_id", [str(user_id)])],
-    )
-    return build_task_calendar_events(tasks, completions, range_start, range_end)
 
 
 def user_has_tasks(user_id):
-    row = first_row(TASKS_TABLE_ID, [Query.equal("user_id", [str(user_id)])])
-    return bool(row)
+    return _user_has_tasks_service(user_id, first_row_fn=first_row)
 
 
 def task_calendar_source(preferences=None):
-    preferences = preferences or []
-    pref = next((row for row in preferences if row.get("calendar_name") == TASK_CALENDAR_ID), {})
-    return {
-        "id": TASK_CALENDAR_ID,
-        "kind": "local",
-        "default_name": TASK_CALENDAR_NAME,
-        "display_name": pref.get("display_name") or "",
-        "color_hex": pref.get("color_hex") or TASK_CALENDAR_COLOR,
-        "url": "",
-        "editable": True,
-        "source_id": TASK_CALENDAR_ID,
-        "legacy_names": [TASK_CALENDAR_NAME],
-    }
+    return _task_calendar_source_service(preferences)
