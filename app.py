@@ -8,6 +8,8 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, EnvironmentConfig, load_environment_config
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
@@ -19,11 +21,16 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AUTH_SESSION_DURATION = timedelta(days=400)
 
 
-def _session_secret_key():
-    configured = os.environ.get("FLASK_SECRET_KEY")
+def _session_secret_key(environment_config: EnvironmentConfig | None = None):
+    if environment_config is None:
+        configured = os.environ.get("FLASK_SECRET_KEY")
+        flask_env = (os.environ.get("FLASK_ENV") or "").strip().lower()
+    else:
+        configured = environment_config.flask_secret_key
+        flask_env = environment_config.flask_env
     if configured:
         return configured
-    if (os.environ.get("FLASK_ENV") or "").strip().lower() == "production":
+    if flask_env == "production":
         raise RuntimeError("FLASK_SECRET_KEY must be configured in production.")
     logger.warning("FLASK_SECRET_KEY is not configured; using an ephemeral development key.")
     return secrets.token_hex(32)
@@ -31,6 +38,8 @@ def _session_secret_key():
 
 def create_app():
     app = Flask(__name__)
+    environment_config = load_environment_config()
+    app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = environment_config
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,
@@ -42,8 +51,8 @@ def create_app():
     from avatar_images import avatar_url_for_size
 
     app.jinja_env.filters["avatar_url"] = avatar_url_for_size
-    app.secret_key = _session_secret_key()
-    app.config["APPWRITE_DATABASE_ID"] = os.environ.get("APPWRITE_DATABASE_ID", "")
+    app.secret_key = _session_secret_key(environment_config)
+    app.config["APPWRITE_DATABASE_ID"] = environment_config.appwrite_database_id
     from services.database import database_path, nest_instance_dir
 
     resolved_database_path = database_path()
@@ -51,10 +60,7 @@ def create_app():
     app.config["CALENDAR_SQLITE_PATH"] = resolved_database_path
     app.config["MAX_CONTENT_LENGTH"] = 5 * 50 * 1024 * 1024
     app.config["FILE_SHARE_UPLOAD_DIR"] = os.path.join(app.root_path, "uploads", "file_share")
-    allow_insecure_http = (
-        os.environ.get("APSTUDY_ALLOW_INSECURE_HTTP") == "1"
-        or os.environ.get("FLASK_DEBUG") == "1"
-    )
+    allow_insecure_http = environment_config.allow_insecure_http
     app.config["SESSION_COOKIE_SECURE"] = not allow_insecure_http
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -67,8 +73,7 @@ def create_app():
     app.config["PREFERRED_URL_SCHEME"] = "http" if allow_insecure_http else "https"
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
-        os.environ.get("FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED", "").strip().lower()
-        in {"1", "true", "yes", "on"}
+        environment_config.frontend_console_diagnostics_enabled
     )
     os.makedirs(app.config["FILE_SHARE_UPLOAD_DIR"], exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
