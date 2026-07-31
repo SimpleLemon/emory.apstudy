@@ -1,5 +1,6 @@
 import { avatarAttrs, avatarUrl, escapeHtml, formatMessageTimestamp, groupMessages, localDateKey, parseMessageDate, plural } from "./presentation.js";
 import { CHAT_CACHE_SCHEMA, createPersistentChatCache, deltaLoadParams, mergeMessages, roomCachePayload, trimMessagesForPersistentCache, updateCacheCursors } from "./cache.js";
+import { createChatRealtime } from "./realtime.js";
 
 export function startChatRuntime(extensions = {}) {
   const root = document.querySelector(".chat-app");
@@ -60,13 +61,6 @@ export function startChatRuntime(extensions = {}) {
 
   window.NestChat = state;
 
-  let realtimeFallbackTimer = null;
-  let realtimeHeartbeatTimer = null;
-  let realtimeReconnectTimer = null;
-  let chatEventSource = null;
-  let chatEventCursor = { since: null, after_id: null };
-  const seenChatEventIds = new Set();
-  const seenChatMessageIds = new Set();
   let chatSoundCooldownTimer = null;
   let unreadSummaryRefreshTimer = null;
   let inlineProfilePopover = null;
@@ -148,6 +142,34 @@ export function startChatRuntime(extensions = {}) {
   extensions.attachments?.init?.(extensionContext);
   extensions.mediaPicker?.init?.(extensionContext);
   extensions.messageMedia?.init?.();
+
+  const actions = {};
+  const runtimeContext = {
+    root,
+    state,
+    els,
+    extensions,
+    config: {
+      PRESENCE_REFRESH_MS,
+      TYPING_PRESENCE_TTL_MS,
+      PRESENCE_TAB_ID_KEY,
+      REALTIME_FALLBACK_MS,
+      REALTIME_HEARTBEAT_MS,
+      REALTIME_RECONNECT_MS,
+      ANNOUNCEMENTS_CHANNEL_ID,
+      GRAMMARLY_DISABLED_ATTRS,
+    },
+    lifecycle: {
+      get paused() {
+        return chatRuntimePaused;
+      },
+      get disposed() {
+        return chatRuntimeDisposed;
+      },
+    },
+    actions,
+    fetchJson: (...args) => fetchJson(...args),
+  };
 
   function roomKey(room) {
     if (!room || !room.id || !room.type) return "";
@@ -617,18 +639,6 @@ export function startChatRuntime(extensions = {}) {
     if (!unreadSummaryRefreshTimer) return;
     window.clearTimeout(unreadSummaryRefreshTimer);
     unreadSummaryRefreshTimer = null;
-  }
-
-  function rememberChatMessageId(messageId) {
-    const id = String(messageId || "");
-    if (!id) return false;
-    if (seenChatMessageIds.has(id)) return false;
-    seenChatMessageIds.add(id);
-    if (seenChatMessageIds.size > 5000) {
-      seenChatMessageIds.clear();
-      seenChatMessageIds.add(id);
-    }
-    return true;
   }
 
   function activeChannel() {
@@ -1186,150 +1196,6 @@ export function startChatRuntime(extensions = {}) {
     if (wasNearBottom && markRead) markRoomRead(room, cache);
     if (!wasNearBottom && incoming.length && els.newMessages) els.newMessages.hidden = false;
     return messages;
-  }
-
-  async function fetchMessageById(messageId) {
-    if (!messageId) return null;
-    try {
-      const payload = await fetchJson(`/api/chat/messages/${encodeURIComponent(messageId)}`);
-      return payload?.message || null;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  async function ingestMessageUpdate(event) {
-    const room = state.activeRoom;
-    const cache = cacheFor(room);
-    if (!room || !cache) return false;
-    if (event.message_id) {
-      const message = await fetchMessageById(event.message_id);
-      if (message) {
-        cache.messages = mergeMessages(cache.messages, [message]);
-        updateCacheCursors(cache);
-        schedulePersistentRoomSave(room);
-        if (patchMessageInDom(message)) {
-          updateAnnouncementsUnreadBanner(cache.messages);
-          return true;
-        }
-      }
-    }
-    await loadMessages({ force: true, quiet: true, preserveScroll: true, light: true });
-    return false;
-  }
-
-  async function ingestActiveRoomMessage(event) {
-    const room = state.activeRoom;
-    const cache = cacheFor(room);
-    if (!room || !cache) return false;
-
-    if (event.message_id && !cache.messages.some((message) => message.id === event.message_id)) {
-      const message = await fetchMessageById(event.message_id);
-      if (message) {
-        applyIncomingMessages(room, [message]);
-        playChatSound(event.actor_id);
-        return true;
-      }
-    }
-
-    const delta = deltaLoadParams(cache);
-    const incoming = delta.after
-      ? await loadMessages({ ...delta, quiet: true, force: true, light: true })
-      : await loadMessages({ force: true, quiet: true });
-    if (!incoming.length && event.message_id) {
-      await loadMessages({ force: true, quiet: true });
-    } else if (incoming.length) {
-      playChatSound(event.actor_id);
-      return true;
-    }
-    return incoming.length > 0;
-  }
-
-  function pollActiveRoomMessages() {
-    const room = state.activeRoom;
-    const cache = cacheFor(room);
-    if (!room || !cache) return;
-    const delta = deltaLoadParams(cache);
-    if (delta.after) {
-      void loadMessages({ ...delta, quiet: true, force: true, light: true });
-    } else {
-      void loadMessages({ force: true, quiet: true });
-    }
-  }
-
-  function startRealtimeFallback() {
-    if (chatRuntimePaused || chatRuntimeDisposed || realtimeFallbackTimer || state.realtimeReady) return;
-    realtimeFallbackTimer = window.setInterval(() => {
-      if (document.visibilityState !== "visible") return;
-      if (state.realtimeReady) {
-        stopRealtimeFallback();
-        return;
-      }
-      pollActiveRoomMessages();
-      void refreshChatSummary();
-    }, REALTIME_FALLBACK_MS);
-  }
-
-  function stopRealtimeFallback() {
-    if (!realtimeFallbackTimer) return;
-    window.clearInterval(realtimeFallbackTimer);
-    realtimeFallbackTimer = null;
-  }
-
-  function startRealtimeHeartbeat() {
-    if (chatRuntimePaused || chatRuntimeDisposed || realtimeHeartbeatTimer) return;
-    realtimeHeartbeatTimer = window.setInterval(() => {
-      if (document.visibilityState !== "visible" || !state.realtimeReady) return;
-      pollActiveRoomMessages();
-    }, REALTIME_HEARTBEAT_MS);
-  }
-
-  function stopRealtimeHeartbeat() {
-    if (!realtimeHeartbeatTimer) return;
-    window.clearInterval(realtimeHeartbeatTimer);
-    realtimeHeartbeatTimer = null;
-  }
-
-  function resetRealtimeConnection() {
-    if (chatEventSource) {
-      chatEventSource.close();
-      chatEventSource = null;
-    }
-    if (state.realtimeUnsubscribe) {
-      state.realtimeUnsubscribe();
-      state.realtimeUnsubscribe = null;
-    }
-    state.realtimeReady = false;
-    state.realtimeConnecting = false;
-    stopRealtimeHeartbeat();
-  }
-
-  function buildChatEventsStreamUrl() {
-    const params = new URLSearchParams();
-    if (chatEventCursor.since) params.set("since", chatEventCursor.since);
-    if (chatEventCursor.after_id) params.set("after_id", chatEventCursor.after_id);
-    const qs = params.toString();
-    return qs ? `/api/chat/events/stream?${qs}` : "/api/chat/events/stream";
-  }
-
-  function scheduleRealtimeReconnect() {
-    if (chatRuntimePaused || chatRuntimeDisposed || realtimeReconnectTimer) return;
-    resetRealtimeConnection();
-    startRealtimeFallback();
-    realtimeReconnectTimer = window.setTimeout(() => {
-      realtimeReconnectTimer = null;
-      initializeChatEventStream();
-    }, REALTIME_RECONNECT_MS);
-  }
-
-  function handleRealtimeDisconnect() {
-    scheduleRealtimeReconnect();
-  }
-
-  async function startRealtimeServices() {
-    if (chatRuntimePaused || chatRuntimeDisposed) return;
-    initializeChatEventStream();
-    void loadInitialPresences();
   }
 
   function composerIsWritable() {
@@ -2184,149 +2050,6 @@ export function startChatRuntime(extensions = {}) {
     scheduleRoomPrefetches();
   }
 
-  function initializeChatEventStream() {
-    if (chatRuntimePaused || chatRuntimeDisposed) return;
-    if (state.realtimeReady || chatEventSource || state.realtimeConnecting) return;
-    if (typeof window.EventSource !== "function") {
-      startRealtimeFallback();
-      return;
-    }
-    state.realtimeConnecting = true;
-    try {
-      const source = new EventSource(buildChatEventsStreamUrl());
-      chatEventSource = source;
-      source.onopen = () => {
-        if (chatRuntimePaused || chatRuntimeDisposed) {
-          source.close();
-          return;
-        }
-        state.realtimeReady = true;
-        state.realtimeConnecting = false;
-        state.realtimeUnsubscribe = () => {
-          if (chatEventSource) {
-            chatEventSource.close();
-            chatEventSource = null;
-          }
-        };
-        stopRealtimeFallback();
-        startRealtimeHeartbeat();
-        pollActiveRoomMessages();
-      };
-      source.onmessage = (messageEvent) => {
-        if (chatRuntimePaused || chatRuntimeDisposed) return;
-        let payload;
-        try {
-          payload = JSON.parse(messageEvent.data);
-        } catch {
-          return;
-        }
-        const eventId = payload?.$id || payload?.id;
-        if (eventId && seenChatEventIds.has(eventId)) return;
-        if (eventId) seenChatEventIds.add(eventId);
-        if (payload?.created_at) {
-          chatEventCursor = { since: payload.created_at, after_id: eventId || null };
-        }
-        void handleRealtimePayload({ payload });
-      };
-      source.onerror = () => {
-        if (chatRuntimePaused || chatRuntimeDisposed) return;
-        handleRealtimeDisconnect();
-      };
-    } catch (error) {
-      console.warn("Chat event stream unavailable", error);
-      state.realtimeConnecting = false;
-      handleRealtimeDisconnect();
-    }
-  }
-
-  function normalizeChatEvent(response) {
-    const raw = response?.payload ?? response?.row ?? response;
-    if (!raw || typeof raw !== "object") return null;
-    const nested = raw.data && typeof raw.data === "object" && !Array.isArray(raw.data) ? raw.data : null;
-    if (!nested) return raw;
-    return {
-      ...nested,
-      ...raw,
-      scope_type: raw.scope_type || nested.scope_type,
-      scope_id: raw.scope_id || nested.scope_id,
-      event_type: raw.event_type || nested.event_type,
-      message_id: raw.message_id || nested.message_id,
-      thread_id: raw.thread_id || nested.thread_id,
-      channel_id: raw.channel_id || nested.channel_id,
-      actor_id: raw.actor_id || nested.actor_id,
-    };
-  }
-
-  function eventIsRelevant(event) {
-    if (!event) return false;
-    if (event.scope_type === "channel") {
-      return state.channels.some((channel) => channel.id === event.scope_id);
-    }
-    if (event.scope_type === "thread") {
-      return state.threads.some((thread) => thread.id === event.scope_id) || event.thread_id;
-    }
-    if (event.scope_type === "university") {
-      return Boolean(state.university?.school_key && state.university.school_key === event.scope_id);
-    }
-    return false;
-  }
-
-  async function handleRealtimePayload(response) {
-    const event = normalizeChatEvent(response);
-    if (!eventIsRelevant(event)) return;
-    const active = state.activeRoom;
-    const eventRoom = event.scope_type === "channel"
-      ? { type: "channel", id: event.scope_id || event.channel_id }
-      : event.scope_type === "thread"
-        ? { type: "thread", id: event.scope_id || event.thread_id }
-        : null;
-
-    if (event.event_type === "message_deleted") {
-      removeMessageFromCaches(event.message_id);
-      void refreshChatSummary();
-      return;
-    }
-
-    if (event.event_type === "message_created") {
-      if (event.message_id && !rememberChatMessageId(event.message_id)) return;
-      if (eventRoom?.type === "thread" && !threadExists(eventRoom.id)) {
-        const thread = await fetchThread(eventRoom.id);
-        if (!thread) {
-          await bootstrap({ preserveActive: true });
-        }
-      }
-      if (eventRoom && active && roomKey(eventRoom) === roomKey(active)) {
-        await ingestActiveRoomMessage(event);
-      } else if (eventRoom) {
-        markRoomStale(eventRoom);
-        scheduleUnreadSummaryRefresh();
-        playChatSound(event.actor_id);
-      }
-      return;
-    }
-
-    if (event.event_type === "message_updated") {
-      if (eventRoom && active && roomKey(eventRoom) === roomKey(active)) {
-        await ingestMessageUpdate(event);
-      } else if (eventRoom) {
-        markRoomStale(eventRoom);
-      }
-      return;
-    }
-
-    if (["thread_updated", "block_updated", "university_approved", "university_denied"].includes(event.event_type)) {
-      if (eventRoom) markRoomStale(eventRoom);
-      if (event.event_type === "thread_updated" && eventRoom?.type === "thread") {
-        const thread = await fetchThread(eventRoom.id);
-        if (thread) {
-          void refreshChatSummary();
-          return;
-        }
-      }
-      await bootstrap({ preserveActive: true });
-    }
-  }
-
   async function loadInitialPresences() {
     try {
       const payload = await fetchJson("/api/presence/online");
@@ -2756,8 +2479,7 @@ export function startChatRuntime(extensions = {}) {
     stopRealtimeFallback();
     stopRealtimeHeartbeat();
     stopPresenceRefreshTimer();
-    window.clearTimeout(realtimeReconnectTimer);
-    realtimeReconnectTimer = null;
+    clearRealtimeReconnectTimer();
     cancelUnreadSummaryRefresh();
     window.clearTimeout(chatSoundCooldownTimer);
     chatSoundCooldownTimer = null;
@@ -2930,36 +2652,7 @@ export function startChatRuntime(extensions = {}) {
       closeInlineProfilePopover();
       if (window.innerWidth > 1100) closeChatDrawers();
     });
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        const room = state.activeRoom;
-        const cache = cacheFor(room);
-        if (cache?.loaded) {
-          if (cache.latestCursor) {
-            const delta = deltaLoadParams(cache);
-            void loadMessages({ ...delta, quiet: true, force: true, light: true })
-              .finally(() => {
-                markRoomRead(room, cache);
-                void refreshChatSummary();
-              });
-          } else if (cache.stale) {
-            void loadMessages({ force: true, quiet: true })
-              .finally(() => {
-                markRoomRead(room, cache);
-                void refreshChatSummary();
-              });
-          } else {
-            markRoomRead(room, cache);
-            void refreshChatSummary();
-          }
-        } else {
-          void refreshChatSummary();
-        }
-        refreshViewingPresence();
-      } else {
-        clearTypingPresence();
-      }
-    });
+    bindRealtimeEvents();
   }
 
   async function startChat() {
@@ -2978,6 +2671,41 @@ export function startChatRuntime(extensions = {}) {
     });
     await Promise.allSettled([cachePromise, bootstrapPromise]);
   }
+
+  const realtime = createChatRealtime(runtimeContext);
+  const {
+    bindEvents: bindRealtimeEvents,
+    clearReconnectTimer: clearRealtimeReconnectTimer,
+    resetRealtimeConnection,
+    startRealtimeFallback,
+    startRealtimeHeartbeat,
+    startRealtimeServices,
+    stopRealtimeFallback,
+    stopRealtimeHeartbeat,
+  } = realtime;
+  Object.assign(actions, {
+    applyIncomingMessages,
+    bootstrap,
+    cacheFor,
+    clearTypingPresence,
+    fetchThread,
+    loadInitialPresences,
+    loadMessages,
+    markRoomRead,
+    markRoomStale,
+    mergeMessages,
+    patchMessageInDom,
+    playChatSound,
+    refreshChatSummary,
+    refreshViewingPresence,
+    removeMessageFromCaches,
+    roomKey,
+    schedulePersistentRoomSave,
+    scheduleUnreadSummaryRefresh,
+    threadExists,
+    updateAnnouncementsUnreadBanner,
+    updateCacheCursors,
+  });
 
   bindEvents();
   if (window.APStudyPageLifecycle?.register) {

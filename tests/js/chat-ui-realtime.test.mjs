@@ -7,8 +7,15 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 async function sourceFor(relativePath) {
-  const resolvedPath = relativePath === "static/js/chat.js" ? "static/js/chat/runtime.js" : relativePath;
-  return readFile(path.join(repoRoot, resolvedPath), "utf8");
+  if (relativePath === "static/js/chat.js") {
+    const paths = [
+      "static/js/chat/runtime.js",
+      "static/js/chat/realtime.js",
+    ];
+    return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
+      .then((sources) => sources.join("\n"));
+  }
+  return readFile(path.join(repoRoot, relativePath), "utf8");
 }
 
 function cssBlock(source, selector) {
@@ -19,7 +26,7 @@ function cssBlock(source, selector) {
 }
 
 test("chat uses realtime event signals instead of message polling", async () => {
-  const source = await sourceFor("static/js/chat/runtime.js");
+  const source = await sourceFor("static/js/chat/realtime.js");
 
   assert.doesNotMatch(source, /pollTimer/);
   assert.match(source, /pollActiveRoomMessages/);
@@ -129,7 +136,7 @@ test("chat marks selected cached rooms and sent messages as read", async () => {
   assert.match(script, /if \(!cache\.stale \|\| latestMessageForRead\(cache\)\) \{\s*markRoomRead\(room, cache\)/);
   assert.match(script, /applyIncomingMessages\(room, \[payload\.message\], \{ toBottom: true \}\)/);
   assert.match(script, /refreshViewingPresence\(\)/);
-  assert.match(script, /\.finally\(\(\) => \{\s*markRoomRead\(room, cache\);\s*void refreshChatSummary\(\);\s*\}\)/);
+  assert.match(script, /\.finally\(\(\) => \{\s*actions\.markRoomRead\(room, cache\);\s*void actions\.refreshChatSummary\(\);\s*\}\)/);
 });
 
 test("chat keeps and renders per-room unread state", async () => {
@@ -182,9 +189,9 @@ test("chat refreshes and updates unread state across realtime and visibility", a
   assert.match(script, /fetchJson\("\/api\/chat\/summary"/);
   assert.match(script, /await refreshChatSummary\(\)/);
   assert.match(script, /scheduleUnreadSummaryRefresh\(\)/);
-  assert.match(script, /scheduleUnreadSummaryRefresh\(\);\s*playChatSound\(event\.actor_id\)/);
-  assert.match(script, /message_deleted"[\s\S]*void refreshChatSummary\(\)/);
-  assert.match(script, /document\.visibilityState === "visible"[\s\S]*void refreshChatSummary\(\)/);
+  assert.match(script, /actions\.scheduleUnreadSummaryRefresh\(\);\s*actions\.playChatSound\(event\.actor_id\)/);
+  assert.match(script, /message_deleted"[\s\S]*void actions\.refreshChatSummary\(\)/);
+  assert.match(script, /document\.visibilityState === "visible"[\s\S]*void actions\.refreshChatSummary\(\)/);
   assert.match(script, /setRoomUnread\(\{ type: "thread", id: payload\.thread\.id \}, \{ unread_count: 0, has_unread: false \}\)/);
 });
 
@@ -195,9 +202,9 @@ test("chat fetches new DM threads directly from realtime events", async () => {
   assert.match(script, /function threadExists\(threadId\)/);
   assert.match(script, /async function fetchThread\(threadId\)/);
   assert.match(script, /fetchJson\(`\/api\/chat\/dm\/threads\/\$\{encodeURIComponent\(threadId\)\}`\)/);
-  assert.match(script, /eventRoom\?\.type === "thread" && !threadExists\(eventRoom\.id\)/);
+  assert.match(script, /eventRoom\?\.type === "thread" && !actions\.threadExists\(eventRoom\.id\)/);
   assert.match(script, /event\.event_type === "thread_updated" && eventRoom\?\.type === "thread"/);
-  assert.match(script, /const thread = await fetchThread\(eventRoom\.id\)/);
+  assert.match(script, /const thread = await actions\.fetchThread\(eventRoom\.id\)/);
   assert.match(api, /@chat_api_bp\.route\("\/api\/chat\/dm\/threads\/<thread_id>"\)/);
   assert.match(api, /def dm_thread\(thread_id\):/);
   assert.match(api, /return jsonify\(\{"thread": payload\}\)/);
@@ -413,7 +420,7 @@ test("chat starts realtime fallback refresh after websocket failure", async () =
   assert.match(script, /function startRealtimeFallback/);
   assert.match(script, /function stopRealtimeFallback/);
   assert.match(script, /document\.visibilityState === "visible"/);
-  assert.match(script, /void refreshChatSummary\(\)/);
+  assert.match(script, /void actions\.refreshChatSummary\(\)/);
   assert.match(script, /startRealtimeFallback\(\)/);
   assert.match(script, /stopRealtimeFallback\(\)/);
 });
@@ -425,7 +432,7 @@ test("chat lifecycle stops realtime resources and resumes one runtime", async ()
   assert.match(script, /chatRequestController\.abort\(\)/);
   assert.match(script, /resetRealtimeConnection\(\)/);
   assert.match(script, /stopPresenceRefreshTimer\(\)/);
-  assert.match(script, /window\.clearTimeout\(realtimeReconnectTimer\)/);
+  assert.match(script, /function clearReconnectTimer\(\)[\s\S]*window\.clearTimeout\(realtimeReconnectTimer\)/);
   assert.match(script, /cancelUnreadSummaryRefresh\(\)/);
   assert.match(script, /clearTransientWork\(\)/);
   assert.match(script, /function resumeChatRuntime\(\)/);
