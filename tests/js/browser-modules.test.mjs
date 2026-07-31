@@ -510,7 +510,14 @@ test("notes list guards destructive actions and supports safe card menus", async
 });
 
 test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wired", async () => {
-    const source = await sourceFor("static/js/notes/editor.js");
+    const source = [
+        await sourceFor("static/js/notes/editor.js"),
+        await sourceFor("static/js/notes/editor/save.js"),
+        await sourceFor("static/js/notes/editor/page-setup.js"),
+        await sourceFor("static/js/notes/editor/paste.js"),
+        await sourceFor("static/js/notes/editor/react-shell.js"),
+        await sourceFor("static/js/notes/editor/toolbar-dom.js"),
+    ].join("\n");
     const toolbarSource = await sourceFor("static/js/notes/toolbar.js");
     const catalogSource = await sourceFor("static/js/notes/editor/block-catalog.js");
     const keyboardSource = await sourceFor("static/js/notes/editor/keyboard-shortcuts.js");
@@ -549,7 +556,7 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.match(styles, /body\.notes-editor-body main\s*\{[^}]*grid-row:\s*1;[^}]*max-width:\s*none;[^}]*padding:\s*0;/s);
     assert.match(source, /preserveRangeSelectionShortcuts/);
     assert.match(source, /listItemHardBreakShortcuts/);
-    assert.match(source, /from '\.\/toolbar\.js'/);
+    assert.match(source, /from '\.\.\/toolbar\.js'/);
     assert.match(source, /from '\.\/editor\/block-catalog\.js'/);
     assert.match(source, /await import\('\.\/editor\/print\.js'\)/);
     assert.match(toolbarSource, /const notesEditorSchema = BlockNoteSchema\.create/);
@@ -585,8 +592,8 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.match(source, /formattingToolbar: false/);
     assert.match(source, /slashMenu: false/);
     assert.match(source, /filePanel: false/);
-    assert.match(source, /function handleNotesPaste\(\{ event, editor, defaultPasteHandler \}\)/);
-    assert.match(source, /pasteHandler: handleNotesPaste/);
+    assert.match(source, /function handleNotesPaste\(\{ event, editor, defaultPasteHandler/);
+    assert.match(source, /pasteHandler: \(options\) => handleNotesPaste/);
     assert.match(source, /from '\.\/editor\/markdown-repair\.js'/);
     assert.match(source, /normalizeClipboardMarkdown/);
     assert.match(source, /normalizeCopiedPlainText/);
@@ -611,7 +618,7 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.doesNotMatch(source, /schedulePastedContentNormalization|replaceBlocks\(documentSnapshot/);
     assert.match(source, /let activePageSetupTrigger = null/);
     assert.match(source, /activePageSetupTrigger = trigger \|\| null/);
-    assert.match(source, /activePageSetupTrigger\?\.contains\(event\.target\)/);
+    assert.match(source, /getActivePageSetupTrigger\(\)\?\.contains\(event\.target\)/);
     assert.doesNotMatch(source, /application\/x-nest-blocknote\+json/);
     assert.match(source, /notes\/tools\/link-preview/);
     assert.match(source, /function toggleHeadingCollapse/);
@@ -749,7 +756,14 @@ test("notes sharing keeps canonical links, view-only capabilities, and folder in
     const listSource = await sourceFor("static/js/notes/list.js");
     const cardsSource = await sourceFor("static/js/notes/list/cards.js");
     const sharingSource = await sourceFor("static/js/notes/sharing.js");
-    const editorSource = await sourceFor("static/js/notes/editor.js");
+    const editorSource = [
+        await sourceFor("static/js/notes/editor.js"),
+        await sourceFor("static/js/notes/editor/save.js"),
+        await sourceFor("static/js/notes/editor/page-setup.js"),
+        await sourceFor("static/js/notes/editor/paste.js"),
+        await sourceFor("static/js/notes/editor/react-shell.js"),
+        await sourceFor("static/js/notes/editor/toolbar-dom.js"),
+    ].join("\n");
     const editorTemplate = await sourceFor("templates/notes_editor.html");
     const styles = `${await sourceFor("static/css/notes.css")}\n${await sourceFor("static/css/notes/editor.css")}`;
     const notesTemplate = await sourceFor("templates/notes.html");
@@ -776,7 +790,7 @@ test("notes sharing keeps canonical links, view-only capabilities, and folder in
 
     assert.match(editorSource, /let canEdit = noteContext\.access\?\.can_edit === true/);
     assert.match(editorSource, /editable: canEdit/);
-    assert.match(editorSource, /if \(!canEdit \|\| !noteId \|\| !titleInput \|\| !editorInstance \|\| noteCollaborationEnabled\) return/);
+    assert.match(editorSource, /if \(!getCanEdit\(\) \|\| !noteId \|\| !titleInput \|\| !getEditor\(\) \|\| getNoteCollaborationEnabled\(\)\) return/);
     assert.match(editorSource, /canEdit \? React\.createElement\(SuggestionMenuController/);
     assert.match(editorSource, /canEdit \? React\.createElement\(SideMenuController/);
     assert.match(editorSource, /if \(!canEdit\) \{\s*button\?\.remove\(\);/);
