@@ -37,6 +37,7 @@ from appwrite_helpers import (
 )
 from services.calendar_store import first_calendar_row
 from services.calendar_urls import load_other_calendar_urls
+from services.discord_chat import sync_discord_channels
 from services.app_config import (
     COURSE_TRACKING_REFRESH_INTERVAL_CHOICES,
     get_course_tracking_refresh_minutes,
@@ -470,8 +471,6 @@ def _reconcile_discord_chat(app):
     """Slowly reconcile Discord-backed chat channels as a Gateway safety net."""
     with app.app_context():
         try:
-            from blueprints.chat_api import sync_discord_channels
-
             created_count, deleted_count = sync_discord_channels(emit_events=False, emit_delete_events=True)
             if created_count or deleted_count:
                 logger.info(

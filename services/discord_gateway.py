@@ -3,6 +3,12 @@ import logging
 import os
 import threading
 
+from services.discord_chat import (
+    delete_discord_gateway_message,
+    delete_discord_gateway_messages,
+    ingest_discord_gateway_message,
+    sync_discord_channels,
+)
 
 logger = logging.getLogger(__name__)
 _bridge = None
@@ -105,8 +111,6 @@ class DiscordGatewayBridge:
 
     def _run_reconcile(self, reason):
         with self.app.app_context():
-            from blueprints.chat_api import sync_discord_channels
-
             created, deleted = sync_discord_channels(emit_events=False, emit_delete_events=True)
             logger.info(
                 "Discord Gateway reconciliation (%s): %s new message(s), %s deleted message(s).",
@@ -117,26 +121,18 @@ class DiscordGatewayBridge:
 
     def _handle_message_create(self, payload):
         with self.app.app_context():
-            from blueprints.chat_api import ingest_discord_gateway_message
-
             ingest_discord_gateway_message(payload, event_type="create")
 
     def _handle_message_update(self, payload):
         with self.app.app_context():
-            from blueprints.chat_api import ingest_discord_gateway_message
-
             ingest_discord_gateway_message(payload, event_type="update")
 
     def _handle_message_delete(self, channel_id, message_id):
         with self.app.app_context():
-            from blueprints.chat_api import delete_discord_gateway_message
-
             delete_discord_gateway_message(channel_id, message_id)
 
     def _handle_bulk_message_delete(self, channel_id, message_ids):
         with self.app.app_context():
-            from blueprints.chat_api import delete_discord_gateway_messages
-
             delete_discord_gateway_messages(channel_id, message_ids)
 
 

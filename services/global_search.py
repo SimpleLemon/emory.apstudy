@@ -14,6 +14,7 @@ from appwrite.query import Query
 from appwrite_client import COLLECTIONS
 from appwrite_helpers import first_row, format_datetime, get_row_safe, list_rows_all, parse_datetime
 from services.atlas_client import build_section_id
+from services.calendar_events import _load_serialized_calendar_events
 from services.note_store import list_notes_for_user, list_shared_for_user, note_list_payload
 from services.notes_preview import preview_text_from_content
 from services.row_utils import row_id as _row_id
@@ -239,8 +240,6 @@ def _event_tie_key(item):
 
 def _search_events(user_id, query):
     # Calendar serialization centralizes configured-feed filtering and event overrides.
-    from blueprints.calendar_api import _load_serialized_calendar_events
-
     settings = first_row(COLLECTIONS["user_settings"], [Query.equal("user_id", [user_id])])
     events, _cache_rows, _created_rows = _load_serialized_calendar_events(user_id, settings)
     results = []

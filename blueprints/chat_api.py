@@ -61,6 +61,7 @@ from services.chat_events import (
     create_university_channel as _create_university_channel_service,
     emit_chat_event as _emit_chat_event_service,
 )
+from services.discord_chat import register_discord_chat_handlers
 from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
@@ -3070,3 +3071,27 @@ def presence():
         "users": _presence_online_users(),
         "dm_statuses": {},
     })
+
+
+def _sync_discord_channels_for_background(*args, **kwargs):
+    return sync_discord_channels(*args, **kwargs)
+
+
+def _ingest_discord_gateway_message_for_background(*args, **kwargs):
+    return ingest_discord_gateway_message(*args, **kwargs)
+
+
+def _delete_discord_gateway_message_for_background(*args, **kwargs):
+    return delete_discord_gateway_message(*args, **kwargs)
+
+
+def _delete_discord_gateway_messages_for_background(*args, **kwargs):
+    return delete_discord_gateway_messages(*args, **kwargs)
+
+
+register_discord_chat_handlers(
+    sync_discord_channels=_sync_discord_channels_for_background,
+    ingest_discord_gateway_message=_ingest_discord_gateway_message_for_background,
+    delete_discord_gateway_message=_delete_discord_gateway_message_for_background,
+    delete_discord_gateway_messages=_delete_discord_gateway_messages_for_background,
+)
