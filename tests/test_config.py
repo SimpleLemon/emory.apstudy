@@ -22,6 +22,12 @@ class EnvironmentConfigTests(unittest.TestCase):
                 "APPWRITE_FILE_SHARE_BUCKET_ID": "files",
                 "APPWRITE_NOTES_MEDIA_BUCKET_ID": "note-media",
                 "APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "chat-files",
+                "DATABASE_PATH": "configured.sqlite3",
+                "NEST_DATABASE_PATH": "fallback.sqlite3",
+                "APSTUDY_FORCE_LOCAL_INSTANCE_DB": "1",
+                "NEST_INSTANCE_DIR": "instance",
+                "CALENDAR_SQLITE_PATH": "calendar.sqlite3",
+                "CALENDAR_DB_PATH": "legacy-calendar.sqlite3",
                 "APSTUDY_ALLOW_INSECURE_HTTP": "0",
                 "FLASK_DEBUG": "1",
                 "FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED": " YeS ",
@@ -32,6 +38,13 @@ class EnvironmentConfigTests(unittest.TestCase):
 
         self.assertEqual(configured.flask_secret_key, "configured-secret")
         self.assertEqual(configured.flask_env, "production")
+        self.assertEqual(configured.flask_env_raw, "  PRODUCTION ")
+        self.assertEqual(configured.database_path_override, "configured.sqlite3")
+        self.assertEqual(configured.nest_database_path, "fallback.sqlite3")
+        self.assertTrue(configured.force_local_instance_db)
+        self.assertEqual(configured.nest_instance_dir_override, "instance")
+        self.assertEqual(configured.calendar_sqlite_path, "calendar.sqlite3")
+        self.assertEqual(configured.calendar_db_path, "legacy-calendar.sqlite3")
         self.assertEqual(configured.appwrite_endpoint, "https://appwrite.example/v1")
         self.assertEqual(configured.appwrite_project_id, "project-id")
         self.assertEqual(configured.appwrite_api_key, "api-key")
@@ -43,6 +56,7 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.appwrite_file_share_bucket_id, "files")
         self.assertEqual(configured.appwrite_notes_media_bucket_id, "note-media")
         self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "chat-files")
+        self.assertTrue(configured.appwrite_chat_attachments_enabled)
         self.assertTrue(configured.allow_insecure_http)
         self.assertTrue(configured.frontend_console_diagnostics_enabled)
 
@@ -52,6 +66,13 @@ class EnvironmentConfigTests(unittest.TestCase):
 
         self.assertIsNone(configured.flask_secret_key)
         self.assertEqual(configured.flask_env, "")
+        self.assertIsNone(configured.flask_env_raw)
+        self.assertIsNone(configured.database_path_override)
+        self.assertIsNone(configured.nest_database_path)
+        self.assertFalse(configured.force_local_instance_db)
+        self.assertIsNone(configured.nest_instance_dir_override)
+        self.assertIsNone(configured.calendar_sqlite_path)
+        self.assertIsNone(configured.calendar_db_path)
         self.assertIsNone(configured.appwrite_endpoint)
         self.assertIsNone(configured.appwrite_project_id)
         self.assertIsNone(configured.appwrite_api_key)
@@ -66,6 +87,7 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.appwrite_file_share_bucket_id, "file_share_files")
         self.assertEqual(configured.appwrite_notes_media_bucket_id, "notes_media")
         self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "chat_attachments")
+        self.assertFalse(configured.appwrite_chat_attachments_enabled)
         self.assertFalse(configured.allow_insecure_http)
         self.assertFalse(configured.frontend_console_diagnostics_enabled)
 
@@ -97,6 +119,7 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.appwrite_file_share_bucket_id, "")
         self.assertEqual(configured.appwrite_notes_media_bucket_id, "")
         self.assertEqual(configured.appwrite_chat_attachments_bucket_id, "")
+        self.assertFalse(configured.appwrite_chat_attachments_enabled)
 
     def test_snapshot_is_read_only(self):
         configured = EnvironmentConfig(

@@ -4,9 +4,10 @@ import sqlite3
 import uuid
 from contextlib import contextmanager
 
-from flask import current_app
+from flask import current_app, has_app_context
 
 from appwrite.exception import AppwriteException
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 
 
 CALENDAR_TABLES = (
@@ -67,6 +68,14 @@ INTEGER_COLUMNS = {
     "user_event_overrides": {"reminder_minutes"},
     "calendar_shares": {"rolling_days"},
 }
+
+
+def _environment_config_snapshot():
+    if has_app_context():
+        configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+        if configured is not None:
+            return configured
+    return load_environment_config()
 
 SCHEMA_STATEMENTS = (
     """
@@ -209,7 +218,7 @@ INDEX_STATEMENTS = (
 def calendar_db_path(path=None):
     if path:
         return path
-    configured = os.environ.get("CALENDAR_SQLITE_PATH")
+    configured = _environment_config_snapshot().calendar_sqlite_path
     if configured:
         return configured
     try:
@@ -488,7 +497,8 @@ from services import database as _nest_database
 def calendar_db_path(path=None):
     if path:
         return _nest_database.resolve_env_path(path) or path
-    legacy = os.environ.get("CALENDAR_SQLITE_PATH") or os.environ.get("CALENDAR_DB_PATH")
+    configured_environment = _environment_config_snapshot()
+    legacy = configured_environment.calendar_sqlite_path or configured_environment.calendar_db_path
     if legacy:
         resolved = _nest_database.resolve_env_path(legacy)
         if resolved:

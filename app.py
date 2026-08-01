@@ -60,7 +60,7 @@ def create_app():
     app.config["APPWRITE_DATABASE_ID"] = environment_config.appwrite_database_id
     from services.database import database_path, nest_instance_dir
 
-    resolved_database_path = database_path()
+    resolved_database_path = database_path(environment_config=environment_config)
     app.config["DATABASE_PATH"] = resolved_database_path
     app.config["CALENDAR_SQLITE_PATH"] = resolved_database_path
     app.config["MAX_CONTENT_LENGTH"] = 5 * 50 * 1024 * 1024
@@ -82,7 +82,7 @@ def create_app():
     )
     os.makedirs(app.config["FILE_SHARE_UPLOAD_DIR"], exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
-    os.makedirs(nest_instance_dir(), exist_ok=True)
+    os.makedirs(nest_instance_dir(environment_config=environment_config), exist_ok=True)
 
     @app.get("/service-worker.js")
     def service_worker():

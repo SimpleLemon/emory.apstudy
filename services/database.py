@@ -8,12 +8,17 @@ from contextlib import contextmanager
 
 from appwrite.exception import AppwriteException
 from flask import current_app, g, has_app_context
+from config import (
+    APSTUDY_FORCE_LOCAL_INSTANCE_DB_ENV,
+    ENVIRONMENT_CONFIG_EXTENSION_KEY,
+    load_environment_config,
+)
 from services.time_utils import utcnow_iso
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PRODUCTION_DATABASE_PATH = "/var/www/nest.apstudy.org/instance/nest.sqlite3"
-LOCAL_INSTANCE_ONLY = "APSTUDY_FORCE_LOCAL_INSTANCE_DB"
+LOCAL_INSTANCE_ONLY = APSTUDY_FORCE_LOCAL_INSTANCE_DB_ENV
 BASELINE_MIGRATION = "001_initial_schema.sql"
 DEFAULT_LIMIT = 100
 UNIQUE_SENTINELS = {"unique()"}
@@ -61,7 +66,17 @@ def resolve_env_path(path_value):
     return os.path.normpath(os.path.join(BASE_DIR, expanded))
 
 
-def database_path(path=None):
+def _environment_config(environment_config=None):
+    if environment_config is not None:
+        return environment_config
+    if has_app_context():
+        configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+        if configured is not None:
+            return configured
+    return load_environment_config()
+
+
+def database_path(path=None, *, environment_config=None):
     if path:
         return resolve_env_path(path) or path
 
@@ -70,23 +85,31 @@ def database_path(path=None):
         if configured:
             return configured
 
-    configured = resolve_env_path(os.environ.get("DATABASE_PATH") or os.environ.get("NEST_DATABASE_PATH"))
+    configured_environment = _environment_config(environment_config)
+    configured = resolve_env_path(
+        configured_environment.database_path_override
+        or configured_environment.nest_database_path
+    )
     if configured:
         return configured
 
-    if os.environ.get(LOCAL_INSTANCE_ONLY) == "1" and os.environ.get("FLASK_ENV") != "production":
+    if (
+        configured_environment.force_local_instance_db
+        and configured_environment.flask_env_raw != "production"
+    ):
         return os.path.join(BASE_DIR, "instance", "nest.sqlite3")
 
-    if os.environ.get("FLASK_ENV") == "production":
+    if configured_environment.flask_env_raw == "production":
         return PRODUCTION_DATABASE_PATH
     return os.path.join(BASE_DIR, "instance", "nest.sqlite3")
 
 
-def nest_instance_dir():
-    configured = resolve_env_path(os.environ.get("NEST_INSTANCE_DIR"))
+def nest_instance_dir(environment_config=None):
+    configured_environment = _environment_config(environment_config)
+    configured = resolve_env_path(configured_environment.nest_instance_dir_override)
     if configured:
         return configured
-    return os.path.dirname(database_path())
+    return os.path.dirname(database_path(environment_config=configured_environment))
 
 
 def migrations_path():
