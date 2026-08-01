@@ -319,9 +319,10 @@ def create_app():
         from scripts.backup_nest_db import run_backup
         from services.database import nest_instance_dir
 
+        configured = load_environment_config()
         instance_dir = Path(nest_instance_dir())
-        backup_dir = Path(os.environ.get("NEST_BACKUP_DIR", "/var/backups/nest-db"))
-        max_backups = int(os.environ.get("NEST_BACKUP_RETENTION", "7"))
+        backup_dir = Path(configured.nest_backup_dir)
+        max_backups = int(configured.nest_backup_retention_raw)
         raise SystemExit(
             run_backup(
                 instance_dir=instance_dir,

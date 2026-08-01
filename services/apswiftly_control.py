@@ -6,15 +6,26 @@ from datetime import datetime, timezone
 
 import requests
 
+from config import load_environment_config
+
 logger = logging.getLogger(__name__)
 
-APSWIFTLY_CONTROL_URL = (os.environ.get("APSWIFTLY_CONTROL_URL") or "http://127.0.0.1:3921").rstrip("/")
-APSWIFTLY_CONTROL_TOKEN = (os.environ.get("APSWIFTLY_CONTROL_TOKEN") or "").strip()
-APSWIFTLY_SERVICE_NAME = (os.environ.get("APSWIFTLY_SERVICE_NAME") or "apswiftly").strip() or "apswiftly"
+_IMPORT_ENVIRONMENT_CONFIG = load_environment_config()
+APSWIFTLY_CONTROL_URL = (
+    _IMPORT_ENVIRONMENT_CONFIG.apswiftly_control_url_raw
+    or "http://127.0.0.1:3921"
+).rstrip("/")
+APSWIFTLY_CONTROL_TOKEN = (
+    _IMPORT_ENVIRONMENT_CONFIG.apswiftly_control_token_raw or ""
+).strip()
+APSWIFTLY_SERVICE_NAME = (
+    _IMPORT_ENVIRONMENT_CONFIG.apswiftly_service_name_raw or "apswiftly"
+).strip() or "apswiftly"
 APSWIFTLY_CONTROL_TIMEOUT_SECONDS = max(
     1,
-    int(os.environ.get("APSWIFTLY_CONTROL_TIMEOUT_SECONDS") or "15"),
+    int(_IMPORT_ENVIRONMENT_CONFIG.apswiftly_control_timeout_seconds_raw or "15"),
 )
+del _IMPORT_ENVIRONMENT_CONFIG
 
 EXECUTABLE_FALLBACKS = {
     "sudo": ("/usr/bin/sudo", "/bin/sudo"),
