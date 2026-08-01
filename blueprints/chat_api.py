@@ -3,7 +3,6 @@ import html
 import io
 import json
 import logging
-import os
 import re
 import secrets
 import sqlite3
@@ -11,7 +10,7 @@ import threading
 import time
 from datetime import datetime, timedelta, timezone
 
-from flask import Blueprint, Response, current_app, jsonify, request, send_file, stream_with_context
+from flask import Blueprint, Response, jsonify, request, send_file, stream_with_context
 from flask_login import current_user, login_required
 
 from appwrite.exception import AppwriteException
@@ -21,7 +20,7 @@ from appwrite.query import Query
 from appwrite.role import Role
 
 from appwrite_client import COLLECTIONS
-from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
+from config import load_environment_config
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
@@ -57,6 +56,7 @@ from services.discord_bridge import (
     fetch_guild_roles,
 )
 from services.discord_audit import DiscordAuditEvent, emit_audit_event, format_actor
+from services.environment_config import runtime_environment_config
 from services.chat_presence import sync_chat_presence_labels_for_user, university_presence_label
 from services.chat_events import (
     create_university_channel as _create_university_channel_service,
@@ -82,23 +82,30 @@ chat_api_bp = Blueprint("chat_api", __name__)
 
 
 def _appwrite_chat_attachments_enabled():
-    configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
-    if configured is None:
-        configured = load_environment_config()
-    return configured.appwrite_chat_attachments_enabled
+    return runtime_environment_config().appwrite_chat_attachments_enabled
 
 
 logger = logging.getLogger(__name__)
 
-CHAT_EVENTS_POLL_SECONDS = float(os.environ.get("CHAT_EVENTS_POLL_SECONDS", "1"))
-CHAT_EVENTS_KEEPALIVE_SECONDS = float(os.environ.get("CHAT_EVENTS_KEEPALIVE_SECONDS", "15"))
-CHAT_EVENTS_STREAM_LIMIT = int(os.environ.get("CHAT_EVENTS_STREAM_LIMIT", "50"))
-PRESENCE_CHAT_FRESH_SECONDS = int(os.environ.get("PRESENCE_CHAT_FRESH_SECONDS", "30"))
-PRESENCE_SITE_FRESH_SECONDS = int(os.environ.get("PRESENCE_SITE_FRESH_SECONDS", "180"))
-PRESENCE_TYPING_FRESH_SECONDS = int(os.environ.get("PRESENCE_TYPING_FRESH_SECONDS", "10"))
+_IMPORT_ENVIRONMENT_CONFIG = load_environment_config()
+CHAT_EVENTS_POLL_SECONDS = float(_IMPORT_ENVIRONMENT_CONFIG.chat_events_poll_seconds_raw)
+CHAT_EVENTS_KEEPALIVE_SECONDS = float(
+    _IMPORT_ENVIRONMENT_CONFIG.chat_events_keepalive_seconds_raw
+)
+CHAT_EVENTS_STREAM_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.chat_events_stream_limit_raw)
+PRESENCE_CHAT_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_chat_fresh_seconds_raw
+)
+PRESENCE_SITE_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_site_fresh_seconds_raw
+)
+PRESENCE_TYPING_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_typing_fresh_seconds_raw
+)
 PRESENCE_FRESH_SECONDS = PRESENCE_CHAT_FRESH_SECONDS
-PRESENCE_LOOKUP_LIMIT = int(os.environ.get("PRESENCE_LOOKUP_LIMIT", "200"))
-PRESENCE_ONLINE_LIMIT = int(os.environ.get("PRESENCE_ONLINE_LIMIT", "500"))
+PRESENCE_LOOKUP_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.presence_lookup_limit_raw)
+PRESENCE_ONLINE_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.presence_online_limit_raw)
+del _IMPORT_ENVIRONMENT_CONFIG
 
 _chat_event_listener_lock = threading.Lock()
 _chat_event_listeners = []
@@ -111,7 +118,6 @@ DISCORD_IMAGE_EXTENSIONS = {".gif", ".jpeg", ".jpg", ".png", ".webp"}
 DISCORD_USER_MENTION_RE = re.compile(r"&lt;@!?(\d+)&gt;")
 DISCORD_ROLE_MENTION_RE = re.compile(r"&lt;@(?:&amp;|&)(\d+)&gt;")
 DISCORD_CUSTOM_EMOJI_RE = re.compile(r"&lt;(a?):([A-Za-z0-9_]{2,32}):(\d+)&gt;")
-DISCORD_INGEST_SECRET_ENV_KEYS = ("DISCORD_CHAT_INGEST_SECRET", "DISCORD_CHAT_SYNC_SECRET", "DISCORD_BRIDGE_SECRET")
 CHAT_MESSAGE_STRING_LIMITS = {
     "channel_id": 64,
     "thread_id": 64,
@@ -718,8 +724,9 @@ def _ensure_discord_channel(row_id, name, label, channel_id, read_only):
 
 def _default_channels():
     channels = []
-    announcements_id = (os.environ.get("DISCORD_ANNOUNCEMENTS_CHANNEL_ID") or "").strip()
-    chat_id = (os.environ.get("DISCORD_CHAT_CHANNEL_ID") or "").strip()
+    configured = runtime_environment_config()
+    announcements_id = (configured.discord_announcements_channel_id or "").strip()
+    chat_id = (configured.discord_chat_channel_id or "").strip()
     try:
         if announcements_id:
             channels.append(_ensure_discord_channel(
@@ -1680,8 +1687,12 @@ def _discord_channel_for_discord_id(discord_channel_id):
 
 
 def _discord_ingest_secret():
-    for key in DISCORD_INGEST_SECRET_ENV_KEYS:
-        value = os.environ.get(key)
+    configured = runtime_environment_config()
+    for value in (
+        configured.discord_chat_ingest_secret,
+        configured.discord_chat_sync_secret,
+        configured.discord_bridge_secret,
+    ):
         if value:
             return value.strip()
     return ""
@@ -2306,7 +2317,7 @@ def bootstrap():
             "school": current_user.school,
             "school_key": getattr(current_user, "school_key", None),
         },
-        "discord_invite_url": os.environ.get("DISCORD_INVITE_URL", ""),
+        "discord_invite_url": runtime_environment_config().discord_invite_url,
         "capabilities": {
             "attachments": _appwrite_chat_attachments_enabled(),
             "max_attachment_size_bytes": entitlements["limits"].get("max_chat_attachment_size_bytes"),

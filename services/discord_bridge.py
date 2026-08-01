@@ -1,6 +1,5 @@
 import json
 import logging
-import os
 import time
 from datetime import datetime, timezone
 
@@ -11,15 +10,19 @@ from appwrite.query import Query
 
 from appwrite_client import COLLECTIONS
 from appwrite_helpers import create_row_safe, first_row, format_datetime, update_row_safe
+from config import load_environment_config
 from services.discord_constants import DEFAULT_GUILD_ID, DISCORD_API_BASE
+from services.environment_config import runtime_environment_config
 from services.redaction import SECRET_TEXT_RE
 
 
 logger = logging.getLogger(__name__)
 WEBHOOK_CONFIG_KEY = "nest_chat_webhook"
 # Guild/role used for the Discord account-linking membership reward.
-LINK_GUILD_ID = os.environ.get("DISCORD_LINK_GUILD_ID", "859910344393883710")
-LINK_ROLE_ID = os.environ.get("DISCORD_LINK_ROLE_ID", "1338596013371555953")
+_IMPORT_ENVIRONMENT_CONFIG = load_environment_config()
+LINK_GUILD_ID = _IMPORT_ENVIRONMENT_CONFIG.discord_link_guild_id
+LINK_ROLE_ID = _IMPORT_ENVIRONMENT_CONFIG.discord_link_role_id
+del _IMPORT_ENVIRONMENT_CONFIG
 GUILD_ROLES_CACHE_SECONDS = 10 * 60
 _guild_roles_cache = {}
 _user_cache = {}
@@ -35,7 +38,7 @@ def _safe_response_text(response, limit=200):
 
 
 def _bot_token():
-    return (os.environ.get("DISCORD_BOT_TOKEN") or "").strip()
+    return (runtime_environment_config().discord_bot_token or "").strip()
 
 
 def _headers():
@@ -78,7 +81,9 @@ def fetch_channel_messages(channel_id, limit=50):
 
 
 def fetch_guild_roles(guild_id=None):
-    guild_id = str(guild_id or os.environ.get("DISCORD_GUILD_ID") or DEFAULT_GUILD_ID).strip()
+    guild_id = str(
+        guild_id or runtime_environment_config().discord_guild_id or DEFAULT_GUILD_ID
+    ).strip()
     if not guild_id or not _bot_token():
         return []
     now = time.monotonic()
@@ -275,7 +280,7 @@ def ensure_chat_webhook():
     if webhook:
         return webhook
 
-    channel_id = (os.environ.get("DISCORD_CHAT_CHANNEL_ID") or "").strip()
+    channel_id = (runtime_environment_config().discord_chat_channel_id or "").strip()
     if not channel_id:
         raise DiscordBridgeError("Discord chat channel is not configured.")
 
