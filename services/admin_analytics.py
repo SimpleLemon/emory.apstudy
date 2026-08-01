@@ -5,6 +5,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 from services import database
+from services.environment_config import runtime_environment_config
 
 try:
     from zoneinfo import ZoneInfo
@@ -609,8 +610,9 @@ def _ga_top_pages_from_details(pages):
 
 
 def _ga4_payload(range_key, window, buckets, tz):
-    property_id = (os.environ.get("GA4_PROPERTY_ID") or DEFAULT_GA4_PROPERTY_ID).strip()
-    credentials = (os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or "").strip()
+    configured = runtime_environment_config()
+    property_id = (configured.ga4_property_id_raw or DEFAULT_GA4_PROPERTY_ID).strip()
+    credentials = (configured.google_application_credentials or "").strip()
     if not credentials:
         return {"configured": False, "status": "not_configured", "message": "GOOGLE_APPLICATION_CREDENTIALS is not configured."}
 
