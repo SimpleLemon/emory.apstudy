@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 import requests
 
 from services.discord_constants import DEFAULT_GUILD_ID, DISCORD_API_BASE
+from services.environment_config import runtime_environment_config
 from services.redaction import SECRET_TEXT_RE
 
 logger = logging.getLogger(__name__)
@@ -54,20 +55,21 @@ def _utcnow_iso():
 
 
 def _env_channel_id(channel):
-    env_name = {
-        "admin": "DISCORD_AUDIT_ADMIN_CHANNEL_ID",
-        "course_tracks": "DISCORD_AUDIT_COURSE_TRACKS_CHANNEL_ID",
-        "creation": "DISCORD_AUDIT_CREATION_CHANNEL_ID",
-        "chat_deletes": "DISCORD_AUDIT_CHAT_DELETES_CHANNEL_ID",
-        "user_logs": "DISCORD_AUDIT_USER_LOGS_CHANNEL_ID",
-        "server_logs": "DISCORD_AUDIT_SERVER_LOGS_CHANNEL_ID",
-        "console_logs": "DISCORD_AUDIT_CONSOLE_LOGS_CHANNEL_ID",
+    configured = runtime_environment_config()
+    override = {
+        "admin": configured.discord_audit_admin_channel_id,
+        "course_tracks": configured.discord_audit_course_tracks_channel_id,
+        "creation": configured.discord_audit_creation_channel_id,
+        "chat_deletes": configured.discord_audit_chat_deletes_channel_id,
+        "user_logs": configured.discord_audit_user_logs_channel_id,
+        "server_logs": configured.discord_audit_server_logs_channel_id,
+        "console_logs": configured.discord_audit_console_logs_channel_id,
     }.get(channel)
-    return (os.environ.get(env_name or "") or DEFAULT_CHANNEL_IDS.get(channel) or "").strip()
+    return (override or DEFAULT_CHANNEL_IDS.get(channel) or "").strip()
 
 
-def _bot_token():
-    return (os.environ.get("DISCORD_BOT_TOKEN") or "").strip()
+def _bot_token(app=None):
+    return (runtime_environment_config(app).discord_bot_token or "").strip()
 
 
 def _fallback_line_count(path):
@@ -94,12 +96,16 @@ def _sanitize_error_text(value, limit=500):
     return _truncate(text, limit)
 
 
-def _console_log_enabled():
-    return os.environ.get("DISCORD_CONSOLE_LOG_ENABLED", "1") != "0"
+def _console_log_enabled(app=None):
+    return runtime_environment_config(app).discord_console_log_enabled_raw != "0"
 
 
-def _server_console_log_enabled():
-    return _console_log_enabled() and os.environ.get("DISCORD_SERVER_CONSOLE_LOG_ENABLED", "1") != "0"
+def _server_console_log_enabled(app=None):
+    if not _console_log_enabled(app):
+        return False
+    return (
+        runtime_environment_config(app).discord_server_console_log_enabled_raw != "0"
+    )
 
 
 def _format_console_block(header, lines):
@@ -292,9 +298,9 @@ class _ConsoleStreamTee:
 
 
 def init_server_console_forwarding(app):
-    if not _server_console_log_enabled():
+    if not _server_console_log_enabled(app):
         return False
-    if not _bot_token():
+    if not _bot_token(app):
         return False
     if getattr(app, "extensions", None) is not None and app.extensions.get("discord_server_console"):
         return False
@@ -839,10 +845,11 @@ _service = None
 
 def init_discord_audit(app):
     global _service
-    if os.environ.get("DISCORD_AUDIT_ENABLED", "1") == "0":
+    configured = runtime_environment_config(app)
+    if configured.discord_audit_enabled_raw == "0":
         logger.info("Discord audit logger disabled (DISCORD_AUDIT_ENABLED=0).")
         return None
-    fallback_path = os.environ.get("DISCORD_AUDIT_FALLBACK_PATH")
+    fallback_path = configured.discord_audit_fallback_path
     if not fallback_path:
         fallback_path = os.path.join(app.instance_path, "discord_audit_fallback.jsonl")
     _service = _service or DiscordAuditService(fallback_path=fallback_path)
@@ -895,7 +902,7 @@ def shutdown_discord_audit():
 def get_audit_service():
     global _service
     if _service is None:
-        fallback_path = os.environ.get("DISCORD_AUDIT_FALLBACK_PATH")
+        fallback_path = runtime_environment_config().discord_audit_fallback_path
         if not fallback_path:
             fallback_path = os.path.join(os.getcwd(), "instance", "discord_audit_fallback.jsonl")
         _service = DiscordAuditService(fallback_path=fallback_path)
@@ -903,7 +910,8 @@ def get_audit_service():
 
 
 def discord_audit_status():
-    fallback_path = os.environ.get("DISCORD_AUDIT_FALLBACK_PATH")
+    configured = runtime_environment_config()
+    fallback_path = configured.discord_audit_fallback_path
     if not fallback_path:
         fallback_path = (
             _service.fallback_path
@@ -913,7 +921,7 @@ def discord_audit_status():
     thread_alive = bool(_service and _service.thread and _service.thread.is_alive())
     queue_length = len(_service.queue) if _service else 0
     return {
-        "audit_enabled": os.environ.get("DISCORD_AUDIT_ENABLED", "1") != "0",
+        "audit_enabled": configured.discord_audit_enabled_raw != "0",
         "bot_token_present": bool(_bot_token()),
         "course_tracks_channel_present": bool(_env_channel_id("course_tracks")),
         "server_logs_channel_present": bool(_env_channel_id("server_logs")),

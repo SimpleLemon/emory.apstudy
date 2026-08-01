@@ -81,13 +81,13 @@ class EnvironmentConfig:
     discord_bot_token: str | None = field(default=None, repr=False)
     discord_guild_id: str | None = None
     discord_gateway_enabled_raw: str = "1"
-    discord_audit_channel_id: str | None = None
-    discord_member_channel_id: str | None = None
-    discord_chat_audit_channel_id: str | None = None
-    discord_health_channel_id: str | None = None
-    discord_task_channel_id: str | None = None
-    discord_auth_channel_id: str | None = None
-    discord_automation_channel_id: str | None = None
+    discord_audit_admin_channel_id: str | None = None
+    discord_audit_course_tracks_channel_id: str | None = None
+    discord_audit_creation_channel_id: str | None = None
+    discord_audit_chat_deletes_channel_id: str | None = None
+    discord_audit_user_logs_channel_id: str | None = None
+    discord_audit_server_logs_channel_id: str | None = None
+    discord_audit_console_logs_channel_id: str | None = None
     discord_console_log_enabled_raw: str = "1"
     discord_server_console_log_enabled_raw: str = "1"
     discord_audit_enabled_raw: str = "1"
@@ -195,13 +195,21 @@ def load_environment_config():
         discord_bot_token=get("DISCORD_BOT_TOKEN"),
         discord_guild_id=get("DISCORD_GUILD_ID"),
         discord_gateway_enabled_raw=get("DISCORD_GATEWAY_ENABLED", "1"),
-        discord_audit_channel_id=get("DISCORD_AUDIT_CHANNEL_ID"),
-        discord_member_channel_id=get("DISCORD_MEMBER_CHANNEL_ID"),
-        discord_chat_audit_channel_id=get("DISCORD_CHAT_AUDIT_CHANNEL_ID"),
-        discord_health_channel_id=get("DISCORD_HEALTH_CHANNEL_ID"),
-        discord_task_channel_id=get("DISCORD_TASK_CHANNEL_ID"),
-        discord_auth_channel_id=get("DISCORD_AUTH_CHANNEL_ID"),
-        discord_automation_channel_id=get("DISCORD_AUTOMATION_CHANNEL_ID"),
+        discord_audit_admin_channel_id=get("DISCORD_AUDIT_ADMIN_CHANNEL_ID"),
+        discord_audit_course_tracks_channel_id=get(
+            "DISCORD_AUDIT_COURSE_TRACKS_CHANNEL_ID"
+        ),
+        discord_audit_creation_channel_id=get("DISCORD_AUDIT_CREATION_CHANNEL_ID"),
+        discord_audit_chat_deletes_channel_id=get(
+            "DISCORD_AUDIT_CHAT_DELETES_CHANNEL_ID"
+        ),
+        discord_audit_user_logs_channel_id=get("DISCORD_AUDIT_USER_LOGS_CHANNEL_ID"),
+        discord_audit_server_logs_channel_id=get(
+            "DISCORD_AUDIT_SERVER_LOGS_CHANNEL_ID"
+        ),
+        discord_audit_console_logs_channel_id=get(
+            "DISCORD_AUDIT_CONSOLE_LOGS_CHANNEL_ID"
+        ),
         discord_console_log_enabled_raw=get("DISCORD_CONSOLE_LOG_ENABLED", "1"),
         discord_server_console_log_enabled_raw=get(
             "DISCORD_SERVER_CONSOLE_LOG_ENABLED", "1"

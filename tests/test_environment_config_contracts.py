@@ -17,6 +17,7 @@ class EnvironmentConfigContractTests(unittest.TestCase):
             "CHAT_EVENTS_POLL_SECONDS": "1.5",
             "DISCORD_CHAT_INGEST_SECRET": " ingest ",
             "DISCORD_GATEWAY_ENABLED": "false",
+            "DISCORD_AUDIT_CHAT_DELETES_CHANNEL_ID": " audit-channel ",
             "SCHEDULER_ENABLED": "yes",
             "FEED_REFRESH_INTERVAL_MINUTES": " 20 ",
             "APSWIFTLY_CONTROL_TIMEOUT_SECONDS": " 21 ",
@@ -32,6 +33,7 @@ class EnvironmentConfigContractTests(unittest.TestCase):
             "chat_events_poll_seconds_raw": "1.5",
             "discord_chat_ingest_secret": " ingest ",
             "discord_gateway_enabled_raw": "false",
+            "discord_audit_chat_deletes_channel_id": " audit-channel ",
             "scheduler_enabled_raw": "yes",
             "feed_refresh_interval_minutes_raw": " 20 ",
             "apswiftly_control_timeout_seconds_raw": " 21 ",
@@ -102,6 +104,7 @@ class EnvironmentConfigContractTests(unittest.TestCase):
         app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = configured
         with patch.dict(os.environ, {"DISCORD_INVITE_URL": "second"}, clear=True):
             self.assertEqual(runtime_environment_config().discord_invite_url, "second")
+            self.assertIs(runtime_environment_config(app), configured)
             with app.app_context():
                 self.assertIs(runtime_environment_config(), configured)
                 self.assertEqual(runtime_environment_config().discord_invite_url, "first")

@@ -9,8 +9,12 @@ from config import (
 )
 
 
-def runtime_environment_config() -> EnvironmentConfig:
+def runtime_environment_config(app=None) -> EnvironmentConfig:
     """Use an app's snapshot, with a fresh fallback for standalone callers."""
+    if app is not None:
+        configured = app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+        if configured is not None:
+            return configured
     if has_app_context():
         configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
         if configured is not None:
