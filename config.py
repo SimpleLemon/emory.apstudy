@@ -10,6 +10,8 @@ import os
 
 ENVIRONMENT_CONFIG_EXTENSION_KEY = "apstudy.environment_config"
 _DIAGNOSTIC_TRUTH_VALUES = {"1", "true", "yes", "on"}
+APPWRITE_FRONTEND_ENDPOINT_DEFAULT = "https://nyc.cloud.appwrite.io/v1"
+APPWRITE_FRONTEND_PROJECT_ID_DEFAULT = "69f77663000c16abdff2"
 
 
 @dataclass(frozen=True, slots=True)
@@ -27,6 +29,8 @@ class EnvironmentConfig:
     # The app factory has historically exposed a missing database ID as "",
     # while appwrite_client.py preserves the raw optional value as None.
     appwrite_database_id_raw: str | None = None
+    appwrite_frontend_endpoint: str = APPWRITE_FRONTEND_ENDPOINT_DEFAULT
+    appwrite_frontend_project_id: str = APPWRITE_FRONTEND_PROJECT_ID_DEFAULT
     appwrite_profile_avatar_bucket_id: str = "profile_avatars"
     appwrite_file_share_bucket_id: str = "file_share_files"
     appwrite_notes_media_bucket_id: str = "notes_media"
@@ -35,6 +39,8 @@ class EnvironmentConfig:
 
 def load_environment_config():
     """Read the app-factory environment contract once for one app instance."""
+    endpoint = os.environ.get("APPWRITE_ENDPOINT")
+    project_id = os.environ.get("APPWRITE_PROJECT_ID")
     database_id = os.environ.get("APPWRITE_DATABASE_ID")
     return EnvironmentConfig(
         flask_secret_key=os.environ.get("FLASK_SECRET_KEY"),
@@ -48,10 +54,16 @@ def load_environment_config():
             os.environ.get("FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED", "").strip().lower()
             in _DIAGNOSTIC_TRUTH_VALUES
         ),
-        appwrite_endpoint=os.environ.get("APPWRITE_ENDPOINT"),
-        appwrite_project_id=os.environ.get("APPWRITE_PROJECT_ID"),
+        appwrite_endpoint=endpoint,
+        appwrite_project_id=project_id,
         appwrite_api_key=os.environ.get("APPWRITE_API_KEY"),
         appwrite_database_id_raw=database_id,
+        appwrite_frontend_endpoint=(
+            APPWRITE_FRONTEND_ENDPOINT_DEFAULT if endpoint is None else endpoint
+        ),
+        appwrite_frontend_project_id=(
+            APPWRITE_FRONTEND_PROJECT_ID_DEFAULT if project_id is None else project_id
+        ),
         appwrite_profile_avatar_bucket_id=os.environ.get(
             "APPWRITE_PROFILE_AVATAR_BUCKET_ID", "profile_avatars"
         ),

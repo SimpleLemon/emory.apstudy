@@ -8,7 +8,12 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.middleware.proxy_fix import ProxyFix
 
-from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, EnvironmentConfig, load_environment_config
+from config import (
+    ENVIRONMENT_CONFIG_EXTENSION_KEY,
+    EnvironmentConfig,
+    get_environment_config,
+    load_environment_config,
+)
 
 load_dotenv()
 logger = logging.getLogger(__name__)
@@ -205,6 +210,7 @@ def create_app():
     def inject_shell_preferences():
         from flask_login import current_user
 
+        configured = get_environment_config(app)
         if not current_user.is_authenticated:
             return {
                 "sidebar_default": "expanded",
@@ -214,8 +220,8 @@ def create_app():
                 "user_tier_label": None,
                 "user_tier_badge": None,
                 "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-                "appwrite_endpoint": os.environ.get("APPWRITE_ENDPOINT", "https://nyc.cloud.appwrite.io/v1"),
-                "appwrite_project_id": os.environ.get("APPWRITE_PROJECT_ID", "69f77663000c16abdff2"),
+                "appwrite_endpoint": configured.appwrite_frontend_endpoint,
+                "appwrite_project_id": configured.appwrite_frontend_project_id,
             }
 
         try:
@@ -252,8 +258,8 @@ def create_app():
             "user_tier_label": TIER_LABELS[user_tier],
             "user_tier_badge": TIER_BADGES.get(user_tier),
             "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-            "appwrite_endpoint": os.environ.get("APPWRITE_ENDPOINT", "https://nyc.cloud.appwrite.io/v1"),
-            "appwrite_project_id": os.environ.get("APPWRITE_PROJECT_ID", "69f77663000c16abdff2"),
+            "appwrite_endpoint": configured.appwrite_frontend_endpoint,
+            "appwrite_project_id": configured.appwrite_frontend_project_id,
         }
 
     # Register all blueprints
