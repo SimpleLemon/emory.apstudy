@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import json
-import os
 import urllib.parse
 import urllib.request
+
+from services.environment_config import runtime_environment_config
 
 
 API_ROOT = "https://api.giphy.com/v1/gifs"
@@ -16,7 +17,7 @@ class GiphyError(RuntimeError):
 
 
 def api_key():
-    return os.environ.get("GIPHY_API_KEY", "").strip()
+    return runtime_environment_config().giphy_api_key.strip()
 
 
 def is_available():

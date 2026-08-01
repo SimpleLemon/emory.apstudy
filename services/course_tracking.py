@@ -1,6 +1,5 @@
 import hashlib
 import logging
-import os
 import re
 from datetime import datetime, timedelta, timezone
 
@@ -17,6 +16,7 @@ from services.course_tracking_email import (
     build_open_seat_subject,
 )
 from services.discord_audit import emit_course_track_event, update_course_tracks_channel_topic
+from services.environment_config import runtime_environment_config
 from services.redaction import SECRET_TEXT_RE
 from services import notifications
 
@@ -108,7 +108,7 @@ def _track_due(track, now):
 
 def _send_open_email(track, section):
     messaging = Messaging(appwrite_client)
-    base_url = os.environ.get("APP_BASE_URL", "https://nest.apstudy.org").rstrip("/")
+    base_url = runtime_environment_config().app_base_url.rstrip("/")
     course_code = section.get("course_code") or track.get("course_code") or "Tracked class"
     section_id = section.get("id") or track.get("section_id") or ""
     subject = build_open_seat_subject(
@@ -405,7 +405,11 @@ def check_course_seat_tracks(*, term=None, subject=None, catalog=None, poll_sour
                     try:
                         _, push_result = notifications.notify(
                             track.get("user_id"), "courses", f"{code} has an opening", body,
-                            build_nest_courses_detail_url(os.environ.get("APP_BASE_URL", "https://nest.apstudy.org"), section.get("id") or track.get("section_id")), source_ref=row_id,
+                            build_nest_courses_detail_url(
+                                runtime_environment_config().app_base_url,
+                                section.get("id") or track.get("section_id"),
+                            ),
+                            source_ref=row_id,
                             dedupe_key=f"course-open:{row_id}:{section.get('enrollment_status')}:{seats}", tag=f"course:{row_id}",
                         )
                         delivered = delivered or push_result["accepted"] > 0

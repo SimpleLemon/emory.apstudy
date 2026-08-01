@@ -3,7 +3,6 @@
 import hashlib
 import json
 import logging
-import os
 from datetime import datetime, timezone
 
 from flask import Blueprint, g, jsonify, render_template, redirect, request, url_for
@@ -21,6 +20,7 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.discord_audit import emit_server_log_event
+from services.environment_config import runtime_environment_config
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import first_calendar_row, list_calendar_rows_all
@@ -879,7 +879,9 @@ def calendar():
         preferred_calendar_view = "week"
     interface_theme = _theme_from_settings(user_settings)
     try:
-        calendar_buffer_days = int(os.environ.get("CALENDAR_DATE_BUFFER_DAYS", "7"))
+        calendar_buffer_days = int(
+            runtime_environment_config().calendar_date_buffer_days_raw
+        )
     except (TypeError, ValueError):
         calendar_buffer_days = 7
     
@@ -906,7 +908,9 @@ def public_calendar_share(share_code):
         theme_preference = _theme_from_settings(_load_user_settings())
 
     try:
-        calendar_buffer_days = int(os.environ.get("CALENDAR_DATE_BUFFER_DAYS", "7"))
+        calendar_buffer_days = int(
+            runtime_environment_config().calendar_date_buffer_days_raw
+        )
     except (TypeError, ValueError):
         calendar_buffer_days = 7
 
@@ -1102,5 +1106,5 @@ def chat():
         "chat.html",
         user=_user_payload(),
         theme_preference=_theme_from_settings(user_settings),
-        discord_invite_url=os.environ.get("DISCORD_INVITE_URL", ""),
+        discord_invite_url=runtime_environment_config().discord_invite_url,
     )
