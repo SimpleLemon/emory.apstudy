@@ -9,10 +9,10 @@ blueprints/auth -> blueprints/settings import cycle.
 """
 
 import logging
-import os
 from urllib.parse import urljoin
 
 import requests as http_requests
+from flask import current_app, has_app_context
 from appwrite.exception import AppwriteException
 from appwrite.id import ID
 from appwrite.input_file import InputFile
@@ -20,6 +20,7 @@ from appwrite.permission import Permission
 from appwrite.role import Role
 from appwrite.services.storage import Storage
 
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 from appwrite_client import (
     ENDPOINT,
     PROFILE_AVATAR_BUCKET_ID,
@@ -41,10 +42,19 @@ MIME_TYPE_EXTENSIONS = {
 }
 
 
+def _environment_config_snapshot():
+    if has_app_context():
+        configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+        if configured is not None:
+            return configured
+    return load_environment_config()
+
+
 def build_avatar_view_url(file_id):
     """Return the public Appwrite Storage view URL for an avatar file."""
-    endpoint = (ENDPOINT or os.environ.get("APPWRITE_ENDPOINT") or "").rstrip("/")
-    project_id = PROJECT_ID or os.environ.get("APPWRITE_PROJECT_ID") or ""
+    configured = _environment_config_snapshot()
+    endpoint = (ENDPOINT or configured.appwrite_endpoint or "").rstrip("/")
+    project_id = PROJECT_ID or configured.appwrite_project_id or ""
     if not endpoint or not project_id or not file_id:
         return None
     return f"{endpoint}/storage/buckets/{PROFILE_AVATAR_BUCKET_ID}/files/{file_id}/view?project={project_id}"

@@ -11,7 +11,7 @@ import threading
 import time
 from datetime import datetime, timedelta, timezone
 
-from flask import Blueprint, Response, jsonify, request, send_file, stream_with_context
+from flask import Blueprint, Response, current_app, jsonify, request, send_file, stream_with_context
 from flask_login import current_user, login_required
 
 from appwrite.exception import AppwriteException
@@ -21,6 +21,7 @@ from appwrite.query import Query
 from appwrite.role import Role
 
 from appwrite_client import COLLECTIONS
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
@@ -78,6 +79,15 @@ from services.user_profile import (
 
 
 chat_api_bp = Blueprint("chat_api", __name__)
+
+
+def _appwrite_chat_attachments_enabled():
+    configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+    if configured is None:
+        configured = load_environment_config()
+    return configured.appwrite_chat_attachments_enabled
+
+
 logger = logging.getLogger(__name__)
 
 CHAT_EVENTS_POLL_SECONDS = float(os.environ.get("CHAT_EVENTS_POLL_SECONDS", "1"))
@@ -2298,7 +2308,7 @@ def bootstrap():
         },
         "discord_invite_url": os.environ.get("DISCORD_INVITE_URL", ""),
         "capabilities": {
-            "attachments": bool(os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID")),
+            "attachments": _appwrite_chat_attachments_enabled(),
             "max_attachment_size_bytes": entitlements["limits"].get("max_chat_attachment_size_bytes"),
             "max_attachments_per_message": MAX_ATTACHMENTS_PER_MESSAGE,
             "giphy": {

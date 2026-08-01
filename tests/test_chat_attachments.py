@@ -1,4 +1,5 @@
 import io
+import os
 import unittest
 import zipfile
 from unittest.mock import patch
@@ -7,11 +8,32 @@ from PIL import Image
 from flask import Flask
 
 from blueprints import chat_api
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 from services import chat_attachments
 from services.entitlements import DEFAULT_TIER_DEFINITIONS, MIB
 
 
 class ChatAttachmentValidationTests(unittest.TestCase):
+    def test_attachment_capability_uses_the_registered_environment_snapshot(self):
+        with patch.dict(
+            os.environ,
+            {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": ""},
+            clear=True,
+        ):
+            configured = load_environment_config()
+
+        app = Flask(__name__)
+        app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = configured
+        with patch.dict(
+            os.environ,
+            {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "configured-bucket"},
+            clear=True,
+        ), app.app_context(), patch.object(chat_attachments, "list_rows_all") as list_rows:
+            self.assertFalse(chat_attachments._chat_attachments_enabled())
+            self.assertFalse(chat_api._appwrite_chat_attachments_enabled())
+            self.assertEqual(chat_attachments.attachments_for_messages(["message-1"]), {})
+            list_rows.assert_not_called()
+
     def test_chat_limits_are_independent_from_regular_file_limits(self):
         self.assertEqual(DEFAULT_TIER_DEFINITIONS["free"]["max_chat_attachment_size_bytes"], 10 * MIB)
         for tier in ("grade_a", "grade_aa", "developer"):

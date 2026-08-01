@@ -205,6 +205,39 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(context["appwrite_endpoint"], "https://configured.example/v1")
         self.assertEqual(context["appwrite_project_id"], "configured-project")
 
+    def test_avatar_storage_uses_the_registered_environment_snapshot(self):
+        from flask import Flask
+        from services import avatar_storage
+
+        with patch.dict(
+            os.environ,
+            {
+                "APPWRITE_ENDPOINT": "https://configured.example/v1",
+                "APPWRITE_PROJECT_ID": "configured-project",
+            },
+            clear=True,
+        ):
+            configured = load_environment_config()
+
+        app = Flask(__name__)
+        app.extensions["apstudy.environment_config"] = configured
+        with patch.dict(
+            os.environ,
+            {
+                "APPWRITE_ENDPOINT": "https://changed.example/v1",
+                "APPWRITE_PROJECT_ID": "changed-project",
+            },
+            clear=True,
+        ), app.app_context(), patch.object(avatar_storage, "ENDPOINT", None), patch.object(
+            avatar_storage, "PROJECT_ID", None
+        ):
+            url = avatar_storage.build_avatar_view_url("avatar-file")
+
+        self.assertEqual(
+            url,
+            "https://configured.example/v1/storage/buckets/profile_avatars/files/avatar-file/view?project=configured-project",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
