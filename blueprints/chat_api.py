@@ -58,6 +58,14 @@ from services.discord_bridge import (
 from services.discord_audit import DiscordAuditEvent, emit_audit_event, format_actor
 from services.environment_config import runtime_environment_config
 from services.chat_presence import sync_chat_presence_labels_for_user, university_presence_label
+from services.chat_presence_runtime import (
+    fresh_presence_rows as _fresh_presence_rows_service,
+    fresh_presence_rows_by_scope as _fresh_presence_rows_by_scope_service,
+    presence_cutoff as _presence_cutoff_service,
+    presence_fresh_seconds as _presence_fresh_seconds_service,
+    presence_status_from_scopes as _presence_status_from_scopes_service,
+    presence_statuses_for_users as _presence_statuses_for_users_service,
+)
 from services.chat_events import (
     create_university_channel as _create_university_channel_service,
     emit_chat_event as _emit_chat_event_service,
@@ -210,98 +218,59 @@ def _presence_scope(scope_type, scope_id):
 
 
 def _presence_cutoff(seconds=PRESENCE_FRESH_SECONDS):
-    return format_datetime(_now() - timedelta(seconds=seconds))
+    return _presence_cutoff_service(
+        seconds,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+    )
 
 
 def _presence_fresh_seconds(scope_type):
-    scope = str(scope_type or "")
-    if scope == "site":
-        return PRESENCE_SITE_FRESH_SECONDS
-    if scope in {"typing_channel", "typing_thread"}:
-        return PRESENCE_TYPING_FRESH_SECONDS
-    return PRESENCE_CHAT_FRESH_SECONDS
+    return _presence_fresh_seconds_service(
+        scope_type,
+        chat_fresh_seconds=PRESENCE_CHAT_FRESH_SECONDS,
+        site_fresh_seconds=PRESENCE_SITE_FRESH_SECONDS,
+        typing_fresh_seconds=PRESENCE_TYPING_FRESH_SECONDS,
+    )
 
 
 def _presence_status_from_scopes(scopes):
-    values = {str(scope or "") for scope in scopes}
-    if "chat" in values:
-        return "active"
-    if "site" in values:
-        return "busy"
-    return "offline"
+    return _presence_status_from_scopes_service(scopes)
 
 
 def _fresh_presence_rows(scope_types=None, *, user_ids=None, seconds=PRESENCE_FRESH_SECONDS, limit=1000):
-    queries = [
-        Query.greater_than_equal("last_seen_at", _presence_cutoff(seconds)),
-        Query.order_desc("last_seen_at"),
-        Query.limit(limit),
-    ]
-    if scope_types:
-        queries.insert(0, Query.equal("scope_type", [str(value) for value in scope_types if value]))
-    if user_ids:
-        queries.insert(0, Query.equal("user_id", [str(value) for value in user_ids if value]))
-    try:
-        return list_rows_safe(COLLECTIONS["chat_presence"], queries).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to list fresh presence rows")
-        return []
+    return _fresh_presence_rows_service(
+        scope_types,
+        user_ids=user_ids,
+        seconds=seconds,
+        limit=limit,
+        cutoff_fn=_presence_cutoff,
+        query_cls=Query,
+        list_rows_fn=list_rows_safe,
+        presence_collection=COLLECTIONS["chat_presence"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _fresh_presence_rows_by_scope(scope_types, *, user_ids=None, limit=1000):
-    rows = []
-    seen = set()
-    for scope_type in scope_types or []:
-        scope = str(scope_type or "").strip()
-        if not scope:
-            continue
-        scoped_rows = _fresh_presence_rows(
-            [scope],
-            user_ids=user_ids,
-            seconds=_presence_fresh_seconds(scope),
-            limit=limit,
-        )
-        for row in scoped_rows:
-            key = _row_id(row) or row.get("presence_key") or (
-                row.get("user_id"),
-                row.get("scope_type"),
-                row.get("scope_id"),
-                row.get("last_seen_at"),
-            )
-            if key in seen:
-                continue
-            seen.add(key)
-            rows.append(row)
-    rows.sort(key=lambda row: row.get("last_seen_at") or "", reverse=True)
-    return rows[:limit]
+    return _fresh_presence_rows_by_scope_service(
+        scope_types,
+        user_ids=user_ids,
+        limit=limit,
+        fresh_presence_rows_fn=_fresh_presence_rows,
+        presence_fresh_seconds_fn=_presence_fresh_seconds,
+        row_id_fn=_row_id,
+    )
 
 
 def _presence_statuses_for_users(user_ids):
-    ordered_ids = []
-    for value in user_ids or []:
-        user_id = str(value or "").strip()
-        if user_id and user_id not in ordered_ids:
-            ordered_ids.append(user_id)
-        if len(ordered_ids) >= PRESENCE_LOOKUP_LIMIT:
-            break
-    statuses = {user_id: "offline" for user_id in ordered_ids}
-    if not ordered_ids:
-        return statuses
-    scopes_by_user = {user_id: set() for user_id in ordered_ids}
-    rows = _fresh_presence_rows_by_scope(["chat", "site"], user_ids=ordered_ids, limit=max(len(ordered_ids) * 4, 20))
-    for row in rows:
-        user_id = str(row.get("user_id") or "")
-        if user_id in scopes_by_user:
-            scopes_by_user[user_id].add(row.get("scope_type"))
-    for user_id, scopes in scopes_by_user.items():
-        statuses[user_id] = _presence_status_from_scopes(scopes)
-    try:
-        from services.focus_mode import active_focus_user_ids
-        for user_id in active_focus_user_ids(ordered_ids):
-            statuses[user_id] = "focus"
-    except sqlite3.OperationalError:
-        pass
-    return statuses
+    return _presence_statuses_for_users_service(
+        user_ids,
+        lookup_limit=PRESENCE_LOOKUP_LIMIT,
+        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        presence_status_from_scopes_fn=_presence_status_from_scopes,
+    )
 
 
 def _presence_online_users():
