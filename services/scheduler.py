@@ -38,6 +38,7 @@ from appwrite_helpers import (
 from services.calendar_store import first_calendar_row
 from services.calendar_urls import load_other_calendar_urls
 from services.discord_chat import sync_discord_channels
+from services.environment_config import runtime_environment_config
 from services.app_config import (
     COURSE_TRACKING_REFRESH_INTERVAL_CHOICES,
     get_course_tracking_refresh_minutes,
@@ -54,11 +55,12 @@ _scheduler_lock_acquired = False
 _scheduler_lock_path = None
 
 
-def _configured_scheduler_lock_path():
-    return os.environ.get("SCHEDULER_LOCK_PATH") or "/tmp/nest_apstudy_scheduler.lock"
+def _configured_scheduler_lock_path(environment_config=None):
+    configured = environment_config or runtime_environment_config()
+    return configured.scheduler_lock_path or "/tmp/nest_apstudy_scheduler.lock"
 
 
-def _should_own_scheduler(app):
+def _should_own_scheduler(app, environment_config=None):
     """
     Decide whether this process should try to own the scheduler.
 
@@ -66,7 +68,8 @@ def _should_own_scheduler(app):
     files, then forks a child (WERKZEUG_RUN_MAIN=true) that serves traffic.
     The parent must not grab the scheduler lock or the child cannot start jobs.
     """
-    werkzeug_run_main = os.environ.get("WERKZEUG_RUN_MAIN")
+    configured = environment_config or runtime_environment_config(app)
+    werkzeug_run_main = configured.werkzeug_run_main
     if werkzeug_run_main == "true":
         return True
     if app.debug and werkzeug_run_main is None:
@@ -102,13 +105,13 @@ def _release_scheduler_lock():
     _scheduler_lock_path = None
 
 
-def _acquire_scheduler_lock():
+def _acquire_scheduler_lock(environment_config=None):
     global _scheduler_lock_file, _scheduler_lock_acquired, _scheduler_lock_path
 
     if _scheduler_lock_acquired:
         return True
 
-    lock_path = _configured_scheduler_lock_path()
+    lock_path = _configured_scheduler_lock_path(environment_config)
     os.makedirs(os.path.dirname(lock_path) or ".", exist_ok=True)
     lock_file = open(lock_path, "a+", encoding="utf-8")
     try:
@@ -137,9 +140,13 @@ def _acquire_scheduler_lock():
     return True
 
 
-def _acquire_scheduler_lock_with_retry(max_attempts=5, delay_seconds=0.2):
+def _acquire_scheduler_lock_with_retry(
+    max_attempts=5,
+    delay_seconds=0.2,
+    environment_config=None,
+):
     for attempt in range(max_attempts):
-        if _acquire_scheduler_lock():
+        if _acquire_scheduler_lock(environment_config):
             return True
         if attempt < max_attempts - 1:
             time.sleep(delay_seconds)
@@ -163,6 +170,7 @@ def _emit_scheduler_event(title, metadata=None, color="gray"):
 
 
 def scheduler_status():
+    configured = runtime_environment_config()
     jobs = []
     if _scheduler is not None:
         try:
@@ -181,11 +189,13 @@ def scheduler_status():
         except Exception:
             logger.exception("Failed to read scheduler jobs")
     return {
-        "scheduler_enabled": os.environ.get("SCHEDULER_ENABLED") == "1",
+        "scheduler_enabled": configured.scheduler_enabled_raw == "1",
         "scheduler_initialized": _scheduler is not None,
         "scheduler_running": bool(_scheduler and _scheduler.running),
         "scheduler_lock_acquired": bool(_scheduler_lock_acquired),
-        "scheduler_lock_path": _scheduler_lock_path or _configured_scheduler_lock_path(),
+        "scheduler_lock_path": (
+            _scheduler_lock_path or _configured_scheduler_lock_path(configured)
+        ),
         "scheduler_process_id": os.getpid(),
         "scheduler_hostname": socket.gethostname(),
         "jobs": jobs,
@@ -239,7 +249,9 @@ def _refresh_all_feeds(app):
                     refresh_minutes = None
 
                 if refresh_minutes is None:
-                    refresh_minutes = int(os.environ.get("FEED_REFRESH_INTERVAL_MINUTES", "15"))
+                    refresh_minutes = int(
+                        runtime_environment_config().feed_refresh_interval_minutes_raw
+                    )
 
                 last_fetched = None
                 feed_table = COLLECTIONS.get("calendar_feeds")
@@ -526,14 +538,18 @@ def init_scheduler(app):
     """
     global _scheduler
 
-    if os.environ.get("SCHEDULER_ENABLED") != "1":
+    configured = runtime_environment_config(app)
+    if configured.scheduler_enabled_raw != "1":
         logger.info(
             "Scheduler disabled (SCHEDULER_ENABLED != '1'). "
             "Feed refresh will only run on manual trigger."
         )
         _emit_scheduler_event(
             "Scheduler Disabled",
-            metadata={"scheduler_enabled": False, "SCHEDULER_ENABLED": os.environ.get("SCHEDULER_ENABLED", "")},
+            metadata={
+                "scheduler_enabled": False,
+                "SCHEDULER_ENABLED": configured.scheduler_enabled_raw or "",
+            },
             color="yellow",
         )
         return
@@ -542,14 +558,14 @@ def init_scheduler(app):
         logger.warning("Scheduler already initialized. Skipping.")
         return
 
-    if not _should_own_scheduler(app):
+    if not _should_own_scheduler(app, configured):
         logger.debug(
             "Skipping scheduler startup in werkzeug reloader parent process."
         )
         return
 
-    if not _acquire_scheduler_lock_with_retry():
-        lock_path = _scheduler_lock_path or _configured_scheduler_lock_path()
+    if not _acquire_scheduler_lock_with_retry(environment_config=configured):
+        lock_path = _scheduler_lock_path or _configured_scheduler_lock_path(configured)
         holder = _read_lock_holder_description(lock_path)
         logger.info(
             "Scheduler lock is held by another process (%s). "
@@ -562,9 +578,7 @@ def init_scheduler(app):
     atexit.register(shutdown_scheduler)
 
     try:
-        default_interval = int(
-            os.environ.get("FEED_REFRESH_INTERVAL_MINUTES", "15")
-        )
+        default_interval = int(configured.feed_refresh_interval_minutes_raw)
         course_tracking_interval = 5
         _scheduler = BackgroundScheduler(daemon=True)
 
@@ -625,7 +639,7 @@ def init_scheduler(app):
             coalesce=True,
         )
 
-        discord_role_sync_minutes = int(os.environ.get("DISCORD_ROLE_SYNC_MINUTES", "30"))
+        discord_role_sync_minutes = int(configured.discord_role_sync_minutes_raw)
         if discord_role_sync_minutes > 0:
             _scheduler.add_job(
                 func=lambda: _sync_discord_roles(app),
@@ -637,9 +651,13 @@ def init_scheduler(app):
                 coalesce=True,
             )
 
-        discord_gateway_enabled = os.environ.get("DISCORD_GATEWAY_ENABLED", "1") != "0"
-        discord_reconcile_seconds = int(os.environ.get("DISCORD_CHAT_RECONCILE_SECONDS", "300"))
-        if os.environ.get("DISCORD_CHAT_SYNC_ENABLED", "1") != "0" and discord_gateway_enabled and discord_reconcile_seconds > 0:
+        discord_gateway_enabled = configured.discord_gateway_enabled_raw != "0"
+        # Keep DISCORD_CHAT_RECONCILE_SECONDS coercion at scheduler startup.
+        discord_reconcile_seconds = int(
+            configured.discord_chat_reconcile_seconds_raw
+        )
+        discord_chat_sync_enabled = configured.discord_chat_sync_enabled_raw != "0"
+        if discord_chat_sync_enabled and discord_gateway_enabled and discord_reconcile_seconds > 0:
             _scheduler.add_job(
                 func=lambda: _reconcile_discord_chat(app),
                 trigger=IntervalTrigger(seconds=discord_reconcile_seconds),
@@ -649,8 +667,8 @@ def init_scheduler(app):
                 max_instances=1,
                 coalesce=True,
             )
-        elif os.environ.get("DISCORD_CHAT_SYNC_ENABLED", "1") != "0":
-            discord_sync_seconds = int(os.environ.get("DISCORD_CHAT_SYNC_SECONDS", "5"))
+        elif discord_chat_sync_enabled:
+            discord_sync_seconds = int(configured.discord_chat_sync_seconds_raw)
             if discord_sync_seconds > 0:
                 _scheduler.add_job(
                     func=lambda: _sync_discord_chat(app),

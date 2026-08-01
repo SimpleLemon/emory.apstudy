@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 from flask import Flask
 
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, EnvironmentConfig
 from services import scheduler
 
 
@@ -70,6 +71,24 @@ class SchedulerDiagnosticsTests(unittest.TestCase):
         emit_event.assert_called_once()
         self.assertEqual(emit_event.call_args.args[0], "Scheduler Disabled")
         self.assertFalse(emit_event.call_args.kwargs["metadata"]["scheduler_enabled"])
+
+    def test_scheduler_init_prefers_the_registered_app_snapshot(self):
+        app = Flask(__name__)
+        app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = EnvironmentConfig(
+            flask_secret_key="secret",
+            flask_env="testing",
+            appwrite_database_id="",
+            allow_insecure_http=False,
+            frontend_console_diagnostics_enabled=False,
+            scheduler_enabled_raw="0",
+        )
+        with patch.dict(os.environ, {"SCHEDULER_ENABLED": "1"}, clear=False), patch(
+            "services.discord_audit.emit_server_log_event", return_value=True
+        ) as emit_event:
+            scheduler.init_scheduler(app)
+
+        self.assertIsNone(scheduler._scheduler)
+        self.assertEqual(emit_event.call_args.args[0], "Scheduler Disabled")
 
     def test_scheduler_enabled_registers_course_tracking_job_and_emits_started(self):
         app = Flask(__name__)
