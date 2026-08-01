@@ -2,7 +2,6 @@ import logging
 import base64
 import json
 import io
-import os
 import uuid
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
@@ -25,6 +24,7 @@ from services.database import db_connection
 from services import invites, note_media, note_store, notes_collaboration
 from services.appwrite_storage import note_media_upload_failure
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, check_storage, request_entitlements
+from services.environment_config import runtime_environment_config
 from services.note_page_setup import (
     PAGE_SETUP_COLORS,
     PAGE_SETUP_FONT_TYPES,
@@ -165,16 +165,20 @@ def _is_owner_access(access):
 
 
 def _collaboration_serializer():
-    secret = os.environ.get("NOTES_COLLABORATION_SECRET") or current_app.secret_key
+    secret = runtime_environment_config().notes_collaboration_secret or current_app.secret_key
     return URLSafeTimedSerializer(secret_key=secret, salt="nest-notes-collaboration-token")
 
 
 def _internal_collaboration_authorized():
-    secret = os.environ.get("NOTES_COLLABORATION_INTERNAL_SECRET") or os.environ.get("NOTES_COLLABORATION_SECRET")
+    configured = runtime_environment_config()
+    secret = (
+        configured.notes_collaboration_internal_secret
+        or configured.notes_collaboration_secret
+    )
     provided = request.headers.get("X-Nest-Collaboration-Secret") or request.args.get("secret")
     if secret:
         return provided == secret
-    if (os.environ.get("FLASK_ENV") or "").strip().lower() == "production":
+    if configured.flask_env == "production":
         return False
     return request.remote_addr in {"127.0.0.1", "::1", "localhost", None}
 

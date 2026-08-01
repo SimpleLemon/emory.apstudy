@@ -18,8 +18,14 @@ from config import (
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-if os.environ.get("APSTUDY_ALLOW_INSECURE_OAUTH") == "1" or os.environ.get("FLASK_DEBUG") == "1":
-    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
+def _configure_insecure_oauth_transport():
+    configured = load_environment_config()
+    if configured.allow_insecure_oauth or configured.flask_debug_raw == "1":
+        os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
+
+_configure_insecure_oauth_transport()
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -28,11 +34,9 @@ AUTH_SESSION_DURATION = timedelta(days=400)
 
 def _session_secret_key(environment_config: EnvironmentConfig | None = None):
     if environment_config is None:
-        configured = os.environ.get("FLASK_SECRET_KEY")
-        flask_env = (os.environ.get("FLASK_ENV") or "").strip().lower()
-    else:
-        configured = environment_config.flask_secret_key
-        flask_env = environment_config.flask_env
+        environment_config = load_environment_config()
+    configured = environment_config.flask_secret_key
+    flask_env = environment_config.flask_env
     if configured:
         return configured
     if flask_env == "production":

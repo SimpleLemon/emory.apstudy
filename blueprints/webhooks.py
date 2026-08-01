@@ -4,22 +4,23 @@ Inbound service webhooks.
 
 import hashlib
 import hmac
-import os
 
 from flask import Blueprint, jsonify, request
 
 from services.discord_audit import emit_server_log_event
+from services.environment_config import runtime_environment_config
 
 
 webhooks_bp = Blueprint("webhooks", __name__)
 
 
 def _github_webhook_secret():
-    return (os.environ.get("GITHUB_WEBHOOK_SECRET") or "").strip()
+    return (runtime_environment_config().github_webhook_secret or "").strip()
 
 
 def _github_unsigned_allowed():
-    return os.environ.get("GITHUB_WEBHOOK_ALLOW_UNSIGNED") == "1" or os.environ.get("FLASK_DEBUG") == "1"
+    configured = runtime_environment_config()
+    return configured.github_webhook_allow_unsigned or configured.flask_debug_raw == "1"
 
 
 def _valid_github_signature(payload, signature_header, secret):
