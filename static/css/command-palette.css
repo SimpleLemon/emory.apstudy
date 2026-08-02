@@ -1,0 +1,382 @@
+
+.apstudy-visually-hidden {
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+
+.navbar-search-button {
+	position: relative;
+}
+
+.navbar-search-tooltip {
+	position: absolute;
+	top: calc(100% + 8px);
+	left: 50%;
+	z-index: var(--z-tooltip);
+	transform: translate(-50%, -2px);
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	min-width: max-content;
+	padding: 5px 8px;
+	border: 1px solid color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+	border-radius: var(--radius-control);
+	background: var(--color-surface-container-high);
+	box-shadow: 0 10px 30px var(--color-shell-shadow);
+	color: var(--color-on-surface);
+	font-size: 12px;
+	font-weight: 600;
+	line-height: 1;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 120ms ease, transform 120ms ease;
+}
+
+.navbar-search-button:hover .navbar-search-tooltip,
+.navbar-search-button:focus-visible .navbar-search-tooltip {
+	transform: translate(-50%, 0);
+	opacity: 1;
+}
+
+[cmdk-overlay] {
+	position: fixed;
+	inset: 0;
+	z-index: var(--z-backdrop);
+	background: rgba(6, 6, 10, 0.58);
+	backdrop-filter: blur(8px);
+	animation: apstudy-command-fade-in 120ms ease;
+}
+
+[cmdk-overlay][data-state="closed"] {
+	animation: apstudy-command-fade-out 100ms ease forwards;
+}
+
+[cmdk-dialog] {
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	z-index: var(--z-modal);
+	width: min(760px, calc(100vw - 32px));
+	max-height: min(680px, calc(100vh - 64px));
+	transform: translate(-50%, -50%);
+	overflow: hidden;
+	border: 1px solid color-mix(in srgb, var(--color-outline-variant) 60%, transparent);
+	border-radius: var(--radius-card);
+	background: var(--color-surface-container-high);
+	box-shadow: 0 28px 80px rgba(0, 0, 0, 0.45);
+	color: var(--color-on-surface);
+	animation: apstudy-command-dialog-in 120ms ease;
+}
+
+[cmdk-dialog][data-state="closed"] {
+	animation: apstudy-command-dialog-out 100ms ease forwards;
+}
+
+.calendar-modal-overlay {
+	z-index: var(--z-modal) !important;
+}
+
+.apstudy-command-palette {
+	display: flex;
+	min-height: 0;
+	max-height: inherit;
+	flex-direction: column;
+	background: var(--color-surface-container-high);
+	color: var(--color-on-surface);
+	font-family: var(--font-body);
+}
+
+.apstudy-command-palette-input-row {
+	display: flex;
+	align-items: center;
+	border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+}
+
+[cmdk-input] {
+	width: 100%;
+	height: 72px;
+	padding: 0 24px;
+	border: 0;
+	outline: 0;
+	background: transparent;
+	color: var(--color-on-surface);
+	font: inherit;
+	font-size: 1.25rem;
+	font-weight: 400;
+	letter-spacing: 0;
+}
+
+[cmdk-input]::placeholder {
+	color: var(--color-on-surface-variant);
+}
+
+.apstudy-command-palette-list {
+	height: var(--cmdk-list-height);
+	max-height: 480px;
+	overflow-y: auto;
+	padding: 16px 12px 20px;
+	scrollbar-color: color-mix(in srgb, var(--color-on-surface-variant) 45%, transparent) transparent;
+	scrollbar-width: thin;
+}
+
+[cmdk-group] + [cmdk-group] {
+	margin-top: 16px;
+}
+
+[cmdk-group-heading] {
+	padding: 8px 12px 9px;
+	color: var(--color-on-surface-variant);
+	font-size: 0.75rem;
+	font-weight: 600;
+	letter-spacing: 0.08em;
+	line-height: 1.2;
+	text-transform: uppercase;
+}
+
+.apstudy-command-palette-item {
+	display: grid;
+	grid-template-columns: 24px minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 12px;
+	min-height: 56px;
+	padding: 8px 16px;
+	border-radius: var(--radius-control);
+	color: color-mix(in srgb, var(--color-on-surface) 80%, transparent);
+	cursor: pointer;
+	font-size: 1rem;
+	line-height: 1.2;
+	outline: none;
+	user-select: none;
+}
+
+.apstudy-command-palette-item[aria-selected="true"],
+.apstudy-command-palette-item:hover {
+	background: color-mix(in srgb, var(--color-primary) 14%, var(--color-surface-container-high));
+	color: var(--color-on-surface);
+}
+
+.apstudy-command-palette-item[aria-selected="true"] {
+	box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.apstudy-command-palette-item-icon {
+	display: inline-flex;
+	width: 24px;
+	height: 24px;
+	flex: 0 0 24px;
+	align-items: center;
+	justify-content: center;
+	color: color-mix(in srgb, var(--color-on-surface-variant) 75%, transparent);
+}
+
+.apstudy-command-palette-item[aria-selected="true"] .apstudy-command-palette-item-icon,
+.apstudy-command-palette-item:hover .apstudy-command-palette-item-icon {
+	color: var(--color-on-surface);
+}
+
+.apstudy-command-palette-item-icon .material-symbols-outlined {
+	width: 20px;
+	height: 20px;
+	font-size: 20px;
+	line-height: 20px;
+}
+
+.apstudy-command-palette-item-icon img {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	object-fit: cover;
+}
+
+.apstudy-command-palette-item-label {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.apstudy-command-palette-result-copy {
+	display: flex;
+	min-width: 0;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.apstudy-command-palette-item-meta {
+	min-width: 0;
+	overflow: hidden;
+	color: var(--color-on-surface-variant);
+	font-size: 0.875rem;
+	font-weight: 400;
+	line-height: 1.35;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.apstudy-command-palette-item-time {
+	max-width: 150px;
+	color: var(--color-on-surface-variant);
+	font-size: 0.75rem;
+	line-height: 1.3;
+	text-align: right;
+	white-space: nowrap;
+}
+
+.apstudy-command-palette-status {
+	display: flex;
+	min-height: 48px;
+	align-items: center;
+	gap: 10px;
+	margin: 0 4px 12px;
+	padding: 10px 12px;
+	border-radius: var(--radius-control);
+	background: color-mix(in srgb, var(--color-on-surface) 6%, transparent);
+	color: var(--color-on-surface-variant);
+	font-size: 0.875rem;
+}
+
+.apstudy-command-palette-status.is-error,
+.apstudy-command-palette-status.is-warning {
+	background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.apstudy-command-palette-status .material-symbols-outlined {
+	font-size: 20px;
+}
+
+.apstudy-command-palette-spinner {
+	width: 18px;
+	height: 18px;
+	border: 2px solid color-mix(in srgb, var(--color-on-surface-variant) 30%, transparent);
+	border-top-color: var(--color-primary);
+	border-radius: 50%;
+	animation: apstudy-command-spin 700ms linear infinite;
+}
+
+.apstudy-command-palette-empty {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 34px 14px;
+	color: var(--color-on-surface-variant);
+	font-size: 0.875rem;
+	text-align: center;
+}
+
+.apstudy-command-palette-empty strong {
+	color: var(--color-on-surface);
+	font-size: 1rem;
+	font-weight: 600;
+}
+
+.apstudy-command-palette-footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 14px 18px;
+	border-top: 1px solid color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+	color: color-mix(in srgb, var(--color-on-surface) 78%, transparent);
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+}
+
+.apstudy-command-palette-close {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	border: 0;
+	background: none;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+	padding: 0;
+}
+
+.apstudy-command-palette-close:focus-visible {
+	outline: 2px solid color-mix(in srgb, var(--color-primary) 55%, transparent);
+	outline-offset: 3px;
+}
+
+@media (max-width: 860px) {
+	.apstudy-command-palette-close {
+		min-height: 36px;
+		padding: 4px 6px;
+		border-radius: var(--radius-control);
+	}
+}
+
+.apstudy-command-palette-footer span {
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	min-width: 0;
+	white-space: nowrap;
+}
+
+.apstudy-command-palette-footer kbd {
+	display: inline-flex;
+	min-width: 42px;
+	height: 30px;
+	align-items: center;
+	justify-content: center;
+	border-radius: var(--radius-control);
+	background: color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+	color: var(--color-on-surface);
+	font: inherit;
+	font-weight: 500;
+}
+
+@keyframes apstudy-command-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes apstudy-command-fade-out {
+	from {
+		opacity: 1;
+	}
+	to {
+		opacity: 0;
+	}
+}
+
+@keyframes apstudy-command-dialog-in {
+	from {
+		opacity: 0;
+		transform: translate(-50%, calc(-50% + 6px));
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%);
+	}
+}
+
+@keyframes apstudy-command-dialog-out {
+	from {
+		opacity: 1;
+		transform: translate(-50%, -50%);
+	}
+	to {
+		opacity: 0;
+		transform: translate(-50%, calc(-50% + 6px));
+	}
+}
+
+@keyframes apstudy-command-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}

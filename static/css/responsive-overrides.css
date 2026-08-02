@@ -1,0 +1,167 @@
+
+@media (max-width: 640px) {
+	button,
+	input,
+	select,
+	textarea {
+		font-size: 16px;
+	}
+
+	.apstudy-confirm {
+		align-items: flex-end;
+		padding: 12px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+	}
+
+	.apstudy-confirm__panel {
+		width: 100%;
+		max-height: calc(100dvh - 24px);
+		overflow: auto;
+		border-radius: var(--radius-card);
+		grid-template-columns: 40px minmax(0, 1fr);
+	}
+
+	.apstudy-confirm__actions {
+		flex-direction: column-reverse;
+		align-items: stretch;
+	}
+
+	.apstudy-confirm__actions button {
+		width: 100%;
+		min-height: 48px;
+	}
+
+	.calendar-info-modal,
+	.calendar-event-modal,
+	.calendar-share-modal {
+		align-items: flex-end;
+		padding: 12px max(12px, env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+	}
+
+	.calendar-info-dialog,
+	.calendar-share-dialog,
+	.calendar-event-dialog {
+		width: 100%;
+		max-height: calc(100dvh - 24px);
+		border-radius: var(--radius-card);
+		overflow: auto;
+	}
+
+	.calendar-info-footer,
+	.calendar-share-dialog .calendar-info-footer,
+	.calendar-event-footer {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.calendar-info-button,
+	.calendar-share-dialog .calendar-info-button,
+	.calendar-event-button,
+	.calendar-source-row,
+	.calendar-context-action,
+	.calendar-source-mode {
+		min-height: 48px;
+	}
+
+	.calendar-info-button,
+	.calendar-share-dialog .calendar-info-button,
+	.calendar-event-button {
+		width: 100%;
+	}
+
+	.calendar-source-add,
+	.calendar-source-more,
+	.calendar-info-close,
+	.calendar-share-dialog .calendar-info-close,
+	.calendar-event-icon-button,
+	.calendar-context-preset,
+	.calendar-event-color-choice {
+		min-width: 48px;
+		min-height: 48px;
+	}
+
+	.calendar-info-input,
+	.calendar-share-dialog .calendar-info-input,
+	.calendar-event-field input,
+	.calendar-event-field textarea,
+	.calendar-event-field select {
+		min-height: 48px;
+		font-size: 16px;
+	}
+
+	.calendar-source-menu,
+	.calendar-context-menu,
+	.calendar-right-click-menu {
+		max-width: calc(100vw - 24px);
+	}
+
+	[cmdk-dialog] {
+		inset: 0;
+		width: 100vw;
+		max-height: none;
+		height: 100dvh;
+		transform: none;
+		border: 0;
+		border-radius: 0;
+	}
+
+	.apstudy-command-palette {
+		height: 100%;
+	}
+
+	[cmdk-input] {
+		height: calc(68px + env(safe-area-inset-top));
+		padding: env(safe-area-inset-top) max(18px, env(safe-area-inset-right)) 0 max(18px, env(safe-area-inset-left));
+		font-size: 1.125rem;
+	}
+
+	.apstudy-command-palette-list {
+		flex: 1;
+		max-height: none;
+		padding: 12px max(10px, env(safe-area-inset-right)) 18px max(10px, env(safe-area-inset-left));
+	}
+
+	.apstudy-command-palette-item {
+		padding-inline: 12px;
+	}
+
+	.apstudy-command-palette-item-time {
+		max-width: 88px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.apstudy-command-palette-footer {
+		padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+	}
+
+	.apstudy-command-palette-footer kbd {
+		min-width: 38px;
+		height: 28px;
+	}
+
+	@keyframes apstudy-command-dialog-in {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes apstudy-command-dialog-out {
+		from {
+			opacity: 1;
+		}
+		to {
+			opacity: 0;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	[cmdk-overlay],
+	[cmdk-dialog],
+	.apstudy-command-palette-spinner {
+		animation: none;
+	}
+}

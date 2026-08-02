@@ -1,0 +1,97 @@
+.tier-badge {
+  display: block;
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  image-rendering: pixelated;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.tier-badge-trigger {
+  position: relative;
+  z-index: var(--z-tooltip);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 24px;
+  min-height: 24px;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  outline: none;
+}
+
+.tier-badge-trigger:focus-visible {
+  outline: 2px solid var(--color-primary, #0060aa);
+  outline-offset: 2px;
+}
+
+.tier-badge-trigger::before,
+.tier-badge-trigger::after {
+  position: absolute;
+  z-index: var(--z-tooltip);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.tier-badge-trigger::before {
+  content: '';
+  top: -8px;
+  left: 50%;
+  border: 6px solid transparent;
+  border-top-color: var(--color-surface-container-high, #30343d);
+  transform: translate(-50%, -3px);
+}
+
+.tier-badge-trigger::after {
+  content: attr(data-tooltip);
+  top: 0;
+  left: 50%;
+  display: block;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 32px));
+  padding: 0.55rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant, #555b66) 70%, transparent);
+  border-radius: var(--radius-control);
+  background: var(--color-surface-container-high, #30343d);
+  box-shadow: 0 10px 24px color-mix(in srgb, #000 28%, transparent);
+  color: var(--color-on-surface, #f6f7fb);
+  font-family: var(--font-body);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: center;
+  white-space: normal;
+  transform: translate(-50%, calc(-100% - 9px));
+}
+
+.tier-badge-trigger:hover::before,
+.tier-badge-trigger:hover::after,
+.tier-badge-trigger:focus-visible::before,
+.tier-badge-trigger:focus-visible::after,
+.tier-badge-trigger.is-tooltip-open::before,
+.tier-badge-trigger.is-tooltip-open::after {
+  opacity: 1;
+}
+
+.tier-badge-trigger:hover::before,
+.tier-badge-trigger:focus-visible::before,
+.tier-badge-trigger.is-tooltip-open::before {
+  transform: translate(-50%, 0);
+}
+
+.tier-badge-trigger:hover::after,
+.tier-badge-trigger:focus-visible::after,
+.tier-badge-trigger.is-tooltip-open::after {
+  transform: translate(-50%, calc(-100% - 6px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-badge-trigger::before,
+  .tier-badge-trigger::after {
+    transition: none;
+  }
+}
