@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
+const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 const read = (relativePath) => readFile(new URL(`../../${relativePath}`, import.meta.url), "utf8");
 
 test("onboarding keeps executable behavior out of the server-rendered template", async () => {
@@ -58,7 +61,7 @@ test("chat runtime delegates cache, presentation, realtime, presence, message DO
 test("shared and feature stylesheets load their extracted responsibilities in cascade order", async () => {
   const [sharedAssets, globalCss, overlays, notesTemplate, notesCss, notesEditorCss, analyticsTemplate, adminCss, analyticsCss, responsiveCss] = await Promise.all([
     read("templates/_shared_runtime_assets.html"),
-    read("static/css/global.css"),
+    readCssSource(repoRoot, "static/css/global.css"),
     read("static/css/core/feedback-overlays.css"),
     read("templates/notes_editor.html"),
     read("static/css/notes.css"),

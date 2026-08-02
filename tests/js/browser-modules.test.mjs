@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -367,7 +368,7 @@ test("calendar and courses switch dense schedules to compact mobile agenda rende
         await sourceFor("static/js/courses/index.js"),
         await sourceFor("static/js/courses/calendar.js"),
     ].join("\n");
-    const globalStyles = await sourceFor("static/css/global.css");
+    const globalStyles = await readCssSource(repoRoot, "static/css/global.css");
     const coursesStyles = await sourceFor("static/css/courses.css");
 
     assert.match(calendarSource, /COMPACT_CALENDAR_QUERY = window\.matchMedia\("\(max-width: 640px\)"\)/);
@@ -1286,7 +1287,7 @@ test("browser notifications preflight capabilities and never use native alert di
 });
 
 test("shared selection controls avoid browser-default checkbox and radio rendering", async () => {
-    const source = await sourceFor("static/css/global.css");
+    const source = await readCssSource(repoRoot, "static/css/global.css");
 
     assert.match(source, /:where\(input\[type="checkbox"\], input\[type="radio"\]\):not\(\[data-native-control\]\)/);
     assert.match(source, /appearance:\s*none/);
@@ -1320,7 +1321,7 @@ test("tier badge assets and admin controls stay wired to the supported roles", a
     const authUsersTemplate = await sourceFor("templates/partials/admin_auth_users.html");
     const detailTemplate = await sourceFor("templates/admin_detail.html");
     const entitlementService = await sourceFor("services/entitlements.py");
-    const globalStyles = await sourceFor("static/css/global.css");
+    const globalStyles = await readCssSource(repoRoot, "static/css/global.css");
 
     for (const asset of [
         "grade-a-egg.png",

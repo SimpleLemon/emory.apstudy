@@ -3,10 +3,11 @@ import test from "node:test";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const primitiveSource = await readFile(path.join(repoRoot, "static/js/core/ui-primitives.js"), "utf8");
-const globalStyles = await readFile(path.join(repoRoot, "static/css/global.css"), "utf8");
+const globalStyles = await readCssSource(repoRoot, "static/css/global.css");
 
 test("ui-primitives.js exposes APStudyFormField helpers", () => {
     assert.match(primitiveSource, /window\.APStudyFormField\s*=/);

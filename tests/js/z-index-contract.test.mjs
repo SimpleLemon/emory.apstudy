@@ -3,9 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { readCssSource } from './helpers/css-source.mjs';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const globalCss = fs.readFileSync(path.join(repoRoot, 'static/css/global.css'), 'utf8');
+const globalCss = await readCssSource(repoRoot, 'static/css/global.css');
 const overlayCss = fs.readFileSync(path.join(repoRoot, 'static/css/core/feedback-overlays.css'), 'utf8');
 const sharedCss = `${globalCss}\n${overlayCss}`;
 

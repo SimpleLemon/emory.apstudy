@@ -4,10 +4,11 @@ import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = await readFile(path.join(repoRoot, "static/js/core/cookie-consent.js"), "utf8");
-const globalStyles = `${await readFile(path.join(repoRoot, "static/css/global.css"), "utf8")}\n${await readFile(path.join(repoRoot, "static/css/core/feedback-overlays.css"), "utf8")}`;
+const globalStyles = `${await readCssSource(repoRoot, "static/css/global.css")}\n${await readFile(path.join(repoRoot, "static/css/core/feedback-overlays.css"), "utf8")}`;
 
 class FakeElement {
     constructor(tagName, document) {

@@ -87,7 +87,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
             self.assertTrue((ROOT / "static/fonts" / asset).is_file(), asset)
 
     def test_first_party_css_uses_visual_system_contract(self):
-        global_css = (ROOT / "static/css/global.css").read_text()
+        global_css = (ROOT / "static/css/global-foundation.css").read_text()
         for token in (
             "--radius-control: 6px", "--radius-card: 12px", "--radius-panel: 18px",
             "--radius-dialog: 24px", "--radius-pill: 999px", "--radius-avatar: 50%",
@@ -246,7 +246,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
         self.assertEqual([], problems)
 
     def test_shared_accessibility_layer_covers_focus_dialogs_and_motion(self):
-        css = (ROOT / "static/css/global.css").read_text()
+        css = (ROOT / "static/css/global-foundation.css").read_text()
         javascript = (ROOT / "static/js/core/global.js").read_text()
         self.assertIn(".apstudy-skip-link", css)
         self.assertRegex(css, r"::selection\s*\{[^}]*--color-on-surface")
