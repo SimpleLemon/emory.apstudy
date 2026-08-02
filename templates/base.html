@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html {% block html_attrs %}lang="en" data-apstudy-theme-preference="system-match" data-apstudy-theme-locked="true"{% endblock %}>
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+    {% block head_early %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
+    {% include "_diagnostics_assets.html" %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
+    {% block title %}<title>APStudy Nest</title>{% endblock %}
+    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/manifest.json">
+    {% include "_font_assets.html" %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+    {% block shared_styles_before_tailwind %}{% endblock %}
+    {% block tailwind %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+    {% endblock %}
+    {% block feature_styles %}{% endblock %}
+    {% block description %}{% endblock %}
+    {% block head_end %}{% endblock %}
+    {% block shared_head_scripts %}
+    <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
+    {% endblock %}
+</head>
+<body{% block body_attrs %}{% endblock %}>
+    {% block body_content %}{% endblock %}
+    {% block body_scripts %}{% endblock %}
+</body>
+</html>

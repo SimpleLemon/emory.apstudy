@@ -102,6 +102,12 @@ function decision(choice, ageMs = 0) {
     });
 }
 
+function isConcreteFullPage(name, source) {
+    return name !== "base.html" && (
+        source.includes("<!DOCTYPE html>") || /\{%\s*extends\s+["']base\.html["']\s*%\}/.test(source)
+    );
+}
+
 test("public analytics stays off until an explicit choice is stored", () => {
     const defaultHarness = createHarness();
     const malformedHarness = createHarness({ stored: "not-json" });
@@ -227,7 +233,7 @@ test("full templates declare authenticated, public-choice, hybrid, or off analyt
     for (const name of templateNames) {
         const templateSource = await readFile(path.join(templateDirectory, name), "utf8");
         assert.doesNotMatch(templateSource, /googletagmanager\.com\/gtag/, `${name} must not load GA directly`);
-        if (!templateSource.includes("<!DOCTYPE html>")) continue;
+        if (!isConcreteFullPage(name, templateSource)) continue;
         if (authenticatedTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="authenticated"/);
         else if (publicTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="public-choice"/);
         else if (offTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="off"/);
