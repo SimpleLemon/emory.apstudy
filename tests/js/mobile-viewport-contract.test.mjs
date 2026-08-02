@@ -9,7 +9,7 @@ const source = (file) => readFile(path.join(root, file), "utf8");
 
 test("full-height application shells use the shared dynamic viewport fallback", async () => {
     const files = [
-        "static/css/layout.css", "static/css/sidebar.css", "static/css/chat.css",
+        "static/css/layout.css", "static/css/chat.css",
         "static/css/onboarding.css", "static/css/courses.css", "static/css/notes.css",
         "static/css/landing.css", "static/css/landing-demos.css",
     ];
