@@ -1,6 +1,3 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 /* Shared primitive visuals for ui-primitives.js: forms, loaders, skeletons, dialogs, and toasts. */
 :root {
 	--font-display: "Space Grotesk", system-ui, sans-serif;
