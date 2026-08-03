@@ -1,9 +1,7 @@
-import sqlite3
-
 from flask import Blueprint
 
 from extensions import login_manager
-from services.calendar_store import INDEX_STATEMENTS, SCHEMA_STATEMENTS
+from services import database
 
 
 def reset_flask_login_manager():
@@ -12,12 +10,7 @@ def reset_flask_login_manager():
 
 
 def bootstrap_calendar_db(db_path):
-    with sqlite3.connect(db_path) as conn:
-        for statement in SCHEMA_STATEMENTS:
-            conn.execute(statement)
-        for statement in INDEX_STATEMENTS:
-            conn.execute(statement)
-        conn.commit()
+    database.init_db(path=db_path)
 
 
 def register_shell_route_stubs(app):
