@@ -1,0 +1,194 @@
+name: CI
+
+on:
+  push: {}
+  pull_request: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# ESLint 10.8 supports Node ^20.19, ^22.13, or >=24; Vite 6 supports Node 22.
+# The project documents Python 3.11+, and its pinned requirements support Python 3.12.
+env:
+  NODE_VERSION: '22.x'
+  PYTHON_VERSION: '3.12'
+
+jobs:
+  quality:
+    name: Lint, build, and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Create Python virtual environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
+      - name: Verify generated vendor asset is committed
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git ls-files --error-unmatch static/js/vendor/dist/sortable-global.js >/dev/null
+          git diff --exit-code -- static/js/vendor/dist/sortable-global.js
+
+      - name: Test
+        run: npm test
+
+  browser:
+    name: Browser tests
+    runs-on: ubuntu-latest
+    needs: quality
+    timeout-minutes: 20
+    env:
+      # Keep the browser server self-contained; never use a production database or integrations.
+      FLASK_ENV: testing
+      FLASK_DEBUG: '0'
+      FLASK_SECRET_KEY: ci-browser-test-secret
+      APSTUDY_ALLOW_INSECURE_HTTP: '1'
+      APSTUDY_FORCE_LOCAL_INSTANCE_DB: '1'
+      DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+      NEST_DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+      NEST_INSTANCE_DIR: ${{ runner.temp }}/apstudy-ci/instance
+      SCHEDULER_LOCK_PATH: ${{ runner.temp }}/apstudy-ci/scheduler.lock
+      SCHEDULER_ENABLED: '0'
+      DISCORD_GATEWAY_ENABLED: '0'
+      DISCORD_AUDIT_ENABLED: '0'
+      DISCORD_CONSOLE_LOG_ENABLED: '0'
+      DISCORD_SERVER_CONSOLE_LOG_ENABLED: '0'
+      DISCORD_CHAT_SYNC_ENABLED: '0'
+      DISCORD_BOT_TOKEN: ''
+      DISCORD_AUDIT_FALLBACK_PATH: ${{ runner.temp }}/apstudy-ci/discord-audit.jsonl
+      PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+
+      - name: Install JavaScript dependencies
+        run: npm ci
+
+      - name: Create Python virtual environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install -r requirements.txt
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Flask server
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ci_dir="${RUNNER_TEMP}/apstudy-ci"
+          log_file="${ci_dir}/flask.log"
+          pid_file="${ci_dir}/flask.pid"
+          mkdir -p "$ci_dir"
+
+          nohup .venv/bin/flask --app app:create_app run \
+            --host 127.0.0.1 --port 8000 --no-reload --no-debugger \
+            >"$log_file" 2>&1 &
+          echo "$!" >"$pid_file"
+
+          for attempt in {1..60}; do
+            if curl --fail --silent --show-error --max-time 5 \
+              http://127.0.0.1:8000/ >/dev/null; then
+              exit 0
+            fi
+            if ! kill -0 "$(<"$pid_file")" 2>/dev/null; then
+              echo 'Flask exited before becoming ready.' >&2
+              sed -n '1,240p' "$log_file" >&2 || true
+              exit 1
+            fi
+            sleep 1
+          done
+
+          echo 'Flask did not become ready within 60 seconds.' >&2
+          sed -n '1,240p' "$log_file" >&2 || true
+          exit 1
+
+      - name: Run browser tests
+        run: npm run test:browser
+
+      - name: Upload browser artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            playwright-report/
+            test-results/
+            ${{ runner.temp }}/apstudy-ci/flask.log
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Stop Flask server
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          pid_file="${RUNNER_TEMP}/apstudy-ci/flask.pid"
+          if [[ ! -f "$pid_file" ]]; then
+            exit 0
+          fi
+
+          server_pid="$(<"$pid_file")"
+          if [[ "$server_pid" =~ ^[0-9]+$ ]] && kill -0 "$server_pid" 2>/dev/null; then
+            kill "$server_pid" 2>/dev/null || true
+            for attempt in {1..10}; do
+              if ! kill -0 "$server_pid" 2>/dev/null; then
+                break
+              fi
+              sleep 1
+            done
+            if kill -0 "$server_pid" 2>/dev/null; then
+              kill -KILL "$server_pid" 2>/dev/null || true
+            fi
+          fi
