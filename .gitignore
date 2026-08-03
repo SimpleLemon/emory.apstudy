@@ -58,6 +58,11 @@ static/js/notes/dist/*
 static/js/tasks/dist/*
 !static/js/tasks/dist/task-app.js
 
+# The classic-script Sortable bridge is built locally from the pinned npm package.
+!static/js/vendor/dist/
+static/js/vendor/dist/*
+!static/js/vendor/dist/sortable-global.js
+
 # Testing / coverage
 .pytest_cache/
 .coverage
@@ -149,7 +154,10 @@ logs/
 
 # Local-only project files and automation
 .agents/
-.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/ci.yml
 codex-attention-notifier
 docs/
 .scorecard.png

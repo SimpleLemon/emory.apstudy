@@ -300,7 +300,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
         self.assertIn('label: "Move list earlier"', tasks)
         self.assertIn('label: "Move task earlier"', tasks)
         self.assertIn("Move to ${list.name}", tasks)
-        for relative_path in ("static/js/dashboard/index.js", "static/js/tasks/task-components.js"):
+        for relative_path in ("static/js/dashboard/layout-editor.js", "static/js/tasks/task-components.js"):
             self.assertIn("prefersReducedMotion", (ROOT / relative_path).read_text())
 
 

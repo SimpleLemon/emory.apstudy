@@ -19,7 +19,6 @@
     const { checklistHtml, renderTile } = window.APStudyDashboardRenderers;
     const state = {
         summary: null,
-        sortable: null,
         editor: null,
         activePopoverLocked: false,
         editMode: false,
@@ -367,29 +366,6 @@
         els.addTile.setAttribute("aria-expanded", isOpen ? "true" : "false");
         if (isOpen && focusFirst) requestAnimationFrame(() => els.addMenu.querySelector('[role="menuitem"]')?.focus({ preventScroll: true }));
         if (!isOpen && restoreFocus) els.addTile.focus({ preventScroll: true });
-    }
-    function setupSortable() {
-        if (!els.tiles || typeof Sortable === "undefined") return;
-        destroySortable();
-        if (!state.editMode) return;
-        state.sortable = Sortable.create(els.tiles, {
-            animation: window.APStudyAccessibility?.prefersReducedMotion?.() ? 0 : 150,
-            draggable: ".dashboard-tile",
-            filter: ".dashboard-tile-edit-controls,.dashboard-tile-edit-controls *, .dashboard-config-menu, .dashboard-config-menu *, .dashboard-resize-grip",
-            ghostClass: "dashboard-tile-ghost",
-            dragClass: "is-dragging",
-            preventOnFilter: false,
-            onStart: closeTileConfigMenus,
-            onEnd: () => {
-                syncSummaryLayoutFromDom();
-                updateAddTileMenu();
-                void persistLayout();
-            },
-        });
-    }
-    function destroySortable() {
-        state.sortable?.destroy();
-        state.sortable = null;
     }
     async function persistLayout() {
         const tile_layout = tileLayoutFromDom();

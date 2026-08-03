@@ -40,7 +40,6 @@ if (false) {
     await import("../../static/js/calendar/views/week-view.js");
     await import("../../static/js/chat/index.js");
     await import("../../static/js/core/breadcrumb.js");
-    await import("../../static/js/core/appwrite.js");
     await import("../../static/js/core/command-palette.js");
     await import("../../static/js/core/command-palette-search.js");
     await import("../../static/js/core/command-palette-workspace.js");
@@ -481,7 +480,7 @@ test("notes list guards destructive actions and supports safe card menus", async
     assert.match(dragSource, /delayOnTouchOnly: true/);
     assert.match(dragSource, /touchStartThreshold: 8/);
     assert.match(dragSource, /folder-card\.is-drop-target/);
-    assert.match(template, /sortablejs@1\.15\.0\/Sortable\.min\.js/);
+    assert.match(template, /js\/vendor\/dist\/sortable-global\.js/);
     assert.match(styles, /\.folder-card\.is-drop-target/);
     assert.match(styles, /\.note-card-ghost/);
     assert.doesNotMatch(cardsSource, /more_horiz/);
@@ -925,9 +924,8 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
         assert.match(source, new RegExp(endpoint.replaceAll("/", "\\/")));
     }
 
-    assert.doesNotMatch(template, /appwrite@|js\/core\/appwrite\.js/);
+    assert.doesNotMatch(template, /appwrite@/);
     assert.match(template, /\{% set settings_assets_version = 'settings-[^']+' %\}/);
-    assert.match(template, /data-probe-appwrite-session="false"/);
     assert.match(template, /id="settings-skeleton"/);
     assert.match(template, /settings-sections[^"]*is-loading/);
     assert.match(source, /const SETTINGS_SECTION_IDS = \['account', 'tier', 'data', 'preferences', 'notifications'\]/);
@@ -1015,27 +1013,8 @@ test("task app shell keeps data-layer wiring, destructive confirms, and mount co
     assert.match(template, /task-skeleton-layout/);
     assert.doesNotMatch(source, /APStudySkeleton\?\.fieldSet/);
     assert.doesNotMatch(source, /use-sound|useSound/);
-    assert.doesNotMatch(template, /appwrite@|js\/core\/appwrite\.js|use-sound/);
-    assert.match(template, /data-probe-appwrite-session="false"/);
+    assert.doesNotMatch(template, /appwrite@|use-sound/);
     assert.match(template, /data-command-palette-preload="false"/);
-});
-
-test("appwrite bootstrap exposes configured SDK clients globally", async () => {
-    const source = await sourceFor("static/js/core/appwrite.js");
-
-    assert.match(source, /document\.querySelector\('meta\[name="apstudy-appwrite-endpoint"\]'\)\?\.content/);
-    assert.match(source, /document\.querySelector\('meta\[name="apstudy-appwrite-project-id"\]'\)\?\.content/);
-    assert.match(source, /const APPWRITE_ENDPOINT = configMeta\.endpoint \|\| "https:\/\/nyc\.cloud\.appwrite\.io\/v1"/);
-    assert.match(source, /const APPWRITE_PROJECT_ID = configMeta\.projectId \|\| "69f77663000c16abdff2"/);
-    assert.match(source, /new Appwrite\.Client\(\)/);
-    assert.match(source, /\.setEndpoint\(APPWRITE_ENDPOINT\)/);
-    assert.match(source, /\.setProject\(APPWRITE_PROJECT_ID\)/);
-    assert.match(source, /window\.account = account/);
-    assert.match(source, /window\.databases = databases/);
-    assert.match(source, /window\.storage = storage/);
-    assert.doesNotMatch(source, /window\.presences/);
-    assert.doesNotMatch(source, /window\.realtime/);
-    assert.doesNotMatch(source, /window\.Channel = Appwrite\.Channel/);
 });
 
 test("calendar context menu keeps task, event, override, and keyboard flows wired", async () => {
@@ -1080,15 +1059,7 @@ test("global chrome keeps lifecycle, navigation, mutation, confirmation, loader,
     assert.match(source, /window\.APStudyDate = \{/);
     assert.match(source, /function clearClientState\(options = \{\}\)/);
     assert.match(source, /function markClientLoggedOut\(\)/);
-    assert.match(source, /function shouldEnforceAuth\(\)/);
-    assert.match(source, /APStudyAppwriteSessionProbe/);
-    assert.doesNotMatch(source, /account\.get\(/);
     assert.doesNotMatch(source, /window\.location\.replace\(`\$\{window\.location\.origin\}\/logout`\)/);
-    assert.match(source, /account\.deleteSession\("current"\)/);
-    const stopHeartbeatIndex = source.indexOf('window.APStudyPresenceHeartbeat?.stop?.();');
-    const deleteSessionIndex = source.indexOf('account.deleteSession("current")');
-    assert.ok(stopHeartbeatIndex >= 0, "logout stops presence heartbeats");
-    assert.ok(stopHeartbeatIndex < deleteSessionIndex, "logout stops heartbeats before revoking the session");
     assert.match(source, /stop: stopHeartbeat/);
     assert.match(source, /clearClientState\(\{ includeCookies: false \}\)/);
     assert.match(source, /document\.querySelectorAll\("\[data-logout\]"\)/);
@@ -1102,7 +1073,6 @@ test("login template uses server-started Appwrite OAuth links", async () => {
     assert.match(source, /url_for\('auth\.appwrite_oauth_start', provider='discord'\)/);
     assert.doesNotMatch(source, /createOAuth2Session/);
     assert.doesNotMatch(source, /js\/login\.js/);
-    assert.doesNotMatch(source, /js\/appwrite\.js/);
 });
 
 test("landing page keeps product proof visible and wires the new signup journey accessibly", async () => {
