@@ -10,8 +10,6 @@ import os
 
 ENVIRONMENT_CONFIG_EXTENSION_KEY = "apstudy.environment_config"
 _DIAGNOSTIC_TRUTH_VALUES = {"1", "true", "yes", "on"}
-APPWRITE_FRONTEND_ENDPOINT_DEFAULT = "https://nyc.cloud.appwrite.io/v1"
-APPWRITE_FRONTEND_PROJECT_ID_DEFAULT = "69f77663000c16abdff2"
 APSTUDY_FORCE_LOCAL_INSTANCE_DB_ENV = "APSTUDY_FORCE_LOCAL_INSTANCE_DB"
 
 
@@ -37,8 +35,6 @@ class EnvironmentConfig:
     # The app factory has historically exposed a missing database ID as "",
     # while appwrite_client.py preserves the raw optional value as None.
     appwrite_database_id_raw: str | None = None
-    appwrite_frontend_endpoint: str = APPWRITE_FRONTEND_ENDPOINT_DEFAULT
-    appwrite_frontend_project_id: str = APPWRITE_FRONTEND_PROJECT_ID_DEFAULT
     appwrite_profile_avatar_bucket_id: str = "profile_avatars"
     appwrite_file_share_bucket_id: str = "file_share_files"
     appwrite_notes_media_bucket_id: str = "notes_media"
@@ -139,12 +135,6 @@ def load_environment_config():
         appwrite_project_id=project_id,
         appwrite_api_key=get("APPWRITE_API_KEY"),
         appwrite_database_id_raw=database_id,
-        appwrite_frontend_endpoint=(
-            APPWRITE_FRONTEND_ENDPOINT_DEFAULT if endpoint is None else endpoint
-        ),
-        appwrite_frontend_project_id=(
-            APPWRITE_FRONTEND_PROJECT_ID_DEFAULT if project_id is None else project_id
-        ),
         appwrite_profile_avatar_bucket_id=get(
             "APPWRITE_PROFILE_AVATAR_BUCKET_ID", "profile_avatars"
         ),

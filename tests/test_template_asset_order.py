@@ -119,12 +119,6 @@ class TemplateAssetOrderTests(unittest.TestCase):
                         f"render-blocking script: {script}",
                     )
 
-                if "appwrite@25.0.0" in head:
-                    sdk = head.index("appwrite@25.0.0")
-                    appwrite = head.index("js/core/appwrite.js")
-                    self.assertLess(head.index("js/core/theme-init.js"), sdk)
-                    self.assertLess(sdk, appwrite)
-
     def test_shared_shell_bootstraps_before_global_runtime(self):
         for template in _full_templates():
             source = _template_source(template)

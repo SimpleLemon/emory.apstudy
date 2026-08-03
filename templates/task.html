@@ -33,7 +33,7 @@
         }
     </style>
 </head>
-<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-probe-appwrite-session="false" data-command-palette-preload="false" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+<body class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-command-palette-preload="false" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
     <global class="thenav" data-profile-picture="{{ (user.picture or '')|avatar_url(32) }}" data-user-email="{{ user.email }}" data-user-tier="{{ user_tier or '' }}"></global>
     {% set sidebar_user_emory_student = user.emory_student %}
     {% include "_sidebar.html" %}

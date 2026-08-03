@@ -47,7 +47,7 @@
     <meta name="twitter:description" content="Settings for your APStudy account, data, and preferences." />
     <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
 </head>
-<body class="settings-body bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-settings-page="true" data-probe-appwrite-session="false" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+<body class="settings-body bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-settings-page="true" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
     <global class="thenav" data-profile-picture="{{ (user.picture or '')|avatar_url(32) }}" data-user-email="{{ user.email }}" data-user-tier="{{ user_tier or '' }}"></global>
     {% set sidebar_user_emory_student = user.emory_student %}
     {% include "_sidebar.html" %}

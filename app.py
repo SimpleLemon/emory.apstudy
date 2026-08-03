@@ -11,7 +11,6 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from config import (
     ENVIRONMENT_CONFIG_EXTENSION_KEY,
     EnvironmentConfig,
-    get_environment_config,
     load_environment_config,
 )
 
@@ -61,7 +60,6 @@ def create_app():
 
     app.jinja_env.filters["avatar_url"] = avatar_url_for_size
     app.secret_key = _session_secret_key(environment_config)
-    app.config["APPWRITE_DATABASE_ID"] = environment_config.appwrite_database_id
     from services.database import database_path, nest_instance_dir
 
     resolved_database_path = database_path(environment_config=environment_config)
@@ -214,7 +212,6 @@ def create_app():
     def inject_shell_preferences():
         from flask_login import current_user
 
-        configured = get_environment_config(app)
         if not current_user.is_authenticated:
             return {
                 "sidebar_default": "expanded",
@@ -224,8 +221,6 @@ def create_app():
                 "user_tier_label": None,
                 "user_tier_badge": None,
                 "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-                "appwrite_endpoint": configured.appwrite_frontend_endpoint,
-                "appwrite_project_id": configured.appwrite_frontend_project_id,
             }
 
         try:
@@ -262,8 +257,6 @@ def create_app():
             "user_tier_label": TIER_LABELS[user_tier],
             "user_tier_badge": TIER_BADGES.get(user_tier),
             "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-            "appwrite_endpoint": configured.appwrite_frontend_endpoint,
-            "appwrite_project_id": configured.appwrite_frontend_project_id,
         }
 
     # Register all blueprints

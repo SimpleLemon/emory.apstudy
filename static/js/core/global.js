@@ -336,23 +336,6 @@ function markClientLoggedOut() {
     }
 }
 
-function shouldEnforceAuth() {
-    if (window.location.pathname === "/login") {
-        return false;
-    }
-    const nav = document.querySelector("global.thenav");
-    if (nav && nav.hasAttribute("data-profile-picture")) {
-        return true;
-    }
-    return document.body?.dataset?.requiresAuth === "true";
-}
-
-async function ensureAppwriteSession() {
-    if (document.body?.dataset?.probeAppwriteSession !== "true" || !shouldEnforceAuth()) return;
-    if (typeof window.APStudyAppwriteSessionProbe !== "function") return;
-    await window.APStudyAppwriteSessionProbe();
-}
-
 async function runLogoutFlow() {
     window.APStudyPresenceHeartbeat?.stop?.();
     try {
@@ -360,14 +343,6 @@ async function runLogoutFlow() {
     } catch (error) {
         console.warn('Unable to revoke this browser notification subscription during logout.', error);
     }
-    if (window.account && typeof account.deleteSession === "function") {
-        try {
-            await account.deleteSession("current");
-        } catch (error) {
-            console.warn("Failed to clear Appwrite session", error);
-        }
-    }
-
     clearClientState({ includeCookies: false });
     markClientLoggedOut();
     try {
@@ -603,7 +578,6 @@ function initializePresenceHeartbeat() {
 }
 
 function initializeGlobalChrome() {
-    ensureAppwriteSession();
     drainServerToasts();
     initializePresenceHeartbeat();
     initializeTierBadgeTooltips();

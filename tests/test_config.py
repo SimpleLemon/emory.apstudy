@@ -48,8 +48,6 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.appwrite_endpoint, "https://appwrite.example/v1")
         self.assertEqual(configured.appwrite_project_id, "project-id")
         self.assertEqual(configured.appwrite_api_key, "api-key")
-        self.assertEqual(configured.appwrite_frontend_endpoint, "https://appwrite.example/v1")
-        self.assertEqual(configured.appwrite_frontend_project_id, "project-id")
         self.assertEqual(configured.appwrite_database_id, "database-id")
         self.assertEqual(configured.appwrite_database_id_raw, "database-id")
         self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "avatars")
@@ -76,11 +74,6 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertIsNone(configured.appwrite_endpoint)
         self.assertIsNone(configured.appwrite_project_id)
         self.assertIsNone(configured.appwrite_api_key)
-        self.assertEqual(
-            configured.appwrite_frontend_endpoint,
-            "https://nyc.cloud.appwrite.io/v1",
-        )
-        self.assertEqual(configured.appwrite_frontend_project_id, "69f77663000c16abdff2")
         self.assertEqual(configured.appwrite_database_id, "")
         self.assertIsNone(configured.appwrite_database_id_raw)
         self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "profile_avatars")
@@ -111,8 +104,6 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.appwrite_endpoint, "")
         self.assertEqual(configured.appwrite_project_id, "")
         self.assertEqual(configured.appwrite_api_key, "")
-        self.assertEqual(configured.appwrite_frontend_endpoint, "")
-        self.assertEqual(configured.appwrite_frontend_project_id, "")
         self.assertEqual(configured.appwrite_database_id, "")
         self.assertEqual(configured.appwrite_database_id_raw, "")
         self.assertEqual(configured.appwrite_profile_avatar_bucket_id, "")
@@ -169,41 +160,8 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.flask_secret_key, "test-secret")
         self.assertTrue(configured.allow_insecure_http)
         self.assertTrue(configured.frontend_console_diagnostics_enabled)
-        self.assertEqual(app.config["APPWRITE_DATABASE_ID"], configured.appwrite_database_id)
         self.assertFalse(app.config["SESSION_COOKIE_SECURE"])
         self.assertTrue(app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"])
-
-    def test_shell_context_uses_the_create_app_snapshot(self):
-        from app import create_app
-
-        with tempfile.TemporaryDirectory() as temp_dir, patch.dict(
-            os.environ,
-            {
-                "DATABASE_PATH": os.path.join(temp_dir, "nest.sqlite3"),
-                "FLASK_SECRET_KEY": "test-secret",
-                "FLASK_ENV": "testing",
-                "SCHEDULER_ENABLED": "0",
-                "DISCORD_AUDIT_ENABLED": "0",
-                "APPWRITE_ENDPOINT": "https://configured.example/v1",
-                "APPWRITE_PROJECT_ID": "configured-project",
-            },
-            clear=False,
-        ), patch("services.discord_audit.init_discord_audit"), patch("services.scheduler.init_scheduler"):
-            app = create_app()
-
-        with patch.dict(
-            os.environ,
-            {
-                "APPWRITE_ENDPOINT": "https://changed.example/v1",
-                "APPWRITE_PROJECT_ID": "changed-project",
-            },
-            clear=False,
-        ), app.test_request_context("/"):
-            context = {}
-            app.update_template_context(context)
-
-        self.assertEqual(context["appwrite_endpoint"], "https://configured.example/v1")
-        self.assertEqual(context["appwrite_project_id"], "configured-project")
 
     def test_avatar_storage_uses_the_registered_environment_snapshot(self):
         from flask import Flask
