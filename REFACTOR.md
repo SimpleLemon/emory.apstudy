@@ -647,30 +647,33 @@ hidden.
 | 2026-08-01 | I (phase 4) | 5594aa7, c4e33d5 | 412 JS / 608 PY green; npm test green; build green | Completed the bounded database/instance/calendar path and storage-capability batches through the read-only facade, preserving path precedence, raw production matching, bucket defaults, and missing-or-empty capability behavior. Entitlement/tier, chat/Discord, scheduler/operations, backup, deployment, instance/, and infrastructure reads remain deferred; no push. |
 | 2026-08-01 | I (completion) | 1e127a0–d03b178 | 412 JS / 634 PY green; npm test green; build green | Completed Theme I in nine bounded commits after four independent Luna Max audits. Routed all eligible product environment reads through the frozen facade while preserving import/startup/request/job/CLI timing, defaults, normalization, and errors. The AST boundary test documents the intentional exceptions: protected entitlement logic, the protected backup script, OAuth environment mutation, and full-environment inheritance for untouched VPS subprocesses. No deployment, `instance/`, VPS configuration, production infrastructure, or `services/app_config.py` changes; no push. |
 | 2026-08-01 | K (phase 1: presence query/status core) | 7b0d6d29 | 412 JS / 634 PY green; 14 targeted; npm test green; build green | Extracted six runtime presence freshness/query/status helpers into `services/chat_presence_runtime.py` behind per-call blueprint adapters. Preserved all `blueprints.chat_api` symbols, nested patch interception, the 25-route map, SSE listener state, Discord/database behavior, and external contracts. Deliberate callback bypass produced the required red test before restoration. Later presence, Discord/rendering, summary/bootstrap, delivery routes, and any SSE reassessment remain deferred; no push. |
+| 2026-08-01 | K (completion: presence, Discord formatting/sync/ingest, threads/read-state/summary/bootstrap, delivery routes, stateless SSE extraction/reassessment) | — | npm test 412 JS + 736 Python; npm run build passed; Theme K contract subset 89; Desloppify review exit 0/no scan metrics; 25 routes; red/green patch probes | All remaining Theme K phases are complete: presence, Discord formatting/sync/ingest, threads/read-state/summary/bootstrap, delivery routes, and stateless SSE extraction/reassessment. SSE listener state and generator deliberately remain blueprint-local as the completed safety decision, not a pending Theme K phase. Residual inherited/architectural risks may remain; optional future cleanup of remaining blueprint helpers is separate from Theme K completion. Commit: —; no push occurred. |
 | 2026-08-01 | L (phase 1: characterization) | a1b21750 | 13 new tests; final safe targeted: 28 passed; 412 JS passed; build passed; mutation probe red then green; literal `npm test` failed because this worktree lacks `.venv` and broader Python execution reaches forbidden `instance/` or unmocked service paths | Characterized provider-identity and authentication-session boundaries without changing production behavior. Harness isolation remains deferred; no push. |
 | 2026-08-02 | M (phase 1: base + 404 pilot) | — | 412 JS / 736 PY green; npm test green; build green; 24 targeted JS / 16 targeted PY; browser unavailable | Introduced a reusable base template, migrated only the 404 page, and added inheritance-aware asset-order and analytics contracts while preserving the cascade and rendered behavior. Browser verification remains pending because no local server was available. Phases 2–6 are deferred; no push. |
 | 2026-08-02 | M (completion: phases 2–6) | e1f05264, 291b8b7e, 3a8f3706, 66260be6, 7390aaa7, f5c5af2c | 414 JS / 736 PY green; npm test green; build green; targeted 61 JS / 16 PY; browser unavailable/pending | Unused `sidebar.css` deleted after `rg` proof; inert Tailwind directives removed; task fallbacks corrected; admin table shells macro-consolidated; global CSS split through ordered manifest without further template migration; Theme M complete; no push. |
 
 ### Deferred items and open questions
 
-- `.desloppify/plan.json` needs a rescan; its clusters name files that no longer exist and
-  `config.json` already has `needs_rescan: true`. Rescan before trusting any score as a measure of
-  this refactor's progress.
-- The scanner reports "131 resolved findings never committed — verified score depressed." Its commit
-  log is empty (`commit_log: []`, `uncommitted_issues: 127`). Score history is unreliable until
-  that is reconciled; do not use the strict score as a success metric this cycle.
-- Desloppify `zone_overrides` mislabels three files as classic scripts that are really ES modules:
-  `static/js/core/command-palette.js`, `static/js/notes/editor.js`, `static/js/tasks/task.js`. It
-  also lists `static/js/login.js`, which does not exist.
-- `static/js/core/appwrite.js` appears orphaned — it expects a global `Appwrite` SDK that no template
-  loads, and `tests/test_template_asset_order.py:27–33` actively asserts the SDK is *not* loaded.
-  Determine whether to wire or retire it; do not delete on assumption.
-- SortableJS is loaded two ways: CDN in `dashboard.html:28` and `notes.html:23`, npm import in
-  `tasks/task-components.js:3`. Pick one.
+- A literal `--path ..` attempt from `static/` was not authoritative: this installed CLI cannot
+  combine that relative target with canonical repository-root state and produced child-prefixed
+  paths; those results and state were discarded.
+- Per repository guidance, authoritative fresh scans were rerun from the repo root with `--path .`
+  and explicit root language state. Final clean metrics: JavaScript 250 files / 56,271 LOC,
+  objective 91.5, strict 22.9, 3,047 open; Python 183 files / 58,514 LOC, objective 85.8, strict
+  21.5, 486 open. Both report `scan_count=1`, `needs_rescan: false`, clean root-relative paths,
+  and empty `commit_log` and `uncommitted_issues`. Subjective dimensions remain unassessed, so
+  strict scores are not a success metric.
+- Sibling `main`'s prior `uncommitted_issues: 127`, empty `commit_log`, and historical “131 resolved”
+  prose were stale local attribution metadata; none of that metadata was copied or recorded.
+- The fresh worktree-local exclusion config has no stale `zone_overrides` and excludes dependency,
+  generated, and local-only trees.
+- The orphaned browser Appwrite bootstrap (`static/js/core/appwrite.js`) and its unused meta partial
+  were retired after confirming that product authentication, storage, and admin paths are server-side.
+- SortableJS now has one npm source (`sortablejs@1.15.0`): a Vite-built classic-script bridge serves
+  dashboard and notes, while the Tasks import and bundle remain unchanged.
 - `blueprints/invites_api.py` has no `url_prefix`; its routes hardcode `/settings/api/invites`
   (L74). Inconsistent with the other blueprints but working — leave unless a theme covers it.
-- `services/calendar_store.py` keeps its own `calendar_connection` and DDL (L232–258) from when
-  calendar lived in a separate SQLite file. `app.py:51` now points `CALENDAR_SQLITE_PATH` at the main
-  DB. Legacy worth unwinding eventually; not urgent.
-- No CI exists. `.github/workflows/` is present locally but empty, and there are no test or lint git
-  hooks. `npm test` is entirely dependent on someone remembering to run it.
+- Shadowed legacy calendar DDL/CRUD was removed; the test harness uses authoritative migrations, with
+  active database wrappers, path compatibility, and backup behavior preserved.
+- A tracked GitHub Actions workflow runs the existing lint/build/unit/browser gates; no local hook was
+  added because shared Git LFS hooks must remain intact.
