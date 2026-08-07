@@ -157,7 +157,8 @@ logs/
 .github/*
 !.github/workflows/
 .github/workflows/*
-!.github/workflows/ci.yml
+!.github/workflows/*.yml
+!.github/workflows/*.yaml
 codex-attention-notifier
 docs/
 .scorecard.png

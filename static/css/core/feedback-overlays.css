@@ -195,8 +195,8 @@ body.apstudy-confirm-open {
 	align-items: center;
 	justify-content: center;
 	border-radius: var(--radius-card);
-	background: color-mix(in srgb, var(--color-primary, #3b82f6) 14%, transparent);
-	color: var(--color-primary, #3b82f6);
+	background: color-mix(in srgb, var(--color-primary, #0060aa) 14%, transparent);
+	color: var(--color-primary, #0060aa);
 }
 
 .apstudy-confirm.is-danger .apstudy-confirm__icon {
@@ -254,8 +254,8 @@ body.apstudy-confirm-open {
 }
 
 .apstudy-confirm__accept {
-	border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 58%, transparent) !important;
-	background: var(--color-primary, #3b82f6);
+	border: 1px solid color-mix(in srgb, var(--color-primary, #0060aa) 58%, transparent) !important;
+	background: var(--color-primary, #0060aa);
 	color: var(--color-on-primary, #ffffff);
 }
 

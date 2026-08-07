@@ -696,7 +696,7 @@ html body [aria-invalid="true"]:is(.grid, [role="group"], [id$="-group"]) > :is(
 	display: inline-block;
 	position: relative;
 	box-sizing: border-box;
-	color: var(--color-primary, #3b82f6);
+	color: var(--color-primary, #0060aa);
 	animation: apstudyLoaderRotation 1s linear infinite;
 }
 
@@ -716,7 +716,7 @@ html body [aria-invalid="true"]:is(.grid, [role="group"], [id$="-group"]) > :is(
 .loader::before {
 	top: auto;
 	bottom: 0;
-	background-color: var(--color-primary, #3b82f6);
+	background-color: var(--color-primary, #0060aa);
 	animation-delay: 0.5s;
 }
 

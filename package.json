@@ -10,7 +10,7 @@
     "build:notes": "vite build --config vite.notes.config.mjs",
     "build:tasks": "vite build --config vite.tasks.config.mjs",
     "build": "npm run build:css && npm run build:sortable && npm run build:notes && npm run build:tasks",
-    "lint": "eslint .",
+    "lint": "eslint . --max-warnings 3283",
     "collab:start": "node collaboration/server.mjs",
     "watch:css": "tailwindcss -c ./tailwind.config.cjs -i ./static/css/tailwind-input.css -o ./static/css/tailwind.css --watch",
     "test": "npm run test:js && npm run test:py",

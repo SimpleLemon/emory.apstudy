@@ -12,8 +12,8 @@
 }
 
 .calendar-mobile-day.is-today {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, var(--color-outline-variant, #8f929c));
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 12%, transparent);
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, var(--color-outline-variant, #8f929c));
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 12%, transparent);
 }
 
 .calendar-mobile-day-header {
@@ -37,8 +37,8 @@
 	align-items: center;
 	justify-content: center;
 	border-radius: var(--radius-pill);
-	background: color-mix(in srgb, var(--color-primary, #3b82f6) 13%, transparent);
-	color: var(--color-primary, #3b82f6);
+	background: color-mix(in srgb, var(--color-primary, #0060aa) 13%, transparent);
+	color: var(--color-primary, #0060aa);
 	font-size: 12px;
 }
 
@@ -308,7 +308,7 @@
 
 .calendar-source-add:hover,
 .calendar-source-add:focus-visible {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 65%, transparent) !important;
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 65%, transparent) !important;
 	background: var(--color-surface-container-high, rgba(0, 0, 0, 0.08));
 	color: var(--color-on-surface, #202124);
 	outline: none;
@@ -335,7 +335,7 @@
 
 .calendar-source-more:hover,
 .calendar-source-more:focus-visible {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 70%, transparent) !important;
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 70%, transparent) !important;
 	background: var(--color-surface-container-high, rgba(0, 0, 0, 0.08));
 	color: var(--color-on-surface, #202124);
 	outline: none;
@@ -459,7 +459,7 @@
 .calendar-context-preset:hover,
 .calendar-context-preset:focus-visible {
 	transform: scale(1.06);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 25%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 25%, transparent);
 	outline: none;
 }
 
@@ -496,9 +496,9 @@
 }
 
 .calendar-source-mode.is-active {
-	background: var(--color-primary, #3b82f6);
+	background: var(--color-primary, #0060aa);
 	color: var(--color-on-primary, #fff);
-	box-shadow: 0 8px 18px color-mix(in srgb, var(--color-primary, #3b82f6) 24%, transparent);
+	box-shadow: 0 8px 18px color-mix(in srgb, var(--color-primary, #0060aa) 24%, transparent);
 }
 
 .calendar-right-click-menu {
@@ -564,7 +564,7 @@
 }
 
 .calendar-event-shell:focus-visible {
-	box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #3b82f6) 70%, transparent);
+	box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #0060aa) 70%, transparent);
 }
 
 .calendar-event-shell.is-completed {
@@ -624,8 +624,8 @@
 .calendar-upcoming-toggle {
 	align-self: flex-start;
 	border-radius: var(--radius-control);
-	background: color-mix(in srgb, var(--color-primary, #3b82f6) 14%, transparent);
-	color: var(--color-primary, #3b82f6);
+	background: color-mix(in srgb, var(--color-primary, #0060aa) 14%, transparent);
+	color: var(--color-primary, #0060aa);
 	font-size: 14px;
 	font-weight: 700;
 	line-height: 1.2;
@@ -635,9 +635,9 @@
 
 .calendar-upcoming-toggle:hover,
 .calendar-upcoming-toggle:focus-visible {
-	background: color-mix(in srgb, var(--color-primary, #3b82f6) 24%, transparent);
+	background: color-mix(in srgb, var(--color-primary, #0060aa) 24%, transparent);
 	color: var(--color-on-surface, #202124);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 20%, transparent);
 	outline: none;
 }
 
@@ -715,7 +715,7 @@
 
 .calendar-info-close:hover,
 .calendar-info-close:focus-visible {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent);
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent);
 	background: var(--color-surface-container-high, rgba(0, 0, 0, 0.08));
 	color: var(--color-on-surface, #202124);
 	outline: none;
@@ -789,8 +789,8 @@
 }
 
 .calendar-info-input:focus {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 70%, transparent);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 70%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 20%, transparent);
 	outline: none;
 }
 
@@ -847,7 +847,7 @@
 }
 
 .calendar-info-button-primary {
-	background: var(--color-primary, #3b82f6);
+	background: var(--color-primary, #0060aa);
 	color: var(--color-on-primary, #ffffff);
 	font-weight: 600;
 }
@@ -1354,7 +1354,7 @@
 
 .calendar-event-icon-button:hover,
 .calendar-event-icon-button:focus-visible {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent) !important;
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent) !important;
 	background: var(--color-surface-container-high, rgba(0, 0, 0, 0.08));
 	color: var(--color-on-surface, #202124);
 	outline: none;
@@ -1398,8 +1398,8 @@
 .calendar-event-field input:focus,
 .calendar-event-field textarea:focus,
 .calendar-event-field select:focus {
-	border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 72%, transparent);
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+	border-color: color-mix(in srgb, var(--color-primary, #0060aa) 72%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 20%, transparent);
 	outline: none;
 }
 
@@ -1427,7 +1427,7 @@
 .calendar-event-check input {
 	width: 18px;
 	height: 18px;
-	accent-color: var(--color-primary, #3b82f6);
+	accent-color: var(--color-primary, #0060aa);
 }
 
 .calendar-event-color-section {
@@ -1476,7 +1476,7 @@
 
 .calendar-event-color-choice:hover,
 .calendar-event-color-choice:focus-visible {
-	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 24%, transparent);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 24%, transparent);
 	outline: none;
 	transform: translateY(-1px);
 }
@@ -1529,7 +1529,7 @@
 }
 
 .calendar-event-button-primary {
-	background: var(--color-primary, #3b82f6);
+	background: var(--color-primary, #0060aa);
 	color: var(--color-on-primary, #fff);
 }
 

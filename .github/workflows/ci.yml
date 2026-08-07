@@ -55,12 +55,16 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Verify generated vendor asset is committed
+      - name: Verify generated frontend assets are committed
         shell: bash
         run: |
           set -Eeuo pipefail
           git ls-files --error-unmatch static/js/vendor/dist/sortable-global.js >/dev/null
           git diff --exit-code -- static/js/vendor/dist/sortable-global.js
+          git ls-files --error-unmatch static/js/notes/dist/notes-editor-v17.js >/dev/null
+          git diff --exit-code -- static/js/notes/dist/notes-editor-v17.js
+          git ls-files --error-unmatch static/js/tasks/dist/task-app.js >/dev/null
+          git diff --exit-code -- static/js/tasks/dist/task-app.js
 
       - name: Test
         run: npm test
