@@ -1,26 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Your entire academic schedule, organized. Track tasks, plan classes, and optimize your workflow with Nest." />
-    <title>Calendar - APStudy Nest</title>
+{% extends "base.html" %}
+{# base.html owns viewport-fit=cover, js/core/theme-init.js, _diagnostics_assets.html, and css/global.css before js/core/global.js. #}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <script>
         window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";
     </script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
     {% include '_sidebar_init.html' %}
-    {% include "_font_assets.html" %}
-    
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+{% endblock %}
+
+{% block title %}<title>Calendar - APStudy Nest</title>{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
+{% endblock %}
+
+{% block description %}
+    <meta name="description" content="Your entire academic schedule, organized. Track tasks, plan classes, and optimize your workflow with Nest." />
+{% endblock %}
+
+{% block head_end %}
     <meta property="og:url" content="https://nest.apstudy.org/">
     <meta property="og:type" content="website">
     <meta property="og:title" content="APStudy Nest">
@@ -32,6 +33,9 @@
     <meta name="twitter:title" content="APStudy Nest">
     <meta name="twitter:description" content="Your entire academic schedule, organized. Track tasks, plan classes, and optimize your workflow with Nest." />
     <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
+{% endblock %}
+
+{% block shared_head_scripts %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/navbar.js') }}" defer></script>
@@ -42,8 +46,11 @@
             font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
     </style>
-</head>
-<body data-default-dashboard-view="{{ preferred_calendar_view|default('week') }}" data-calendar-buffer-days="{{ calendar_buffer_days|default(7) }}" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L" class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased">
+{% endblock %}
+
+{% block body_attrs %} data-default-dashboard-view="{{ preferred_calendar_view|default('week') }}" data-calendar-buffer-days="{{ calendar_buffer_days|default(7) }}" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L" class="bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased"{% endblock %}
+
+{% block body_content %}
 <global class="thenav" data-profile-picture="{{ (user.picture or '')|avatar_url(32) }}" data-user-email="{{ user.email }}" data-user-tier="{{ user_tier or '' }}"></global>
 {% set sidebar_user_emory_student = user.emory_student %}
 {% include "_sidebar.html" %}
@@ -96,4 +103,4 @@
 </section>
 <global class="thefooter"></global>
 </main>
-</body></html>
+{% endblock %}

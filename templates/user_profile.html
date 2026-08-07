@@ -1,28 +1,29 @@
-<!DOCTYPE html>
-<html lang="en" data-apstudy-theme-preference="{{ theme_preference or 'system-match' }}">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    <title>{{ profile.name }} - APStudy Nest</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en" data-apstudy-theme-preference="{{ theme_preference or 'system-match' }}"{% endblock %}
+
+{% block title %}<title>{{ profile.name }} - APStudy Nest</title>{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/settings.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/user-profile.css') }}">
+{% endblock %}
+
+{% block shared_head_scripts %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     {% if viewer %}
     <script src="{{ url_for('static', filename='js/core/navbar.js') }}" defer></script>
     {% endif %}
-</head>
-<body class="user-profile-page" data-analytics-mode="public-choice" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block body_attrs %} class="user-profile-page" data-analytics-mode="public-choice" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     {% if viewer %}
     <global class="thenav" data-profile-picture="{{ (viewer.picture or '')|avatar_url(32) }}" data-user-email="{{ viewer.email }}" data-user-tier="{{ viewer.tier or '' }}"></global>
     {% endif %}
@@ -88,5 +89,4 @@
         </main>
         <global class="thefooter user-profile-footer-chrome"></global>
     </div>
-</body>
-</html>
+{% endblock %}

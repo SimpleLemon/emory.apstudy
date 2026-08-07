@@ -1,20 +1,18 @@
-<!DOCTYPE html>
-<html lang="en" data-apstudy-theme-preference="system-match" data-apstudy-theme-locked="true">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <title>Login - APStudy Nest</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en" data-apstudy-theme-preference="system-match" data-apstudy-theme-locked="true"{% endblock %}
+
+{% block title %}<title>Login - APStudy Nest</title>{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
+{% endblock %}
+
+{% block feature_styles %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
+{% endblock %}
+
+{% block description %}
     <meta name="description" content="Your entire academic schedule, organized. Track tasks, plan classes, and optimize your workflow with Nest."/>
     <meta property="og:url" content="https://nest.apstudy.org/">
     <meta property="og:type" content="website">
@@ -27,10 +25,11 @@
     <meta name="twitter:title" content="APStudy Nest">
     <meta name="twitter:description" content="Your entire academic schedule, organized. Track tasks, plan classes, and optimize your workflow with Nest."/>
     <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/login.css') }}">
-</head>
-<body class="login-page" data-analytics-mode="off">
+{% endblock %}
+
+{% block body_attrs %} class="login-page" data-analytics-mode="off"{% endblock %}
+
+{% block body_content %}
     <div class="login-shell">
         <main class="login-content">
             <section class="login-card" aria-labelledby="login-title">
@@ -87,5 +86,4 @@
         </main>
         <global class="thefooter login-footer"></global>
     </div>
-</body>
-</html>
+{% endblock %}

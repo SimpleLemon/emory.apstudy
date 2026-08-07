@@ -1,26 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends "base.html" %}
+{# base.html owns viewport-fit=cover, js/core/theme-init.js, _diagnostics_assets.html, and css/global.css before js/core/global.js. #}
+
 {% set settings_assets_version = 'settings-tier-invites-20260728-1' %}
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <script>
         window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";
     </script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
     {% include '_sidebar_init.html' %}
-    <title>Settings - APStudy Nest</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
+{% endblock %}
+
+{% block title %}<title>Settings - APStudy Nest</title>{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/layout.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/settings.css', v=settings_assets_version) }}">
-    {% include "_font_assets.html" %}
+{% endblock %}
+
+{% block description %}
+    <meta name="description" content="Settings for your APStudy account, data, and preferences." />
+{% endblock %}
+
+{% block head_end %}
+    <meta property="og:url" content="https://nest.apstudy.org/">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Nest University | APStudy">
+    <meta property="og:description" content="Settings for your APStudy account, data, and preferences." />
+    <meta property="og:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="nest.apstudy.org">
+    <meta property="twitter:url" content="https://nest.apstudy.org/">
+    <meta name="twitter:title" content="Nest University | APStudy">
+    <meta name="twitter:description" content="Settings for your APStudy account, data, and preferences." />
+    <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
+{% endblock %}
+
+{% block shared_head_scripts %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/navbar.js', v=settings_assets_version) }}" defer></script>
@@ -34,20 +55,11 @@
     <script src="{{ url_for('static', filename='js/settings/notifications.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/settings/invites.js', v=settings_assets_version) }}" defer></script>
     <script src="{{ url_for('static', filename='js/settings/index.js', v=settings_assets_version) }}" defer></script>
-    <meta name="description" content="Settings for your APStudy account, data, and preferences." />
-    <meta property="og:url" content="https://nest.apstudy.org/">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Nest University | APStudy">
-    <meta property="og:description" content="Settings for your APStudy account, data, and preferences." />
-    <meta property="og:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:domain" content="nest.apstudy.org">
-    <meta property="twitter:url" content="https://nest.apstudy.org/">
-    <meta name="twitter:title" content="Nest University | APStudy">
-    <meta name="twitter:description" content="Settings for your APStudy account, data, and preferences." />
-    <meta name="twitter:image" content="https://resources.apstudy.org/images/APResourcesBanner.png">
-</head>
-<body class="settings-body bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-settings-page="true" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block body_attrs %} class="settings-body bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-settings-page="true" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     <global class="thenav" data-profile-picture="{{ (user.picture or '')|avatar_url(32) }}" data-user-email="{{ user.email }}" data-user-tier="{{ user_tier or '' }}"></global>
     {% set sidebar_user_emory_student = user.emory_student %}
     {% include "_sidebar.html" %}
@@ -670,5 +682,4 @@
             <button type="button" class="settings-discord-modal-cancel" data-discord-modal-close>Cancel</button>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

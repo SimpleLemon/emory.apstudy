@@ -1,23 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="View a shared APStudy Nest calendar." />
-    <title>Shared Calendar - APStudy Nest</title>
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <script>
         window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";
     </script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+{% endblock %}
+
+{% block title %}<title>Shared Calendar - APStudy Nest</title>{% endblock %}
+
+{% block shared_brand_links %}
     <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="manifest" href="/manifest.json">
+{% endblock %}
+
+{% block shared_styles_before_tailwind %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
+{% block description %}<meta name="description" content="View a shared APStudy Nest calendar." />{% endblock %}
+
+{% block shared_head_scripts %}
     {% if share_found %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
@@ -57,8 +62,9 @@
             font-family: var(--font-display) !important;
         }
     </style>
-</head>
-<body
+{% endblock %}
+
+{% block body_attrs %}
     data-analytics-mode="public-choice"
     data-analytics-measurement-id="G-0NT330ZX5L"
     data-default-dashboard-view="{{ preferred_calendar_view|default('month') }}"
@@ -67,7 +73,9 @@
     data-public-share-code="{{ share_code or '' }}"
     data-public-calendar-title="{{ (owner_name ~ "'s Shared Calendar") if owner_name else 'Shared Calendar' }}"
     data-public-calendar-range-label="{{ scope_label or '' }}"
-    class="bg-surface text-on-surface font-body min-h-screen antialiased">
+    class="bg-surface text-on-surface font-body min-h-screen antialiased"{% endblock %}
+
+{% block body_content %}
 <main class="w-full px-6 md:px-8 pt-6 pb-10 flex flex-col gap-8 relative z-10">
 {% if share_found %}
 <section class="flex flex-col gap-4 w-full animate-fade-in-up">
@@ -116,5 +124,4 @@
 </section>
 {% endif %}
 </main>
-</body>
-</html>
+{% endblock %}

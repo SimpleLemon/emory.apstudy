@@ -8,9 +8,9 @@
     {% include "_diagnostics_assets.html" %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
     {% block title %}<title>APStudy Nest</title>{% endblock %}
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
+    {% block shared_brand_links %}<link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
+    <link rel="manifest" href="/manifest.json">{% endblock %}
     {% include "_font_assets.html" %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
     {% block shared_styles_before_tailwind %}{% endblock %}

@@ -1,28 +1,38 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="robots" content="noindex,nofollow" />
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <script>window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or 'system-match' }}";</script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
     {% if viewer_authenticated %}{% include '_sidebar_init.html' %}{% endif %}
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% endblock %}
+
+{% block title %}<title>{{ (folder.name if folder else 'Shared Folder') }} - APStudy Nest</title>{% endblock %}
+
+{% block shared_brand_links %}{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/notes.css') }}?v=notes-sharing-1">
-    <title>{{ (folder.name if folder else 'Shared Folder') }} - APStudy Nest</title>
+{% endblock %}
+
+{% block description %}<meta name="robots" content="noindex,nofollow" />{% endblock %}
+
+{% block shared_head_scripts %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/navbar.js') }}" defer></script>
     {% if viewer_authenticated %}<script src="{{ url_for('static', filename='js/core/sidebar.js') }}" defer></script>{% endif %}
     <script src="{{ url_for('static', filename='js/notes/sharing.js') }}" defer></script>
-</head>
-<body class="{% if not viewer_authenticated %}notes-no-sidebar {% endif %}{% if page_state != 'ready' %}notes-access-body {% endif %}bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-analytics-mode="public-choice" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block body_attrs %} class="{% if not viewer_authenticated %}notes-no-sidebar {% endif %}{% if page_state != 'ready' %}notes-access-body {% endif %}bg-surface text-on-surface font-body min-h-screen flex flex-col antialiased" data-analytics-mode="public-choice" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     <global class="thenav"
         data-authenticated="{{ 'true' if viewer_authenticated else 'false' }}"
         data-has-sidebar="{{ 'true' if viewer_authenticated else 'false' }}"
@@ -80,5 +90,4 @@
         </section>
         {% endif %}
     </main>
-</body>
-</html>
+{% endblock %}

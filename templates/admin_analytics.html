@@ -1,24 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <title>Admin Analytics - APStudy Nest</title>
     <script>window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";</script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}" />
+{% endblock %}
+
+{% block title %}{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/analytics.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/responsive.css') }}" />
-</head>
-<body class="admin-page" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block shared_head_scripts %}{% endblock %}
+
+{% block body_attrs %} class="admin-page" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     {% include "_admin_sidebar.html" %}
     <main class="admin-shell admin-analytics-shell" data-admin-analytics data-default-range="{{ default_range }}">
         <header class="admin-header admin-page-header admin-analytics-header">
@@ -286,9 +287,11 @@
         <div class="admin-inline-notice admin-analytics-notice" data-analytics-notice hidden></div>
     </main>
 
+{% endblock %}
+
+{% block body_scripts %}
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-nav.js') }}" defer></script>
     <script src="https://www.gstatic.com/charts/loader.js" defer></script>
     <script src="{{ url_for('static', filename='js/admin-analytics.js') }}" defer></script>
-</body>
-</html>
+{% endblock %}
