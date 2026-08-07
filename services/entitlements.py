@@ -1,7 +1,6 @@
 """Shared tier definitions, usage accounting, and quota enforcement."""
 
 import logging
-import os
 import sqlite3
 
 from appwrite.exception import AppwriteException
@@ -11,6 +10,7 @@ from appwrite_client import COLLECTIONS
 from appwrite_helpers import first_row, list_rows_all
 from services.app_config import get_config, set_config
 from services.database import db_connection
+from services.environment_config import runtime_environment_config
 
 
 logger = logging.getLogger(__name__)
@@ -243,7 +243,7 @@ def usage_for_user(user_id, user_doc=None):
     media = _rows(COLLECTIONS["note_media"], [Query.equal("user_id", [normalized_id])])
     chat_attachments = (
         _rows(COLLECTIONS["chat_attachments"], [Query.equal("user_id", [normalized_id])])
-        if os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID")
+        if runtime_environment_config().appwrite_chat_attachments_enabled
         else []
     )
     notes = _rows(COLLECTIONS["notes"], [Query.equal("user_id", [normalized_id])])

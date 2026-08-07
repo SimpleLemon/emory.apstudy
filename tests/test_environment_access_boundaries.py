@@ -17,7 +17,6 @@ EXPECTED_OS_ENVIRON_ACCESS = Counter(
         ("blueprints/admin.py", "mapping"): 2,
         ("config.py", "get"): 1,
         ("scripts/backup_nest_db.py", "get"): 2,
-        ("services/entitlements.py", "get"): 1,
         ("services/host_admin.py", "mapping"): 2,
     }
 )
