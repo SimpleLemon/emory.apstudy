@@ -9,6 +9,7 @@ from appwrite.exception import AppwriteException
 from werkzeug.exceptions import NotFound
 
 import blueprints.auth as auth
+import services.auth_session as auth_session
 import services.oauth_providers as oauth_providers
 from app import create_app
 from avatar_images import avatar_url_for_size
@@ -1098,6 +1099,57 @@ class AuthSessionErrorContractTestCase(unittest.TestCase):
         })
         fetch_identity.assert_called_once_with("google", "google-token")
         legacy_http_get.assert_not_called()
+
+    def test_session_login_uses_extracted_service_seam(self):
+        remote_user = {
+            "$id": "user-1",
+            "email": "student@example.com",
+            "name": "Student",
+        }
+        completed_login = {"redirect": "/dashboard", "user_id": "user-1"}
+
+        with self.app.test_client() as client:
+            with patch.object(
+                auth,
+                "_fetch_provider_identity",
+                return_value={"email": "student@example.com"},
+            ), patch.object(
+                auth,
+                "_account_from_user_id",
+                return_value=remote_user,
+            ), patch.object(
+                auth_session,
+                "_complete_appwrite_login",
+                return_value=completed_login,
+            ) as complete_login, patch.object(
+                auth,
+                "get_row_safe",
+                side_effect=AssertionError("legacy Appwrite login path invoked"),
+            ) as legacy_get_row:
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "google",
+                        "provider_access_token": "google-token",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {
+            "redirect": "/dashboard",
+            "status": "ok",
+            "user_id": "user-1",
+        })
+        complete_login.assert_called_once()
+        call_args = complete_login.call_args
+        self.assertEqual(call_args.args, (remote_user,))
+        self.assertEqual(call_args.kwargs["provider"], "google")
+        self.assertEqual(call_args.kwargs["email"], "student@example.com")
+        self.assertEqual(call_args.kwargs["provider_access_token"], "google-token")
+        self.assertEqual(call_args.kwargs["page_context"], "auth/session")
+        self.assertIn("dependencies", call_args.kwargs)
+        legacy_get_row.assert_not_called()
 
 
 class AvatarStorageServiceTestCase(unittest.TestCase):
