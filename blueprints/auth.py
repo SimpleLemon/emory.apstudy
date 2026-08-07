@@ -44,7 +44,7 @@ from avatar_images import DEFAULT_AVATAR_URL
 from services.avatar_storage import delete_avatar_file, store_avatar_from_url
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_server_log_event, emit_user_event, format_actor, format_user_target
-from services import discord_bridge, invites, notes_collaboration
+from services import discord_bridge, invites, notes_collaboration, oauth_providers
 from services.entitlements import TIER_BADGES, TIER_LABELS, normalize_tier
 from services.user_profile import (
     USERNAME_MAX_LENGTH,
@@ -497,98 +497,7 @@ def _discord_avatar_url(profile):
 
 
 def _fetch_provider_identity(provider, access_token):
-    if not provider or not access_token:
-        return {}
-
-    provider_key = provider.lower()
-    try:
-        if provider_key == "google":
-            response = http_requests.get(
-                "https://www.googleapis.com/oauth2/v2/userinfo",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=8,
-            )
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("verified_email") is False:
-                    logger.warning("Google token email is not verified")
-                    return {}
-                return {
-                    "id": data.get("id"),
-                    "email": data.get("email"),
-                    "name": data.get("name"),
-                    "avatar_url": data.get("picture"),
-                }
-            logger.warning("Google identity fetch failed: %s", response.status_code)
-            return {}
-
-        if provider_key == "github":
-            response = http_requests.get(
-                "https://api.github.com/user",
-                headers={
-                    "Authorization": f"Bearer {access_token}",
-                    "Accept": "application/vnd.github+json",
-                },
-                timeout=8,
-            )
-            if response.status_code != 200:
-                logger.warning("GitHub identity fetch failed: %s", response.status_code)
-                return {}
-
-            data = response.json()
-            email = data.get("email")
-            if not email:
-                emails_response = http_requests.get(
-                    "https://api.github.com/user/emails",
-                    headers={
-                        "Authorization": f"Bearer {access_token}",
-                        "Accept": "application/vnd.github+json",
-                    },
-                    timeout=8,
-                )
-                if emails_response.status_code == 200:
-                    emails = emails_response.json()
-                    primary_email = next(
-                        (
-                            item.get("email")
-                            for item in emails
-                            if item.get("primary") and item.get("verified")
-                        ),
-                        None,
-                    )
-                    email = primary_email
-
-            return {
-                "id": data.get("id"),
-                "email": email,
-                "name": data.get("name") or data.get("login"),
-                "avatar_url": data.get("avatar_url"),
-            }
-
-        if provider_key == "discord":
-            response = http_requests.get(
-                "https://discord.com/api/users/@me",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=8,
-            )
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("verified") is False:
-                    logger.warning("Discord token email is not verified")
-                    return {}
-                return {
-                    "id": data.get("id"),
-                    "email": data.get("email"),
-                    "name": data.get("global_name") or data.get("username"),
-                    "username": data.get("username") or data.get("global_name"),
-                    "avatar_url": _discord_avatar_url(data),
-                }
-            logger.warning("Discord identity fetch failed: %s", response.status_code)
-            return {}
-    except Exception:
-        logger.exception("Failed to fetch provider identity: %s", provider)
-
-    return {}
+    return oauth_providers._fetch_provider_identity(provider, access_token)
 
 
 def _format_member_since(value):
