@@ -6,6 +6,7 @@ import logging
 import secrets
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+from urllib.parse import urlparse, urlunparse
 
 from flask import url_for
 from werkzeug.routing import BuildError
@@ -23,12 +24,6 @@ from appwrite_helpers import (
     parse_datetime,
     update_row_safe,
 )
-from blueprints.settings import (
-    _normalize_calendar_url,
-    _normalize_canvas_calendar_url,
-    _settings_defaults,
-    _validate_other_calendar_urls,
-)
 from services.calendar_store import (
     create_calendar_row,
     delete_calendar_row,
@@ -37,11 +32,14 @@ from services.calendar_store import (
     update_calendar_row,
 )
 from services.calendar_urls import (
+    MAX_OTHER_CALENDAR_URLS,
     iter_valid_other_calendar_urls,
     load_other_calendar_urls,
+    normalize_calendar_url as _normalize_calendar_url,
 )
 from services.feed_fetcher import derive_feed_status
 from services.row_utils import row_id as _row_id
+from services.settings_defaults import settings_defaults as _settings_defaults
 from services.task_calendar import (
     task_calendar_events_for_user,
     task_calendar_source,
@@ -58,6 +56,9 @@ DEFAULT_LOCAL_SOURCE_ID = f"{LOCAL_SOURCE_PREFIX}default"
 DEFAULT_LOCAL_SOURCE_NAME = "Personal"
 DEFAULT_CALENDAR_COLOR = "#6366f1"
 SIMULATED_CALENDAR_NAME = "Simulated Courses"
+CANVAS_CALENDAR_HOST_PREFIX = "canvas."
+CANVAS_CALENDAR_HOST_SUFFIX = ".edu"
+CANVAS_CALENDAR_PATH_PREFIXES = ("/feeds/calendar", "/feeds/calendars")
 CALENDAR_SHARE_CODE_LENGTH = 16
 CALENDAR_SHARE_CODE_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 CALENDAR_SHARE_DATE_SCOPES = {"all", "fixed", "rolling"}
@@ -66,6 +67,81 @@ CALENDAR_SHARE_MAX_ROLLING_DAYS = 366
 PREFERENCES_BATCH_LIMIT = 50
 TIMED_EVENT_REMINDERS = {-1, 0, 5, 10, 15, 30, 60, 120, 1440, 2880}
 ALL_DAY_EVENT_REMINDERS = {-1, -540, 900, 2340, 9540}
+
+
+def _normalize_canvas_calendar_url(url):
+    """Return a normalized Canvas calendar URL, or None if invalid."""
+    if not isinstance(url, str):
+        return None
+
+    raw = url.strip()
+    if not raw:
+        return None
+
+    if "://" not in raw:
+        raw = f"https://{raw}"
+
+    parsed = urlparse(raw)
+    if parsed.scheme.lower() != "https":
+        return None
+
+    host = parsed.netloc.lower()
+    if not (host.startswith(CANVAS_CALENDAR_HOST_PREFIX) and host.endswith(CANVAS_CALENDAR_HOST_SUFFIX)):
+        return None
+
+    path = parsed.path or ""
+    if not path.startswith(CANVAS_CALENDAR_PATH_PREFIXES):
+        return None
+
+    normalized_path = path.rstrip("/")
+    return urlunparse((
+        "https",
+        host,
+        normalized_path,
+        "",
+        parsed.query,
+        "",
+    ))
+
+
+def _validate_other_calendar_urls(other_urls, canvas_url):
+    """Validate optional external calendar links and prevent duplicates."""
+    if other_urls is None:
+        return []
+    if not isinstance(other_urls, list):
+        raise ValueError("other_ical_urls must be a list.")
+
+    cleaned = []
+    seen = set()
+    normalized_canvas = _normalize_calendar_url(canvas_url)
+
+    for raw in other_urls:
+        if not isinstance(raw, str):
+            raise ValueError("Each calendar URL must be a string.")
+
+        value = raw.strip()
+        if not value:
+            continue
+
+        normalized = _normalize_calendar_url(value)
+        if not normalized:
+            raise ValueError(
+                "Each optional calendar link must be a valid http(s) or webcal URL."
+            )
+
+        if normalized_canvas and normalized == normalized_canvas:
+            raise ValueError("Optional calendar links cannot duplicate the Nest Canvas calendar.")
+
+        if normalized in seen:
+            raise ValueError("Duplicate optional calendar links are not allowed.")
+
+        seen.add(normalized)
+        cleaned.append(normalized)
+
+    if len(cleaned) > MAX_OTHER_CALENDAR_URLS:
+        raise ValueError(f"You can add up to {MAX_OTHER_CALENDAR_URLS} optional calendar links.")
+
+    return cleaned
 
 
 def _canonical_feed_url(feed_url):

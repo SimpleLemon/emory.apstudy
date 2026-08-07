@@ -309,10 +309,10 @@ def save_onboarding_step_five(user, user_id, dependencies):
     user.onboarding_complete = True
     user.onboarding_step = 5
 
-    from blueprints.chat_api import (
-        create_welcome_dm_for_user,
-        initialize_new_user_discord_read_states,
-    )
+    create_welcome_dm_for_user = dependencies["create_welcome_dm_for_user"]
+    initialize_new_user_discord_read_states = dependencies[
+        "initialize_new_user_discord_read_states"
+    ]
 
     try:
         initialize_new_user_discord_read_states(user_id)

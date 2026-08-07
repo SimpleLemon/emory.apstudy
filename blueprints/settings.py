@@ -13,7 +13,6 @@ import secrets
 import logging
 import shutil
 from datetime import datetime
-from urllib.parse import urlparse, urlunparse
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from flask_login import login_required, current_user
@@ -49,6 +48,10 @@ from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_creation_event, emit_user_event, format_actor
 from services import discord_bridge, invites
 from services.calendar_store import delete_calendar_rows_by_user
+from services.calendar_events import (
+    _normalize_canvas_calendar_url,
+    _validate_other_calendar_urls,
+)
 from services.calendar_urls import (
     MAX_OTHER_CALENDAR_URLS,
     iter_valid_other_calendar_urls as _iter_valid_other_calendar_urls,
@@ -468,81 +471,6 @@ def delete_account():
     return jsonify({"status": "ok"})
 
 
-def _normalize_canvas_calendar_url(url):
-    """Return a normalized Canvas calendar URL, or None if invalid."""
-    if not isinstance(url, str):
-        return None
-
-    raw = url.strip()
-    if not raw:
-        return None
-
-    if "://" not in raw:
-        raw = f"https://{raw}"
-
-    parsed = urlparse(raw)
-    if parsed.scheme.lower() != "https":
-        return None
-
-    host = parsed.netloc.lower()
-    if not (host.startswith(CANVAS_CALENDAR_HOST_PREFIX) and host.endswith(CANVAS_CALENDAR_HOST_SUFFIX)):
-        return None
-
-    path = parsed.path or ""
-    if not path.startswith(CANVAS_CALENDAR_PATH_PREFIXES):
-        return None
-
-    normalized_path = path.rstrip("/")
-    return urlunparse((
-        "https",
-        host,
-        normalized_path,
-        "",
-        parsed.query,
-        "",
-    ))
-
-
-def _validate_other_calendar_urls(other_urls, canvas_url):
-    """Validate optional external calendar links and prevent duplicates."""
-    if other_urls is None:
-        return []
-    if not isinstance(other_urls, list):
-        raise ValueError("other_ical_urls must be a list.")
-
-    cleaned = []
-    seen = set()
-    normalized_canvas = _normalize_calendar_url(canvas_url)
-
-    for raw in other_urls:
-        if not isinstance(raw, str):
-            raise ValueError("Each calendar URL must be a string.")
-
-        value = raw.strip()
-        if not value:
-            continue
-
-        normalized = _normalize_calendar_url(value)
-        if not normalized:
-            raise ValueError(
-                "Each optional calendar link must be a valid http(s) or webcal URL."
-            )
-
-        if normalized_canvas and normalized == normalized_canvas:
-            raise ValueError("Optional calendar links cannot duplicate the Nest Canvas calendar.")
-
-        if normalized in seen:
-            raise ValueError("Duplicate optional calendar links are not allowed.")
-
-        seen.add(normalized)
-        cleaned.append(normalized)
-
-    if len(cleaned) > MAX_OTHER_CALENDAR_URLS:
-        raise ValueError(f"You can add up to {MAX_OTHER_CALENDAR_URLS} optional calendar links.")
-
-    return cleaned
-
-
 EDUCATION_LEVELS = {
     "High School",
     "Undergraduate",
@@ -634,6 +562,16 @@ def _onboarding_context():
     }
 
 
+def _onboarding_chat_dependencies():
+    """Resolve post-onboarding chat hooks at request time for patchability."""
+    from blueprints import chat_api
+
+    return {
+        "create_welcome_dm_for_user": chat_api.create_welcome_dm_for_user,
+        "initialize_new_user_discord_read_states": chat_api.initialize_new_user_discord_read_states,
+    }
+
+
 # ── Page routes ───────────────────────────────────────────────────────────────
 
 @settings_bp.route("/onboarding")
@@ -706,6 +644,7 @@ def save_onboarding():
     if step == 4:
         return save_onboarding_step_four(current_user, user_id, dependencies)
     if step == 5:
+        dependencies.update(_onboarding_chat_dependencies())
         return save_onboarding_step_five(current_user, user_id, dependencies)
 
     return jsonify({"error": "Invalid onboarding step."}), 400
