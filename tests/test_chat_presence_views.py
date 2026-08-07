@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 from flask import Flask
 
 import blueprints.chat_api as chat_api
-from services import chat_presence_views
+from services import chat_presence_runtime, chat_presence_views
 
 
 class _QueryStub:
@@ -15,6 +15,20 @@ class _QueryStub:
 
 
 class TestChatPresenceViews(unittest.TestCase):
+    def test_presence_status_from_scopes_uses_real_scope_precedence(self):
+        self.assertEqual(
+            chat_presence_runtime.presence_status_from_scopes({"site", "chat"}),
+            "active",
+        )
+        self.assertEqual(
+            chat_presence_runtime.presence_status_from_scopes({"site"}),
+            "busy",
+        )
+        self.assertEqual(
+            chat_presence_runtime.presence_status_from_scopes(set()),
+            "offline",
+        )
+
     def test_online_projection_keeps_focus_and_scope_metadata(self):
         rows = [
             {

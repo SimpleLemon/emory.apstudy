@@ -177,6 +177,37 @@ class NotesCollaborationDatabaseTests(CollaborationDatabaseTestCase):
         self.assertEqual(statuses["viewer@example.test"], "accepted")
         self.assertEqual(statuses["other@example.test"], "accepted")
 
+    def test_claim_invitations_upgrades_existing_viewer_access(self):
+        with database.db_connection(self.path) as conn:
+            conn.execute(
+                """
+                INSERT INTO note_access_grants (
+                    id, owner_user_id, resource_type, resource_id, principal_type,
+                    principal_id, access_level, granted_by_user_id, created_at, updated_at
+                ) VALUES ('viewer-grant', 'owner', 'note', 'note-1', 'user', 'viewer', 'viewer', 'owner', ?, ?)
+                """,
+                [NOW, NOW],
+            )
+
+        with patch.object(notes_collaboration, "utcnow_iso", return_value=NOW):
+            notes_collaboration.replace_pending_invitations(
+                "note",
+                "note-1",
+                "owner",
+                [{"email": "viewer@example.test", "role": "editor"}],
+                "owner",
+            )
+            claimed = notes_collaboration.claim_pending_invitations(
+                "viewer",
+                "viewer@example.test",
+            )
+
+        self.assertEqual(len(claimed), 1)
+        viewer_grant = self.row(
+            "SELECT access_level FROM note_access_grants WHERE resource_id = 'note-1' AND principal_id = 'viewer'"
+        )
+        self.assertEqual(viewer_grant["access_level"], "editor")
+
     def test_access_events_stringify_identifiers_and_preserve_optional_fields(self):
         with patch.object(notes_collaboration, "utcnow_iso", return_value=NOW):
             notes_collaboration.record_access_event(

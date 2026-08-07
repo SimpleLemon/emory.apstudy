@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime, timezone
+from functools import partial
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -126,6 +127,7 @@ class DiscordSyncServiceTests(unittest.TestCase):
     def test_partial_update_does_not_wipe_missing_message_fields(self):
         existing = {
             "$id": "message-row",
+            "channel_id": "nest_chat",
             "content": "keep me",
             "rendered_html": "keep me",
             "updated_at": "2026-05-26T22:00:00Z",
@@ -134,12 +136,15 @@ class DiscordSyncServiceTests(unittest.TestCase):
             "channel_id": "nest_chat",
             "updated_at": "2026-05-26T22:02:00Z",
         }
-        update_fn = Mock(return_value=existing)
+        update_fn = Mock(
+            side_effect=lambda _collection, _row_id, changes: {**existing, **changes}
+        )
         emit_fn = Mock()
         dependencies = _dependencies(
-            discord_message_changes_fn=lambda _existing, _payload: {
-                "updated_at": payload["updated_at"]
-            },
+            discord_message_changes_fn=partial(
+                chat_discord_sync.discord_message_changes,
+                compare_fields=chat_api.DISCORD_SYNC_COMPARE_FIELDS,
+            ),
             update_row_fn=update_fn,
             emit_chat_event_fn=emit_fn,
         )
@@ -154,7 +159,12 @@ class DiscordSyncServiceTests(unittest.TestCase):
             dependencies=dependencies,
         )
 
-        self.assertEqual(row, existing)
+        self.assertEqual(
+            row,
+            {**existing, "updated_at": payload["updated_at"]},
+        )
+        self.assertEqual(row["content"], "keep me")
+        self.assertEqual(row["rendered_html"], "keep me")
         self.assertFalse(created)
         self.assertEqual(update_fn.call_args.args[2], {"updated_at": payload["updated_at"]})
         self.assertEqual(emit_fn.call_args.args[:3], ("channel", "nest_chat", "message_updated"))
