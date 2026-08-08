@@ -10,6 +10,7 @@ from appwrite_helpers import get_row_safe, parse_datetime
 
 
 DASHBOARD_LIST_LIMIT = 8
+DASHBOARD_CALENDAR_UPCOMING_LIMIT = 80
 DASHBOARD_TASK_LIMIT = 8
 DASHBOARD_TASK_FILTER_SOURCE_LIMIT = 100
 DASHBOARD_TASK_PRIORITY_RANK = {
@@ -39,6 +40,178 @@ def date_key(value):
 def sort_key(value):
     parsed = as_utc(value)
     return parsed or datetime.min.replace(tzinfo=timezone.utc)
+
+
+def load_calendar_summary(user_id, user_settings, dependencies):
+    today = datetime.now(timezone.utc).date()
+    today_start = datetime(
+        today.year,
+        today.month,
+        today.day,
+        tzinfo=timezone.utc,
+    )
+    week_start_date = today - timedelta(days=(today.weekday() + 1) % 7)
+    week_start = datetime(
+        week_start_date.year,
+        week_start_date.month,
+        week_start_date.day,
+        tzinfo=timezone.utc,
+    )
+    week_end = week_start + timedelta(days=7)
+    upcoming_end = today_start + timedelta(days=31)
+    month_start = datetime(today.year, today.month, 1, tzinfo=timezone.utc)
+    if today.month == 12:
+        month_end = datetime(today.year + 1, 1, 1, tzinfo=timezone.utc)
+    else:
+        month_end = datetime(today.year, today.month + 1, 1, tzinfo=timezone.utc)
+    range_start = min(month_start, week_start, today_start)
+    range_end = max(month_end, week_end, upcoming_end)
+
+    try:
+        from blueprints.calendar_api import (
+            _configured_calendar_sources,
+            _configured_feed_urls,
+            _filter_configured_cache_events,
+            _load_calendar_feed_metadata,
+            _load_calendar_preferences,
+            _load_local_calendar_sources,
+            _serialize_event,
+            _serialize_user_event,
+        )
+
+        feed_urls = _configured_feed_urls(user_settings)
+        cache_rows = dependencies["list_calendar_rows_all"](
+            COLLECTIONS["calendar_cache"],
+            [
+                Query.equal("user_id", [user_id]),
+                Query.order_asc("event_start"),
+            ],
+        )
+        event_rows = dependencies["list_calendar_rows_all"](
+            COLLECTIONS["user_events"],
+            [
+                Query.equal("user_id", [user_id]),
+                Query.order_asc("start"),
+            ],
+        )
+        preferences = _load_calendar_preferences(user_id)
+        local_sources = _load_local_calendar_sources(user_id)
+        feed_metadata = _load_calendar_feed_metadata(user_id)
+        sources = _configured_calendar_sources(
+            user_settings,
+            cache_rows,
+            preferences,
+            feed_metadata,
+            local_sources,
+            event_rows,
+        )
+        cache_rows = _filter_configured_cache_events(cache_rows, feed_urls)
+
+        serialized = [
+            _serialize_event(row, user_settings)
+            for row in cache_rows
+        ]
+        serialized.extend(_serialize_user_event(row) for row in event_rows)
+
+        try:
+            from blueprints.tasks_api import task_calendar_events_for_user
+
+            serialized.extend(
+                task_calendar_events_for_user(
+                    user_id,
+                    range_start,
+                    range_end,
+                )
+            )
+        except (AppwriteException, AttributeError):
+            dependencies["logger"].exception(
+                "Failed to load task events for dashboard calendar user %s",
+                user_id,
+            )
+
+        visible = []
+        source_by_id = {source.get("id"): source for source in sources}
+        for event in serialized:
+            start = dependencies["as_utc"](event.get("start"))
+            end = dependencies["as_utc"](event.get("end")) or start
+            if not start:
+                continue
+            if end and end < range_start:
+                continue
+            if start >= range_end:
+                continue
+            source = source_by_id.get(event.get("calendar_id")) or {}
+            color = event.get("color") or source.get("color_hex") or "#6366f1"
+            visible.append({
+                "id": (
+                    event.get("id")
+                    or event.get("uid")
+                    or event.get("event_ref")
+                ),
+                "title": event.get("title") or "Untitled event",
+                "start": event.get("start"),
+                "end": event.get("end"),
+                "date": dependencies["date_key"](event.get("start")),
+                "color": color,
+                "all_day": bool(event.get("is_all_day")),
+            })
+        visible.sort(
+            key=lambda item: dependencies["sort_key"](item.get("start"))
+        )
+        month_events = [
+            event
+            for event in visible
+            if dependencies["sort_key"](
+                event.get("end") or event.get("start")
+            ) >= month_start
+            and dependencies["sort_key"](event.get("start")) < month_end
+        ]
+        week_events = [
+            event
+            for event in visible
+            if dependencies["sort_key"](
+                event.get("end") or event.get("start")
+            ) >= week_start
+            and dependencies["sort_key"](event.get("start")) < week_end
+        ]
+        upcoming_events = [
+            event
+            for event in visible
+            if dependencies["sort_key"](
+                event.get("end") or event.get("start")
+            ) >= today_start
+            and dependencies["sort_key"](event.get("start")) < upcoming_end
+        ]
+        return {
+            "month": today.isoformat()[:7],
+            "week_start": week_start.date().isoformat(),
+            "upcoming_start": today.isoformat(),
+            "upcoming_end": (today + timedelta(days=30)).isoformat(),
+            "events": month_events[:80],
+            "week_events": week_events[:40],
+            "upcoming_events": upcoming_events[
+                :DASHBOARD_CALENDAR_UPCOMING_LIMIT
+            ],
+            "event_count": len(month_events),
+            "setup_complete": bool(feed_urls or local_sources or event_rows),
+            "error": None,
+        }
+    except AppwriteException:
+        dependencies["logger"].exception(
+            "Failed to build dashboard calendar summary"
+        )
+        return {
+            "month": today.isoformat()[:7],
+            "week_start": week_start.date().isoformat(),
+            "upcoming_start": today.isoformat(),
+            "upcoming_end": (today + timedelta(days=30)).isoformat(),
+            "events": [],
+            "week_events": [],
+            "upcoming_events": [],
+            "event_count": 0,
+            "setup_complete": False,
+            "error": "Unable to load calendar.",
+        }
 
 
 def task_is_complete(task):

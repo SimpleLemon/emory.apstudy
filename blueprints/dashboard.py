@@ -4,7 +4,7 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, g, jsonify, render_template, redirect, request, url_for
 from flask_login import login_required, current_user
@@ -25,6 +25,7 @@ from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_genera
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import list_calendar_rows_all
 from services.dashboard_summary import (
+    DASHBOARD_CALENDAR_UPCOMING_LIMIT,
     DASHBOARD_LIST_LIMIT,
     DASHBOARD_TASK_FILTER_SOURCE_LIMIT,
     DASHBOARD_TASK_LIMIT,
@@ -34,6 +35,7 @@ from services.dashboard_summary import (
     dashboard_task_bucket,
     date_key as dashboard_date_key,
     load_courses_summary,
+    load_calendar_summary,
     load_message_rooms,
     load_recent_files,
     load_recent_notes,
@@ -72,7 +74,6 @@ DASHBOARD_ALLOWED_TILE_SIZES = {
 DASHBOARD_LAYOUT_VERSION = 4
 DASHBOARD_CALENDAR_VIEWS = ("month", "week", "upcoming")
 DASHBOARD_DEFAULT_CALENDAR_VIEW = "month"
-DASHBOARD_CALENDAR_UPCOMING_LIMIT = 80
 DASHBOARD_TILE_LIMIT = 12
 DASHBOARD_DUPLICATE_TILE_LIMIT = 4
 DASHBOARD_DUPLICATE_TILE_TYPES = {"calendar", "tasks"}
@@ -499,131 +500,11 @@ def _build_checklist(calendar_complete=False, tasks_complete=False):
 
 
 def _load_calendar_summary(user_id, user_settings):
-    today = datetime.now(timezone.utc).date()
-    today_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
-    week_start_date = today - timedelta(days=(today.weekday() + 1) % 7)
-    week_start = datetime(week_start_date.year, week_start_date.month, week_start_date.day, tzinfo=timezone.utc)
-    week_end = week_start + timedelta(days=7)
-    upcoming_end = today_start + timedelta(days=31)
-    month_start = datetime(today.year, today.month, 1, tzinfo=timezone.utc)
-    if today.month == 12:
-        month_end = datetime(today.year + 1, 1, 1, tzinfo=timezone.utc)
-    else:
-        month_end = datetime(today.year, today.month + 1, 1, tzinfo=timezone.utc)
-    range_start = min(month_start, week_start, today_start)
-    range_end = max(month_end, week_end, upcoming_end)
-
-    try:
-        from blueprints.calendar_api import (
-            _configured_calendar_sources,
-            _configured_feed_urls,
-            _filter_configured_cache_events,
-            _load_calendar_feed_metadata,
-            _load_calendar_preferences,
-            _load_local_calendar_sources,
-            _serialize_event,
-            _serialize_user_event,
-        )
-
-        feed_urls = _configured_feed_urls(user_settings)
-        cache_rows = list_calendar_rows_all(
-            COLLECTIONS["calendar_cache"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("event_start"),
-            ],
-        )
-        event_rows = list_calendar_rows_all(
-            COLLECTIONS["user_events"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("start"),
-            ],
-        )
-        preferences = _load_calendar_preferences(user_id)
-        local_sources = _load_local_calendar_sources(user_id)
-        feed_metadata = _load_calendar_feed_metadata(user_id)
-        sources = _configured_calendar_sources(
-            user_settings,
-            cache_rows,
-            preferences,
-            feed_metadata,
-            local_sources,
-            event_rows,
-        )
-        cache_rows = _filter_configured_cache_events(cache_rows, feed_urls)
-
-        serialized = [_serialize_event(row, user_settings) for row in cache_rows]
-        serialized.extend(_serialize_user_event(row) for row in event_rows)
-
-        try:
-            from blueprints.tasks_api import task_calendar_events_for_user
-
-            serialized.extend(task_calendar_events_for_user(user_id, range_start, range_end))
-        except (AppwriteException, AttributeError):
-            logger.exception("Failed to load task events for dashboard calendar user %s", user_id)
-
-        visible = []
-        source_by_id = {source.get("id"): source for source in sources}
-        for event in serialized:
-            start = _as_utc(event.get("start"))
-            end = _as_utc(event.get("end")) or start
-            if not start:
-                continue
-            if end and end < range_start:
-                continue
-            if start >= range_end:
-                continue
-            source = source_by_id.get(event.get("calendar_id")) or {}
-            color = event.get("color") or source.get("color_hex") or "#6366f1"
-            visible.append({
-                "id": event.get("id") or event.get("uid") or event.get("event_ref"),
-                "title": event.get("title") or "Untitled event",
-                "start": event.get("start"),
-                "end": event.get("end"),
-                "date": _date_key(event.get("start")),
-                "color": color,
-                "all_day": bool(event.get("is_all_day")),
-            })
-        visible.sort(key=lambda item: _sort_key(item.get("start")))
-        month_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= month_start and _sort_key(event.get("start")) < month_end
-        ]
-        week_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= week_start and _sort_key(event.get("start")) < week_end
-        ]
-        upcoming_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= today_start and _sort_key(event.get("start")) < upcoming_end
-        ]
-        return {
-            "month": today.isoformat()[:7],
-            "week_start": week_start.date().isoformat(),
-            "upcoming_start": today.isoformat(),
-            "upcoming_end": (today + timedelta(days=30)).isoformat(),
-            "events": month_events[:80],
-            "week_events": week_events[:40],
-            "upcoming_events": upcoming_events[:DASHBOARD_CALENDAR_UPCOMING_LIMIT],
-            "event_count": len(month_events),
-            "setup_complete": bool(feed_urls or local_sources or event_rows),
-            "error": None,
-        }
-    except AppwriteException:
-        logger.exception("Failed to build dashboard calendar summary")
-        return {
-            "month": today.isoformat()[:7],
-            "week_start": week_start.date().isoformat(),
-            "upcoming_start": today.isoformat(),
-            "upcoming_end": (today + timedelta(days=30)).isoformat(),
-            "events": [],
-            "week_events": [],
-            "upcoming_events": [],
-            "event_count": 0,
-            "setup_complete": False,
-            "error": "Unable to load calendar.",
-        }
+    return load_calendar_summary(
+        user_id,
+        user_settings,
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _task_is_complete(task):
@@ -662,7 +543,9 @@ def _dashboard_summary_dependencies():
         "as_utc": _as_utc,
         "can_access_channel": _dashboard_can_access_channel,
         "dashboard_task_bucket": _dashboard_task_bucket,
+        "date_key": _date_key,
         "format_datetime": format_datetime,
+        "list_calendar_rows_all": list_calendar_rows_all,
         "list_rows_all": list_rows_all,
         "list_rows_safe": list_rows_safe,
         "logger": logger,
