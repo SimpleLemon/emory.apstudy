@@ -1,13 +1,8 @@
+import { escapeHtml } from "../core/ui-primitives-module.js";
+
 export const DEFAULT_COLOR = "#6366f1";
 
-export function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("'", "&#39;");
-}
+export { escapeHtml };
 
 function parseHex(hex) {
   const clean = String(hex || "").replace("#", "");

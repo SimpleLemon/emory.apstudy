@@ -1,3 +1,5 @@
+import { escapeHtml } from "../../core/ui-primitives-module.js";
+
 // Event create/edit modal and API integration.
 (function () {
     let modal = null;
@@ -7,15 +9,6 @@
     let selectedCalendarId = null;
     let selectedColor = null;
     let openerEl = null;
-
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#39;");
-    }
 
     function getCalendarOptions() {
         if (typeof window.getCalendarOptionsForEventForm === "function") {

@@ -137,10 +137,14 @@ test("command palette keeps primary navigation, theme actions, and global contro
 
 test("calendar event form preserves escaping, API routes, and cache refresh behavior", async () => {
     const source = await sourceFor("static/js/calendar/events/event-form.js");
+    const primitives = await sourceFor("static/js/core/ui-primitives.js");
 
-    for (const replacement of ["&amp;", "&lt;", "&gt;", "&quot;", "&#39;"]) {
-        assert.match(source, new RegExp(replacement.replace("&", "&")));
+    assert.match(primitives, /div\.textContent = value == null \? '' : String\(value\)/);
+    assert.match(primitives, /return div\.innerHTML/);
+    for (const replacement of ["&quot;", "&#39;"]) {
+        assert.match(primitives, new RegExp(replacement.replace("&", "&")));
     }
+    assert.match(source, /import \{ escapeHtml \} from "\.\.\/\.\.\/core\/ui-primitives-module\.js"/);
 
     assert.match(source, /window\.openCalendarEventForm = function/);
     assert.match(source, /fetch\("\/api\/calendar\/events"/);

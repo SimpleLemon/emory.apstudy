@@ -1,5 +1,6 @@
 import { HocuspocusProvider } from '@hocuspocus/provider';
 import * as Y from 'yjs';
+import { escapeHtml } from '../../core/ui-primitives-module.js';
 
 const ACTIVE_ROLES = new Set(['owner', 'editor', 'reviewer']);
 const CURSOR_COLORS = ['#7c3aed', '#0ea5e9', '#16a34a', '#f97316', '#db2777', '#0891b2', '#9333ea', '#dc2626'];
@@ -16,15 +17,6 @@ export function deterministicCollaboratorColor(seed) {
 function initialsFor(value) {
     const words = String(value || 'Nest User').trim().split(/\s+/).filter(Boolean);
     return words.slice(0, 2).map((word) => word[0]?.toUpperCase() || '').join('') || 'N';
-}
-
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
 }
 
 function absoluteWebSocketUrl(path) {
