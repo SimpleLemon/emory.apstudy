@@ -5,10 +5,10 @@ import re
 import sqlite3
 import uuid
 from contextlib import contextmanager
-from datetime import datetime, timezone
 
 from appwrite.exception import AppwriteException
 from flask import current_app, g, has_app_context
+from services.time_utils import utcnow_iso
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -48,10 +48,6 @@ BOOLEAN_COLUMNS = {
     "user_invites": {"is_active"},
     "user_invite_attributions": {"is_anonymized"},
 }
-
-
-def utcnow_iso():
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def resolve_env_path(path_value):

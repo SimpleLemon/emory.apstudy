@@ -25,6 +25,7 @@ from services.database import db_connection
 from services import invites, note_media, note_store, notes_collaboration
 from services.appwrite_storage import note_media_upload_failure
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, check_storage, request_entitlements
+from services.time_utils import utcnow_iso as _utcnow_iso
 
 
 notes_api_bp = Blueprint("notes_api", __name__)
@@ -46,10 +47,6 @@ def notes_not_found(error):
 @notes_api_bp.errorhandler(500)
 def notes_server_error(error):
     return jsonify({"error": "Unable to complete notes request."}), 500
-
-
-def _utcnow_iso():
-    return format_datetime(datetime.now(timezone.utc))
 
 
 def _parse_page_setup(value):

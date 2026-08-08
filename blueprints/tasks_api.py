@@ -23,6 +23,7 @@ from appwrite_helpers import (
 )
 from services.task_schedule import build_task_occurrences, next_task_occurrence_key
 from services.row_utils import row_id as _row_id
+from services.time_utils import utcnow as _utcnow, utcnow_iso as _utcnow_iso
 from services import invites
 
 
@@ -40,16 +41,6 @@ RECURRENCE_UNITS = {"day", "week", "month", "year"}
 LIST_SORT_MODES = {"default", "date", "deadline", "title"}
 TIMED_REMINDER_MINUTES = {-1, 0, 5, 10, 15, 30, 60, 120, 1440, 2880}
 DATE_ONLY_REMINDER_MINUTES = {-1, -540, 900, 2340, 9540}
-
-
-
-
-def _utcnow():
-    return datetime.now(timezone.utc)
-
-
-def _utcnow_iso():
-    return format_datetime(_utcnow())
 
 
 def _coerce_utc(value):

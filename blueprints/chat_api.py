@@ -61,6 +61,7 @@ from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
 from services.row_utils import row_id as _row_id
+from services.time_utils import utcnow as _now
 from services.universities import normalize_school_key, school_payload, search_universities
 
 
@@ -125,12 +126,6 @@ WELCOME_DM_TEXT = (
     "Welcome to your Nest! If you have any questions, feedback, or run into any issues, "
     "please feel free to message me anytime :)"
 )
-
-
-def _now():
-    return datetime.now(timezone.utc)
-
-
 
 
 def _bounded_string(value, limit, *, empty_as_none=False):

@@ -43,6 +43,7 @@ from services.entitlements import (
     request_entitlements,
 )
 from services.row_utils import row_id as _row_id
+from services.time_utils import utcnow as _utcnow
 
 
 file_share_bp = Blueprint("file_share", __name__)
@@ -56,10 +57,6 @@ SHARE_CODE_LENGTH = 24
 SHARE_CODE_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
 APPWRITE_STORAGE_BACKEND = "appwrite"
 ROOT_FOLDER_ID = "root"
-
-
-def _utcnow():
-    return datetime.now(timezone.utc)
 
 
 def _status_code(exc):
