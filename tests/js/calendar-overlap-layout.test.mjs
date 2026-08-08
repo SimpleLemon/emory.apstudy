@@ -5,7 +5,7 @@ import test from "node:test";
 import { fileURLToPath } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-globalThis.window = {};
+globalThis.window = { APStudyUIPrimitives: { escapeHtml: String } };
 globalThis.document = { documentElement: {} };
 const utilsSource = await readFile(path.join(root, "static/js/calendar/utils.js"), "utf8");
 await import(`data:text/javascript;base64,${Buffer.from(utilsSource).toString("base64")}#calendar-overlap-layout`);

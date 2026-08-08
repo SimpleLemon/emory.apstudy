@@ -193,7 +193,7 @@ test("calendar dashboard keeps cache, public-share, and event-form contracts wir
     assert.match(source, /\/api\/calendar\/share\/\$\{encodeURIComponent\(state\.public\.shareCode\)\}\/events/);
     assert.match(source, /fetch\("\/api\/calendar\/refresh", \{ method: "POST" \}\)/);
     assert.match(source, /fetch\("\/api\/atlas\/sections\/by-id"/);
-    assert.match(source, /function escapeHtml\(value\)/);
+    assert.match(source, /const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
 });
 
 test("dashboard daily quote fetches Flask endpoint and uses one smooth egg card", async () => {
