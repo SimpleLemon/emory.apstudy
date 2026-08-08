@@ -5,6 +5,7 @@ test("week rendering gives isolated groups full width and overlapping groups det
     page.on("pageerror", (error) => errors.push(error.message));
     await page.goto(`${baseURL}/static/js/calendar/utils.js`);
     await page.setContent(`<!doctype html><html><body><div id="calendar"></div></body></html>`);
+    await page.addScriptTag({ url: `${baseURL}/static/js/core/ui-primitives.js` });
     await page.evaluate(async () => {
         await import("/static/js/calendar/utils.js");
         await import("/static/js/calendar/views/week-view.js");
@@ -54,6 +55,7 @@ test("week rendering gives isolated groups full width and overlapping groups det
 test("month rendering turns a timed cross-day event into one compact spanning band", async ({ page, baseURL }) => {
     await page.goto(`${baseURL}/static/js/calendar/utils.js`);
     await page.setContent(`<!doctype html><html><head><link rel="stylesheet" href="${baseURL}/static/css/tailwind.css"></head><body><div id="calendar"></div></body></html>`);
+    await page.addScriptTag({ url: `${baseURL}/static/js/core/ui-primitives.js` });
     await page.evaluate(async () => {
         await import("/static/js/calendar/utils.js");
         await import("/static/js/calendar/views/month-view.js");
@@ -120,6 +122,7 @@ test("month rendering turns a timed cross-day event into one compact spanning ba
 test("week rendering keeps cross-day bands at compact all-day density", async ({ page, baseURL }) => {
     await page.goto(`${baseURL}/static/js/calendar/utils.js`);
     await page.setContent(`<!doctype html><html><head><link rel="stylesheet" href="${baseURL}/static/css/tailwind.css"></head><body><div id="calendar"></div></body></html>`);
+    await page.addScriptTag({ url: `${baseURL}/static/js/core/ui-primitives.js` });
     await page.evaluate(async () => {
         await import("/static/js/calendar/utils.js");
         await import("/static/js/calendar/views/week-view.js");
