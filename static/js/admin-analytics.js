@@ -1,4 +1,5 @@
 (() => {
+  const { escapeHtml } = window.APStudyUIPrimitives;
   const RANGE_KEYS = new Set(["24h", "7d", "14d", "30d", "60d", "all"]);
   let googleChartsRequested = false;
   let googleChartsReady = false;
@@ -160,15 +161,6 @@
     const label = deltaLabel(comparison);
     if (!label) return "";
     return `<span class="${deltaBadgeClass(comparison)}" title="Compared with the previous period" aria-label="${escapeHtml(label)} compared with the previous period"><span>${escapeHtml(label)}${deltaTrendSvg(comparison)}</span></span>`;
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#39;");
   }
 
   function chartEmpty(label = "No data yet") {

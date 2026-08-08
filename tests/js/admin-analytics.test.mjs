@@ -19,6 +19,7 @@ async function runBrowserScript(relativePath, extra = {}) {
     Array,
     Set,
     window: {
+      APStudyUIPrimitives: { escapeHtml: String },
       location: { origin: "https://example.test" },
       ...extra.window,
     },
