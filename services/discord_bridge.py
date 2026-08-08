@@ -1,7 +1,6 @@
 import json
 import logging
 import os
-import re
 import time
 from datetime import datetime, timezone
 
@@ -12,13 +11,12 @@ from appwrite.query import Query
 
 from appwrite_client import COLLECTIONS
 from appwrite_helpers import create_row_safe, first_row, format_datetime, update_row_safe
+from services.discord_constants import DEFAULT_GUILD_ID, DISCORD_API_BASE
+from services.redaction import SECRET_TEXT_RE
 
 
 logger = logging.getLogger(__name__)
-SECRET_TEXT_RE = re.compile(r"((?:[?&]|\b)(?:secret|key|token|password)=)[^&\s]+", re.IGNORECASE)
-DISCORD_API_BASE = "https://discord.com/api/v10"
 WEBHOOK_CONFIG_KEY = "nest_chat_webhook"
-DEFAULT_GUILD_ID = "867928393558151228"
 # Guild/role used for the Discord account-linking membership reward.
 LINK_GUILD_ID = os.environ.get("DISCORD_LINK_GUILD_ID", "859910344393883710")
 LINK_ROLE_ID = os.environ.get("DISCORD_LINK_ROLE_ID", "1338596013371555953")

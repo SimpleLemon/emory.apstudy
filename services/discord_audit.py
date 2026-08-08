@@ -3,7 +3,6 @@ import json
 import logging
 import os
 import random
-import re
 import sys
 import threading
 import time
@@ -15,10 +14,11 @@ from datetime import datetime, timezone
 
 import requests
 
+from services.discord_constants import DEFAULT_GUILD_ID, DISCORD_API_BASE
+from services.redaction import SECRET_TEXT_RE
 
 logger = logging.getLogger(__name__)
 
-DISCORD_API_BASE = "https://discord.com/api/v10"
 DEFAULT_CHANNEL_IDS = {
     "admin": "1508544226491633834",
     "course_tracks": "1508544241679335555",
@@ -28,8 +28,6 @@ DEFAULT_CHANNEL_IDS = {
     "server_logs": "1509603923433099356",
     "console_logs": "1517608382591139951",
 }
-DEFAULT_GUILD_ID = "867928393558151228"
-
 COLOR_VALUES = {
     "red": 0xED4245,
     "green": 0x57F287,
@@ -47,9 +45,6 @@ MAX_QUEUE_EVENTS = 200
 INVALID_WINDOW_SECONDS = 10 * 60
 INVALID_PAUSE_SECONDS = 10 * 60
 INVALID_PAUSE_THRESHOLD = 50
-SECRET_TEXT_RE = re.compile(r"((?:[?&]|\b)(?:secret|key|token|password)=)[^&\s]+", re.IGNORECASE)
-
-
 def _event_nonce(event):
     return hashlib.sha256(event.event_id.encode("utf-8")).hexdigest()[:25]
 

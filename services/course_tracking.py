@@ -17,11 +17,11 @@ from services.course_tracking_email import (
     build_open_seat_subject,
 )
 from services.discord_audit import emit_course_track_event, update_course_tracks_channel_topic
+from services.redaction import SECRET_TEXT_RE
 from services import notifications
 
 
 logger = logging.getLogger(__name__)
-SECRET_TEXT_RE = re.compile(r"((?:[?&]|\b)(?:secret|key|token|password)=)[^&\s]+", re.IGNORECASE)
 _last_poll_metadata = None
 
 

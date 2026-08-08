@@ -33,6 +33,7 @@ from extensions import csrf
 from blueprints.settings import _settings_defaults
 from blueprints.chat_api import create_university_channel, emit_chat_event
 from services.chat_presence import sync_chat_presence_labels_for_school
+from services.redaction import SECRET_TEXT_RE
 from services.row_utils import row_id as _row_id
 from services.toasts import push_toast
 from services.user_cleanup import delete_user_data
@@ -80,7 +81,6 @@ except ImportError:  # pragma: no cover - optional dependency for monitoring
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
 admin_actions_logger = logging.getLogger("admin_actions")
-SECRET_TEXT_RE = re.compile(r"((?:[?&]|\b)(?:secret|key|token|password)=)[^&\s]+", re.IGNORECASE)
 SCHEDULER_ENV_PATH = "/var/www/nest.apstudy.org/.env"
 SCHEDULER_SERVICE_NAME = "nest"
 SCHEDULER_COMMAND_TIMEOUT_SECONDS = 20
