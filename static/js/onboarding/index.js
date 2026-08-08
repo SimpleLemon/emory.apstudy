@@ -136,15 +136,9 @@ function validateAccountStep() {
     return true;
 }
 function fetchJson(url, options = {}) {
-    return fetch(url, {
-        headers: { 'Content-Type': 'application/json' },
+    return window.APStudyHttp.fetchJson(url, {
         ...options,
-    }).then(async (response) => {
-        const data = await response.json();
-        if (!response.ok) {
-            throw new Error(data.error || 'Request failed');
-        }
-        return data;
+        pendingLabel: options.pendingLabel || 'onboarding-save',
     });
 }
 const DARK_THEMES = ['obsidian-dark', 'nest-dark'];
