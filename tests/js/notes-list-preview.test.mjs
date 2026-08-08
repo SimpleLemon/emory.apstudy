@@ -10,7 +10,7 @@ const utilsSource = readFileSync(path.join(root, 'static/js/notes/list/utils.js'
 
 function loadUtils() {
     const context = {
-        window: {},
+        window: { APStudyUIPrimitives: { escapeHtml: String } },
         global: {},
         fetch: async () => ({ ok: true, headers: { get: () => 'application/json' }, json: async () => ({}) }),
     };

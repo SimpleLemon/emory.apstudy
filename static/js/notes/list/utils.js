@@ -1,12 +1,5 @@
 (function registerNotesListUtils(global) {
-    function escapeHtml(value) {
-        return String(value ?? '')
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#39;');
-    }
+    const { escapeHtml } = global.APStudyUIPrimitives;
 
     function formatCount(count, singular) {
         return `${count} ${singular}${count === 1 ? '' : 's'}`;

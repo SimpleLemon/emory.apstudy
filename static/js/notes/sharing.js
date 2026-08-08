@@ -1,4 +1,5 @@
 (function registerNotesSharing(global) {
+    const { escapeHtml } = global.APStudyUIPrimitives;
     const ROLE_OPTIONS = [
         { value: 'viewer', label: 'Viewer', description: 'Can view live content.' },
         { value: 'reviewer', label: 'Reviewer', description: 'Can comment and suggest changes.' },
@@ -8,15 +9,6 @@
     let activeModal = null;
     let returnFocus = null;
     let searchTimer = null;
-
-    function escapeHtml(value) {
-        return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#39;');
-    }
 
     function normalizeRole(value) {
         const role = String(value || 'viewer').toLowerCase();

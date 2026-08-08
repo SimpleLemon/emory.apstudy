@@ -1,4 +1,6 @@
 (function () {
+  const { escapeHtml } = window.APStudyUIPrimitives;
+
   function createSettingsUtils({
     elements,
     constants,
@@ -295,15 +297,6 @@
       link.click();
       link.remove();
       window.setTimeout(() => URL.revokeObjectURL(url), 2000);
-    }
-
-    function escapeHtml(value) {
-      return String(value)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
     }
 
     return {
