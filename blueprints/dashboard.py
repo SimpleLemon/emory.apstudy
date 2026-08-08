@@ -427,20 +427,6 @@ def _ordered_tile_layout(saved_layout, available_tile_ids):
     return ordered
 
 
-def _ordered_tiles(saved_order, available_tile_ids):
-    if isinstance(saved_order, dict):
-        return [tile["type"] for tile in _ordered_tile_layout(saved_order, available_tile_ids)]
-    available = [tile_id for tile_id in available_tile_ids if tile_id in DASHBOARD_TILE_IDS]
-    ordered = []
-    for item in saved_order:
-        tile_id = str(item or "").strip()
-        if tile_id in available and tile_id not in ordered:
-            ordered.append(tile_id)
-    ordered.extend(tile_id for tile_id in DEFAULT_DASHBOARD_TILE_ORDER if tile_id in available and tile_id not in ordered)
-    ordered.extend(tile_id for tile_id in available if tile_id not in ordered)
-    return ordered
-
-
 def _validated_tile_size(tile_id, raw_size):
     if raw_size is None or str(raw_size).strip() == "":
         return _default_tile_size(tile_id)

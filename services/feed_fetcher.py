@@ -54,24 +54,6 @@ def _classify_event(summary, description):
     return "unknown"
 
 
-def _extract_course_name(summary):
-    """
-    Attempt to extract the course name from a Canvas event summary.
-    Canvas iCal event summaries typically follow patterns like:
-        "Assignment Name [CHEM 150-001]"
-        "Quiz 3 [BIOL 141]"
-    The bracketed portion, if present, contains the course identifier.
-    """
-    if not summary:
-        return None
-    if "[" in summary and "]" in summary:
-        start = summary.rfind("[")
-        end = summary.rfind("]")
-        if start < end:
-            return summary[start + 1:end].strip()
-    return None
-
-
 def _stringify_ical(value):
     """Return a trimmed string value for an iCal property."""
     if value is None:

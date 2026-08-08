@@ -21,22 +21,6 @@ from appwrite_helpers import list_rows_all, parse_datetime
 from services.calendar_store import list_calendar_rows_all
 
 
-def _ics_escape(text):
-    """
-    Escape special characters for iCalendar text values.
-    Commas, semicolons, and backslashes must be escaped per RFC 5545 [7].
-    """
-    if not text:
-        return ""
-    return (
-        text
-        .replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\n", "\\n")
-    )
-
-
 def _build_event_uid(event_uid, user_id):
     """
     Generate a globally unique UID for each event in the output .ics.

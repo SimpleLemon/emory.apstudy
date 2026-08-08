@@ -28,7 +28,7 @@ from appwrite.services.account import Account
 from appwrite.services.storage import Storage
 from appwrite.services.users import Users
 from appwrite_client import client as appwrite_client
-from appwrite_client import COLLECTIONS, FILE_SHARE_BUCKET_ID, PROFILE_AVATAR_BUCKET_ID
+from appwrite_client import COLLECTIONS, PROFILE_AVATAR_BUCKET_ID
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
@@ -147,18 +147,6 @@ def _avatar_view_url(file_id):
 
 def _delete_avatar_file(file_id):
     delete_avatar_file(file_id)
-
-
-def _delete_file_share_storage_file(file_row):
-    storage_file_id = file_row.get("storage_file_id")
-    if not storage_file_id:
-        return
-    try:
-        Storage(appwrite_client).delete_file(file_row.get("storage_bucket_id") or FILE_SHARE_BUCKET_ID, storage_file_id)
-    except AppwriteException as exc:
-        status = getattr(exc, "code", None) or getattr(exc, "response_code", None)
-        if int(status or 0) != 404:
-            logger.exception("Failed to delete shared file from Appwrite Storage")
 
 
 def _normalize_theme_value(value):
