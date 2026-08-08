@@ -70,6 +70,13 @@ from services.note_page_setup import (
     PAGE_SETUP_MARGIN_MAX as NOTES_PAGE_SETUP_MARGIN_MAX,
     PAGE_SETUP_MARGIN_MIN as NOTES_PAGE_SETUP_MARGIN_MIN,
 )
+from services.onboarding import (
+    save_onboarding_step_five,
+    save_onboarding_step_four,
+    save_onboarding_step_one,
+    save_onboarding_step_three,
+    save_onboarding_step_two,
+)
 
 settings_bp = Blueprint("settings", __name__)
 logger = logging.getLogger(__name__)
@@ -668,287 +675,55 @@ def save_onboarding():
     step = int(payload.get("step", current_user.onboarding_step or 1))
     action = payload.get("action", "continue")
     user_id = str(current_user.id)
+    dependencies = {
+        "AppwriteException": AppwriteException,
+        "EntitlementError": EntitlementError,
+        "EntitlementLimitError": EntitlementLimitError,
+        "ID": ID,
+        "Query": Query,
+        "check_limit": check_limit,
+        "collections": COLLECTIONS,
+        "create_row_safe": create_row_safe,
+        "datetime": datetime,
+        "default_term": DEFAULT_TERM,
+        "emit_creation_event": emit_creation_event,
+        "emit_user_event": emit_user_event,
+        "format_actor": format_actor,
+        "format_datetime": format_datetime,
+        "invites": invites,
+        "jsonify": jsonify,
+        "list_rows_all": list_rows_all,
+        "logger": logger,
+        "normalize_education_level": _normalize_education_level,
+        "normalize_emory_email": _normalize_emory_email,
+        "normalize_emory_student": _normalize_emory_student,
+        "request_entitlements": request_entitlements,
+        "school_payload": school_payload,
+        "sync_chat_presence_labels_for_user": sync_chat_presence_labels_for_user,
+        "update_row_safe": update_row_safe,
+        "url_for": url_for,
+        "username_is_taken": _username_is_taken,
+        "validate_username": _validate_username,
+    }
 
     if step == 1:
-        display_name = (payload.get("display_name") or "").strip()
-        if not display_name:
-            return jsonify({"error": "Display name is required."}), 400
-
-        try:
-            username = _validate_username(payload.get("username"))
-        except ValueError as error:
-            return jsonify({"error": str(error)}), 400
-
-        if _username_is_taken(username, user_id):
-            return jsonify({"error": "That username is already taken."}), 409
-
-        next_step = max(current_user.onboarding_step or 1, 2)
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "name": display_name,
-                    "username": username,
-                    "onboarding_step": next_step,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding step")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_step = next_step
-        current_user.name = display_name
-        current_user.username = username
-        return jsonify({"status": "ok", "next_step": 2})
-
+        return save_onboarding_step_one(payload, current_user, user_id, dependencies)
     if step == 2:
-        education_level = _normalize_education_level(payload.get("education_level"))
-        if not education_level:
-            return jsonify({"error": "Select an education level before continuing."}), 400
-
-        class_year = (payload.get("class_year") or "").strip() or None
-        emory_student = _normalize_emory_student(payload.get("emory_student"))
-        emory_email = payload.get("emory_email")
-        school_updates = school_payload(None)
-
-        if education_level in {"High School", "Undergraduate"}:
-            if not class_year or len(class_year) != 4 or not class_year.isdigit():
-                return jsonify({"error": "Enter a valid 4-digit class year."}), 400
-        else:
-            class_year = None
-
-        if education_level == "Undergraduate":
-            if emory_student is None:
-                return jsonify({"error": "Select whether you are an Emory University student."}), 400
-            if emory_student:
-                try:
-                    emory_email = _normalize_emory_email(emory_email)
-                except ValueError as error:
-                    return jsonify({"error": str(error)}), 400
-                school_updates = school_payload("Emory University")
-            else:
-                emory_email = None
-                school_updates = school_payload(payload.get("school"))
-        else:
-            emory_student = None
-            emory_email = None
-
-        next_step = 3 if education_level == "Undergraduate" and emory_student else 4
-
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "education_level": education_level,
-                    "class_year": class_year,
-                    "emory_student": emory_student,
-                    "emory_email": emory_email,
-                    **school_updates,
-                    "onboarding_step": next_step,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding profile")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.education_level = education_level
-        current_user.class_year = class_year
-        current_user.emory_student = emory_student
-        current_user.emory_email = emory_email
-        current_user.school = school_updates.get("school")
-        current_user.school_key = school_updates.get("school_key")
-        current_user.school_source = school_updates.get("school_source")
-        current_user.scorecard_id = school_updates.get("scorecard_id")
-        current_user.onboarding_step = next_step
-        sync_chat_presence_labels_for_user(user_id)
-        return jsonify({"status": "ok", "next_step": next_step})
-
+        return save_onboarding_step_two(payload, current_user, user_id, dependencies)
     if step == 3:
-        if action == "add_course":
-            course_code = (payload.get("course_code") or "").strip().upper()
-            course_name = (payload.get("course_name") or "").strip() or None
-            section_number = (payload.get("section_number") or "").strip() or None
-            instructor_name = (payload.get("instructor_name") or "").strip() or None
-            term = (payload.get("term") or DEFAULT_TERM).strip() or DEFAULT_TERM
-
-            subject = (payload.get("subject") or "").strip().upper()
-            catalog = (payload.get("catalog") or "").strip()
-
-            if course_code and (not subject or not catalog):
-                parts = course_code.split()
-                if len(parts) >= 2:
-                    subject = parts[0].upper()
-                    catalog = parts[1]
-
-            if not subject or not catalog:
-                return jsonify({"error": "Course code is required."}), 400
-
-            try:
-                candidates = list_rows_all(
-                    COLLECTIONS["user_courses"],
-                    [
-                        Query.equal("user_id", [user_id]),
-                        Query.equal("term", [term]),
-                        Query.equal("subject", [subject]),
-                        Query.equal("catalog", [catalog]),
-                        Query.equal("source", ["onboarding"]),
-                    ],
-                )
-            except AppwriteException:
-                logger.exception("Failed to check onboarding course")
-                return jsonify({"error": "Unable to save course."}), 500
-
-            existing = next(
-                (doc for doc in candidates if not doc.get("crn")),
-                None,
-            )
-            if existing:
-                return jsonify({"error": "Course already added."}), 409
-
-            try:
-                entitlements = request_entitlements(current_user)
-                check_limit(entitlements, "max_saved_courses", entitlements["usage"]["saved_courses"])
-            except EntitlementLimitError as exc:
-                return jsonify(exc.payload()), 403
-            except EntitlementError:
-                logger.exception("Failed to verify onboarding course limits")
-                return jsonify({"error": "Unable to verify your course limits right now.", "code": "tier_check_unavailable"}), 503
-
-            try:
-                course = create_row_safe(
-                    COLLECTIONS["user_courses"],
-                    row_id=ID.unique(),
-                    data={
-                        "user_id": user_id,
-                        "term": term,
-                        "subject": subject,
-                        "catalog": catalog,
-                        "course_name": course_name,
-                        "section_number": section_number,
-                        "instructor_name": instructor_name,
-                        "source": "onboarding",
-                        "added_at": format_datetime(datetime.utcnow()),
-                    },
-                )
-            except AppwriteException:
-                logger.exception("Failed to add onboarding course")
-                return jsonify({"error": "Unable to save course."}), 500
-
-            try:
-                invites.record_activation(user_id, "course")
-            except Exception:
-                logger.exception("Failed to record invite activation for onboarding course")
-
-            emit_creation_event(
-                "Onboarding Course Added",
-                actor=format_actor(current_user),
-                target=f"{subject} {catalog}",
-                metadata={
-                    "page_context": "onboarding",
-                    "resource_type": "user_course",
-                    "resource_id": course.get("$id") or course.get("id"),
-                    "course_name": course_name,
-                    "section_number": section_number,
-                    "teacher": instructor_name,
-                    "term": term,
-                },
-                color="green",
-            )
-            return jsonify({
-                "status": "ok",
-                "course": {
-                    "id": course.get("$id"),
-                    "course_code": f"{subject} {catalog}",
-                    "course_name": course_name,
-                    "section_number": section_number,
-                    "instructor_name": instructor_name,
-                    "term": term,
-                },
-            }), 201
-
-        if action in {"advance", "continue", "review"}:
-            try:
-                update_row_safe(
-                    COLLECTIONS["users"],
-                    user_id,
-                    {"onboarding_step": 4},
-                )
-            except AppwriteException:
-                logger.exception("Failed to update onboarding step")
-                return jsonify({"error": "Unable to save onboarding."}), 500
-            current_user.onboarding_step = 4
-            return jsonify({"status": "ok", "next_step": 4})
-
-        if action == "complete":
-            return jsonify({"error": "Complete onboarding from the confirm step."}), 400
-
+        response = save_onboarding_step_three(
+            payload,
+            action,
+            current_user,
+            user_id,
+            dependencies,
+        )
+        if response is not None:
+            return response
     if step == 4:
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {"onboarding_step": 5},
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding step")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_step = 5
-        return jsonify({"status": "ok", "next_step": 5})
-
+        return save_onboarding_step_four(current_user, user_id, dependencies)
     if step == 5:
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "onboarding_complete": True,
-                    "onboarding_step": 5,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to complete onboarding")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_complete = True
-        current_user.onboarding_step = 5
-        from blueprints.chat_api import (
-            create_welcome_dm_for_user,
-            initialize_new_user_discord_read_states,
-        )
-
-        try:
-            initialize_new_user_discord_read_states(user_id)
-        except Exception:
-            logger.exception("Failed to initialize Discord read states after onboarding for user %s", user_id)
-        try:
-            create_welcome_dm_for_user(user_id)
-        except Exception:
-            logger.exception("Failed to create welcome DM after onboarding for user %s", user_id)
-        try:
-            invites.promote_if_activated(user_id)
-        except Exception:
-            logger.exception("Failed to promote activated invite after onboarding for user %s", user_id)
-        emit_user_event(
-            "Onboarding Complete",
-            actor=format_actor(current_user),
-            target=str(current_user.id),
-            metadata={
-                "page_context": "onboarding",
-                "resource_type": "user",
-                "resource_id": user_id,
-                "education_level": getattr(current_user, "education_level", None),
-                "class_year": getattr(current_user, "class_year", None),
-                "school": getattr(current_user, "school", None),
-                "school_key": getattr(current_user, "school_key", None),
-                "school_source": getattr(current_user, "school_source", None),
-                "scorecard_id": getattr(current_user, "scorecard_id", None),
-                "major": getattr(current_user, "major", None),
-                "graduation_year": getattr(current_user, "graduation_year", None),
-                "emory_student": getattr(current_user, "emory_student", None),
-                "emory_email": getattr(current_user, "emory_email", None),
-            },
-            color="green",
-        )
-        return jsonify({"status": "ok", "redirect_url": url_for("dashboard.dashboard")})
+        return save_onboarding_step_five(current_user, user_id, dependencies)
 
     return jsonify({"error": "Invalid onboarding step."}), 400
 
