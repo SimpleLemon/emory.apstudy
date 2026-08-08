@@ -39,7 +39,12 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.atlas_client import DEFAULT_TERM
-from services.avatar_storage import build_avatar_view_url, delete_avatar_file
+from services.avatar_storage import (
+    ALLOWED_AVATAR_MIME_TYPES,
+    MAX_AVATAR_BYTES,
+    build_avatar_view_url,
+    delete_avatar_file,
+)
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_creation_event, emit_user_event, format_actor
 from services import discord_bridge, invites
@@ -51,8 +56,20 @@ from services.calendar_urls import (
     normalize_calendar_url as _normalize_calendar_url,
 )
 from services.user_cleanup import delete_user_data
+from services.user_profile import (
+    DEFAULT_BANNER_COLOR,
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
+)
 from services.universities import school_payload
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, entitlement_payload, request_entitlements
+from services.note_page_setup import (
+    PAGE_SETUP_COLORS as NOTES_PAGE_SETUP_COLORS,
+    PAGE_SETUP_FONT_TYPES as NOTES_PAGE_SETUP_FONT_TYPES,
+    PAGE_SETUP_MARGIN_MAX as NOTES_PAGE_SETUP_MARGIN_MAX,
+    PAGE_SETUP_MARGIN_MIN as NOTES_PAGE_SETUP_MARGIN_MIN,
+)
 
 settings_bp = Blueprint("settings", __name__)
 logger = logging.getLogger(__name__)
@@ -60,17 +77,7 @@ logger = logging.getLogger(__name__)
 CANVAS_CALENDAR_HOST_PREFIX = "canvas."
 CANVAS_CALENDAR_HOST_SUFFIX = ".edu"
 CANVAS_CALENDAR_PATH_PREFIXES = ("/feeds/calendar", "/feeds/calendars")
-DEFAULT_BANNER_COLOR = "#fecae1"
-MAX_AVATAR_BYTES = 10 * 1024 * 1024
-ALLOWED_AVATAR_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 ALLOWED_AVATAR_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
-USERNAME_MIN_LENGTH = 3
-USERNAME_MAX_LENGTH = 20
-USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
-NOTES_PAGE_SETUP_COLORS = {"default", "paper", "warm", "blue", "green", "rose", "dark"}
-NOTES_PAGE_SETUP_FONT_TYPES = {"default", "sans", "display", "serif", "mono"}
-NOTES_PAGE_SETUP_MARGIN_MIN = 2
-NOTES_PAGE_SETUP_MARGIN_MAX = 18
 USERNAME_RESERVED = {
     "account",
     "admin",

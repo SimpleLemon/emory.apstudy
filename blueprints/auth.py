@@ -47,6 +47,9 @@ from services.discord_audit import emit_server_log_event, emit_user_event, forma
 from services import discord_bridge, invites, notes_collaboration
 from services.entitlements import TIER_BADGES, TIER_LABELS, normalize_tier
 from services.user_profile import (
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
     is_early_member as _is_early_member,
     is_emory_school as _is_emory_school,
     normalize_banner_color as _normalize_banner_color,
@@ -99,9 +102,6 @@ PUBLIC_PROFILE_CSP = "; ".join([
     "form-action 'self'",
 ])
 
-USERNAME_MIN_LENGTH = 3
-USERNAME_MAX_LENGTH = 20
-USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 APPWRITE_OAUTH_PROVIDERS = {
     "discord": OAuthProvider.DISCORD,
     "github": OAuthProvider.GITHUB,

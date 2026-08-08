@@ -25,6 +25,12 @@ from services.database import db_connection
 from services import invites, note_media, note_store, notes_collaboration
 from services.appwrite_storage import note_media_upload_failure
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, check_storage, request_entitlements
+from services.note_page_setup import (
+    PAGE_SETUP_COLORS,
+    PAGE_SETUP_FONT_TYPES,
+    PAGE_SETUP_MARGIN_MAX,
+    PAGE_SETUP_MARGIN_MIN,
+)
 from services.time_utils import utcnow_iso as _utcnow_iso
 
 
@@ -33,12 +39,6 @@ logger = logging.getLogger(__name__)
 
 USER_SETTINGS_TABLE_ID = "user_settings"
 LINK_PREVIEWS_TABLE_ID = "chat_link_previews"
-PAGE_SETUP_COLORS = {"default", "paper", "warm", "blue", "green", "rose", "dark"}
-PAGE_SETUP_FONT_TYPES = {"default", "sans", "display", "serif", "mono"}
-PAGE_SETUP_MARGIN_MIN = 2
-PAGE_SETUP_MARGIN_MAX = 18
-
-
 @notes_api_bp.errorhandler(404)
 def notes_not_found(error):
     return jsonify({"error": "Not found."}), 404
