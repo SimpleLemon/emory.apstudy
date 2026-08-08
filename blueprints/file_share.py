@@ -31,7 +31,6 @@ from services.discord_audit import emit_creation_event, format_actor
 from services.entitlements import (
     EntitlementError,
     EntitlementLimitError,
-    check_limit,
     check_storage,
     request_entitlements,
 )
@@ -83,6 +82,7 @@ from services.file_share_store import (
     _storage_path,
     _zip_arcname,
     _zip_response as _zip_response_service,
+    upload_file_response,
 )
 from services.row_utils import row_id as _row_id
 from services.time_utils import utcnow as _utcnow
@@ -154,176 +154,49 @@ def file_share_page():
     )
 
 
+def _upload_file_dependencies():
+    return {
+        "allowed_expiry_options": ALLOWED_EXPIRY_OPTIONS,
+        "appwrite_upload_error": _appwrite_upload_error,
+        "assert_folder_target": _assert_folder_target,
+        "bucket_id": FILE_SHARE_BUCKET_ID,
+        "check_storage": check_storage,
+        "create_row_safe": create_row_safe,
+        "default_expiry_days": DEFAULT_EXPIRY_DAYS,
+        "emit_creation_event": emit_creation_event,
+        "entitlement_error": EntitlementError,
+        "entitlement_limit_error": EntitlementLimitError,
+        "format_actor": format_actor,
+        "format_datetime": format_datetime,
+        "generate_share_code": _generate_share_code,
+        "input_file_from_bytes": InputFile.from_bytes,
+        "jsonify": jsonify,
+        "logger": logger,
+        "max_file_size": MAX_FILE_SIZE,
+        "max_upload_files": MAX_UPLOAD_FILES,
+        "normalize_folder_id": _normalize_folder_id,
+        "request_entitlements": request_entitlements,
+        "secure_filename": secure_filename,
+        "shared_file_payload": _shared_file_payload,
+        "storage": _storage,
+        "storage_backend": APPWRITE_STORAGE_BACKEND,
+        "storage_path": _storage_path,
+        "timedelta": timedelta,
+        "utcnow": _utcnow,
+        "uuid4": uuid.uuid4,
+    }
+
+
 @file_share_bp.route("/api/files/upload", methods=["POST"])
 @login_required
 def upload_file():
     files = request.files.getlist("file")
-    if not files:
-        return jsonify({"error": "At least one file is required."}), 400
-
-    user_id = str(current_user.id)
-    try:
-        entitlements = request_entitlements(current_user)
-        plan_upload_files = entitlements["limits"].get("max_upload_files")
-        plan_file_size = entitlements["limits"].get("max_file_size_bytes")
-        effective_upload_files = min(MAX_UPLOAD_FILES, plan_upload_files) if plan_upload_files is not None else MAX_UPLOAD_FILES
-        effective_file_size = min(MAX_FILE_SIZE, plan_file_size) if plan_file_size is not None else MAX_FILE_SIZE
-        if plan_upload_files is not None and len(files) > plan_upload_files:
-            raise EntitlementLimitError("files per upload", 0, len(files), plan_upload_files)
-    except EntitlementLimitError as exc:
-        return jsonify(exc.payload()), 403
-    except EntitlementError:
-        logger.exception("Failed to calculate file upload limits")
-        return jsonify({"error": "Unable to verify your storage limits right now.", "code": "tier_check_unavailable"}), 503
-    folder_id = _normalize_folder_id(request.form.get("folderId"))
-    _assert_folder_target(user_id, folder_id)
-
-    filenames = request.form.getlist("filename")
-    visibilities = request.form.getlist("visibility")
-    expiries = request.form.getlist("expiryDays")
-
-    total_provided = len(files)
-    to_process = files[:effective_upload_files]
-    skipped = total_provided - len(to_process)
-
-    created = []
-    errors = []
-    reserved_storage_bytes = 0
-
-    for idx, uploaded_file in enumerate(to_process):
-        if not uploaded_file or not uploaded_file.filename:
-            errors.append({"index": idx, "error": "Missing file or filename."})
-            continue
-
-        custom_filename = (filenames[idx] if idx < len(filenames) else "") or ""
-        visibility = ((visibilities[idx] if idx < len(visibilities) else "private") or "private").strip().lower()
-        try:
-            expiry_days = int(expiries[idx]) if idx < len(expiries) else DEFAULT_EXPIRY_DAYS
-        except (TypeError, ValueError):
-            expiry_days = DEFAULT_EXPIRY_DAYS
-
-        if visibility not in {"public", "private"}:
-            errors.append({"index": idx, "error": "Invalid visibility option."})
-            continue
-        if expiry_days not in ALLOWED_EXPIRY_OPTIONS:
-            errors.append({"index": idx, "error": "Invalid expiry selection."})
-            continue
-
-        display_filename = custom_filename.strip() or uploaded_file.filename
-        uploaded_data = uploaded_file.read()
-        file_size_bytes = len(uploaded_data)
-        if plan_file_size is not None and file_size_bytes > plan_file_size:
-            quota_error = EntitlementLimitError("file size bytes", 0, file_size_bytes, plan_file_size)
-            errors.append({"index": idx, **quota_error.payload()})
-            continue
-        if file_size_bytes > effective_file_size:
-            errors.append({
-                "index": idx,
-                "error": f"{uploaded_file.filename} exceeds the current file-size limit.",
-                "code": "file_too_large",
-            })
-            continue
-        if file_size_bytes == 0:
-            errors.append({"index": idx, "error": f"{uploaded_file.filename} is empty."})
-            continue
-
-        try:
-            check_storage(entitlements, reserved_storage_bytes + file_size_bytes)
-            reserved_storage_bytes += file_size_bytes
-        except EntitlementLimitError as exc:
-            errors.append({"index": idx, **exc.payload()})
-            continue
-
-        file_id = str(uuid.uuid4())
-        storage_file_id = file_id
-        sanitized_name = secure_filename(display_filename) or "file"
-
-        try:
-            _storage().create_file(
-                FILE_SHARE_BUCKET_ID,
-                storage_file_id,
-                InputFile.from_bytes(
-                    uploaded_data,
-                    filename=sanitized_name,
-                    mime_type=uploaded_file.mimetype or "application/octet-stream",
-                ),
-            )
-        except AppwriteException as exc:
-            logger.exception("Failed to upload file to Appwrite Storage")
-            reserved_storage_bytes -= file_size_bytes
-            errors.append({"index": idx, "error": _appwrite_upload_error(exc)})
-            continue
-
-        is_public = visibility == "public"
-        share_code = _generate_share_code() if is_public else None
-        now = _utcnow()
-        expires_at = now + timedelta(days=expiry_days)
-
-        try:
-            shared_file = create_row_safe(
-                COLLECTIONS["shared_files"],
-                row_id=file_id,
-                data={
-                    "user_id": user_id,
-                    "folder_id": folder_id,
-                    "original_filename": display_filename,
-                    "stored_path": _storage_path(storage_file_id),
-                    "storage_backend": APPWRITE_STORAGE_BACKEND,
-                    "storage_bucket_id": FILE_SHARE_BUCKET_ID,
-                    "storage_file_id": storage_file_id,
-                    "file_size_bytes": file_size_bytes,
-                    "mime_type": uploaded_file.mimetype,
-                    "share_code": share_code,
-                    "is_public": is_public,
-                    "expires_at": format_datetime(expires_at),
-                    "created_at": format_datetime(now),
-                    "updated_at": format_datetime(now),
-                    "downloaded_count": 0,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to save shared file row for upload %s", display_filename)
-            reserved_storage_bytes -= file_size_bytes
-            try:
-                _storage().delete_file(FILE_SHARE_BUCKET_ID, storage_file_id)
-            except AppwriteException:
-                logger.exception(
-                    "Failed to clean up uploaded Appwrite file %s after row failure",
-                    storage_file_id,
-                )
-            errors.append({"index": idx, "error": "Unable to save file."})
-            continue
-
-        created.append(_shared_file_payload(shared_file))
-        emit_creation_event(
-            "Shared File Created",
-            actor=format_actor(current_user),
-            target=display_filename,
-            metadata={
-                "page_context": "files/upload",
-                "resource_type": "shared_file",
-                "resource_id": shared_file.get("$id") or shared_file.get("id"),
-                "folder_id": folder_id,
-                "is_public": is_public,
-                "file_size_bytes": file_size_bytes,
-                "mime_type": uploaded_file.mimetype,
-                "expiry_days": expiry_days,
-            },
-            color="green",
-        )
-
-    response = {"files": created}
-    if skipped:
-        response["skipped"] = skipped
-        response.setdefault("errors", []).append(
-            {"error": f"Only {effective_upload_files} files are accepted; {skipped} file(s) were ignored."}
-        )
-    if errors:
-        response.setdefault("errors", []).extend(errors)
-        if not created:
-            response["error"] = errors[0].get("error") or "Upload failed."
-
-    return jsonify(response), 201 if created else 400
+    return upload_file_response(
+        current_user,
+        files,
+        request.form,
+        _upload_file_dependencies(),
+    )
 
 
 @file_share_bp.route("/api/files/my")
