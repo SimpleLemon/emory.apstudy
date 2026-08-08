@@ -60,6 +60,24 @@ from services.admin_user_sections import (
     load_seat_tracks_section,
     load_settings_section,
 )
+from services.host_admin import (
+    SCHEDULER_COMMAND_TIMEOUT_SECONDS,
+    SCHEDULER_ENV_PATH,
+    SCHEDULER_EXECUTABLE_FALLBACKS,
+    SCHEDULER_SERVICE_NAME,
+    SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
+    SYSTEM_GIT_REPO_PATH,
+    SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS,
+    SYSTEM_RESTART_DELAY_SECONDS,
+    SYSTEM_STORAGE_LIMIT_GB,
+    git_pull_already_up_to_date as _git_pull_already_up_to_date,
+    resolve_scheduler_executable as _resolve_scheduler_executable_service,
+    run_scheduler_control_action as _run_scheduler_control_action_service,
+    run_system_git_pull as _run_system_git_pull_service,
+    schedule_system_restart as _schedule_system_restart_service,
+    scheduler_command_for_action as _scheduler_command_for_action_service,
+    scheduler_command_label as _scheduler_command_label,
+)
 from services.scheduler import update_course_tracking_refresh_interval
 from services.discord_audit import discord_audit_status, emit_admin_event, format_actor, format_user_target
 import services.apswiftly_control as apswiftly_control_service
@@ -91,23 +109,6 @@ except ImportError:  # pragma: no cover - optional dependency for monitoring
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
 admin_actions_logger = logging.getLogger("admin_actions")
-SCHEDULER_ENV_PATH = "/var/www/nest.apstudy.org/.env"
-SCHEDULER_SERVICE_NAME = "nest"
-SCHEDULER_COMMAND_TIMEOUT_SECONDS = 20
-SYSTEM_GIT_REPO_PATH = "/var/www/nest.apstudy.org"
-SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS = 60
-SYSTEM_RESTART_DELAY_SECONDS = 2
-SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS = 20
-SYSTEM_STORAGE_LIMIT_GB = 150
-SCHEDULER_EXECUTABLE_FALLBACKS = {
-    "git": ("/usr/bin/git", "/bin/git"),
-    "sed": ("/usr/bin/sed", "/bin/sed"),
-    "sh": ("/bin/sh", "/usr/bin/sh"),
-    "ssh": ("/usr/bin/ssh", "/bin/ssh"),
-    "sudo": ("/usr/bin/sudo", "/bin/sudo"),
-    "systemctl": ("/usr/bin/systemctl", "/bin/systemctl"),
-}
-
 ALLOWED_SECTIONS = {
     "overview",
     "settings",
@@ -251,96 +252,55 @@ def _sanitize_admin_error(error):
 
 
 def _resolve_scheduler_executable(name):
-    found = shutil.which(name)
-    if found:
-        return found
-    for candidate in SCHEDULER_EXECUTABLE_FALLBACKS.get(name, ()):
-        if os.path.exists(candidate) and os.access(candidate, os.X_OK):
-            return candidate
-    raise FileNotFoundError(f"Required scheduler command not found: {name}")
+    return _resolve_scheduler_executable_service(
+        name,
+        shutil.which,
+        os.path.exists,
+        os.access,
+        SCHEDULER_EXECUTABLE_FALLBACKS,
+    )
 
 
 def _scheduler_command_for_action(action):
-    if action == "pause":
-        replacement = "s/SCHEDULER_ENABLED=1/SCHEDULER_ENABLED=0/g"
-    elif action == "resume":
-        replacement = "s/SCHEDULER_ENABLED=0/SCHEDULER_ENABLED=1/g"
-    else:
-        raise ValueError("Unsupported scheduler action.")
-    return [
-        [_resolve_scheduler_executable("sed"), "-i", replacement, SCHEDULER_ENV_PATH],
-        [_resolve_scheduler_executable("systemctl"), "restart", SCHEDULER_SERVICE_NAME],
-    ]
+    return _scheduler_command_for_action_service(
+        action,
+        _resolve_scheduler_executable,
+        SCHEDULER_ENV_PATH,
+        SCHEDULER_SERVICE_NAME,
+    )
 
 
 def _run_scheduler_control_action(action):
-    commands = _scheduler_command_for_action(action)
-    completed = []
-    for command in commands:
-        subprocess.run(
-            command,
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=SCHEDULER_COMMAND_TIMEOUT_SECONDS,
-        )
-        completed.append(command[0])
-    return completed
+    return _run_scheduler_control_action_service(
+        action,
+        _scheduler_command_for_action,
+        subprocess.run,
+        SCHEDULER_COMMAND_TIMEOUT_SECONDS,
+    )
 
 
 def _run_system_git_pull():
-    git_env = os.environ.copy()
-    git_env["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    git_env["GIT_SSH"] = _resolve_scheduler_executable("ssh")
-    command = [_resolve_scheduler_executable("git"), "-C", SYSTEM_GIT_REPO_PATH, "pull"]
-    return subprocess.run(
-        command,
-        check=True,
-        capture_output=True,
-        text=True,
-        env=git_env,
-        timeout=SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
+    return _run_system_git_pull_service(
+        os.environ,
+        _resolve_scheduler_executable,
+        subprocess.run,
+        SYSTEM_GIT_REPO_PATH,
+        SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
     )
 
 
 def _schedule_system_restart():
-    restart_env = os.environ.copy()
-    restart_env["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    sudo_path = _resolve_scheduler_executable("sudo")
-    systemctl_path = _resolve_scheduler_executable("systemctl")
-    command = [
-        _resolve_scheduler_executable("sh"),
-        "-c",
-        f"sleep {SYSTEM_RESTART_DELAY_SECONDS}; exec {sudo_path} {systemctl_path} restart {SCHEDULER_SERVICE_NAME}",
-    ]
-    process = subprocess.Popen(
-        command,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        env=restart_env,
-        start_new_session=True,
+    return _schedule_system_restart_service(
+        os.environ,
+        _resolve_scheduler_executable,
+        subprocess.Popen,
+        subprocess.DEVNULL,
+        subprocess.TimeoutExpired,
+        threading.Thread,
+        SYSTEM_RESTART_DELAY_SECONDS,
+        SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS,
+        SCHEDULER_SERVICE_NAME,
     )
-    if callable(getattr(process, "wait", None)):
-        def stop_hung_restart():
-            try:
-                process.wait(timeout=SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS)
-            except subprocess.TimeoutExpired:
-                process.kill()
-
-        threading.Thread(target=stop_hung_restart, daemon=True).start()
-    return process
-
-
-def _git_pull_already_up_to_date(completed):
-    output = f"{completed.stdout or ''}\n{completed.stderr or ''}".lower()
-    return "already up to date" in output or "already up-to-date" in output
-
-
-def _scheduler_command_label(command):
-    if isinstance(command, (list, tuple)):
-        return " ".join(str(part) for part in command)
-    return str(command or "")
 
 
 def _require_admin():
