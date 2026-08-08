@@ -2646,10 +2646,11 @@ def send_channel_message(channel_id):
         "content": content,
         "rendered_html": render_markdown(content),
         "link_preview_json": json.dumps(previews),
-        "created_at": now,
         "updated_at": now,
     }
 
+    message_source = "appwrite"
+    message_created_at = now
     if channel.get("kind") == "discord":
         bridge_files = []
         bridge_links = []
@@ -2689,15 +2690,15 @@ def send_channel_message(channel_id):
         except (DiscordBridgeError, Exception):
             logger.exception("Failed to send Discord webhook message")
             return jsonify({"error": "Unable to send to Discord right now."}), 502
+        message_source = "discord"
+        message_created_at = discord_message.get("timestamp") or now
         base_payload.update({
-            "source": "discord",
             "external_id": _discord_message_external_id(channel, discord_message.get("id")),
             "discord_message_id": discord_message.get("id"),
             "discord_webhook_id": discord_message.get("webhook_id") or webhook.get("id"),
-            "created_at": discord_message.get("timestamp") or now,
         })
-    else:
-        base_payload["source"] = "appwrite"
+    base_payload["source"] = message_source
+    base_payload["created_at"] = message_created_at
 
     row_id = None
     if channel.get("kind") == "discord" and base_payload.get("discord_message_id"):

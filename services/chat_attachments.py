@@ -143,12 +143,13 @@ def _optimize_image(data, extension):
             image = ImageOps.exif_transpose(image)
             image.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.Resampling.LANCZOS)
             output = io.BytesIO()
-            save_kwargs = {"optimize": True}
             if image_format == "JPEG":
                 image = image.convert("RGB")
-                save_kwargs.update(quality=86, progressive=True)
+                save_kwargs = {"optimize": True, "quality": 86, "progressive": True}
             elif image_format == "WEBP":
-                save_kwargs.update(quality=86, method=5)
+                save_kwargs = {"optimize": True, "quality": 86, "method": 5}
+            else:
+                save_kwargs = {"optimize": True}
             image.save(output, format=image_format, **save_kwargs)
             optimized = output.getvalue()
             if len(optimized) >= len(data) and image.size == (width, height) and not has_metadata:

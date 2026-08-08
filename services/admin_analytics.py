@@ -475,18 +475,15 @@ def _ga_series_from_rows(rows, buckets, dimension_name, window, tz):
 
 
 def _ga_totals_from_rows(rows):
-    totals = {"activeUsers": 0, "screenPageViews": 0, "eventCount": 0}
     row = next(iter(rows or []), None)
     if not row:
-        return totals
+        return {"activeUsers": 0, "screenPageViews": 0, "eventCount": 0}
     metrics = [_metric_int(metric) for metric in row.metric_values]
-    if len(metrics) > 0:
-        totals["activeUsers"] = metrics[0]
-    if len(metrics) > 1:
-        totals["screenPageViews"] = metrics[1]
-    if len(metrics) > 2:
-        totals["eventCount"] = metrics[2]
-    return totals
+    return {
+        "activeUsers": metrics[0] if len(metrics) > 0 else 0,
+        "screenPageViews": metrics[1] if len(metrics) > 1 else 0,
+        "eventCount": metrics[2] if len(metrics) > 2 else 0,
+    }
 
 
 def _comparison_delta(current, previous):

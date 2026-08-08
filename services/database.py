@@ -339,11 +339,11 @@ def _normalize_value(table_id, column, value):
 
 
 def _row_to_dict(table_id, row):
+    row_id = row["id"]
     data = dict(row)
     for column in BOOLEAN_COLUMNS.get(table_id, set()):
         if column in data and data[column] is not None:
             data[column] = bool(data[column])
-    row_id = data.get("id")
     data["$id"] = row_id
     return data
 

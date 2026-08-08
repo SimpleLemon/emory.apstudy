@@ -369,7 +369,7 @@ def _task_updates_from_payload(payload, *, creating=False, existing=None):
         effective_deadline = updates.get("deadline_at", existing.get("deadline_at"))
         effective_time = updates.get("deadline_time", existing.get("deadline_time"))
         if not effective_deadline:
-            updates["reminder_minutes"] = -1
+            reminder_minutes = -1
         else:
             is_date_only = not bool(effective_time)
             reminder_value = (
@@ -377,11 +377,12 @@ def _task_updates_from_payload(payload, *, creating=False, existing=None):
                 if reminder_provided
                 else existing.get("reminder_minutes", _default_task_reminder(is_date_only))
             )
-            updates["reminder_minutes"] = _normalize_task_reminder(
+            reminder_minutes = _normalize_task_reminder(
                 reminder_value,
                 is_date_only,
                 strict=reminder_provided,
             )
+        updates["reminder_minutes"] = reminder_minutes
 
     if creating or "recurrence" in payload or "repeat" in payload:
         recurrence_value = payload.get("recurrence", payload.get("repeat"))

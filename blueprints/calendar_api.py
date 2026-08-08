@@ -622,10 +622,13 @@ def _apply_event_override(event, override):
         result["color"] = override.get("color") or None
     if override.get("is_all_day") is not None:
         result["is_all_day"] = is_all_day
-    if override.get("reminder_minutes") is not None:
-        result["reminder_minutes"] = int(override.get("reminder_minutes"))
-    elif override.get("is_all_day") is not None:
-        result["reminder_minutes"] = _default_reminder_minutes(is_all_day)
+    override_reminder = override.get("reminder_minutes")
+    if override_reminder is not None or override.get("is_all_day") is not None:
+        result["reminder_minutes"] = (
+            int(override_reminder)
+            if override_reminder is not None
+            else _default_reminder_minutes(is_all_day)
+        )
     if override.get("start"):
         result["start"] = _serialize_datetime(parse_datetime(override.get("start")), is_all_day)
     if override.get("end"):

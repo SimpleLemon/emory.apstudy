@@ -1014,13 +1014,15 @@ def _complete_appwrite_login(
             updates["picture_url"] = stored_picture_url
             updates["avatar_source"] = "provider"
             updates["avatar_file_size_bytes"] = stored_file_size_bytes
+            avatar_file_id = None
             if stored_file_id:
-                updates["avatar_file_id"] = stored_file_id
+                avatar_file_id = stored_file_id
                 if previous_file_id and previous_file_id != stored_file_id:
                     delete_avatar_file(previous_file_id)
             elif previous_file_id and storage_result == "provider_url_fallback":
-                updates["avatar_file_id"] = None
                 delete_avatar_file(previous_file_id)
+            if stored_file_id or (previous_file_id and storage_result == "provider_url_fallback"):
+                updates["avatar_file_id"] = avatar_file_id
         if email:
             updates["email"] = email
         if provider and provider != "appwrite":

@@ -1561,8 +1561,9 @@ def _course_tracking_diagnostics():
     from services.scheduler import scheduler_status
 
     enabled_count, enabled_error = _enabled_course_track_count()
+    scheduler_payload = scheduler_status()
     payload = {
-        **scheduler_status(),
+        **scheduler_payload,
         **discord_audit_status(),
         "enabled_track_count": enabled_count,
         "enabled_track_count_error": enabled_error,
@@ -1570,7 +1571,7 @@ def _course_tracking_diagnostics():
     }
     payload["course_tracking_job_registered"] = any(
         job.get("id") == "check_course_seat_tracks"
-        for job in payload.get("jobs", [])
+        for job in scheduler_payload.get("jobs", [])
     )
     return payload
 
