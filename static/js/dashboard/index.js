@@ -21,6 +21,7 @@
         summary: null,
         editor: null,
         activePopoverLocked: false,
+        activePopoverTrigger: null,
         editMode: false,
         resize: null,
         controlsBound: false,
@@ -97,6 +98,7 @@
     }
     function renderTiles(summary, layoutOverride = null) {
         if (!els.tiles) return;
+        hidePopover();
         const layout = layoutOverride?.tiles || normalizeTileLayout(summaryLayoutSource(summary), summary.available_tiles);
         summary.tile_layout_version = 4;
         summary.tile_layout = layout;
@@ -379,18 +381,21 @@
         }
     }
     function bindCalendarPopoverTrigger(trigger, date, events) {
-        if (!trigger || !date || !events.length) return;
-        trigger.addEventListener("mouseenter", () => {
+        if (!trigger) return;
+        clearPopoverTrigger(trigger);
+        if (!date || !events.length || trigger.disabled) return;
+        trigger.setAttribute("aria-expanded", "false");
+        trigger.addEventListener("pointerenter", () => {
             if (!isLayoutEditing() && !state.activePopoverLocked) showPopover(trigger, date, events);
         });
-        trigger.addEventListener("mouseleave", () => {
-            if (!isLayoutEditing() && !state.activePopoverLocked) hidePopover();
+        trigger.addEventListener("pointerleave", () => {
+            if (!isLayoutEditing() && !state.activePopoverLocked && state.activePopoverTrigger === trigger) hidePopover();
         });
         trigger.addEventListener("focus", () => {
             if (!isLayoutEditing() && !state.activePopoverLocked) showPopover(trigger, date, events);
         });
         trigger.addEventListener("blur", () => {
-            if (!isLayoutEditing() && !state.activePopoverLocked) hidePopover();
+            if (!isLayoutEditing() && !state.activePopoverLocked && state.activePopoverTrigger === trigger) hidePopover();
         });
         trigger.addEventListener("click", (event) => {
             if (isLayoutEditing()) return;
@@ -426,15 +431,32 @@
     }
     function ensurePopover() {
         let popover = document.getElementById("dashboard-popover");
-        if (popover) return popover;
+        if (popover) {
+            popover.setAttribute("role", "tooltip");
+            return popover;
+        }
         popover = document.createElement("div");
         popover.id = "dashboard-popover";
         popover.className = "dashboard-popover";
+        popover.setAttribute("role", "tooltip");
         popover.hidden = true;
         document.body.appendChild(popover);
         return popover;
     }
+    function resetPopoverTrigger(trigger) {
+        if (!trigger) return;
+        clearPopoverTrigger(trigger);
+        trigger.setAttribute("aria-expanded", "false");
+    }
+    function clearPopoverTrigger(trigger) {
+        if (!trigger) return;
+        trigger.removeAttribute("aria-describedby");
+        trigger.removeAttribute("aria-controls");
+        trigger.removeAttribute("aria-expanded");
+    }
     function showPopover(anchor, date, events) {
+        if (!anchor?.isConnected) return;
+        if (state.activePopoverTrigger && state.activePopoverTrigger !== anchor) hidePopover({ unlock: false });
         const popover = ensurePopover();
         const labelDate = new Date(`${date}T00:00:00`);
         const title = Number.isNaN(labelDate.getTime())
@@ -451,6 +473,11 @@
                 `).join("")}
             </ul>
         `;
+        resetPopoverTrigger(anchor);
+        anchor.setAttribute("aria-describedby", "dashboard-popover");
+        anchor.setAttribute("aria-controls", "dashboard-popover");
+        anchor.setAttribute("aria-expanded", "true");
+        state.activePopoverTrigger = anchor;
         popover.hidden = false;
         const rect = anchor.getBoundingClientRect();
         const popoverRect = popover.getBoundingClientRect();
@@ -466,9 +493,12 @@
         popover.style.left = `${Math.max(gap, left)}px`;
         popover.style.top = `${top}px`;
     }
-    function hidePopover() {
+    function hidePopover({ unlock = true } = {}) {
+        resetPopoverTrigger(state.activePopoverTrigger);
+        state.activePopoverTrigger = null;
         const popover = document.getElementById("dashboard-popover");
         if (popover) popover.hidden = true;
+        if (unlock) state.activePopoverLocked = false;
     }
     function showToast(message, type = "error", options = {}) {
         if (window.APStudyToast) {
@@ -503,7 +533,6 @@
         }
     }
     document.addEventListener("click", () => {
-        state.activePopoverLocked = false;
         hidePopover();
         closeTileConfigMenus();
         setAddMenuOpen(false);
@@ -514,7 +543,6 @@
             event.preventDefault();
             return;
         }
-        state.activePopoverLocked = false;
         hidePopover();
         closeTileConfigMenus({ restoreFocus: true });
         setAddMenuOpen(false, { restoreFocus: els.addTile?.getAttribute("aria-expanded") === "true" });

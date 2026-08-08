@@ -116,7 +116,7 @@
             }
         }
 
-        function exit() {
+        function exit({ restoreFocus = false } = {}) {
             state.editing = false;
             state.selectedId = null;
             state.removed = [];
@@ -124,6 +124,7 @@
             destroySortable();
             render(state.saved);
             syncChrome();
+            if (restoreFocus) elements.editToggle?.focus({ preventScroll: true });
         }
 
         function cancel() {
@@ -132,13 +133,13 @@
                 elements.discardDialog?.showModal?.();
                 return;
             }
-            exit();
+            exit({ restoreFocus: true });
         }
 
         function confirmDiscard() {
             state.draft = cloneLayout(state.saved);
             elements.discardDialog?.close?.();
-            exit();
+            exit({ restoreFocus: true });
         }
 
         function select(instanceId, { focusToolbar = false } = {}) {
@@ -169,6 +170,7 @@
                 } else {
                     tile.removeAttribute("tabindex");
                     tile.removeAttribute("role");
+                    tile.removeAttribute("aria-pressed");
                     tile.querySelector(".dashboard-tile-inner")?.removeAttribute("inert");
                     tile.querySelector(".dashboard-tile-inner")?.removeAttribute("aria-hidden");
                 }
@@ -176,11 +178,12 @@
             if (elements.quoteSlot) {
                 const selectable = state.editing && state.draft?.daily_quote_visible;
                 elements.quoteSlot.classList.toggle("is-layout-selectable", selectable);
-                elements.quoteSlot.tabIndex = selectable ? 0 : -1;
                 if (selectable) {
+                    elements.quoteSlot.tabIndex = 0;
                     elements.quoteSlot.setAttribute("role", "button");
                     elements.quoteSlot.setAttribute("aria-label", "Select Daily Quote banner for editing");
                 } else {
+                    elements.quoteSlot.removeAttribute("tabindex");
                     elements.quoteSlot.removeAttribute("role");
                     elements.quoteSlot.removeAttribute("aria-label");
                     elements.quoteSlot.removeAttribute("aria-pressed");
@@ -201,12 +204,13 @@
             elements.tiles?.querySelectorAll(".dashboard-tile").forEach((tile) => {
                 const selected = state.editing && tile.dataset.tileId === state.selectedId;
                 tile.classList.toggle("is-selected", selected);
-                tile.setAttribute("aria-pressed", selected ? "true" : "false");
+                if (state.editing) tile.setAttribute("aria-pressed", selected ? "true" : "false");
+                else tile.removeAttribute("aria-pressed");
             });
             elements.quoteSlot?.classList.toggle("is-selected", state.editing && state.selectedId === "daily_quote");
             if (state.editing && elements.quoteSlot?.classList.contains("is-layout-selectable")) {
                 elements.quoteSlot.setAttribute("aria-pressed", state.selectedId === "daily_quote" ? "true" : "false");
-            }
+            } else elements.quoteSlot?.removeAttribute("aria-pressed");
         }
 
         function syncChrome() {

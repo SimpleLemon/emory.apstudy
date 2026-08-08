@@ -127,13 +127,23 @@
             day.setDate(start.getDate() + index);
             const key = localDateKey(day);
             const dayEvents = eventMap.get(key) || [];
+            const eventTitles = dayEvents.map((event) => event.title || "Untitled event");
+            const dateLabel = day.toLocaleDateString(undefined, {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+            });
+            const dayLabel = eventTitles.length
+                ? `${dateLabel}. Events: ${eventTitles.join(", ")}`
+                : dateLabel;
             const markerHtml = view === "week"
                 ? dayEvents.slice(0, 5).map((event) => `<span class="dashboard-week-event-bar" style="--marker-color:${escapeHtml(event.color || "#6366f1")}"></span>`).join("")
                 : dayEvents.slice(0, 5).map((event) => `<span class="dashboard-marker" style="--marker-color:${escapeHtml(event.color || "#6366f1")}"></span>`).join("");
             cells.push(`
-                <button class="dashboard-day ${day.getMonth() === monthIndex ? "" : "is-muted"} ${key === todayKey ? "is-today" : ""}" type="button" data-date="${escapeHtml(key)}" ${dayEvents.length ? "" : "aria-disabled=\"true\""}>
+                <button class="dashboard-day ${day.getMonth() === monthIndex ? "" : "is-muted"} ${key === todayKey ? "is-today" : ""}" type="button" data-date="${escapeHtml(key)}" aria-label="${escapeAttr(dayLabel)}" ${dayEvents.length ? "" : "disabled"}>
                     <span class="dashboard-day-number">${escapeHtml(formatMonthGridDayLabel(day))}</span>
-                    <span class="dashboard-day-markers" aria-hidden="true">
+                    <span class="dashboard-day-markers">
                         ${markerHtml}
                     </span>
                 </button>

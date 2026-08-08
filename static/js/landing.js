@@ -220,6 +220,7 @@
 })();
 
 (() => {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const title = document.querySelector("[data-landing-calendar-title]");
     const daysRoot = document.querySelector("[data-landing-calendar-days]");
     const eventsRoot = document.querySelector("[data-landing-calendar-events]");
