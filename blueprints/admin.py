@@ -33,6 +33,7 @@ from extensions import csrf
 from blueprints.settings import _settings_defaults
 from blueprints.chat_api import create_university_channel, emit_chat_event
 from services.chat_presence import sync_chat_presence_labels_for_school
+from services.row_utils import row_id as _row_id
 from services.toasts import push_toast
 from services.user_cleanup import delete_user_data
 from services.user_profile import (
@@ -108,10 +109,6 @@ ALLOWED_SECTIONS = {
     "chat",
     "invites",
 }
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
 
 
 def _format_admin_date(value):

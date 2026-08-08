@@ -25,6 +25,7 @@ from services.discord_audit import emit_server_log_event
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import list_calendar_rows_all
+from services.row_utils import row_id as _row_id
 from services.toasts import pop_toasts
 from services import note_store
 
@@ -186,10 +187,6 @@ def _ensure_user_settings(user_id):
 
 def _theme_from_settings(user_settings):
     return user_settings.get("interface_theme") if user_settings else None
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
 
 
 def _as_utc(value):

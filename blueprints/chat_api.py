@@ -60,6 +60,7 @@ from services.chat_presence import sync_chat_presence_labels_for_user, universit
 from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
+from services.row_utils import row_id as _row_id
 from services.universities import normalize_school_key, school_payload, search_universities
 
 
@@ -130,8 +131,6 @@ def _now():
     return datetime.now(timezone.utc)
 
 
-def _row_id(row):
-    return row.get("$id") or row.get("id")
 
 
 def _bounded_string(value, limit, *, empty_as_none=False):

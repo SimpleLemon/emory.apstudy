@@ -17,6 +17,7 @@ from appwrite.query import Query
 
 from appwrite_client import COLLECTIONS, DATABASE_ID, tablesdb
 from services.database import database_path, init_db, insert_row_ignore
+from services.row_utils import row_id as _row_id
 
 
 logger = logging.getLogger("migrate_appwrite_to_sqlite")
@@ -51,10 +52,6 @@ def _row_list_to_rows(response):
         value = {}
     rows = getattr(response, "rows", value.get("rows", []))
     return [_row_to_dict(row) for row in rows]
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
 
 
 def _require_appwrite():

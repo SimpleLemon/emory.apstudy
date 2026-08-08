@@ -11,6 +11,7 @@ from appwrite.services.storage import Storage
 from appwrite_client import COLLECTIONS, FILE_SHARE_BUCKET_ID, client as appwrite_client
 from appwrite_helpers import delete_row_safe, list_rows_all
 from services.calendar_store import delete_calendar_rows_by_user
+from services.row_utils import row_id as _row_id
 
 logger = logging.getLogger(__name__)
 
@@ -53,11 +54,6 @@ _RELATION_TABLES = (
         ("inviter_user_id",),
     ),
 )
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
-
 
 def _delete_shared_file_storage(file_row):
     storage_file_id = file_row.get("storage_file_id")

@@ -22,6 +22,7 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.task_schedule import build_task_occurrences, next_task_occurrence_key
+from services.row_utils import row_id as _row_id
 from services import invites
 
 
@@ -41,8 +42,6 @@ TIMED_REMINDER_MINUTES = {-1, 0, 5, 10, 15, 30, 60, 120, 1440, 2880}
 DATE_ONLY_REMINDER_MINUTES = {-1, -540, 900, 2340, 9540}
 
 
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
 
 
 def _utcnow():

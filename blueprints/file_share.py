@@ -42,6 +42,7 @@ from services.entitlements import (
     check_storage,
     request_entitlements,
 )
+from services.row_utils import row_id as _row_id
 
 
 file_share_bp = Blueprint("file_share", __name__)
@@ -73,10 +74,6 @@ def _status_code(exc):
 
 def _appwrite_upload_error(exc):
     return appwrite_upload_error(exc)
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
 
 
 def _folders_collection():

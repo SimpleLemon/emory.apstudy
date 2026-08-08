@@ -14,6 +14,7 @@ from appwrite_helpers import (
 )
 from services.database import db_connection, utcnow_iso
 from services.notes_preview import preview_text_from_content
+from services.row_utils import row_id as _row_id
 
 logger = logging.getLogger(__name__)
 
@@ -24,11 +25,6 @@ USERS_TABLE_ID = "users"
 ORDER_STEP = 1000
 ACCESS_LEVELS = ("viewer", "reviewer", "editor")
 ACCESS_RANK = {"none": 0, "viewer": 1, "reviewer": 2, "editor": 3, "owner": 4}
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
-
 
 def _max_order(user_id, table_id):
     try:

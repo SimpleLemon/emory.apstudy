@@ -16,6 +16,7 @@ from appwrite_helpers import first_row, format_datetime, get_row_safe, list_rows
 from services.atlas_client import build_section_id
 from services.note_store import list_notes_for_user, list_shared_for_user, note_list_payload
 from services.notes_preview import preview_text_from_content
+from services.row_utils import row_id as _row_id
 from services.user_profile import is_emory_or_oxford_user
 
 
@@ -24,11 +25,6 @@ logger = logging.getLogger(__name__)
 GROUP_ORDER = ("files", "notes", "events", "messages", "courses")
 RESULTS_PER_GROUP = 5
 SNIPPET_LENGTH = 140
-
-
-def _row_id(row):
-    return str((row or {}).get("$id") or (row or {}).get("id") or "")
-
 
 def _plain_text(value):
     text = html.unescape(str(value or ""))

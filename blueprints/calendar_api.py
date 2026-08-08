@@ -37,6 +37,7 @@ from blueprints.settings import (
     _validate_other_calendar_urls,
 )
 from services.discord_audit import emit_creation_event, format_actor
+from services.row_utils import row_id as _row_id
 from services.calendar_store import (
     create_calendar_row,
     delete_calendar_row,
@@ -924,10 +925,6 @@ def _settings_payload_for_source_update(settings, source_id, next_url):
             "other_ical_urls_json": json.dumps(validated_other_urls),
         },
     }
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
 
 
 def _calendar_shares_collection():

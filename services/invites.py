@@ -21,6 +21,7 @@ from appwrite_helpers import (
 from services import notifications
 from services.discord_audit import emit_creation_event, format_actor
 from services.entitlements import normalize_tier
+from services.row_utils import row_id as _row_id
 
 
 logger = logging.getLogger(__name__)
@@ -50,11 +51,6 @@ class InviteLimitError(InviteError):
 
 class InviteNotFoundError(InviteError):
     """Raised when an invite is missing or belongs to another user."""
-
-
-def _row_id(row):
-    return (row or {}).get("$id") or (row or {}).get("id")
-
 
 def _now():
     return format_datetime(datetime.now(timezone.utc))
