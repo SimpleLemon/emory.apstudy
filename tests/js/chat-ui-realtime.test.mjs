@@ -205,7 +205,7 @@ test("chat fetches new DM threads directly from realtime events", async () => {
 
 test("chat supports direct channel and thread URL selection", async () => {
   const script = await sourceFor("static/js/chat.js");
-  const dashboard = await sourceFor("blueprints/dashboard.py");
+  const dashboard = await sourceFor("services/dashboard_summary.py");
 
   assert.match(script, /function requestedRoomFromLocation\(\)/);
   assert.match(script, /new URLSearchParams\(window\.location\.search \|\| ""\)/);

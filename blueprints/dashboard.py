@@ -18,13 +18,32 @@ from appwrite_helpers import (
     format_datetime,
     list_rows_safe,
     list_rows_all,
-    parse_datetime,
     update_row_safe,
 )
 from services.discord_audit import emit_server_log_event
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import list_calendar_rows_all
+from services.dashboard_summary import (
+    DASHBOARD_LIST_LIMIT,
+    DASHBOARD_TASK_FILTER_SOURCE_LIMIT,
+    DASHBOARD_TASK_LIMIT,
+    DASHBOARD_TASK_PRIORITY_RANK,
+    as_utc as dashboard_as_utc,
+    can_access_channel,
+    dashboard_task_bucket,
+    date_key as dashboard_date_key,
+    load_courses_summary,
+    load_message_rooms,
+    load_recent_files,
+    load_recent_notes,
+    load_tasks_summary,
+    sort_key as dashboard_sort_key,
+    task_is_complete,
+    task_list_payload,
+    task_payload,
+    task_priority_rank,
+)
 from services.row_utils import row_id as _row_id
 from services.toasts import pop_toasts
 from services import note_store
@@ -54,9 +73,6 @@ DASHBOARD_LAYOUT_VERSION = 4
 DASHBOARD_CALENDAR_VIEWS = ("month", "week", "upcoming")
 DASHBOARD_DEFAULT_CALENDAR_VIEW = "month"
 DASHBOARD_CALENDAR_UPCOMING_LIMIT = 80
-DASHBOARD_LIST_LIMIT = 8
-DASHBOARD_TASK_LIMIT = 8
-DASHBOARD_TASK_FILTER_SOURCE_LIMIT = 100
 DASHBOARD_TILE_LIMIT = 12
 DASHBOARD_DUPLICATE_TILE_LIMIT = 4
 DASHBOARD_DUPLICATE_TILE_TYPES = {"calendar", "tasks"}
@@ -66,13 +82,6 @@ DASHBOARD_CALENDAR_UPCOMING_DAYS = (7, 14, 30)
 DASHBOARD_TASK_DEADLINE_DAYS = (7, 30)
 DASHBOARD_TASK_PRIORITIES = ("high", "medium", "low", "none")
 DASHBOARD_TITLE_MAX_LENGTH = 60
-DASHBOARD_TASK_PRIORITY_RANK = {
-    "high": 0,
-    "medium": 1,
-    "low": 2,
-}
-
-
 def _is_emory_or_oxford_user():
     school = str(getattr(current_user, "school", "") or "").strip().lower()
     school_key = str(getattr(current_user, "school_key", "") or "").strip().lower()
@@ -190,25 +199,15 @@ def _theme_from_settings(user_settings):
 
 
 def _as_utc(value):
-    parsed = parse_datetime(value)
-    if not parsed:
-        return None
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+    return dashboard_as_utc(value)
 
 
 def _date_key(value):
-    parsed = _as_utc(value)
-    if parsed:
-        return parsed.date().isoformat()
-    text = str(value or "").strip()
-    return text[:10] if len(text) >= 10 else ""
+    return dashboard_date_key(value)
 
 
 def _sort_key(value):
-    parsed = _as_utc(value)
-    return parsed or datetime.min.replace(tzinfo=timezone.utc)
+    return dashboard_sort_key(value)
 
 
 def _default_tile_size(tile_id):
@@ -628,270 +627,86 @@ def _load_calendar_summary(user_id, user_settings):
 
 
 def _task_is_complete(task):
-    if task.get("recurrence_json"):
-        return False
-    return bool(task.get("completed"))
+    return task_is_complete(task)
 
 
 def _task_payload(row, now):
-    deadline = _as_utc(row.get("deadline_at"))
-    overdue = bool(deadline and deadline < now and not _task_is_complete(row))
-    return {
-        "id": _row_id(row),
-        "title": row.get("title") or "Untitled task",
-        "list_id": row.get("list_id") or "",
-        "priority": row.get("priority") or "none",
-        "deadline_at": format_datetime(deadline) if deadline else None,
-        "overdue": overdue,
-        "starred": bool(row.get("starred")),
-    }
+    return task_payload(row, now, {
+        "as_utc": _as_utc,
+        "format_datetime": format_datetime,
+        "row_id": _row_id,
+        "task_is_complete": _task_is_complete,
+    })
 
 
 def _task_list_payload(row):
-    list_id = _row_id(row)
-    return {
-        "id": list_id,
-        "name": row.get("name") or "Untitled List",
-        "order": row.get("order") or 0,
-        "hidden": bool(row.get("hidden", False)),
-    }
+    return task_list_payload(row, {"row_id": _row_id})
 
 
 def _task_priority_rank(row):
-    priority = str(row.get("priority") or "").strip().lower()
-    return DASHBOARD_TASK_PRIORITY_RANK.get(priority, len(DASHBOARD_TASK_PRIORITY_RANK))
+    return task_priority_rank(row)
 
 
 def _dashboard_task_bucket(row, now, seven_day_end, thirty_day_end):
-    deadline = _as_utc(row.get("deadline_at"))
-    if not deadline:
-        return 2
-    if deadline <= seven_day_end:
-        return 0
-    if deadline <= thirty_day_end:
-        return 1
-    return None
+    return dashboard_task_bucket(
+        row,
+        now,
+        seven_day_end,
+        thirty_day_end,
+        _as_utc,
+    )
+
+
+def _dashboard_summary_dependencies():
+    return {
+        "as_utc": _as_utc,
+        "can_access_channel": _dashboard_can_access_channel,
+        "dashboard_task_bucket": _dashboard_task_bucket,
+        "format_datetime": format_datetime,
+        "list_rows_all": list_rows_all,
+        "list_rows_safe": list_rows_safe,
+        "logger": logger,
+        "normalize_task_list_ids": _normalize_task_list_ids,
+        "row_id": _row_id,
+        "sort_key": _sort_key,
+        "task_is_complete": _task_is_complete,
+        "task_list_payload": _task_list_payload,
+        "task_payload": _task_payload,
+        "task_priority_rank": _task_priority_rank,
+        "url_for": url_for,
+    }
 
 
 def _load_tasks_summary(user_id, selected_list_ids=None):
-    now = datetime.now(timezone.utc)
-    seven_day_end = now + timedelta(days=7)
-    thirty_day_end = now + timedelta(days=30)
-    try:
-        list_rows = list_rows_all(
-            COLLECTIONS.get("task_lists", "task_lists"),
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("order"),
-            ],
-        )
-        rows = list_rows_all(
-            COLLECTIONS["tasks"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("deadline_at"),
-            ],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard task summary")
-        return {"items": [], "lists": [], "selected_list_ids": [], "total_count": 0, "setup_complete": False, "error": "Unable to load tasks."}
-
-    lists = [_task_list_payload(row) for row in sorted(list_rows, key=lambda item: item.get("order") or 0)]
-    available_list_ids = [item["id"] for item in lists if item.get("id")]
-    selected_ids = _normalize_task_list_ids(selected_list_ids, available_list_ids)
-    selected_set = set(selected_ids)
-    candidates = []
-    for row in rows:
-        if selected_set and str(row.get("list_id") or "") not in selected_set:
-            continue
-        if _task_is_complete(row):
-            continue
-        bucket = _dashboard_task_bucket(row, now, seven_day_end, thirty_day_end)
-        if bucket is None:
-            continue
-        candidates.append((bucket, row))
-    candidates.sort(key=lambda item: (
-        item[0],
-        _task_priority_rank(item[1]),
-        _as_utc(item[1].get("deadline_at")) or datetime.max.replace(tzinfo=timezone.utc),
-        item[1].get("title") or "",
-    ))
-    upcoming = [row for _, row in candidates]
-    source_items = [_task_payload(row, now) for row in upcoming[:DASHBOARD_TASK_FILTER_SOURCE_LIMIT]]
-    return {
-        "items": source_items[:DASHBOARD_TASK_LIMIT],
-        "all_items": source_items,
-        "lists": lists,
-        "selected_list_ids": selected_ids,
-        "total_count": len(upcoming),
-        "setup_complete": bool(rows),
-        "error": None,
-    }
+    return load_tasks_summary(
+        user_id,
+        selected_list_ids,
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _load_recent_files(user_id):
-    now = datetime.now(timezone.utc)
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["shared_files"],
-            [Query.equal("user_id", [user_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard file summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load files."}
-    rows = [
-        row for row in rows
-        if not (expires_at := _as_utc(row.get("expires_at"))) or expires_at > now
-    ]
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("created_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "name": row.get("original_filename") or "Untitled file",
-                "size_bytes": row.get("file_size_bytes") or 0,
-                "updated_at": row.get("updated_at") or row.get("created_at"),
-                "href": url_for("file_share.file_share_page"),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "error": None,
-    }
+    return load_recent_files(user_id, _dashboard_summary_dependencies())
 
 
 def _load_recent_notes(user_id):
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["notes"],
-            [Query.equal("user_id", [user_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard notes summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load notes."}
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("created_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "title": row.get("title") or "Untitled note",
-                "updated_at": row.get("updated_at") or row.get("created_at"),
-                "href": url_for("dashboard.note_document", note_id=_row_id(row)),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "error": None,
-    }
+    return load_recent_notes(user_id, _dashboard_summary_dependencies())
 
 
 def _load_message_rooms(user_id):
-    try:
-        channels = list_rows_all(COLLECTIONS["chat_channels"], [Query.order_asc("created_at")])
-        thread_rows_a = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_a", [user_id])])
-        thread_rows_b = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_b", [user_id])])
-        message_rows = list_rows_safe(
-            COLLECTIONS["chat_messages"],
-            [Query.order_desc("created_at"), Query.limit(250)],
-        ).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to build dashboard message summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load messages."}
-
-    channel_by_id = {_row_id(row): row for row in channels if _row_id(row)}
-    thread_by_id = {_row_id(row): row for row in thread_rows_a + thread_rows_b if _row_id(row)}
-    room_latest = {}
-    for row in message_rows:
-        if row.get("deleted_at"):
-            continue
-        channel_id = row.get("channel_id")
-        thread_id = row.get("thread_id")
-        if channel_id and channel_id in channel_by_id:
-            key = ("channel", channel_id)
-        elif thread_id and thread_id in thread_by_id:
-            key = ("thread", thread_id)
-        else:
-            continue
-        created_at = row.get("created_at")
-        if key not in room_latest or _sort_key(created_at) > _sort_key(room_latest[key]):
-            room_latest[key] = created_at
-
-    rooms = []
-    for (room_type, room_id), last_at in room_latest.items():
-        if room_type == "channel":
-            row = channel_by_id.get(room_id) or {}
-            if not _dashboard_can_access_channel(row):
-                continue
-            label = row.get("label") or row.get("name") or "Channel"
-            href = url_for("dashboard.chat", channel=room_id)
-        else:
-            row = thread_by_id.get(room_id) or {}
-            other_id = row.get("participant_b") if row.get("participant_a") == user_id else row.get("participant_a")
-            label = "Direct message"
-            try:
-                from appwrite_helpers import get_row_safe
-
-                user = get_row_safe(COLLECTIONS["users"], other_id, allow_missing=True) if other_id else None
-            except AppwriteException:
-                user = None
-            if user:
-                label = user.get("name") or user.get("username") or label
-            href = url_for("dashboard.chat", thread=room_id)
-        rooms.append({
-            "id": room_id,
-            "type": room_type,
-            "label": label,
-            "last_activity_at": last_at,
-            "href": href,
-        })
-    rooms.sort(key=lambda item: _sort_key(item.get("last_activity_at")), reverse=True)
-    return {"items": rooms[:DASHBOARD_LIST_LIMIT], "total_count": len(rooms), "error": None}
+    return load_message_rooms(user_id, _dashboard_summary_dependencies())
 
 
 def _dashboard_can_access_channel(channel):
-    if not channel:
-        return False
-    kind = channel.get("kind")
-    if kind == "discord":
-        return True
-    if kind == "university":
-        return bool(channel.get("approved")) and channel.get("school_key") == getattr(current_user, "school_key", None)
-    return False
+    return can_access_channel(channel, current_user)
 
 
 def _load_courses_summary(user_id):
-    if not _is_emory_or_oxford_user():
-        return {"items": [], "total_count": 0, "available": False, "error": None}
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["user_courses"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("term"),
-                Query.order_asc("subject"),
-                Query.order_asc("catalog"),
-            ],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard courses summary")
-        return {"items": [], "total_count": 0, "available": False, "error": "Unable to load courses."}
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("added_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "code": f"{row.get('subject') or ''} {row.get('catalog') or ''}".strip() or "Course",
-                "name": row.get("course_name") or "",
-                "term": row.get("term") or "",
-                "section": row.get("section_number") or row.get("crn") or "",
-                "updated_at": row.get("updated_at") or row.get("added_at"),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "available": bool(rows),
-        "error": None,
-    }
+    return load_courses_summary(
+        user_id,
+        _is_emory_or_oxford_user(),
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _dashboard_summary_payload():
