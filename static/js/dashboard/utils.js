@@ -97,19 +97,7 @@
     }
 
     function fetchJson(url, options = {}) {
-        if (window.APStudyHttp?.fetchJson) {
-            return window.APStudyHttp.fetchJson(url, options);
-        }
-        return fetch(url, {
-            headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-            ...options,
-        }).then(async (response) => {
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(data.error || "Request failed");
-            }
-            return data;
-        });
+        return window.APStudyHttp.fetchJson(url, options);
     }
 
     function formatDateTime(value) {

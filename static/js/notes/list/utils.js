@@ -62,25 +62,10 @@
     }
 
     async function apiJson(url, options = {}) {
-        if (global.APStudyHttp?.fetchJson) {
-            return global.APStudyHttp.fetchJson(url, {
-                ...options,
-                pendingLabel: options.pendingLabel || "notes-save",
-            });
-        }
-        const headers = { ...(options.headers || {}) };
-        if (options.body && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
-        const method = String(options.method || 'GET').toUpperCase();
-        const request = fetch(url, { ...options, headers });
-        const response = await (method === 'GET'
-            ? request
-            : global.APStudyPendingMutations?.track(request, 'notes-save') || request);
-        const contentType = response.headers.get('Content-Type') || '';
-        const payload = contentType.includes('application/json') ? await response.json() : null;
-        if (!response.ok) {
-            throw new Error(payload?.error || payload?.message || response.statusText || 'Request failed.');
-        }
-        return payload || {};
+        return global.APStudyHttp.fetchJson(url, {
+            ...options,
+            pendingLabel: options.pendingLabel || "notes-save",
+        });
     }
 
     global.APStudyNotesListUtils = {

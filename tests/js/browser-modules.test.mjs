@@ -463,7 +463,7 @@ test("notes list guards destructive actions and supports safe card menus", async
     ].join("\n");
 
     assert.match(source, /function apiJson\(url, options = \{\}\)/);
-    assert.match(source, /APStudyPendingMutations\?\.track\(request, 'notes-save'\)/);
+    assert.match(source, /APStudyHttp\.fetchJson\(url,[\s\S]*pendingLabel: options\.pendingLabel \|\| "notes-save"/);
     assert.match(source, /apiJson\(`\/api\/notes\/\$\{encodeURIComponent\(noteId\)\}`/);
     assert.match(source, /apiJson\(`\/api\/notes\/folders\/\$\{encodeURIComponent\(folderId\)\}`/);
     assert.doesNotMatch(cardsSource, /NotesExport/);

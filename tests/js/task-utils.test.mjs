@@ -148,11 +148,15 @@ test("fetchJson tracks mutations and raises server-provided errors", async () =>
                 return request;
             },
         },
+        APStudyHttp: {
+            async fetchJson(_url, options) {
+                const request = options.method === "POST"
+                    ? Promise.resolve({ saved: true })
+                    : Promise.reject(new Error("Nope"));
+                return window.APStudyPendingMutations.track(request, options.pendingLabel);
+            },
+        },
     };
-    globalThis.fetch = async (_url, options) => ({
-        ok: options.method === "POST",
-        json: async () => options.method === "POST" ? { saved: true } : { error: "Nope" },
-    });
 
     assert.deepEqual(await utils.fetchJson("/api/tasks", { method: "POST", body: "{}" }), { saved: true });
     assert.deepEqual(trackedLabels, ["task-save"]);

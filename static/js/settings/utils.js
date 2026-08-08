@@ -208,31 +208,10 @@
     }
 
     async function fetchJson(url, options = {}) {
-      if (window.APStudyHttp?.fetchJson) {
-        return window.APStudyHttp.fetchJson(url, {
-          ...options,
-          pendingLabel: options.pendingLabel || 'settings-save',
-        });
-      }
-      const method = String(options.method || 'GET').toUpperCase();
-      const request = fetch(url, {
-        headers: {
-          'Content-Type': 'application/json',
-          ...(options.headers || {}),
-        },
+      return window.APStudyHttp.fetchJson(url, {
         ...options,
+        pendingLabel: options.pendingLabel || 'settings-save',
       });
-      const response = await (method === 'GET'
-        ? request
-        : window.APStudyPendingMutations?.track(request, 'settings-save') || request);
-
-      const contentType = response.headers.get('content-type') || '';
-      const data = contentType.includes('application/json') ? await response.json() : null;
-
-      if (!response.ok) {
-        throw new Error((data && data.error) || 'Request failed.');
-      }
-      return data;
     }
 
     async function fetchFormData(url, formData) {
