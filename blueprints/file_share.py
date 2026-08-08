@@ -446,7 +446,7 @@ def _send_shared_file(shared_file):
             },
         )
     except AppwriteException:
-        logger.exception("Failed to update download count")
+        logger.exception("Failed to update download count for shared file %s", _row_id(shared_file))
 
     return send_file(
         io.BytesIO(data),
@@ -727,12 +727,15 @@ def upload_file():
                 },
             )
         except AppwriteException:
-            logger.exception("Failed to save shared file row")
+            logger.exception("Failed to save shared file row for upload %s", display_filename)
             reserved_storage_bytes -= file_size_bytes
             try:
                 _storage().delete_file(FILE_SHARE_BUCKET_ID, storage_file_id)
             except AppwriteException:
-                logger.exception("Failed to clean up uploaded Appwrite file after row failure")
+                logger.exception(
+                    "Failed to clean up uploaded Appwrite file %s after row failure",
+                    storage_file_id,
+                )
             errors.append({"index": idx, "error": "Unable to save file."})
             continue
 

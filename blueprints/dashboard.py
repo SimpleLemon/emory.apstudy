@@ -579,7 +579,7 @@ def _load_calendar_summary(user_id, user_settings):
 
             serialized.extend(task_calendar_events_for_user(user_id, range_start, range_end))
         except (AppwriteException, AttributeError):
-            logger.exception("Failed to load task events for dashboard calendar")
+            logger.exception("Failed to load task events for dashboard calendar user %s", user_id)
 
         visible = []
         source_by_id = {source.get("id"): source for source in sources}
@@ -1035,7 +1035,10 @@ def report_dashboard_quote_error():
             color="yellow",
         )
     except Exception:
-        logger.exception("Failed to emit daily quote error to Discord server log")
+        logger.exception(
+            "Failed to emit daily quote error to Discord server log for user %s",
+            current_user.id,
+        )
 
     return jsonify({"status": "ok", "reason": metadata["reason"]})
 

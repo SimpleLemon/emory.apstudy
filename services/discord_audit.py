@@ -278,7 +278,7 @@ class _ConsoleStreamTee:
             try:
                 queue_server_console_lines(lines)
             except Exception:
-                pass
+                logger.exception("Failed to queue captured server console lines")
 
     def flush(self):
         return self._stream.flush()

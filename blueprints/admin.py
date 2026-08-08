@@ -182,7 +182,7 @@ def _read_os_pretty():
             if pretty:
                 return pretty
     except Exception:
-        pass
+        logger.debug("Failed to read freedesktop OS release metadata", exc_info=True)
     try:
         return platform.platform()
     except Exception:
@@ -207,32 +207,34 @@ def _system_status():
 
         status.update(scheduler_status())
     except Exception:
-        logger.exception("Failed to read scheduler status")
+        logger.exception("Failed to read scheduler status for admin system overview")
     if psutil is None:
         return status
+    metrics = {}
     try:
-        status["cpu_percent"] = round(psutil.cpu_percent(interval=0.1), 1)
+        metrics["cpu_percent"] = round(psutil.cpu_percent(interval=0.1), 1)
     except Exception:
-        pass
+        logger.debug("Failed to read CPU utilization", exc_info=True)
     try:
-        status["cpu_logical"] = psutil.cpu_count(logical=True)
-        status["cpu_physical"] = psutil.cpu_count(logical=False)
+        metrics["cpu_logical"] = psutil.cpu_count(logical=True)
+        metrics["cpu_physical"] = psutil.cpu_count(logical=False)
     except Exception:
-        pass
+        logger.debug("Failed to read CPU counts", exc_info=True)
     try:
         memory = psutil.virtual_memory()
-        status["mem_percent"] = round(memory.percent, 1)
-        status["mem_used_gb"] = round(memory.used / (1024**3), 1)
-        status["mem_total_gb"] = round(memory.total / (1024**3), 1)
+        metrics["mem_percent"] = round(memory.percent, 1)
+        metrics["mem_used_gb"] = round(memory.used / (1024**3), 1)
+        metrics["mem_total_gb"] = round(memory.total / (1024**3), 1)
     except Exception:
-        pass
+        logger.debug("Failed to read memory utilization", exc_info=True)
     try:
         disk = shutil.disk_usage("/")
         storage_used_gb = disk.used / (1024**3)
-        status["storage_used_gb"] = round(storage_used_gb, 1)
-        status["storage_percent"] = round((storage_used_gb / SYSTEM_STORAGE_LIMIT_GB) * 100, 1)
+        metrics["storage_used_gb"] = round(storage_used_gb, 1)
+        metrics["storage_percent"] = round((storage_used_gb / SYSTEM_STORAGE_LIMIT_GB) * 100, 1)
     except Exception:
-        pass
+        logger.debug("Failed to read disk utilization", exc_info=True)
+    status.update(metrics)
     return status
 
 

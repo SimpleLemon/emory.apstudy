@@ -161,7 +161,7 @@ def create_app():
 
             record_authenticated_activity(str(current_user.id), at=now)
         except Exception:
-            logger.exception("Failed to record authenticated activity")
+            logger.exception("Failed to record authenticated activity for user %s", current_user.id)
 
         if request.method not in {"GET", "HEAD"}:
             return None
@@ -177,7 +177,7 @@ def create_app():
                 if now - previous < timedelta(minutes=15):
                     return None
             except ValueError:
-                pass
+                logger.warning("Ignoring malformed last_site_open_tracked_at session value")
 
         try:
             from appwrite_client import COLLECTIONS
@@ -188,7 +188,11 @@ def create_app():
             current_user.last_login = now
             session["last_site_open_tracked_at"] = timestamp
         except Exception:
-            logger.exception("Failed to track authenticated site open")
+            logger.exception(
+                "Failed to track authenticated site open for user %s on %s",
+                current_user.id,
+                request.path,
+            )
         return None
 
     @app.context_processor

@@ -923,15 +923,15 @@ def save_onboarding():
         try:
             initialize_new_user_discord_read_states(user_id)
         except Exception:
-            logger.exception("Failed to initialize Discord read states after onboarding")
+            logger.exception("Failed to initialize Discord read states after onboarding for user %s", user_id)
         try:
             create_welcome_dm_for_user(user_id)
         except Exception:
-            logger.exception("Failed to create welcome DM after onboarding")
+            logger.exception("Failed to create welcome DM after onboarding for user %s", user_id)
         try:
             invites.promote_if_activated(user_id)
         except Exception:
-            logger.exception("Failed to promote activated invite after onboarding")
+            logger.exception("Failed to promote activated invite after onboarding for user %s", user_id)
         emit_user_event(
             "Onboarding Complete",
             actor=format_actor(current_user),
@@ -973,7 +973,7 @@ def settings_page():
                 {"created_at": format_datetime(datetime.utcnow())},
             )
         except AppwriteException:
-            logger.exception("Failed to set user created_at")
+            logger.exception("Failed to set created_at for user %s", current_user.id)
         current_user.created_at = datetime.utcnow()
 
     user_settings = _load_user_settings(str(current_user.id))
@@ -1054,7 +1054,7 @@ def unlink_discord():
             },
         )
     except AppwriteException:
-        logger.exception("Failed to clear Discord link fields")
+        logger.exception("Failed to clear Discord link fields for user %s", current_user.id)
         return jsonify({"error": "Unable to unlink Discord account."}), 500
 
     current_user.discord_id = None
