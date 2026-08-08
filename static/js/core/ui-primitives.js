@@ -14,7 +14,9 @@
     const escapeHtml = (value) => {
         const div = document.createElement('div');
         div.textContent = value == null ? '' : String(value);
-        return div.innerHTML;
+        return div.innerHTML
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     };
 
     const normalizeFields = (fields) => (Array.isArray(fields) ? fields : [fields]).filter(Boolean);
@@ -423,6 +425,7 @@
     });
 
     window.APStudyUIPrimitives = Object.freeze({
+        escapeHtml,
         form: window.APStudyFormField,
         loader: window.APStudyLoader,
         skeleton: window.APStudySkeleton,

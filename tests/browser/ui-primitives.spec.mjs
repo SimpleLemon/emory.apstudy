@@ -8,8 +8,15 @@ test("shared form, loader, skeleton, toast, and dialog primitives initialize ind
     await page.goto(`${baseURL}/ui-primitives-harness`, { waitUntil: "networkidle" });
 
     expect(await page.evaluate(() => Object.keys(window.APStudyUIPrimitives).sort())).toEqual([
-        "confirm", "form", "loader", "skeleton", "toast",
+        "confirm", "escapeHtml", "form", "loader", "skeleton", "toast", "undo",
     ]);
+    expect(await page.evaluate(() => [
+        window.APStudyUIPrimitives.escapeHtml(`&<>"'`),
+        window.APStudyUIPrimitives.escapeHtml(null),
+        window.APStudyUIPrimitives.escapeHtml(undefined),
+        window.APStudyUIPrimitives.escapeHtml(0),
+        window.APStudyUIPrimitives.escapeHtml(false),
+    ])).toEqual(["&amp;&lt;&gt;&quot;&#39;", "", "", "0", "false"]);
     expect(await page.evaluate(() => window.APStudyLoader.html("<Loading>"))).toContain("&lt;Loading&gt;");
     expect(await page.evaluate(() => window.APStudySkeleton.cards({ count: 2 }))).toContain('role="status"');
 

@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const primitives = fs.readFileSync(path.join(repoRoot, 'static/js/core/ui-primitives.js'), 'utf8');
+const primitivesModule = fs.readFileSync(path.join(repoRoot, 'static/js/core/ui-primitives-module.js'), 'utf8');
 const feedbackOverlays = fs.readFileSync(path.join(repoRoot, 'static/css/core/feedback-overlays.css'), 'utf8');
 
 test('shared UI primitive module has substantive owned APIs', () => {
@@ -13,6 +14,12 @@ test('shared UI primitive module has substantive owned APIs', () => {
         assert.match(primitives, new RegExp(`window\\.${api}`));
     }
     assert.match(primitives, /window\.APStudyUIPrimitives = Object\.freeze/);
+    assert.match(primitives, /div\.textContent = value == null \? '' : String\(value\)/);
+    assert.match(primitives, /\.replace\(\/"\/g, '&quot;'\)/);
+    assert.match(primitives, /\.replace\(\/'\/g, '&#39;'\)/);
+    assert.match(primitives, /Object\.freeze\(\{\s*escapeHtml,/);
+    assert.match(primitivesModule, /import '\.\/ui-primitives\.js'/);
+    assert.match(primitivesModule, /export const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
     assert.ok(primitives.length > 8_000, 'ui-primitives.js must not become an empty compatibility shim');
     const globalSource = fs.readFileSync(path.join(repoRoot, 'static/js/core/global.js'), 'utf8');
     assert.doesNotMatch(globalSource, /window\.APStudy(?:FormField|Loader|Skeleton|Toast|Confirm)\s*=/);
