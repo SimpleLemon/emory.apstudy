@@ -40,6 +40,7 @@ from services.dashboard_summary import (
     load_recent_files,
     load_recent_notes,
     load_tasks_summary,
+    save_dashboard_layout,
     sort_key as dashboard_sort_key,
     task_is_complete,
     task_list_payload,
@@ -724,177 +725,46 @@ def report_dashboard_quote_error():
     return jsonify({"status": "ok", "reason": metadata["reason"]})
 
 
+def _dashboard_layout_dependencies():
+    return {
+        "calendar_upcoming_days": DASHBOARD_CALENDAR_UPCOMING_DAYS,
+        "coerce_layout": _coerce_layout,
+        "densities": DASHBOARD_DENSITIES,
+        "duplicate_tile_limit": DASHBOARD_DUPLICATE_TILE_LIMIT,
+        "duplicate_tile_types": DASHBOARD_DUPLICATE_TILE_TYPES,
+        "ensure_user_settings": _ensure_user_settings,
+        "format_datetime": format_datetime,
+        "item_limits": DASHBOARD_ITEM_LIMITS,
+        "jsonify": jsonify,
+        "layout_version": _layout_version,
+        "layout_version_number": DASHBOARD_LAYOUT_VERSION,
+        "legacy_instance_id": _legacy_instance_id,
+        "list_rows_all": list_rows_all,
+        "logger": logger,
+        "normalize_task_list_ids": _normalize_task_list_ids,
+        "row_id": _row_id,
+        "settings_row_id": _settings_row_id,
+        "task_deadline_days": DASHBOARD_TASK_DEADLINE_DAYS,
+        "task_priorities": DASHBOARD_TASK_PRIORITIES,
+        "tile_ids": DASHBOARD_TILE_IDS,
+        "tile_limit": DASHBOARD_TILE_LIMIT,
+        "title_max_length": DASHBOARD_TITLE_MAX_LENGTH,
+        "update_row_safe": update_row_safe,
+        "validated_calendar_view": _validated_calendar_view,
+        "validated_tile_size": _validated_tile_size,
+    }
+
+
 @dashboard_bp.route("/api/dashboard/layout", methods=["PATCH"])
 @login_required
 def update_dashboard_layout():
     """Persist a validated v4 dashboard layout draft."""
-    if not current_user.onboarding_complete:
-        return jsonify({"error": "Onboarding is required."}), 403
-
     payload = request.get_json(silent=True) or {}
-    raw_layout = payload.get("dashboard_layout", payload.get("tile_layout", payload.get("layout")))
-    if raw_layout is None:
-        raw_layout = payload.get("tiles")
-    if raw_layout is None:
-        raw_layout = payload.get("tile_order", payload.get("order"))
-    if not isinstance(raw_layout, (dict, list)):
-        return jsonify({"error": "tile_layout must be an object or list."}), 400
-
-    raw_tiles = raw_layout.get("tiles") if isinstance(raw_layout, dict) else raw_layout
-    if not isinstance(raw_tiles, list):
-        return jsonify({"error": "tile_layout tiles must be a list."}), 400
-    if len(raw_tiles) > DASHBOARD_TILE_LIMIT:
-        return jsonify({"error": f"Dashboard layouts support at most {DASHBOARD_TILE_LIMIT} tiles."}), 400
-
-    layout_version = _layout_version(raw_layout)
-    raw_quote_visible = raw_layout.get("daily_quote_visible") if isinstance(raw_layout, dict) else True
-    if raw_quote_visible is not None and not isinstance(raw_quote_visible, bool):
-        return jsonify({"error": "daily_quote_visible must be true or false."}), 400
-    daily_quote_visible = True if raw_quote_visible is None else raw_quote_visible
-
-    user_id = str(current_user.id)
-    owned_task_list_ids = None
-    normalized_tiles = []
-    seen_instances = set()
-    type_counts = {}
-    for item in raw_tiles:
-        if isinstance(item, dict):
-            tile_id = str(item.get("type") or item.get("id") or "").strip()
-            instance_id = str(item.get("instance_id") or (item.get("id") if item.get("type") else "") or _legacy_instance_id(tile_id)).strip()
-            raw_size = item.get("size")
-            raw_view = item.get("view")
-            raw_task_list_ids = item.get("task_list_ids")
-        else:
-            tile_id = str(item or "").strip()
-            instance_id = _legacy_instance_id(tile_id)
-            raw_size = None
-            raw_view = None
-            raw_task_list_ids = None
-            item = {}
-        if tile_id not in DASHBOARD_TILE_IDS:
-            return jsonify({"error": f"Unknown dashboard tile: {tile_id or 'blank'}."}), 400
-        if not instance_id or len(instance_id) > 80 or not all(character.isalnum() or character in "-_:." for character in instance_id):
-            return jsonify({"error": f"Invalid dashboard tile instance: {instance_id or 'blank'}."}), 400
-        if instance_id in seen_instances:
-            return jsonify({"error": f"Duplicate dashboard tile instance: {instance_id}."}), 400
-        type_counts[tile_id] = type_counts.get(tile_id, 0) + 1
-        if type_counts[tile_id] > 1 and (layout_version < DASHBOARD_LAYOUT_VERSION or tile_id not in DASHBOARD_DUPLICATE_TILE_TYPES):
-            return jsonify({"error": f"Duplicate dashboard tile: {tile_id}."}), 400
-        if type_counts[tile_id] > DASHBOARD_DUPLICATE_TILE_LIMIT:
-            return jsonify({"error": f"Dashboard supports at most {DASHBOARD_DUPLICATE_TILE_LIMIT} {tile_id} tiles."}), 400
-        size = _validated_tile_size(tile_id, raw_size)
-        if size is None:
-            return jsonify({"error": f"Invalid size '{raw_size or 'blank'}' for dashboard tile: {tile_id}."}), 400
-        raw_title = item.get("title")
-        if raw_title is not None and not isinstance(raw_title, str):
-            return jsonify({"error": "Dashboard tile titles must be text."}), 400
-        title = str(raw_title or "").strip()
-        if len(title) > DASHBOARD_TITLE_MAX_LENGTH:
-            return jsonify({"error": f"Dashboard tile titles must be {DASHBOARD_TITLE_MAX_LENGTH} characters or fewer."}), 400
-        try:
-            item_limit = int(item.get("item_limit", 5))
-        except (TypeError, ValueError):
-            item_limit = None
-        if item_limit not in DASHBOARD_ITEM_LIMITS:
-            return jsonify({"error": "Dashboard tile item_limit must be 3, 5, or 8."}), 400
-        density = str(item.get("density", "comfortable")).strip().lower()
-        if density not in DASHBOARD_DENSITIES:
-            return jsonify({"error": "Dashboard tile density must be compact or comfortable."}), 400
-        tile_payload = {
-            "instance_id": instance_id,
-            "type": tile_id,
-            "size": size,
-            "density": density,
-            "item_limit": item_limit,
-        }
-        if title:
-            tile_payload["title"] = title
-        if tile_id == "calendar":
-            view = _validated_calendar_view(raw_view)
-            if view is None:
-                return jsonify({"error": f"Invalid calendar view '{raw_view or 'blank'}'."}), 400
-            upcoming_days = item.get("upcoming_days", 7)
-            if upcoming_days not in DASHBOARD_CALENDAR_UPCOMING_DAYS:
-                return jsonify({"error": "Calendar upcoming_days must be 7, 14, or 30."}), 400
-            tile_payload.update({"view": view, "upcoming_days": upcoming_days})
-        if tile_id == "tasks" and raw_task_list_ids is not None:
-            if not isinstance(raw_task_list_ids, list):
-                return jsonify({"error": "Task list filters must be a list."}), 400
-            if raw_task_list_ids:
-                if owned_task_list_ids is None:
-                    try:
-                        owned_task_list_ids = {
-                            _row_id(row)
-                            for row in list_rows_all(
-                                COLLECTIONS.get("task_lists", "task_lists"),
-                                [Query.equal("user_id", [user_id])],
-                            )
-                        }
-                    except AppwriteException:
-                        logger.exception("Failed to validate dashboard task list filters")
-                        return jsonify({"error": "Unable to validate task list filters."}), 500
-                task_list_ids = _normalize_task_list_ids(raw_task_list_ids, owned_task_list_ids)
-                if len(task_list_ids) != len({str(item or "").strip() for item in raw_task_list_ids if str(item or "").strip()}):
-                    return jsonify({"error": "Task list filters must belong to your account."}), 400
-                if not task_list_ids:
-                    return jsonify({"error": "Select at least one task list or choose All."}), 400
-                tile_payload["task_list_ids"] = task_list_ids
-        if tile_id == "tasks":
-            deadline_days = item.get("deadline_days", 30)
-            if deadline_days not in DASHBOARD_TASK_DEADLINE_DAYS:
-                return jsonify({"error": "Task deadline_days must be 7 or 30."}), 400
-            raw_priorities = item.get("priorities", list(DASHBOARD_TASK_PRIORITIES))
-            if not isinstance(raw_priorities, list):
-                return jsonify({"error": "Task priorities must be a list."}), 400
-            priorities = []
-            for raw_priority in raw_priorities:
-                priority = str(raw_priority or "").strip().lower()
-                if priority not in DASHBOARD_TASK_PRIORITIES:
-                    return jsonify({"error": f"Unknown task priority: {priority or 'blank'}."}), 400
-                if priority not in priorities:
-                    priorities.append(priority)
-            if not priorities:
-                return jsonify({"error": "Select at least one task priority."}), 400
-            for boolean_field in ("include_overdue", "include_undated", "starred_only"):
-                if boolean_field in item and not isinstance(item[boolean_field], bool):
-                    return jsonify({"error": f"{boolean_field} must be true or false."}), 400
-            tile_payload.update({
-                "deadline_days": deadline_days,
-                "include_overdue": item.get("include_overdue", True),
-                "include_undated": item.get("include_undated", True),
-                "priorities": priorities,
-                "starred_only": item.get("starred_only", False),
-            })
-        normalized_tiles.append(tile_payload)
-        seen_instances.add(instance_id)
-
-    normalized = {
-        "version": DASHBOARD_LAYOUT_VERSION,
-        "daily_quote_visible": daily_quote_visible,
-        "tiles": normalized_tiles,
-    }
-
-    try:
-        settings = _ensure_user_settings(user_id)
-        settings = update_row_safe(
-            COLLECTIONS["user_settings"],
-            _settings_row_id(settings),
-            {
-                "dashboard_layout_json": json.dumps(normalized, separators=(",", ":")),
-                "updated_at": format_datetime(datetime.now(timezone.utc)),
-            },
-        )
-    except AppwriteException:
-        logger.exception("Failed to save dashboard layout")
-        return jsonify({"error": "Unable to save dashboard layout."}), 500
-
-    saved_layout = _coerce_layout(settings.get("dashboard_layout_json"))
-    return jsonify({
-        "status": "ok",
-        "dashboard_layout": saved_layout,
-        "tile_layout": saved_layout["tiles"],
-        "tile_order": [tile["type"] for tile in saved_layout["tiles"]],
-    })
+    return save_dashboard_layout(
+        current_user,
+        payload,
+        _dashboard_layout_dependencies(),
+    )
 
 
 @dashboard_bp.route("/api/dashboard/checklist/hidden", methods=["POST"])
