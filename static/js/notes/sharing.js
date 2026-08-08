@@ -36,18 +36,16 @@
     }
 
     async function apiJson(url, options = {}) {
-        const response = await fetch(url, {
+        return global.APStudyHttp.fetchJson(url, {
             ...options,
-            headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
+            jsonMode: 'optional',
+            errorFactory: (payload, response) => {
+                const error = new Error(payload.error || 'Unable to update sharing.');
+                error.payload = payload;
+                error.status = response.status;
+                return error;
+            },
         });
-        const payload = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            const error = new Error(payload.error || 'Unable to update sharing.');
-            error.payload = payload;
-            error.status = response.status;
-            throw error;
-        }
-        return payload;
     }
 
     function endpointFor(resourceType, resourceId) {

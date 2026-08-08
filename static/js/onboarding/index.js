@@ -139,6 +139,8 @@ function fetchJson(url, options = {}) {
     return window.APStudyHttp.fetchJson(url, {
         ...options,
         pendingLabel: options.pendingLabel || 'onboarding-save',
+        jsonMode: 'required',
+        errorFactory: (payload) => new Error(payload.error || 'Request failed'),
     });
 }
 const DARK_THEMES = ['obsidian-dark', 'nest-dark'];

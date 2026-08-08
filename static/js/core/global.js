@@ -421,20 +421,34 @@ function drainServerToasts() {
 
 window.APStudyHttp = window.APStudyHttp || {
     async fetchJson(url, options = {}) {
-        const headers = { ...(options.headers || {}) };
-        if (options.body && !headers["Content-Type"]) {
+        const {
+            errorFactory = null,
+            jsonMode = "content-type",
+            pendingLabel = null,
+            ...requestOptions
+        } = options;
+        const headers = { ...(requestOptions.headers || {}) };
+        if (requestOptions.body && !headers["Content-Type"]) {
             headers["Content-Type"] = "application/json";
         }
-        const method = String(options.method || "GET").toUpperCase();
-        let request = fetch(url, { ...options, headers });
-        const pendingLabel = options.pendingLabel || null;
+        const method = String(requestOptions.method || "GET").toUpperCase();
+        let request = fetch(url, { ...requestOptions, headers });
         if (method !== "GET" && pendingLabel && window.APStudyPendingMutations?.track) {
             request = window.APStudyPendingMutations.track(request, pendingLabel);
         }
         const response = await request;
         const contentType = response.headers.get("Content-Type") || "";
-        const payload = contentType.includes("application/json") ? await response.json() : null;
+        const payload = jsonMode === "required"
+            ? await response.json()
+            : jsonMode === "optional"
+              ? await response.json().catch(() => ({}))
+              : contentType.includes("application/json")
+                ? await response.json()
+                : null;
         if (!response.ok) {
+            if (typeof errorFactory === "function") {
+                throw errorFactory(payload, response);
+            }
             const message = payload?.error || payload?.message || response.statusText || "Request failed.";
             const error = new Error(message);
             if (payload && typeof payload === "object") {
