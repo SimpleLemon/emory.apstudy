@@ -1,3 +1,5 @@
+import { escapeHtml } from "../core/ui-primitives-module.js";
+
 const ALLOWED_EXTENSIONS = new Set([
   "jpg", "jpeg", "png", "webp", "gif", "pdf", "txt", "md", "markdown", "csv", "json",
   "docx", "xlsx", "pptx", "odt", "ods", "odp", "zip",
@@ -9,12 +11,6 @@ function formatBytes(value) {
   if (size < 1024) return `${size} B`;
   if (size < 1024 ** 2) return `${(size / 1024).toFixed(1)} KiB`;
   return `${(size / 1024 ** 2).toFixed(1)} MiB`;
-}
-
-function escapeHtml(value) {
-  return String(value || "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[char]);
 }
 
 async function compressedUpload(file) {

@@ -1,3 +1,5 @@
+import { escapeHtml } from "../core/ui-primitives-module.js";
+
 const EMOJI_GROUPS = {
   Recent: [],
   Faces: ["😀", "😃", "😄", "😁", "😂", "🥹", "😊", "😍", "🥰", "😘", "😎", "🤓", "🧐", "🤔", "🫡", "😴", "😭", "😤", "😱", "🥳", "🤯", "🫠", "🙃", "😉"],
@@ -20,12 +22,6 @@ const EMOJI_NAMES = {
 };
 const RECENT_KEY = "apstudy-chat-recent-emoji";
 const HOVER_SMILES = ["😀", "😄", "😊", "🤩", "🥳"];
-
-function escapeHtml(value) {
-  return String(value || "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[char]);
-}
 
 function recentEmoji() {
   try { return JSON.parse(localStorage.getItem(RECENT_KEY) || "[]").slice(0, 18); } catch (_) { return []; }

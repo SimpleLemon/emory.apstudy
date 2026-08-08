@@ -25,6 +25,8 @@ test("chat runtime delegates cache and presentation responsibilities", async () 
   assert.match(runtime, /from "\.\/presentation\.js"/);
   assert.doesNotMatch(runtime, /function openChatCacheDb|function groupMessages|function escapeHtml/);
   assert.match(cache, /export function createPersistentChatCache/);
+  assert.match(presentation, /import \{ escapeHtml \} from "\.\.\/core\/ui-primitives-module\.js"/);
+  assert.match(presentation, /export \{ escapeHtml \}/);
   assert.match(presentation, /export function groupMessages/);
 });
 

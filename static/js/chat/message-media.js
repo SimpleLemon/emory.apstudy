@@ -1,8 +1,4 @@
-function escapeHtml(value) {
-  return String(value || "").replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
-  })[char]);
-}
+import { escapeHtml } from "../core/ui-primitives-module.js";
 
 function formatBytes(value) {
   const size = Number(value || 0);
