@@ -5,6 +5,15 @@ import blueprints.admin as admin
 
 
 class TestAdminChatHistory(unittest.TestCase):
+    def test_section_dispatch_keeps_loader_patch_effective(self):
+        expected = {"messages": [{"$id": "message-1"}]}
+        with patch.object(admin, "load_chat_section", return_value=expected) as load_chat:
+            payload = admin._load_section("chat", "user-1")
+
+        self.assertEqual(payload, expected)
+        load_chat.assert_called_once()
+        self.assertEqual(load_chat.call_args.args[0], "user-1")
+
     def test_count_rows_falls_back_to_full_list_when_total_missing(self):
         with patch.object(admin, "list_rows_safe", return_value={"rows": [{"$id": "one"}]}), \
                 patch.object(admin, "list_rows_all", return_value=[{"$id": "one"}, {"$id": "two"}, {"$id": "three"}]):

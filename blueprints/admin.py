@@ -50,6 +50,16 @@ from services.app_config import (
     spring_course_tracking_open,
 )
 from services.admin_access import admin_user_ids
+from services.admin_user_sections import (
+    load_calendars_section,
+    load_chat_section,
+    load_courses_section,
+    load_files_section,
+    load_invites_section,
+    load_notes_section,
+    load_seat_tracks_section,
+    load_settings_section,
+)
 from services.scheduler import update_course_tracking_refresh_interval
 from services.discord_audit import discord_audit_status, emit_admin_event, format_actor, format_user_target
 import services.apswiftly_control as apswiftly_control_service
@@ -766,176 +776,37 @@ def _delete_user_rows(user_id):
     return delete_user_data(user_id)
 
 
+def _section_loader_dependencies():
+    return {
+        "collections": COLLECTIONS,
+        "first_row": first_row,
+        "list_calendar_rows_all": list_calendar_rows_all,
+        "list_rows_all": list_rows_all,
+        "row_id": _row_id,
+        "user_chat_blocks": _user_chat_blocks,
+        "user_chat_messages": _user_chat_messages,
+        "user_dm_threads": _user_dm_threads,
+    }
+
+
 def _load_section(section, user_id):
+    dependencies = _section_loader_dependencies()
     if section == "invites":
-        try:
-            owned_invites = list_rows_all(
-                COLLECTIONS["user_invites"],
-                [
-                    Query.equal("owner_user_id", [user_id]),
-                    Query.order_desc("created_at"),
-                ],
-            )
-            owned_attributions = list_rows_all(
-                COLLECTIONS["user_invite_attributions"],
-                [
-                    Query.equal("inviter_user_id", [user_id]),
-                    Query.order_desc("signed_up_at"),
-                ],
-            )
-            received_attribution = first_row(
-                COLLECTIONS["user_invite_attributions"],
-                [Query.equal("invited_user_id", [user_id])],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load invite records for admin")
-            return {
-                "invites": [],
-                "received_attribution": None,
-            }
-
-        attributions_by_invite = {}
-        for attribution in owned_attributions:
-            attributions_by_invite.setdefault(
-                str(attribution.get("invite_id") or ""),
-                [],
-            ).append(attribution)
-        return {
-            "invites": [
-                {
-                    "invite": invitation,
-                    "attributions": attributions_by_invite.get(
-                        str(_row_id(invitation) or ""),
-                        [],
-                    ),
-                }
-                for invitation in owned_invites
-            ],
-            "received_attribution": received_attribution,
-        }
-
+        return load_invites_section(user_id, dependencies)
     if section == "settings":
-        try:
-            return {
-                "settings": first_row(
-                    COLLECTIONS["user_settings"],
-                    [Query.equal("user_id", [user_id])],
-                )
-            }
-        except AppwriteException:
-            logger.exception("Failed to load user settings")
-            return {"settings": None}
-
+        return load_settings_section(user_id, dependencies)
     if section == "files":
-        try:
-            folders = list_rows_all(
-                COLLECTIONS["file_folders"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("created_at")],
-            )
-            files = list_rows_all(
-                COLLECTIONS["shared_files"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("created_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load files for admin")
-            return {"folders": [], "files": []}
-        return {
-            "folders": folders,
-            "files": files,
-        }
-
+        return load_files_section(user_id, dependencies)
     if section == "notes":
-        try:
-            notes = list_rows_all(
-                COLLECTIONS["notes"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            folders = list_rows_all(
-                COLLECTIONS["note_folders"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("created_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load notes for admin")
-            return {"notes": [], "note_folders": []}
-        return {
-            "notes": notes,
-            "note_folders": folders,
-        }
-
+        return load_notes_section(user_id, dependencies)
     if section == "calendars":
-        try:
-            cache_rows = list_calendar_rows_all(
-                COLLECTIONS["calendar_cache"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("event_start")],
-            )
-            feeds = list_calendar_rows_all(
-                COLLECTIONS["calendar_feeds"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            preferences = list_calendar_rows_all(
-                COLLECTIONS["user_calendar_preferences"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("calendar_name")],
-            )
-            sources = list_calendar_rows_all(
-                COLLECTIONS["user_calendar_sources"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            events = list_calendar_rows_all(
-                COLLECTIONS["user_events"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("start")],
-            )
-            overrides = list_calendar_rows_all(
-                COLLECTIONS["user_event_overrides"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load calendar data for admin")
-            return {
-                "calendar_cache": [],
-                "calendar_feeds": [],
-                "calendar_preferences": [],
-                "calendar_sources": [],
-                "calendar_events": [],
-                "calendar_overrides": [],
-            }
-        return {
-            "calendar_cache": cache_rows,
-            "calendar_feeds": feeds,
-            "calendar_preferences": preferences,
-            "calendar_sources": sources,
-            "calendar_events": events,
-            "calendar_overrides": overrides,
-        }
-
+        return load_calendars_section(user_id, dependencies)
     if section == "courses":
-        try:
-            courses = list_rows_all(
-                COLLECTIONS["user_courses"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("term")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load courses for admin")
-            courses = []
-        return {"courses": courses}
-
+        return load_courses_section(user_id, dependencies)
     if section == "seat_tracks":
-        try:
-            tracks = list_rows_all(
-                COLLECTIONS["course_seat_tracks"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load seat tracks for admin")
-            tracks = []
-        return {"seat_tracks": tracks}
-
+        return load_seat_tracks_section(user_id, dependencies)
     if section == "chat":
-        return {
-            "messages": _user_chat_messages(user_id),
-            "dm_threads": _user_dm_threads(user_id),
-            "blocks": _user_chat_blocks(user_id),
-        }
-
+        return load_chat_section(user_id, dependencies)
     return {}
 
 
