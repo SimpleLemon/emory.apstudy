@@ -1406,3 +1406,169 @@ def _public_calendar_events_payload(
         ),
         "share": calendar_share_payload(share),
     }
+
+
+def get_events_response(user_id, response_user_id, args, dependencies):
+    """Build the authenticated calendar events API response."""
+    collections = dependencies["collections"]
+    query = dependencies["query"]
+    jsonify = dependencies["jsonify"]
+    first_row_fn = dependencies["first_row"]
+    list_calendar_rows = dependencies["list_calendar_rows_all"]
+    logger_instance = dependencies["logger"]
+    parse_range_param = dependencies["parse_range_param"]
+    configured_feed_urls = dependencies["configured_feed_urls"]
+    load_calendar_preferences = dependencies["load_calendar_preferences"]
+    load_calendar_feed_metadata = dependencies["load_calendar_feed_metadata"]
+    load_local_calendar_sources = dependencies["load_local_calendar_sources"]
+    load_event_overrides = dependencies["load_event_overrides"]
+    refresh_initial_feed_cache = dependencies["refresh_initial_feed_cache"]
+    filter_configured_cache_events = dependencies[
+        "filter_configured_cache_events"
+    ]
+    task_calendar_payload = dependencies["task_calendar_payload"]
+    append_task_calendar_source = dependencies["append_task_calendar_source"]
+    configured_calendar_sources = dependencies["configured_calendar_sources"]
+    serialize_event = dependencies["serialize_event"]
+    apply_event_override = dependencies["apply_event_override"]
+    serialize_user_event = dependencies["serialize_user_event"]
+    api_event_overlaps_range = dependencies["api_event_overlaps_range"]
+    resolve_last_fetched = dependencies["resolve_last_fetched"]
+
+    range_start = parse_range_param(args.get("start"))
+    range_end = parse_range_param(args.get("end"))
+    if bool(args.get("start")) ^ bool(args.get("end")):
+        return jsonify({"error": "start and end are required together"}), 400
+    if (args.get("start") and not range_start) or (
+        args.get("end") and not range_end
+    ):
+        return jsonify({"error": "start and end must be valid ISO-8601"}), 400
+
+    try:
+        settings = first_row_fn(
+            collections["user_settings"],
+            [query.equal("user_id", [user_id])],
+        )
+        feed_urls = configured_feed_urls(settings)
+        cache_events = list_calendar_rows(
+            collections["calendar_cache"],
+            [
+                query.equal("user_id", [user_id]),
+                query.order_asc("event_start"),
+            ],
+        )
+        created_events = list_calendar_rows(
+            collections["user_events"],
+            [
+                query.equal("user_id", [user_id]),
+                query.order_asc("start"),
+            ],
+        )
+        preferences = load_calendar_preferences(user_id)
+        feed_metadata = load_calendar_feed_metadata(user_id)
+        local_sources = load_local_calendar_sources(user_id)
+        event_overrides = load_event_overrides(user_id)
+    except AppwriteException:
+        logger_instance.exception("Failed to load calendar events")
+        return jsonify({"error": "Unable to load calendar events."}), 500
+
+    refresh_error = None
+    refreshed = False
+    if feed_urls:
+        refreshed, refresh_error = refresh_initial_feed_cache(
+            user_id,
+            feed_urls,
+            cache_events,
+            feed_metadata,
+        )
+    if refreshed:
+        try:
+            cache_events = list_calendar_rows(
+                collections["calendar_cache"],
+                [
+                    query.equal("user_id", [user_id]),
+                    query.order_asc("event_start"),
+                ],
+            )
+            feed_metadata = load_calendar_feed_metadata(user_id)
+        except AppwriteException:
+            logger_instance.exception(
+                "Failed to reload calendar events after initial feed fetch"
+            )
+            return jsonify({"error": "Unable to load calendar events."}), 500
+
+    cache_events = filter_configured_cache_events(cache_events, feed_urls)
+    try:
+        task_events, task_source = task_calendar_payload(
+            user_id,
+            preferences,
+            range_start,
+            range_end,
+        )
+    except AppwriteException:
+        logger_instance.exception("Failed to load task calendar events")
+        return jsonify({"error": "Unable to load calendar events."}), 500
+
+    calendar_sources = append_task_calendar_source(
+        configured_calendar_sources(
+            settings,
+            cache_events,
+            preferences,
+            feed_metadata,
+            local_sources,
+            created_events,
+        ),
+        task_source,
+    )
+    overrides_by_ref = {
+        override.get("event_ref"): override
+        for override in event_overrides
+        if override.get("event_ref")
+    }
+
+    serialized_cache_events = []
+    for cache_event in cache_events:
+        serialized_event = serialize_event(cache_event, settings)
+        serialized_event = apply_event_override(
+            serialized_event,
+            overrides_by_ref.get(serialized_event.get("event_ref")),
+        )
+        if serialized_event:
+            serialized_cache_events.append(serialized_event)
+    serialized_created_events = [
+        serialize_user_event(event)
+        for event in created_events
+    ]
+
+    if range_start and range_end:
+        serialized_cache_events = [
+            event
+            for event in serialized_cache_events
+            if api_event_overlaps_range(event, range_start, range_end)
+        ]
+        serialized_created_events = [
+            event
+            for event in serialized_created_events
+            if api_event_overlaps_range(event, range_start, range_end)
+        ]
+
+    serialized = (
+        serialized_cache_events
+        + serialized_created_events
+        + task_events
+    )
+
+    return jsonify({
+        "user_id": response_user_id,
+        "count": len(serialized),
+        "events": serialized,
+        "feed_configured": bool(feed_urls),
+        "calendar_sources": calendar_sources,
+        "refresh_interval_minutes": (
+            settings.get("feed_refresh_minutes")
+            if settings
+            else None
+        ),
+        "last_fetched": resolve_last_fetched(user_id),
+        "refresh_error": refresh_error,
+    })
