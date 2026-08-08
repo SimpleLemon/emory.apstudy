@@ -6,6 +6,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import threading
 from functools import wraps
 from datetime import datetime, timezone
 
@@ -85,6 +86,7 @@ SCHEDULER_COMMAND_TIMEOUT_SECONDS = 20
 SYSTEM_GIT_REPO_PATH = "/var/www/nest.apstudy.org"
 SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS = 60
 SYSTEM_RESTART_DELAY_SECONDS = 2
+SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS = 20
 SYSTEM_STORAGE_LIMIT_GB = 150
 SCHEDULER_EXECUTABLE_FALLBACKS = {
     "git": ("/usr/bin/git", "/bin/git"),
@@ -302,7 +304,7 @@ def _schedule_system_restart():
         "-c",
         f"sleep {SYSTEM_RESTART_DELAY_SECONDS}; exec {sudo_path} {systemctl_path} restart {SCHEDULER_SERVICE_NAME}",
     ]
-    return subprocess.Popen(
+    process = subprocess.Popen(
         command,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.DEVNULL,
@@ -310,6 +312,15 @@ def _schedule_system_restart():
         env=restart_env,
         start_new_session=True,
     )
+    if callable(getattr(process, "wait", None)):
+        def stop_hung_restart():
+            try:
+                process.wait(timeout=SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS)
+            except subprocess.TimeoutExpired:
+                process.kill()
+
+        threading.Thread(target=stop_hung_restart, daemon=True).start()
+    return process
 
 
 def _git_pull_already_up_to_date(completed):
