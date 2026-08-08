@@ -1,4 +1,6 @@
 (function () {
+  const { escapeHtml } = window.APStudyUIPrimitives;
+
   function buildSectionSearchBlob(section) {
     const parts = [];
     const push = (value) => {
@@ -151,15 +153,6 @@
       hour: "numeric",
       minute: "2-digit",
     });
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
   }
 
   function cssEscape(value) {

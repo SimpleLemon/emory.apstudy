@@ -16,7 +16,7 @@ async function loadFilesUtils() {
     };
     const context = {
         document,
-        window: {},
+        window: { APStudyUIPrimitives: { escapeHtml: String } },
         Date,
         fetch() {
             throw new Error("fetch should not run while loading utils");

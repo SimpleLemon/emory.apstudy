@@ -9,7 +9,7 @@ function loadCoursesUtils() {
   const context = {
     console,
     URLSearchParams,
-    window: {},
+    window: { APStudyUIPrimitives: { escapeHtml: String } },
   };
   vm.createContext(context);
   vm.runInContext(source, context);

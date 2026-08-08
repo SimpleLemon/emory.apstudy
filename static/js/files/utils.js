@@ -1,5 +1,6 @@
 /* files/utils.js - shared File Share helpers */
 (() => {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const DEFAULT_ALLOWED_EXPIRY = [1, 3, 7, 14, 30];
 
     function normalizeExpiryConfig(config = {}) {
@@ -398,15 +399,6 @@
     function cssEscape(value) {
         if (window.CSS?.escape) return window.CSS.escape(value);
         return String(value).replace(/["\\]/g, "\\$&");
-    }
-
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
     }
 
     window.APStudyFilesUtils = {

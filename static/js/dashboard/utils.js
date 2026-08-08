@@ -1,4 +1,6 @@
 (function () {
+    const { escapeHtml } = window.APStudyUIPrimitives;
+
     const TILE_META = {
         calendar: {
             title: "Monthly Calendar",
@@ -89,12 +91,6 @@
     const TASK_PRIORITIES = ["high", "medium", "low", "none"];
     const MAX_TILES = 12;
     const MAX_DUPLICATE_TILES = 4;
-
-    function escapeHtml(value) {
-        const div = document.createElement("div");
-        div.textContent = value == null ? "" : String(value);
-        return div.innerHTML;
-    }
 
     function escapeAttr(value) {
         return escapeHtml(value).replace(/"/g, "&quot;").replace(/'/g, "&#39;");

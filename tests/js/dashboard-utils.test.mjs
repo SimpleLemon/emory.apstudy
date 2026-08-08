@@ -40,6 +40,7 @@ function loadDashboardUtils(source) {
     const context = {
         document,
         window: {
+            APStudyUIPrimitives: { escapeHtml: String },
             setTimeout() {},
         },
         Date,
