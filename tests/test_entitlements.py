@@ -57,7 +57,11 @@ class EntitlementServiceTestCase(unittest.TestCase):
             ],
         }
 
-        with patch.object(entitlements, "_rows", side_effect=lambda table, queries: rows[table]), \
+        with patch.dict(
+                entitlements.os.environ,
+                {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "chat-attachments"},
+            ), \
+                patch.object(entitlements, "_rows", side_effect=lambda table, queries: rows[table]), \
                 patch.object(entitlements, "_calendar_feed_count", return_value=2), \
                 patch.object(entitlements, "_focus_playlist_count", return_value=3):
             usage = entitlements.usage_for_user(
