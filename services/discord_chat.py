@@ -1,4 +1,10 @@
-"""Service boundary for Discord-backed chat operations."""
+"""Service boundary for Discord-backed chat operations.
+
+The Flask chat blueprint registers the callback-driven Discord adapters during
+application bootstrap. Scheduler and Gateway code imports only this module, so
+background callers remain independent of blueprint modules while request-time
+tests retain their established blueprint patch seams.
+"""
 
 
 _handlers = {}

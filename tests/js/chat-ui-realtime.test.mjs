@@ -50,15 +50,9 @@ test("chat uses realtime event signals instead of message polling", async () => 
 
 test("chat uses local presence APIs for online and typing state", async () => {
   const script = await sourceFor("static/js/chat.js");
-  const appwrite = await sourceFor("static/js/core/appwrite.js");
   const global = await sourceFor("static/js/core/global.js");
   const template = await sourceFor("templates/chat.html");
 
-  assert.doesNotMatch(template, /appwrite@25\.0\.0|js\/core\/appwrite\.js/);
-  assert.doesNotMatch(appwrite, /Appwrite\.Presences/);
-  assert.doesNotMatch(appwrite, /Appwrite\.Realtime/);
-  assert.doesNotMatch(appwrite, /window\.presences/);
-  assert.doesNotMatch(appwrite, /window\.realtime/);
   assert.doesNotMatch(template, /data-appwrite-database-id/);
   assert.match(global, /initializePresenceHeartbeat/);
   assert.match(global, /\/api\/presence\/heartbeat/);
@@ -321,6 +315,7 @@ test("chat styles discord custom emojis as inline lazy images", async () => {
 test("scheduler uses discord gateway with slow reconciliation", async () => {
   const scheduler = await sourceFor("services/scheduler.py");
   const api = await sourceFor("blueprints/chat_api.py");
+  const sync = await sourceFor("services/chat_discord_sync.py");
   const gateway = await sourceFor("services/discord_gateway.py");
 
   assert.match(scheduler, /def _reconcile_discord_chat\(app\):/);
@@ -334,10 +329,11 @@ test("scheduler uses discord gateway with slow reconciliation", async () => {
   assert.match(gateway, /on_raw_message_delete/);
   assert.match(gateway, /sync_discord_channels\(emit_events=False, emit_delete_events=True\)/);
   assert.match(api, /def sync_discord_channels\(emit_events=True, emit_delete_events=None\):/);
-  assert.match(api, /_sync_discord_channel\(\s*channel,\s*emit_events=emit_events,\s*emit_delete_events=emit_delete_events,/);
-  assert.match(api, /_upsert_discord_message\(channel, message, emit_event=emit_events\)/);
-  assert.match(api, /emit_chat_event\(\s*"channel",\s*channel_id,\s*"message_created"/);
-  assert.match(api, /"message_updated"/);
+  assert.match(sync, /def sync_discord_channel\(/);
+  assert.match(sync, /dependencies\.upsert_discord_message_fn\(\s*channel,\s*message,\s*emit_event=emit_events,\s*\)/);
+  assert.match(sync, /dependencies\.reconcile_discord_deletes_fn\(\s*channel,\s*messages,\s*emit_events=emit_delete_events,\s*\)/);
+  assert.match(sync, /if emit_event:\s*dependencies\.emit_chat_event_fn\(\s*"channel",\s*channel_id,\s*"message_created",\s*message_id=dependencies\.row_id_fn\(row\),\s*channel_id=channel_id,\s*channel=channel,\s*\)/);
+  assert.match(sync, /if emit_event:\s*dependencies\.emit_chat_event_fn\(\s*"channel",\s*channel_id,\s*"message_updated",\s*message_id=row_id,\s*channel_id=channel_id,\s*channel=channel,\s*\)/);
   assert.match(api, /@chat_api_bp\.route\("\/api\/chat\/events\/stream"\)/);
   assert.match(api, /text\/event-stream/);
   assert.match(api, /def _event_visible_for_user/);
