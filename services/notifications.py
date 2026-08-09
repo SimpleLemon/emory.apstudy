@@ -11,6 +11,7 @@ from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
 
 from services.database import db_connection
+from services.environment_config import runtime_environment_config
 from services.task_schedule import build_task_occurrences
 
 logger = logging.getLogger(__name__)
@@ -51,8 +52,9 @@ def _safe_url(value, fallback="/dashboard?notifications=open"):
 
 def push_configuration():
     """Return public push configuration without exposing private key material."""
-    public_key = str(os.environ.get("VAPID_PUBLIC_KEY") or "").strip()
-    private_key = str(os.environ.get("VAPID_PRIVATE_KEY") or "").strip()
+    configured = runtime_environment_config()
+    public_key = str(configured.vapid_public_key or "").strip()
+    private_key = str(configured.vapid_private_key or "").strip()
     private_key_available = bool(private_key and ("BEGIN PRIVATE KEY" in private_key or os.path.isfile(private_key)))
     return {
         "configured": bool(public_key and private_key_available),
@@ -372,8 +374,9 @@ def flush_foreground_queue(now=None):
 
 def _send(subscription, payload):
     from pywebpush import WebPushException, webpush
-    private_key = str(os.environ.get("VAPID_PRIVATE_KEY") or "").strip()
-    subject = os.environ.get("VAPID_SUBJECT", "mailto:support@apstudy.org")
+    configured = runtime_environment_config()
+    private_key = str(configured.vapid_private_key or "").strip()
+    subject = configured.vapid_subject
     if not push_configuration()["configured"]:
         raise RuntimeError("VAPID_PRIVATE_KEY is not configured.")
     try:

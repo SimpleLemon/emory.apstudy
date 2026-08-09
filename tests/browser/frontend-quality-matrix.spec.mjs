@@ -39,8 +39,21 @@ test("landing tolerates 200 percent text sizing at mobile width", async ({ page,
   expect(consoleErrors).toEqual([]);
 });
 
+test("landing calendar demo binds the shared escapeHtml primitive", async ({ page, baseURL }) => {
+  const pageErrors = [];
+  const consoleErrors = [];
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
+  await page.goto(`${baseURL}/`, { waitUntil: "networkidle" });
+  await page.getByRole("tab", { name: "Calendar" }).click();
+  await expect(page.locator('[data-landing-calendar-events] .demo-week-event')).not.toHaveCount(0);
+  await expect(page.locator('[data-landing-calendar-agenda]')).toContainText("BIOL 141");
+  expect(pageErrors).toEqual([]);
+  expect(consoleErrors).toEqual([]);
+});
+
 test("computed calendar event colors retain AA contrast in light and dark themes", async ({ page, baseURL }) => {
-  await page.setContent(`<!doctype html><html><body><div id="events"></div><script src="${baseURL}/static/js/calendar/utils.js"></script></body></html>`);
+  await page.setContent(`<!doctype html><html><body><div id="events"></div><script src="${baseURL}/static/js/core/ui-primitives.js"></script><script src="${baseURL}/static/js/calendar/utils.js"></script></body></html>`);
   const results = await page.evaluate(() => {
     const accents = ["#000000", "#ffffff", "#777777", "#ef4444", "rgb(18, 120, 210)"];
     const themes = [

@@ -8,8 +8,8 @@ test("closing an event editor removes its hit area and returns control to the ca
         <link rel="stylesheet" href="${baseURL}/static/css/global.css">
     </head><body>
         <button id="outside" type="button">Calendar control</button>
-        <script src="${baseURL}/static/js/calendar/events/event-form.js"></script>
     </body></html>`);
+    await page.addScriptTag({ url: `${baseURL}/static/js/calendar/events/event-form.js`, type: "module" });
 
     await page.evaluate(() => {
         window.openCalendarEventForm({

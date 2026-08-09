@@ -2,13 +2,15 @@ import os
 import html
 import unittest
 from types import SimpleNamespace
-from unittest.mock import patch
+from unittest.mock import Mock, call, patch
 
 from flask import Flask, session
 from appwrite.exception import AppwriteException
 from werkzeug.exceptions import NotFound
 
 import blueprints.auth as auth
+import services.auth_session as auth_session
+import services.oauth_providers as oauth_providers
 from app import create_app
 from avatar_images import avatar_url_for_size
 from extensions import login_manager
@@ -679,6 +681,475 @@ class AppwriteOauthRouteTestCase(unittest.TestCase):
             avatar_url_for_size("https://lh3.googleusercontent.com/a/avatar=s96-c", 56),
             "https://lh3.googleusercontent.com/a/avatar=s56-c",
         )
+
+
+class ProviderIdentityTestCase(unittest.TestCase):
+    @staticmethod
+    def _response(status_code=200, payload=None):
+        return SimpleNamespace(status_code=status_code, json=lambda: payload)
+
+    def test_google_identity_uses_exact_endpoint_headers_and_timeout(self):
+        response = self._response(payload={
+            "id": "google-user-1",
+            "email": "student@example.com",
+            "name": "Student Name",
+            "picture": "https://example.com/google-avatar.png",
+            "verified_email": True,
+        })
+
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            identity = auth._fetch_provider_identity("google", "google-token")
+
+        self.assertEqual(identity, {
+            "id": "google-user-1",
+            "email": "student@example.com",
+            "name": "Student Name",
+            "avatar_url": "https://example.com/google-avatar.png",
+        })
+        http_get.assert_called_once_with(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": "Bearer google-token"},
+            timeout=8,
+        )
+
+    def test_google_identity_rejects_an_explicitly_unverified_email(self):
+        response = self._response(payload={
+            "id": "google-user-1",
+            "email": "student@example.com",
+            "verified_email": False,
+        })
+
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            identity = auth._fetch_provider_identity("google", "google-token")
+
+        self.assertEqual(identity, {})
+        http_get.assert_called_once_with(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": "Bearer google-token"},
+            timeout=8,
+        )
+
+    def test_github_identity_uses_profile_email_and_login_name_fallback(self):
+        response = self._response(payload={
+            "id": 42,
+            "email": "octocat@example.com",
+            "name": "",
+            "login": "octocat",
+            "avatar_url": "https://avatars.example.com/octocat.png",
+        })
+
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            identity = auth._fetch_provider_identity("github", "github-token")
+
+        self.assertEqual(identity, {
+            "id": 42,
+            "email": "octocat@example.com",
+            "name": "octocat",
+            "avatar_url": "https://avatars.example.com/octocat.png",
+        })
+        http_get.assert_called_once_with(
+            "https://api.github.com/user",
+            headers={
+                "Authorization": "Bearer github-token",
+                "Accept": "application/vnd.github+json",
+            },
+            timeout=8,
+        )
+
+    def test_github_identity_falls_back_to_the_primary_verified_email(self):
+        profile_response = self._response(payload={
+            "id": "github-user-1",
+            "email": None,
+            "name": "GitHub Student",
+            "avatar_url": "https://avatars.example.com/student.png",
+        })
+        emails_response = self._response(payload=[
+            {"email": "unverified-primary@example.com", "primary": True, "verified": False},
+            {"email": "verified-secondary@example.com", "primary": False, "verified": True},
+            {"email": "verified-primary@example.com", "primary": True, "verified": True},
+        ])
+        headers = {
+            "Authorization": "Bearer github-token",
+            "Accept": "application/vnd.github+json",
+        }
+
+        with patch(
+            "blueprints.auth.http_requests.get",
+            side_effect=[profile_response, emails_response],
+        ) as http_get:
+            identity = auth._fetch_provider_identity("github", "github-token")
+
+        self.assertEqual(identity, {
+            "id": "github-user-1",
+            "email": "verified-primary@example.com",
+            "name": "GitHub Student",
+            "avatar_url": "https://avatars.example.com/student.png",
+        })
+        self.assertEqual(http_get.call_args_list, [
+            call(
+                "https://api.github.com/user",
+                headers=headers,
+                timeout=8,
+            ),
+            call(
+                "https://api.github.com/user/emails",
+                headers=headers,
+                timeout=8,
+            ),
+        ])
+
+    def test_github_identity_keeps_profile_when_email_fallback_is_non_200(self):
+        profile_response = self._response(payload={
+            "id": "github-user-1",
+            "email": None,
+            "name": "GitHub Student",
+            "avatar_url": "https://avatars.example.com/student.png",
+        })
+        emails_response = SimpleNamespace(
+            status_code=503,
+            json=Mock(side_effect=AssertionError("email JSON should not be read")),
+        )
+        headers = {
+            "Authorization": "Bearer github-token",
+            "Accept": "application/vnd.github+json",
+        }
+
+        with patch(
+            "blueprints.auth.http_requests.get",
+            side_effect=[profile_response, emails_response],
+        ) as http_get:
+            identity = auth._fetch_provider_identity("github", "github-token")
+
+        self.assertEqual(identity, {
+            "id": "github-user-1",
+            "email": None,
+            "name": "GitHub Student",
+            "avatar_url": "https://avatars.example.com/student.png",
+        })
+        emails_response.json.assert_not_called()
+        self.assertEqual(http_get.call_args_list, [
+            call(
+                "https://api.github.com/user",
+                headers=headers,
+                timeout=8,
+            ),
+            call(
+                "https://api.github.com/user/emails",
+                headers=headers,
+                timeout=8,
+            ),
+        ])
+
+    def test_github_identity_returns_empty_when_email_fallback_json_raises(self):
+        profile_response = self._response(payload={
+            "id": "github-user-1",
+            "email": None,
+            "name": "GitHub Student",
+            "avatar_url": "https://avatars.example.com/student.png",
+        })
+        emails_response = SimpleNamespace(
+            status_code=200,
+            json=Mock(side_effect=ValueError("invalid email JSON")),
+        )
+        headers = {
+            "Authorization": "Bearer github-token",
+            "Accept": "application/vnd.github+json",
+        }
+
+        with patch(
+            "blueprints.auth.http_requests.get",
+            side_effect=[profile_response, emails_response],
+        ) as http_get:
+            identity = auth._fetch_provider_identity("github", "github-token")
+
+        self.assertEqual(identity, {})
+        emails_response.json.assert_called_once_with()
+        self.assertEqual(http_get.call_args_list, [
+            call(
+                "https://api.github.com/user",
+                headers=headers,
+                timeout=8,
+            ),
+            call(
+                "https://api.github.com/user/emails",
+                headers=headers,
+                timeout=8,
+            ),
+        ])
+
+    def test_discord_identity_uses_verified_profile_and_animated_avatar_url(self):
+        response = self._response(payload={
+            "id": "discord-user-1",
+            "email": "student@example.com",
+            "global_name": "Student Display",
+            "username": "student#1234",
+            "avatar": "a_avatar-hash",
+            "verified": True,
+        })
+
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            identity = auth._fetch_provider_identity("discord", "discord-token")
+
+        self.assertEqual(identity, {
+            "id": "discord-user-1",
+            "email": "student@example.com",
+            "name": "Student Display",
+            "username": "student#1234",
+            "avatar_url": "https://cdn.discordapp.com/avatars/discord-user-1/a_avatar-hash.gif?size=256",
+        })
+        http_get.assert_called_once_with(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": "Bearer discord-token"},
+            timeout=8,
+        )
+
+    def test_discord_identity_rejects_an_explicitly_unverified_email(self):
+        response = self._response(payload={
+            "id": "discord-user-1",
+            "email": "student@example.com",
+            "verified": False,
+        })
+
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            identity = auth._fetch_provider_identity("discord", "discord-token")
+
+        self.assertEqual(identity, {})
+        http_get.assert_called_once_with(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": "Bearer discord-token"},
+            timeout=8,
+        )
+
+    def test_provider_identity_returns_empty_for_non_200_responses(self):
+        cases = [
+            (
+                "google",
+                "google-token",
+                "https://www.googleapis.com/oauth2/v2/userinfo",
+                {"Authorization": "Bearer google-token"},
+            ),
+            (
+                "github",
+                "github-token",
+                "https://api.github.com/user",
+                {
+                    "Authorization": "Bearer github-token",
+                    "Accept": "application/vnd.github+json",
+                },
+            ),
+            (
+                "discord",
+                "discord-token",
+                "https://discord.com/api/users/@me",
+                {"Authorization": "Bearer discord-token"},
+            ),
+        ]
+
+        for provider, token, url, headers in cases:
+            with self.subTest(provider=provider):
+                with patch(
+                    "blueprints.auth.http_requests.get",
+                    return_value=self._response(status_code=401),
+                ) as http_get:
+                    identity = auth._fetch_provider_identity(provider, token)
+
+                self.assertEqual(identity, {})
+                http_get.assert_called_once_with(url, headers=headers, timeout=8)
+
+    def test_provider_identity_returns_empty_when_http_or_json_raises(self):
+        with patch(
+            "blueprints.auth.http_requests.get",
+            side_effect=RuntimeError("network down"),
+        ) as http_get:
+            self.assertEqual(auth._fetch_provider_identity("google", "google-token"), {})
+        http_get.assert_called_once_with(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": "Bearer google-token"},
+            timeout=8,
+        )
+
+        response = SimpleNamespace(
+            status_code=200,
+            json=Mock(side_effect=ValueError("invalid JSON")),
+        )
+        with patch("blueprints.auth.http_requests.get", return_value=response) as http_get:
+            self.assertEqual(auth._fetch_provider_identity("discord", "discord-token"), {})
+        response.json.assert_called_once_with()
+        http_get.assert_called_once_with(
+            "https://discord.com/api/users/@me",
+            headers={"Authorization": "Bearer discord-token"},
+            timeout=8,
+        )
+
+    def test_unsupported_or_incomplete_provider_identity_makes_no_request(self):
+        cases = [
+            (None, "token"),
+            ("", "token"),
+            ("not-a-provider", "token"),
+            ("google", None),
+            ("google", ""),
+        ]
+
+        for provider, token in cases:
+            with self.subTest(provider=provider, token=token):
+                with patch("blueprints.auth.http_requests.get") as http_get:
+                    identity = auth._fetch_provider_identity(provider, token)
+
+                self.assertEqual(identity, {})
+                http_get.assert_not_called()
+
+
+class AuthSessionErrorContractTestCase(unittest.TestCase):
+    def setUp(self):
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.app = Flask(
+            __name__,
+            template_folder=os.path.join(project_root, "templates"),
+            static_folder=os.path.join(project_root, "static"),
+        )
+        self.app.secret_key = "test"
+        login_manager.init_app(self.app)
+        self.app.register_blueprint(auth.auth_bp)
+
+    def tearDown(self):
+        reset_flask_login_manager()
+
+    def test_session_rejects_missing_session_proof_with_stable_error(self):
+        with self.app.test_client() as client:
+            with patch("blueprints.auth.http_requests.get") as http_get, \
+                    patch.object(auth, "_account_from_jwt") as account_from_jwt, \
+                    patch.object(auth, "_account_from_user_id") as account_from_user_id, \
+                    patch.object(auth, "_complete_appwrite_login") as complete_login:
+                response = client.post("/auth/session", json={"user_id": "user-1"})
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Missing Appwrite session proof."})
+        http_get.assert_not_called()
+        account_from_jwt.assert_not_called()
+        account_from_user_id.assert_not_called()
+        complete_login.assert_not_called()
+
+    def test_session_rejects_non_200_provider_identity_before_appwrite_login(self):
+        provider_response = SimpleNamespace(status_code=401, json=lambda: {})
+
+        with self.app.test_client() as client:
+            with patch(
+                "blueprints.auth.http_requests.get",
+                return_value=provider_response,
+            ) as http_get, \
+                    patch.object(auth, "_account_from_user_id") as account_from_user_id, \
+                    patch.object(auth, "_complete_appwrite_login") as complete_login:
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "google",
+                        "provider_access_token": "google-token",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Invalid provider session."})
+        http_get.assert_called_once_with(
+            "https://www.googleapis.com/oauth2/v2/userinfo",
+            headers={"Authorization": "Bearer google-token"},
+            timeout=8,
+        )
+        account_from_user_id.assert_not_called()
+        complete_login.assert_not_called()
+
+    def test_session_provider_identity_uses_extracted_service_seam(self):
+        remote_user = {
+            "$id": "user-1",
+            "email": "student@example.com",
+            "name": "Student",
+        }
+        completed_login = {"redirect": "/dashboard", "user_id": "user-1"}
+
+        with self.app.test_client() as client:
+            with patch.object(
+                oauth_providers,
+                "_fetch_provider_identity",
+                return_value={"email": "student@example.com"},
+            ) as fetch_identity, \
+                    patch(
+                        "blueprints.auth.http_requests.get",
+                        side_effect=AssertionError("legacy provider identity path invoked"),
+                    ) as legacy_http_get, \
+                    patch.object(auth, "_account_from_user_id", return_value=remote_user), \
+                    patch.object(
+                        auth,
+                        "_complete_appwrite_login",
+                        return_value=completed_login,
+                    ):
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "google",
+                        "provider_access_token": "google-token",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {
+            "redirect": "/dashboard",
+            "status": "ok",
+            "user_id": "user-1",
+        })
+        fetch_identity.assert_called_once_with("google", "google-token")
+        legacy_http_get.assert_not_called()
+
+    def test_session_login_uses_extracted_service_seam(self):
+        remote_user = {
+            "$id": "user-1",
+            "email": "student@example.com",
+            "name": "Student",
+        }
+        completed_login = {"redirect": "/dashboard", "user_id": "user-1"}
+
+        with self.app.test_client() as client:
+            with patch.object(
+                auth,
+                "_fetch_provider_identity",
+                return_value={"email": "student@example.com"},
+            ), patch.object(
+                auth,
+                "_account_from_user_id",
+                return_value=remote_user,
+            ), patch.object(
+                auth_session,
+                "_complete_appwrite_login",
+                return_value=completed_login,
+            ) as complete_login, patch.object(
+                auth,
+                "get_row_safe",
+                side_effect=AssertionError("legacy Appwrite login path invoked"),
+            ) as legacy_get_row:
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "google",
+                        "provider_access_token": "google-token",
+                    },
+                )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {
+            "redirect": "/dashboard",
+            "status": "ok",
+            "user_id": "user-1",
+        })
+        complete_login.assert_called_once()
+        call_args = complete_login.call_args
+        self.assertEqual(call_args.args, (remote_user,))
+        self.assertEqual(call_args.kwargs["provider"], "google")
+        self.assertEqual(call_args.kwargs["email"], "student@example.com")
+        self.assertEqual(call_args.kwargs["provider_access_token"], "google-token")
+        self.assertEqual(call_args.kwargs["page_context"], "auth/session")
+        self.assertIn("dependencies", call_args.kwargs)
+        legacy_get_row.assert_not_called()
 
 
 class AvatarStorageServiceTestCase(unittest.TestCase):

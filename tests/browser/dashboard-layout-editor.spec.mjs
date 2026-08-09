@@ -33,6 +33,7 @@ test("tile settings preview live, open opposite the tile, and keep move boundari
         <dialog id="discard"><button id="keep">Keep</button><button id="discard-confirm">Discard</button></dialog>
         <div id="announcer"></div>
     `);
+    await page.addScriptTag({ url: `${baseURL}/static/js/core/ui-primitives.js` });
     await page.addScriptTag({ url: `${baseURL}/static/js/dashboard/utils.js` });
     await page.addScriptTag({ url: `${baseURL}/static/js/dashboard/layout-editor.js` });
 
@@ -77,6 +78,18 @@ test("tile settings preview live, open opposite the tile, and keep move boundari
         render(editor.currentLayout());
     }, layout);
 
+    const firstTile = page.locator('[data-tile-id="tile-a"]');
+    await expect(firstTile).not.toHaveAttribute("role");
+    await expect(firstTile).not.toHaveAttribute("tabindex");
+    await expect(firstTile).not.toHaveAttribute("aria-pressed");
+
+    await page.locator("#edit").click();
+    await expect(firstTile).toHaveAttribute("role", "button");
+    await expect(firstTile).toHaveAttribute("tabindex", "0");
+    await expect(firstTile).toHaveAttribute("aria-pressed", "false");
+    await page.locator("#cancel").click();
+    await expect(page.locator("#edit")).toBeFocused();
+
     await page.locator("#edit").click();
     await page.locator('[data-tile-id="tile-b"]').click();
     await page.locator("#customize").click();
@@ -87,6 +100,7 @@ test("tile settings preview live, open opposite the tile, and keep move boundari
     await page.getByRole("radio", { name: "Wide" }).check();
     await expect(page.locator('[data-tile-id="tile-b"]')).toHaveAttribute("data-tile-size", "wide");
     await page.locator("#drawer").getByRole("button", { name: "Done" }).click();
+    await expect(page.locator("#customize")).toBeFocused();
 
     await expect(page.locator("#earlier")).toBeEnabled();
     await expect(page.locator("#later")).toBeEnabled();
@@ -103,4 +117,19 @@ test("tile settings preview live, open opposite the tile, and keep move boundari
     await page.locator('[data-tile-id="tile-a"]').click();
     await page.locator("#customize").click();
     await expect(page.locator("#drawer")).toHaveAttribute("data-side", "right");
+
+    await page.locator("#drawer").getByRole("button", { name: "Done" }).click();
+    await page.locator("#cancel").click();
+    await expect(page.locator("#discard")).toBeVisible();
+    await page.locator("#keep").click();
+    await expect(page.locator("#discard")).toBeHidden();
+    await expect(page.locator("#edit")).not.toBeFocused();
+
+    await page.locator("#cancel").click();
+    await page.locator("#discard-confirm").click();
+    await expect(page.locator("#edit")).toBeFocused();
+    await expect(firstTile).not.toHaveAttribute("role");
+    await expect(firstTile).not.toHaveAttribute("tabindex");
+    await expect(firstTile).not.toHaveAttribute("aria-pressed");
+    await expect(page.locator('[data-tile-id="tile-b"] h2')).toHaveText("Calendar: Week");
 });

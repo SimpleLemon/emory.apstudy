@@ -3,16 +3,68 @@ import fs from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
+import vm from 'node:vm';
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
+const templatesRoot = path.join(repoRoot, 'templates');
+const baseTemplate = fs.readFileSync(path.join(templatesRoot, 'base.html'), 'utf8');
+const baseExtendsPattern = /{%\s*extends\s+['"]base\.html['"]\s*%}/;
+const blockPattern = /{%\s*block\s+([A-Za-z_][A-Za-z0-9_]*)\s*%}([\s\S]*?){%\s*endblock\s*%}/g;
 const primitives = fs.readFileSync(path.join(repoRoot, 'static/js/core/ui-primitives.js'), 'utf8');
+const primitivesModule = fs.readFileSync(path.join(repoRoot, 'static/js/core/ui-primitives-module.js'), 'utf8');
 const feedbackOverlays = fs.readFileSync(path.join(repoRoot, 'static/css/core/feedback-overlays.css'), 'utf8');
+
+function loadUiPrimitives() {
+    const window = { addEventListener() {} };
+    const document = {
+        addEventListener() {},
+        createElement() {
+            let text = '';
+            return {
+                set textContent(value) { text = value; },
+                get innerHTML() {
+                    return text
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                },
+            };
+        },
+    };
+    vm.runInNewContext(primitives, { document, window });
+    return window.APStudyUIPrimitives;
+}
+
+function resolvedTemplateSource(filename) {
+    const source = fs.readFileSync(path.join(templatesRoot, filename), 'utf8');
+    if (!baseExtendsPattern.test(source)) return source;
+
+    let inherited = baseTemplate;
+    for (const match of source.matchAll(blockPattern)) {
+        const [, name, body] = match;
+        const inheritedBlock = new RegExp(`{%\\s*block\\s+${name}\\s*%}[\\s\\S]*?{%\\s*endblock\\s*%}`);
+        assert.match(inherited, inheritedBlock, `${filename} overrides missing base block ${name}`);
+        inherited = inherited.replace(inheritedBlock, body);
+    }
+    return inherited;
+}
+
+test('shared escapeHtml primitive escapes markup and quotes behaviorally', () => {
+    const { escapeHtml } = loadUiPrimitives();
+    assert.equal(escapeHtml('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
+});
 
 test('shared UI primitive module has substantive owned APIs', () => {
     for (const api of ['APStudyFormField', 'APStudyLoader', 'APStudySkeleton', 'APStudyToast', 'APStudyUndo', 'APStudyConfirm']) {
         assert.match(primitives, new RegExp(`window\\.${api}`));
     }
     assert.match(primitives, /window\.APStudyUIPrimitives = Object\.freeze/);
+    assert.match(primitives, /div\.textContent = value == null \? '' : String\(value\)/);
+    assert.match(primitives, /\.replace\(\/"\/g, '&quot;'\)/);
+    assert.match(primitives, /\.replace\(\/'\/g, '&#39;'\)/);
+    assert.match(primitives, /Object\.freeze\(\{\s*escapeHtml,/);
+    assert.match(primitivesModule, /import '\.\/ui-primitives\.js'/);
+    assert.match(primitivesModule, /export const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
     assert.ok(primitives.length > 8_000, 'ui-primitives.js must not become an empty compatibility shim');
     const globalSource = fs.readFileSync(path.join(repoRoot, 'static/js/core/global.js'), 'utf8');
     assert.doesNotMatch(globalSource, /window\.APStudy(?:FormField|Loader|Skeleton|Toast|Confirm)\s*=/);
@@ -55,10 +107,10 @@ test('every template using global.js receives primitives first through the share
     assert.match(diagnostics, /include "_shared_runtime_assets\.html"/);
     assert.match(runtime, /js\/core\/ui-primitives\.js/);
 
-    const templates = fs.readdirSync(path.join(repoRoot, 'templates'))
+    const templates = fs.readdirSync(templatesRoot)
         .filter((filename) => filename.endsWith('.html'));
     for (const filename of templates) {
-        const source = fs.readFileSync(path.join(repoRoot, 'templates', filename), 'utf8');
+        const source = resolvedTemplateSource(filename);
         if (!source.includes("js/core/global.js")) continue;
         assert.ok(source.includes('_diagnostics_assets.html'), `${filename} skips shared runtime assets`);
         assert.ok(source.indexOf('_diagnostics_assets.html') < source.indexOf('js/core/global.js'), `${filename} loads primitives after global.js`);

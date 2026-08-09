@@ -1,30 +1,35 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+{% extends "base.html" %}
+{# base.html owns viewport-fit=cover, js/core/theme-init.js, _diagnostics_assets.html, and css/global.css before js/core/global.js. #}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <script>window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";</script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
     {% include '_sidebar_init.html' %}
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}">
+{% endblock %}
+
+{% block title %}<title>Chat - APStudy Nest</title>{% endblock %}
+
+{% block shared_styles_before_tailwind %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/layout.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
-    {% include "_font_assets.html" %}
+{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
-    <title>Chat - APStudy Nest</title>
+{% endblock %}
+
+{% block shared_head_scripts %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/navbar.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/sidebar.js') }}" defer></script>
     <script type="module" src="{{ url_for('static', filename='js/chat/index.js') }}"></script>
-</head>
-<body class="chat-body bg-surface text-on-surface font-body antialiased" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block body_attrs %} class="chat-body bg-surface text-on-surface font-body antialiased" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     <global class="thenav" data-profile-picture="{{ (user.picture or '')|avatar_url(32) }}" data-user-email="{{ user.email }}" data-user-tier="{{ user_tier or '' }}"></global>
     {% set sidebar_user_emory_student = user.emory_student %}
     {% include "_sidebar.html" %}
@@ -183,5 +188,4 @@
         </form>
     </dialog>
     <audio id="chat-audio" preload="auto" src="{{ url_for('static', filename='audio/task-pop.mp3') }}"></audio>
-</body>
-</html>
+{% endblock %}

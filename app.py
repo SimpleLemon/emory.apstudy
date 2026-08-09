@@ -8,22 +8,37 @@ from dotenv import load_dotenv
 from werkzeug.exceptions import RequestEntityTooLarge
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+from config import (
+    ENVIRONMENT_CONFIG_EXTENSION_KEY,
+    EnvironmentConfig,
+    load_environment_config,
+)
+
 load_dotenv()
 logger = logging.getLogger(__name__)
 
-if os.environ.get("APSTUDY_ALLOW_INSECURE_OAUTH") == "1" or os.environ.get("FLASK_DEBUG") == "1":
-    os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
+def _configure_insecure_oauth_transport():
+    configured = load_environment_config()
+    if configured.allow_insecure_oauth or configured.flask_debug_raw == "1":
+        os.environ.setdefault("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
+
+_configure_insecure_oauth_transport()
 
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 AUTH_SESSION_DURATION = timedelta(days=400)
 
 
-def _session_secret_key():
-    configured = os.environ.get("FLASK_SECRET_KEY")
+def _session_secret_key(environment_config: EnvironmentConfig | None = None):
+    if environment_config is None:
+        environment_config = load_environment_config()
+    configured = environment_config.flask_secret_key
+    flask_env = environment_config.flask_env
     if configured:
         return configured
-    if (os.environ.get("FLASK_ENV") or "").strip().lower() == "production":
+    if flask_env == "production":
         raise RuntimeError("FLASK_SECRET_KEY must be configured in production.")
     logger.warning("FLASK_SECRET_KEY is not configured; using an ephemeral development key.")
     return secrets.token_hex(32)
@@ -31,6 +46,8 @@ def _session_secret_key():
 
 def create_app():
     app = Flask(__name__)
+    environment_config = load_environment_config()
+    app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = environment_config
     app.wsgi_app = ProxyFix(
         app.wsgi_app,
         x_for=1,
@@ -42,19 +59,15 @@ def create_app():
     from avatar_images import avatar_url_for_size
 
     app.jinja_env.filters["avatar_url"] = avatar_url_for_size
-    app.secret_key = _session_secret_key()
-    app.config["APPWRITE_DATABASE_ID"] = os.environ.get("APPWRITE_DATABASE_ID", "")
+    app.secret_key = _session_secret_key(environment_config)
     from services.database import database_path, nest_instance_dir
 
-    resolved_database_path = database_path()
+    resolved_database_path = database_path(environment_config=environment_config)
     app.config["DATABASE_PATH"] = resolved_database_path
     app.config["CALENDAR_SQLITE_PATH"] = resolved_database_path
     app.config["MAX_CONTENT_LENGTH"] = 5 * 50 * 1024 * 1024
     app.config["FILE_SHARE_UPLOAD_DIR"] = os.path.join(app.root_path, "uploads", "file_share")
-    allow_insecure_http = (
-        os.environ.get("APSTUDY_ALLOW_INSECURE_HTTP") == "1"
-        or os.environ.get("FLASK_DEBUG") == "1"
-    )
+    allow_insecure_http = environment_config.allow_insecure_http
     app.config["SESSION_COOKIE_SECURE"] = not allow_insecure_http
     app.config["SESSION_COOKIE_HTTPONLY"] = True
     app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
@@ -67,12 +80,11 @@ def create_app():
     app.config["PREFERRED_URL_SCHEME"] = "http" if allow_insecure_http else "https"
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
-        os.environ.get("FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED", "").strip().lower()
-        in {"1", "true", "yes", "on"}
+        environment_config.frontend_console_diagnostics_enabled
     )
     os.makedirs(app.config["FILE_SHARE_UPLOAD_DIR"], exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
-    os.makedirs(nest_instance_dir(), exist_ok=True)
+    os.makedirs(nest_instance_dir(environment_config=environment_config), exist_ok=True)
 
     @app.get("/service-worker.js")
     def service_worker():
@@ -92,7 +104,8 @@ def create_app():
     login_manager.login_view = "auth.login"
     from flask_login import current_user
     from flask_wtf.csrf import CSRFError, generate_csrf
-    from blueprints.auth import LOGIN_NEXT_SESSION_KEY, _is_safe_login_next_url
+    with app.app_context():
+        from blueprints.auth import LOGIN_NEXT_SESSION_KEY, _is_safe_login_next_url
     from services.database import close_db, init_db
     init_db(app)
     app.teardown_appcontext(close_db)
@@ -161,7 +174,7 @@ def create_app():
 
             record_authenticated_activity(str(current_user.id), at=now)
         except Exception:
-            logger.exception("Failed to record authenticated activity")
+            logger.exception("Failed to record authenticated activity for user %s", current_user.id)
 
         if request.method not in {"GET", "HEAD"}:
             return None
@@ -177,7 +190,7 @@ def create_app():
                 if now - previous < timedelta(minutes=15):
                     return None
             except ValueError:
-                pass
+                logger.warning("Ignoring malformed last_site_open_tracked_at session value")
 
         try:
             from appwrite_client import COLLECTIONS
@@ -188,7 +201,11 @@ def create_app():
             current_user.last_login = now
             session["last_site_open_tracked_at"] = timestamp
         except Exception:
-            logger.exception("Failed to track authenticated site open")
+            logger.exception(
+                "Failed to track authenticated site open for user %s on %s",
+                current_user.id,
+                request.path,
+            )
         return None
 
     @app.context_processor
@@ -204,8 +221,6 @@ def create_app():
                 "user_tier_label": None,
                 "user_tier_badge": None,
                 "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-                "appwrite_endpoint": os.environ.get("APPWRITE_ENDPOINT", "https://nyc.cloud.appwrite.io/v1"),
-                "appwrite_project_id": os.environ.get("APPWRITE_PROJECT_ID", "69f77663000c16abdff2"),
             }
 
         try:
@@ -242,8 +257,6 @@ def create_app():
             "user_tier_label": TIER_LABELS[user_tier],
             "user_tier_badge": TIER_BADGES.get(user_tier),
             "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
-            "appwrite_endpoint": os.environ.get("APPWRITE_ENDPOINT", "https://nyc.cloud.appwrite.io/v1"),
-            "appwrite_project_id": os.environ.get("APPWRITE_PROJECT_ID", "69f77663000c16abdff2"),
         }
 
     # Register all blueprints
@@ -299,9 +312,10 @@ def create_app():
         from scripts.backup_nest_db import run_backup
         from services.database import nest_instance_dir
 
+        configured = load_environment_config()
         instance_dir = Path(nest_instance_dir())
-        backup_dir = Path(os.environ.get("NEST_BACKUP_DIR", "/var/backups/nest-db"))
-        max_backups = int(os.environ.get("NEST_BACKUP_RETENTION", "7"))
+        backup_dir = Path(configured.nest_backup_dir)
+        max_backups = int(configured.nest_backup_retention_raw)
         raise SystemExit(
             run_backup(
                 instance_dir=instance_dir,

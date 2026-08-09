@@ -1,13 +1,20 @@
 """Shared profile formatting helpers for auth and admin blueprints."""
 
+import re
 from datetime import datetime
 
 from appwrite_helpers import parse_datetime
 
 
+DEFAULT_BANNER_COLOR = "#fecae1"
+USERNAME_MIN_LENGTH = 3
+USERNAME_MAX_LENGTH = 20
+USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
+
+
 def normalize_banner_color(value):
     if not isinstance(value, str):
-        return "#fecae1"
+        return DEFAULT_BANNER_COLOR
     normalized = value.strip()
     if not normalized.startswith("#"):
         normalized = f"#{normalized}"
@@ -16,8 +23,8 @@ def normalize_banner_color(value):
             int(normalized[1:], 16)
             return normalized.lower()
         except ValueError:
-            return "#fecae1"
-    return "#fecae1"
+            return DEFAULT_BANNER_COLOR
+    return DEFAULT_BANNER_COLOR
 
 
 def profile_handle(name, user_id, username=None):

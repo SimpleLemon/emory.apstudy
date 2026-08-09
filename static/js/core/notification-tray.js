@@ -1,4 +1,5 @@
 (function notificationTrayModule(global) {
+  const { escapeHtml } = global.APStudyUIPrimitives;
   const CATEGORY_META = {
     calendar: { label: 'Calendar', icon: 'calendar_month' },
     courses: { label: 'Courses', icon: 'school' },
@@ -7,15 +8,6 @@
     notes: { label: 'Notes', icon: 'description' },
     test: { label: 'Test', icon: 'check_circle' },
   };
-
-  function escapeHtml(value) {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
 
   function categoryMeta(value) {
     return CATEGORY_META[value] || { label: 'Nest', icon: 'notifications' };

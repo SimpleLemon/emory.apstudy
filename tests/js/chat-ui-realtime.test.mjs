@@ -7,8 +7,19 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
 async function sourceFor(relativePath) {
-  const resolvedPath = relativePath === "static/js/chat.js" ? "static/js/chat/runtime.js" : relativePath;
-  return readFile(path.join(repoRoot, resolvedPath), "utf8");
+  if (relativePath === "static/js/chat.js") {
+    const paths = [
+      "static/js/chat/runtime.js",
+      "static/js/chat/realtime.js",
+      "static/js/chat/presence.js",
+      "static/js/chat/messages-dom.js",
+      "static/js/chat/rooms.js",
+      "static/js/chat/composer.js",
+    ];
+    return Promise.all(paths.map((sourcePath) => readFile(path.join(repoRoot, sourcePath), "utf8")))
+      .then((sources) => sources.join("\n"));
+  }
+  return readFile(path.join(repoRoot, relativePath), "utf8");
 }
 
 function cssBlock(source, selector) {
@@ -19,7 +30,7 @@ function cssBlock(source, selector) {
 }
 
 test("chat uses realtime event signals instead of message polling", async () => {
-  const source = await sourceFor("static/js/chat/runtime.js");
+  const source = await sourceFor("static/js/chat/realtime.js");
 
   assert.doesNotMatch(source, /pollTimer/);
   assert.match(source, /pollActiveRoomMessages/);
@@ -39,15 +50,9 @@ test("chat uses realtime event signals instead of message polling", async () => 
 
 test("chat uses local presence APIs for online and typing state", async () => {
   const script = await sourceFor("static/js/chat.js");
-  const appwrite = await sourceFor("static/js/core/appwrite.js");
   const global = await sourceFor("static/js/core/global.js");
   const template = await sourceFor("templates/chat.html");
 
-  assert.doesNotMatch(template, /appwrite@25\.0\.0|js\/core\/appwrite\.js/);
-  assert.doesNotMatch(appwrite, /Appwrite\.Presences/);
-  assert.doesNotMatch(appwrite, /Appwrite\.Realtime/);
-  assert.doesNotMatch(appwrite, /window\.presences/);
-  assert.doesNotMatch(appwrite, /window\.realtime/);
   assert.doesNotMatch(template, /data-appwrite-database-id/);
   assert.match(global, /initializePresenceHeartbeat/);
   assert.match(global, /\/api\/presence\/heartbeat/);
@@ -114,7 +119,7 @@ test("chat hydrates cached rooms before silent refresh and limits persisted mess
   assert.match(script, /function hydrateFromPersistentCache\(\)/);
   assert.match(script, /await hydrateRoomFromPersistentCache\(room\)/);
   assert.match(script, /await selectRoom\(room, \{ fromCacheHydration: true, quiet: true \}\)/);
-  assert.match(script, /if \(renderCachedRoom\(room\)\)/);
+  assert.match(script, /if \(actions\.renderCachedRoom\(room\)\)/);
   assert.match(script, /scheduleRoomPrefetches/);
   assert.match(script, /requestIdleCallback/);
 });
@@ -122,14 +127,14 @@ test("chat hydrates cached rooms before silent refresh and limits persisted mess
 test("chat marks selected cached rooms and sent messages as read", async () => {
   const script = await sourceFor("static/js/chat.js");
 
-  assert.match(script, /function markRoomRead\(room, cache = cacheFor\(room\), \{ force = false \} = \{\}\)/);
+  assert.match(script, /function markRoomRead\(room, cache = actions\.cacheFor\(room\), \{ force = false \} = \{\}\)/);
   assert.match(script, /fetchJson\("\/api\/chat\/read"/);
   assert.match(script, /if \(!force && latest\?\.id\) body\.message_id = latest\.id/);
   assert.match(script, /clearRoomUnread\(room\)/);
-  assert.match(script, /if \(!cache\.stale \|\| latestMessageForRead\(cache\)\) \{\s*markRoomRead\(room, cache\)/);
+  assert.match(script, /if \(!cache\.stale \|\| actions\.latestMessageForRead\(cache\)\) markRoomRead\(room, cache\)/);
   assert.match(script, /applyIncomingMessages\(room, \[payload\.message\], \{ toBottom: true \}\)/);
   assert.match(script, /refreshViewingPresence\(\)/);
-  assert.match(script, /\.finally\(\(\) => \{\s*markRoomRead\(room, cache\);\s*void refreshChatSummary\(\);\s*\}\)/);
+  assert.match(script, /\.finally\(\(\) => \{\s*actions\.markRoomRead\(room, cache\);\s*void actions\.refreshChatSummary\(\);\s*\}\)/);
 });
 
 test("chat keeps and renders per-room unread state", async () => {
@@ -164,10 +169,10 @@ test("chat room context menu supports mark read", async () => {
   assert.doesNotMatch(script, /function markRoomUnread\(/);
   assert.match(script, /addEventListener\("contextmenu", \(event\) => openRoomContextMenu/);
   assert.match(script, /event\.key !== "ContextMenu" && !\(event\.shiftKey && event\.key === "F10"\)/);
-  assert.match(script, /markRoomRead\(room, cacheFor\(room\), \{ force: true \}\)/);
+  assert.match(script, /markRoomRead\(room, actions\.cacheFor\(room\), \{ force: true \}\)/);
   assert.match(script, /clearedReadRooms/);
   assert.match(script, /cancelUnreadSummaryRefresh\(\)/);
-  assert.match(script, /function markRoomRead\(room, cache = cacheFor\(room\), \{ force = false \} = \{\}\)/);
+  assert.match(script, /function markRoomRead\(room, cache = actions\.cacheFor\(room\), \{ force = false \} = \{\}\)/);
   assert.match(script, /closeRoomContextMenu\(\)/);
   assert.match(styles, /\.chat-room-context-menu/);
   assert.match(styles, /\.chat-room-context-menu\[hidden\]/);
@@ -182,9 +187,9 @@ test("chat refreshes and updates unread state across realtime and visibility", a
   assert.match(script, /fetchJson\("\/api\/chat\/summary"/);
   assert.match(script, /await refreshChatSummary\(\)/);
   assert.match(script, /scheduleUnreadSummaryRefresh\(\)/);
-  assert.match(script, /scheduleUnreadSummaryRefresh\(\);\s*playChatSound\(event\.actor_id\)/);
-  assert.match(script, /message_deleted"[\s\S]*void refreshChatSummary\(\)/);
-  assert.match(script, /document\.visibilityState === "visible"[\s\S]*void refreshChatSummary\(\)/);
+  assert.match(script, /actions\.scheduleUnreadSummaryRefresh\(\);\s*actions\.playChatSound\(event\.actor_id\)/);
+  assert.match(script, /message_deleted"[\s\S]*void actions\.refreshChatSummary\(\)/);
+  assert.match(script, /document\.visibilityState === "visible"[\s\S]*void actions\.refreshChatSummary\(\)/);
   assert.match(script, /setRoomUnread\(\{ type: "thread", id: payload\.thread\.id \}, \{ unread_count: 0, has_unread: false \}\)/);
 });
 
@@ -195,9 +200,9 @@ test("chat fetches new DM threads directly from realtime events", async () => {
   assert.match(script, /function threadExists\(threadId\)/);
   assert.match(script, /async function fetchThread\(threadId\)/);
   assert.match(script, /fetchJson\(`\/api\/chat\/dm\/threads\/\$\{encodeURIComponent\(threadId\)\}`\)/);
-  assert.match(script, /eventRoom\?\.type === "thread" && !threadExists\(eventRoom\.id\)/);
+  assert.match(script, /eventRoom\?\.type === "thread" && !actions\.threadExists\(eventRoom\.id\)/);
   assert.match(script, /event\.event_type === "thread_updated" && eventRoom\?\.type === "thread"/);
-  assert.match(script, /const thread = await fetchThread\(eventRoom\.id\)/);
+  assert.match(script, /const thread = await actions\.fetchThread\(eventRoom\.id\)/);
   assert.match(api, /@chat_api_bp\.route\("\/api\/chat\/dm\/threads\/<thread_id>"\)/);
   assert.match(api, /def dm_thread\(thread_id\):/);
   assert.match(api, /return jsonify\(\{"thread": payload\}\)/);
@@ -205,7 +210,7 @@ test("chat fetches new DM threads directly from realtime events", async () => {
 
 test("chat supports direct channel and thread URL selection", async () => {
   const script = await sourceFor("static/js/chat.js");
-  const dashboard = await sourceFor("blueprints/dashboard.py");
+  const dashboard = await sourceFor("services/dashboard_summary.py");
 
   assert.match(script, /function requestedRoomFromLocation\(\)/);
   assert.match(script, /new URLSearchParams\(window\.location\.search \|\| ""\)/);
@@ -310,6 +315,7 @@ test("chat styles discord custom emojis as inline lazy images", async () => {
 test("scheduler uses discord gateway with slow reconciliation", async () => {
   const scheduler = await sourceFor("services/scheduler.py");
   const api = await sourceFor("blueprints/chat_api.py");
+  const sync = await sourceFor("services/chat_discord_sync.py");
   const gateway = await sourceFor("services/discord_gateway.py");
 
   assert.match(scheduler, /def _reconcile_discord_chat\(app\):/);
@@ -323,10 +329,11 @@ test("scheduler uses discord gateway with slow reconciliation", async () => {
   assert.match(gateway, /on_raw_message_delete/);
   assert.match(gateway, /sync_discord_channels\(emit_events=False, emit_delete_events=True\)/);
   assert.match(api, /def sync_discord_channels\(emit_events=True, emit_delete_events=None\):/);
-  assert.match(api, /_sync_discord_channel\(\s*channel,\s*emit_events=emit_events,\s*emit_delete_events=emit_delete_events,/);
-  assert.match(api, /_upsert_discord_message\(channel, message, emit_event=emit_events\)/);
-  assert.match(api, /emit_chat_event\(\s*"channel",\s*channel_id,\s*"message_created"/);
-  assert.match(api, /"message_updated"/);
+  assert.match(sync, /def sync_discord_channel\(/);
+  assert.match(sync, /dependencies\.upsert_discord_message_fn\(\s*channel,\s*message,\s*emit_event=emit_events,\s*\)/);
+  assert.match(sync, /dependencies\.reconcile_discord_deletes_fn\(\s*channel,\s*messages,\s*emit_events=emit_delete_events,\s*\)/);
+  assert.match(sync, /if emit_event:\s*dependencies\.emit_chat_event_fn\(\s*"channel",\s*channel_id,\s*"message_created",\s*message_id=dependencies\.row_id_fn\(row\),\s*channel_id=channel_id,\s*channel=channel,\s*\)/);
+  assert.match(sync, /if emit_event:\s*dependencies\.emit_chat_event_fn\(\s*"channel",\s*channel_id,\s*"message_updated",\s*message_id=row_id,\s*channel_id=channel_id,\s*channel=channel,\s*\)/);
   assert.match(api, /@chat_api_bp\.route\("\/api\/chat\/events\/stream"\)/);
   assert.match(api, /text\/event-stream/);
   assert.match(api, /def _event_visible_for_user/);
@@ -374,7 +381,7 @@ test("chat composer ignores duplicate sends while a message is in flight", async
   const script = await sourceFor("static/js/chat.js");
 
   assert.match(script, /messageSendInFlight: false/);
-  assert.match(script, /if \(state\.messageSendInFlight\) return;\s+const channel = activeChannel\(\)/);
+  assert.match(script, /if \(state\.messageSendInFlight\) return;\s+const channel = actions\.activeChannel\(\)/);
   assert.match(script, /state\.messageSendInFlight = true;\s+els\.sendButton\.disabled = true/);
   assert.match(script, /finally \{\s+state\.messageSendInFlight = false;/);
 });
@@ -413,7 +420,7 @@ test("chat starts realtime fallback refresh after websocket failure", async () =
   assert.match(script, /function startRealtimeFallback/);
   assert.match(script, /function stopRealtimeFallback/);
   assert.match(script, /document\.visibilityState === "visible"/);
-  assert.match(script, /void refreshChatSummary\(\)/);
+  assert.match(script, /void actions\.refreshChatSummary\(\)/);
   assert.match(script, /startRealtimeFallback\(\)/);
   assert.match(script, /stopRealtimeFallback\(\)/);
 });
@@ -425,7 +432,7 @@ test("chat lifecycle stops realtime resources and resumes one runtime", async ()
   assert.match(script, /chatRequestController\.abort\(\)/);
   assert.match(script, /resetRealtimeConnection\(\)/);
   assert.match(script, /stopPresenceRefreshTimer\(\)/);
-  assert.match(script, /window\.clearTimeout\(realtimeReconnectTimer\)/);
+  assert.match(script, /function clearReconnectTimer\(\)[\s\S]*window\.clearTimeout\(realtimeReconnectTimer\)/);
   assert.match(script, /cancelUnreadSummaryRefresh\(\)/);
   assert.match(script, /clearTransientWork\(\)/);
   assert.match(script, /function resumeChatRuntime\(\)/);

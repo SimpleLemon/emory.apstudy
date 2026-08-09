@@ -21,23 +21,7 @@ from appwrite_helpers import list_rows_all, parse_datetime
 from services.calendar_store import list_calendar_rows_all
 
 
-def _ics_escape(text):
-    """
-    Escape special characters for iCalendar text values.
-    Commas, semicolons, and backslashes must be escaped per RFC 5545 [7].
-    """
-    if not text:
-        return ""
-    return (
-        text
-        .replace("\\", "\\\\")
-        .replace(";", "\\;")
-        .replace(",", "\\,")
-        .replace("\n", "\\n")
-    )
-
-
-def _build_event_uid(event_uid, user_id):
+def _build_event_uid(event_uid, user_id, event_id=None):
     """
     Generate a globally unique UID for each event in the output .ics.
 
@@ -48,7 +32,9 @@ def _build_event_uid(event_uid, user_id):
     """
     if event_uid:
         return f"u{user_id}-{event_uid}"
-    return f"u{user_id}-generated-{id(event_uid)}@nest.apstudy.org"
+    if event_id is None or str(event_id) == "":
+        raise ValueError("A cached event ID is required when event_uid is missing.")
+    return f"u{user_id}-generated-{event_id}@nest.apstudy.org"
 
 
 def build_ics_for_user(user_id):
@@ -90,7 +76,11 @@ def build_ics_for_user(user_id):
         vevent = icalendar.Event()
 
         # UID is required per RFC 5545 and must be globally unique [7]
-        vevent.add("uid", _build_event_uid(event.get("event_uid"), user_id))
+        event_id = event.get("$id") or event.get("id")
+        vevent.add(
+            "uid",
+            _build_event_uid(event.get("event_uid"), user_id, event_id),
+        )
 
         # DTSTAMP is the timestamp of when this .ics was generated [7]
         vevent.add("dtstamp", now)

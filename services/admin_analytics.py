@@ -5,6 +5,7 @@ from collections import Counter
 from datetime import datetime, timedelta, timezone
 
 from services import database
+from services.environment_config import runtime_environment_config
 
 try:
     from zoneinfo import ZoneInfo
@@ -475,18 +476,15 @@ def _ga_series_from_rows(rows, buckets, dimension_name, window, tz):
 
 
 def _ga_totals_from_rows(rows):
-    totals = {"activeUsers": 0, "screenPageViews": 0, "eventCount": 0}
     row = next(iter(rows or []), None)
     if not row:
-        return totals
+        return {"activeUsers": 0, "screenPageViews": 0, "eventCount": 0}
     metrics = [_metric_int(metric) for metric in row.metric_values]
-    if len(metrics) > 0:
-        totals["activeUsers"] = metrics[0]
-    if len(metrics) > 1:
-        totals["screenPageViews"] = metrics[1]
-    if len(metrics) > 2:
-        totals["eventCount"] = metrics[2]
-    return totals
+    return {
+        "activeUsers": metrics[0] if len(metrics) > 0 else 0,
+        "screenPageViews": metrics[1] if len(metrics) > 1 else 0,
+        "eventCount": metrics[2] if len(metrics) > 2 else 0,
+    }
 
 
 def _comparison_delta(current, previous):
@@ -612,8 +610,9 @@ def _ga_top_pages_from_details(pages):
 
 
 def _ga4_payload(range_key, window, buckets, tz):
-    property_id = (os.environ.get("GA4_PROPERTY_ID") or DEFAULT_GA4_PROPERTY_ID).strip()
-    credentials = (os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or "").strip()
+    configured = runtime_environment_config()
+    property_id = (configured.ga4_property_id_raw or DEFAULT_GA4_PROPERTY_ID).strip()
+    credentials = (configured.google_application_credentials or "").strip()
     if not credentials:
         return {"configured": False, "status": "not_configured", "message": "GOOGLE_APPLICATION_CREDENTIALS is not configured."}
 

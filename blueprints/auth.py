@@ -44,9 +44,12 @@ from avatar_images import DEFAULT_AVATAR_URL
 from services.avatar_storage import delete_avatar_file, store_avatar_from_url
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_server_log_event, emit_user_event, format_actor, format_user_target
-from services import discord_bridge, invites, notes_collaboration
+from services import auth_session, discord_bridge, invites, notes_collaboration, oauth_providers
 from services.entitlements import TIER_BADGES, TIER_LABELS, normalize_tier
 from services.user_profile import (
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
     is_early_member as _is_early_member,
     is_emory_school as _is_emory_school,
     normalize_banner_color as _normalize_banner_color,
@@ -99,9 +102,6 @@ PUBLIC_PROFILE_CSP = "; ".join([
     "form-action 'self'",
 ])
 
-USERNAME_MIN_LENGTH = 3
-USERNAME_MAX_LENGTH = 20
-USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
 APPWRITE_OAUTH_PROVIDERS = {
     "discord": OAuthProvider.DISCORD,
     "github": OAuthProvider.GITHUB,
@@ -497,98 +497,7 @@ def _discord_avatar_url(profile):
 
 
 def _fetch_provider_identity(provider, access_token):
-    if not provider or not access_token:
-        return {}
-
-    provider_key = provider.lower()
-    try:
-        if provider_key == "google":
-            response = http_requests.get(
-                "https://www.googleapis.com/oauth2/v2/userinfo",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=8,
-            )
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("verified_email") is False:
-                    logger.warning("Google token email is not verified")
-                    return {}
-                return {
-                    "id": data.get("id"),
-                    "email": data.get("email"),
-                    "name": data.get("name"),
-                    "avatar_url": data.get("picture"),
-                }
-            logger.warning("Google identity fetch failed: %s", response.status_code)
-            return {}
-
-        if provider_key == "github":
-            response = http_requests.get(
-                "https://api.github.com/user",
-                headers={
-                    "Authorization": f"Bearer {access_token}",
-                    "Accept": "application/vnd.github+json",
-                },
-                timeout=8,
-            )
-            if response.status_code != 200:
-                logger.warning("GitHub identity fetch failed: %s", response.status_code)
-                return {}
-
-            data = response.json()
-            email = data.get("email")
-            if not email:
-                emails_response = http_requests.get(
-                    "https://api.github.com/user/emails",
-                    headers={
-                        "Authorization": f"Bearer {access_token}",
-                        "Accept": "application/vnd.github+json",
-                    },
-                    timeout=8,
-                )
-                if emails_response.status_code == 200:
-                    emails = emails_response.json()
-                    primary_email = next(
-                        (
-                            item.get("email")
-                            for item in emails
-                            if item.get("primary") and item.get("verified")
-                        ),
-                        None,
-                    )
-                    email = primary_email
-
-            return {
-                "id": data.get("id"),
-                "email": email,
-                "name": data.get("name") or data.get("login"),
-                "avatar_url": data.get("avatar_url"),
-            }
-
-        if provider_key == "discord":
-            response = http_requests.get(
-                "https://discord.com/api/users/@me",
-                headers={"Authorization": f"Bearer {access_token}"},
-                timeout=8,
-            )
-            if response.status_code == 200:
-                data = response.json()
-                if data.get("verified") is False:
-                    logger.warning("Discord token email is not verified")
-                    return {}
-                return {
-                    "id": data.get("id"),
-                    "email": data.get("email"),
-                    "name": data.get("global_name") or data.get("username"),
-                    "username": data.get("username") or data.get("global_name"),
-                    "avatar_url": _discord_avatar_url(data),
-                }
-            logger.warning("Discord identity fetch failed: %s", response.status_code)
-            return {}
-    except Exception:
-        logger.exception("Failed to fetch provider identity: %s", provider)
-
-    return {}
+    return oauth_providers._fetch_provider_identity(provider, access_token)
 
 
 def _format_member_since(value):
@@ -879,226 +788,53 @@ def _complete_appwrite_login(
     provider_uid=None,
     page_context="auth/session",
 ):
-    remote_user = remote_user or {}
-    remote_user_id = remote_user.get("$id") or remote_user.get("id")
-    remote_email = remote_user.get("email") or ""
-    if not remote_user_id:
-        raise ValueError("Invalid Appwrite user.")
-    if not email:
-        email = remote_email
-
-    appwrite_user_id = str(remote_user_id)
-    user_doc = get_row_safe(COLLECTIONS["users"], appwrite_user_id, allow_missing=True)
-    if not user_doc and email:
-        user_doc = _find_user_by_email(email)
-    created_user = False
-
-    if not provider_access_token:
-        identity_token = _provider_access_token_from_identities(appwrite_user_id, provider=provider)
-        provider_access_token = identity_token.get("provider_access_token") or provider_access_token
-        if not provider_uid:
-            provider_uid = identity_token.get("provider_uid")
-        if identity_token.get("provider"):
-            provider = identity_token["provider"]
-
-    provider_profile = _fetch_provider_profile(provider, provider_access_token)
-    provider_name = provider_profile.get("name")
-    provider_avatar_url = _provider_avatar_url(provider_profile, remote_user, provider=provider)
-    remote_avatar_candidate = _provider_avatar_url({}, remote_user, provider=provider)
-    _log_avatar_collection(
-        user_id=appwrite_user_id,
+    return auth_session._complete_appwrite_login(
+        remote_user,
         provider=provider,
+        email=email,
+        provider_access_token=provider_access_token,
+        provider_uid=provider_uid,
         page_context=page_context,
-        created_user=not bool(user_doc),
-        has_provider_token=bool(provider_access_token),
-        provider_profile_avatar=provider_profile.get("avatar_url"),
-        remote_avatar_candidate=remote_avatar_candidate,
-        resolved_avatar_url=provider_avatar_url,
-        storage_result="pending",
-    )
-
-    discord_id_value = None
-    discord_username_value = None
-    if provider == "discord":
-        discord_identity = _resolve_discord_link_identity(
-            provider_uid=provider_uid,
-            provider_access_token=provider_access_token,
-            appwrite_user_ids=[appwrite_user_id],
-        )
-        discord_id_value = discord_identity.get("id")
-        discord_username_value = discord_identity.get("username")
-
-    name = provider_name or remote_user.get("name") or remote_user.get("displayName")
-    picture_url = provider_avatar_url
-
-    if not user_doc:
-        created_at = format_datetime(datetime.utcnow())
-        avatar_file_id = None
-        avatar_file_size_bytes = 0
-        storage_result = "none"
-        if picture_url:
-            picture_url, avatar_file_id, storage_result, avatar_file_size_bytes = _store_provider_avatar(
-                appwrite_user_id,
-                picture_url,
-                page_context=page_context,
-            )
-        row_data = {
-            "google_id": appwrite_user_id,
-            "email": email,
-            "name": name or remote_user.get("name"),
-            "picture_url": picture_url,
-            "avatar_file_id": avatar_file_id,
-            "avatar_file_size_bytes": avatar_file_size_bytes,
-            "tier": "free",
-            "banner_color": "#fecae1",
-            "avatar_source": "provider" if picture_url else None,
-            "school": None,
-            "major": None,
-            "graduation_year": None,
-            "onboarding_complete": False,
-            "onboarding_step": 1,
-            "created_at": created_at,
-            "last_login": created_at,
-        }
-        if provider and provider != "appwrite":
-            row_data["provider"] = provider
-        if discord_id_value:
-            row_data["discord_id"] = discord_id_value
-            row_data["discord_username"] = discord_username_value
-            row_data["discord_linked_at"] = created_at
-        user_doc = create_row_safe(
-            COLLECTIONS["users"],
-            row_id=appwrite_user_id,
-            data=row_data,
-        )
-        created_user = True
-
-        create_row_safe(
-            COLLECTIONS["user_settings"],
-            row_id=appwrite_user_id,
-            data={
-                "user_id": appwrite_user_id,
-                "ics_secret_token": secrets.token_urlsafe(32),
-                "feed_refresh_minutes": 15,
-                "preferred_calendar_view": "week",
-                "interface_theme": "obsidian-dark",
-                "theme": "dark",
-                "sidebar_default": "expanded",
-                "email_notifications": True,
-                "product_updates": True,
-                "task_sound_enabled": True,
-                "chat_sound_enabled": True,
-                "language": "en",
-                "timezone": "",
-                "created_at": created_at,
-            },
-        )
-        try:
-            invites.attribute_signup(
-                request.cookies.get(INVITE_COOKIE),
-                appwrite_user_id,
-            )
-        except Exception:
-            logger.exception("Failed to attribute new user signup to invite")
-    else:
-        updates = {"last_login": format_datetime(datetime.utcnow())}
-        if name:
-            updates["name"] = name
-        if picture_url and _avatar_can_use_provider(user_doc):
-            stored_picture_url, stored_file_id, storage_result, stored_file_size_bytes = _store_provider_avatar(
-                appwrite_user_id,
-                picture_url,
-                page_context=page_context,
-            )
-            previous_file_id = user_doc.get("avatar_file_id")
-            updates["picture_url"] = stored_picture_url
-            updates["avatar_source"] = "provider"
-            updates["avatar_file_size_bytes"] = stored_file_size_bytes
-            if stored_file_id:
-                updates["avatar_file_id"] = stored_file_id
-                if previous_file_id and previous_file_id != stored_file_id:
-                    delete_avatar_file(previous_file_id)
-            elif previous_file_id and storage_result == "provider_url_fallback":
-                updates["avatar_file_id"] = None
-                delete_avatar_file(previous_file_id)
-        if email:
-            updates["email"] = email
-        if provider and provider != "appwrite":
-            updates["provider"] = provider
-        if discord_id_value:
-            updates["discord_id"] = discord_id_value
-            updates["discord_username"] = discord_username_value
-            if not user_doc.get("discord_id"):
-                updates["discord_linked_at"] = format_datetime(datetime.utcnow())
-
-        row_id = user_doc.get("$id") or user_doc.get("id")
-        if not row_id:
-            raise ValueError("User lookup failed.")
-        user_doc = update_row_safe(
-            COLLECTIONS["users"],
-            row_id,
-            updates,
-        )
-
-    sync_chat_presence_labels_for_user(user_doc.get("$id") or user_doc.get("id"), user_doc)
-    session.permanent = True
-    login_user(
-        user_from_doc(user_doc),
-        remember=True,
-        duration=current_app.config.get("AUTH_SESSION_DURATION", AUTH_SESSION_DURATION),
-    )
-    session["user_id"] = user_doc.get("$id") or user_doc.get("id")
-    session["email"] = email or remote_email
-    _set_oauth_session(provider, appwrite_user_id, email, name=name, picture_url=picture_url)
-    if email or remote_email:
-        try:
-            notes_collaboration.claim_pending_invitations(session["user_id"], email or remote_email)
-        except Exception:
-            logger.exception("Failed to claim pending note invitations for %s", session["user_id"])
-
-    if discord_id_value:
-        try:
-            discord_bridge.add_guild_member_role(discord_id_value)
-        except Exception:
-            logger.exception("Failed to grant Discord role on login for %s", discord_id_value)
-
-    if created_user:
-        emit_user_event(
-            "New User Created",
-            actor=format_actor(user_id=user_doc.get("$id") or user_doc.get("id"), username=user_doc.get("username") or user_doc.get("name")),
-            target=format_user_target(user_doc),
-            metadata={
-                "page_context": page_context,
-                "resource_type": "user",
-                "resource_id": user_doc.get("$id") or user_doc.get("id"),
-                "provider": provider,
-                "email": email or remote_email,
-                "default_settings_created": True,
-            },
-            color="green",
-        )
-
-    emit_user_event(
-        "User Login",
-        actor=format_actor(user_id=user_doc.get("$id") or user_doc.get("id"), username=user_doc.get("username") or user_doc.get("name")),
-        target=format_user_target(user_doc),
-        metadata={
-            "page_context": page_context,
-            "resource_type": "user",
-            "resource_id": user_doc.get("$id") or user_doc.get("id"),
-            "provider": provider,
-            "created_user": created_user,
+        dependencies={
+            "collections": COLLECTIONS,
+            "get_row_safe": get_row_safe,
+            "find_user_by_email": _find_user_by_email,
+            "provider_access_token_from_identities": (
+                _provider_access_token_from_identities
+            ),
+            "fetch_provider_profile": _fetch_provider_profile,
+            "provider_avatar_url": _provider_avatar_url,
+            "log_avatar_collection": _log_avatar_collection,
+            "resolve_discord_link_identity": _resolve_discord_link_identity,
+            "format_datetime": format_datetime,
+            "datetime": datetime,
+            "store_provider_avatar": _store_provider_avatar,
+            "create_row_safe": create_row_safe,
+            "secrets": secrets,
+            "invites": invites,
+            "request": request,
+            "invite_cookie": INVITE_COOKIE,
+            "logger": logger,
+            "avatar_can_use_provider": _avatar_can_use_provider,
+            "delete_avatar_file": delete_avatar_file,
+            "update_row_safe": update_row_safe,
+            "sync_chat_presence_labels_for_user": (
+                sync_chat_presence_labels_for_user
+            ),
+            "session": session,
+            "login_user": login_user,
+            "user_from_doc": user_from_doc,
+            "current_app": current_app,
+            "auth_session_duration": AUTH_SESSION_DURATION,
+            "set_oauth_session": _set_oauth_session,
+            "notes_collaboration": notes_collaboration,
+            "discord_bridge": discord_bridge,
+            "emit_user_event": emit_user_event,
+            "format_actor": format_actor,
+            "format_user_target": format_user_target,
+            "redirect_for_user_doc": _redirect_for_user_doc,
         },
-        color="green",
     )
-
-    return {
-        "created_user": created_user,
-        "email": email or remote_email,
-        "redirect": _redirect_for_user_doc(user_doc),
-        "user_doc": user_doc,
-        "user_id": session["user_id"],
-    }
 
 
 @auth_bp.route("/")

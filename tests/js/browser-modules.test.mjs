@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -39,7 +40,6 @@ if (false) {
     await import("../../static/js/calendar/views/week-view.js");
     await import("../../static/js/chat/index.js");
     await import("../../static/js/core/breadcrumb.js");
-    await import("../../static/js/core/appwrite.js");
     await import("../../static/js/core/command-palette.js");
     await import("../../static/js/core/command-palette-search.js");
     await import("../../static/js/core/command-palette-workspace.js");
@@ -137,10 +137,14 @@ test("command palette keeps primary navigation, theme actions, and global contro
 
 test("calendar event form preserves escaping, API routes, and cache refresh behavior", async () => {
     const source = await sourceFor("static/js/calendar/events/event-form.js");
+    const primitives = await sourceFor("static/js/core/ui-primitives.js");
 
-    for (const replacement of ["&amp;", "&lt;", "&gt;", "&quot;", "&#39;"]) {
-        assert.match(source, new RegExp(replacement.replace("&", "&")));
+    assert.match(primitives, /div\.textContent = value == null \? '' : String\(value\)/);
+    assert.match(primitives, /return div\.innerHTML/);
+    for (const replacement of ["&quot;", "&#39;"]) {
+        assert.match(primitives, new RegExp(replacement.replace("&", "&")));
     }
+    assert.match(source, /import \{ escapeHtml \} from "\.\.\/\.\.\/core\/ui-primitives-module\.js"/);
 
     assert.match(source, /window\.openCalendarEventForm = function/);
     assert.match(source, /fetch\("\/api\/calendar\/events"/);
@@ -189,7 +193,7 @@ test("calendar dashboard keeps cache, public-share, and event-form contracts wir
     assert.match(source, /\/api\/calendar\/share\/\$\{encodeURIComponent\(state\.public\.shareCode\)\}\/events/);
     assert.match(source, /fetch\("\/api\/calendar\/refresh", \{ method: "POST" \}\)/);
     assert.match(source, /fetch\("\/api\/atlas\/sections\/by-id"/);
-    assert.match(source, /function escapeHtml\(value\)/);
+    assert.match(source, /const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
 });
 
 test("dashboard daily quote fetches Flask endpoint and uses one smooth egg card", async () => {
@@ -363,7 +367,7 @@ test("calendar and courses switch dense schedules to compact mobile agenda rende
         await sourceFor("static/js/courses/index.js"),
         await sourceFor("static/js/courses/calendar.js"),
     ].join("\n");
-    const globalStyles = await sourceFor("static/css/global.css");
+    const globalStyles = await readCssSource(repoRoot, "static/css/global.css");
     const coursesStyles = await sourceFor("static/css/courses.css");
 
     assert.match(calendarSource, /COMPACT_CALENDAR_QUERY = window\.matchMedia\("\(max-width: 640px\)"\)/);
@@ -459,7 +463,7 @@ test("notes list guards destructive actions and supports safe card menus", async
     ].join("\n");
 
     assert.match(source, /function apiJson\(url, options = \{\}\)/);
-    assert.match(source, /APStudyPendingMutations\?\.track\(request, 'notes-save'\)/);
+    assert.match(source, /APStudyHttp\.fetchJson\(url,[\s\S]*pendingLabel: options\.pendingLabel \|\| "notes-save"/);
     assert.match(source, /apiJson\(`\/api\/notes\/\$\{encodeURIComponent\(noteId\)\}`/);
     assert.match(source, /apiJson\(`\/api\/notes\/folders\/\$\{encodeURIComponent\(folderId\)\}`/);
     assert.doesNotMatch(cardsSource, /NotesExport/);
@@ -476,7 +480,7 @@ test("notes list guards destructive actions and supports safe card menus", async
     assert.match(dragSource, /delayOnTouchOnly: true/);
     assert.match(dragSource, /touchStartThreshold: 8/);
     assert.match(dragSource, /folder-card\.is-drop-target/);
-    assert.match(template, /sortablejs@1\.15\.0\/Sortable\.min\.js/);
+    assert.match(template, /js\/vendor\/dist\/sortable-global\.js/);
     assert.match(styles, /\.folder-card\.is-drop-target/);
     assert.match(styles, /\.note-card-ghost/);
     assert.doesNotMatch(cardsSource, /more_horiz/);
@@ -506,7 +510,14 @@ test("notes list guards destructive actions and supports safe card menus", async
 });
 
 test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wired", async () => {
-    const source = await sourceFor("static/js/notes/editor.js");
+    const source = [
+        await sourceFor("static/js/notes/editor.js"),
+        await sourceFor("static/js/notes/editor/save.js"),
+        await sourceFor("static/js/notes/editor/page-setup.js"),
+        await sourceFor("static/js/notes/editor/paste.js"),
+        await sourceFor("static/js/notes/editor/react-shell.js"),
+        await sourceFor("static/js/notes/editor/toolbar-dom.js"),
+    ].join("\n");
     const toolbarSource = await sourceFor("static/js/notes/toolbar.js");
     const catalogSource = await sourceFor("static/js/notes/editor/block-catalog.js");
     const keyboardSource = await sourceFor("static/js/notes/editor/keyboard-shortcuts.js");
@@ -545,7 +556,7 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.match(styles, /body\.notes-editor-body main\s*\{[^}]*grid-row:\s*1;[^}]*max-width:\s*none;[^}]*padding:\s*0;/s);
     assert.match(source, /preserveRangeSelectionShortcuts/);
     assert.match(source, /listItemHardBreakShortcuts/);
-    assert.match(source, /from '\.\/toolbar\.js'/);
+    assert.match(source, /from '\.\.\/toolbar\.js'/);
     assert.match(source, /from '\.\/editor\/block-catalog\.js'/);
     assert.match(source, /await import\('\.\/editor\/print\.js'\)/);
     assert.match(toolbarSource, /const notesEditorSchema = BlockNoteSchema\.create/);
@@ -581,8 +592,8 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.match(source, /formattingToolbar: false/);
     assert.match(source, /slashMenu: false/);
     assert.match(source, /filePanel: false/);
-    assert.match(source, /function handleNotesPaste\(\{ event, editor, defaultPasteHandler \}\)/);
-    assert.match(source, /pasteHandler: handleNotesPaste/);
+    assert.match(source, /function handleNotesPaste\(\{ event, editor, defaultPasteHandler/);
+    assert.match(source, /pasteHandler: \(options\) => handleNotesPaste/);
     assert.match(source, /from '\.\/editor\/markdown-repair\.js'/);
     assert.match(source, /normalizeClipboardMarkdown/);
     assert.match(source, /normalizeCopiedPlainText/);
@@ -607,7 +618,7 @@ test("notes editor keeps autosave, BlockNote schema, and load/save endpoints wir
     assert.doesNotMatch(source, /schedulePastedContentNormalization|replaceBlocks\(documentSnapshot/);
     assert.match(source, /let activePageSetupTrigger = null/);
     assert.match(source, /activePageSetupTrigger = trigger \|\| null/);
-    assert.match(source, /activePageSetupTrigger\?\.contains\(event\.target\)/);
+    assert.match(source, /getActivePageSetupTrigger\(\)\?\.contains\(event\.target\)/);
     assert.doesNotMatch(source, /application\/x-nest-blocknote\+json/);
     assert.match(source, /notes\/tools\/link-preview/);
     assert.match(source, /function toggleHeadingCollapse/);
@@ -745,7 +756,14 @@ test("notes sharing keeps canonical links, view-only capabilities, and folder in
     const listSource = await sourceFor("static/js/notes/list.js");
     const cardsSource = await sourceFor("static/js/notes/list/cards.js");
     const sharingSource = await sourceFor("static/js/notes/sharing.js");
-    const editorSource = await sourceFor("static/js/notes/editor.js");
+    const editorSource = [
+        await sourceFor("static/js/notes/editor.js"),
+        await sourceFor("static/js/notes/editor/save.js"),
+        await sourceFor("static/js/notes/editor/page-setup.js"),
+        await sourceFor("static/js/notes/editor/paste.js"),
+        await sourceFor("static/js/notes/editor/react-shell.js"),
+        await sourceFor("static/js/notes/editor/toolbar-dom.js"),
+    ].join("\n");
     const editorTemplate = await sourceFor("templates/notes_editor.html");
     const styles = `${await sourceFor("static/css/notes.css")}\n${await sourceFor("static/css/notes/editor.css")}`;
     const notesTemplate = await sourceFor("templates/notes.html");
@@ -772,7 +790,7 @@ test("notes sharing keeps canonical links, view-only capabilities, and folder in
 
     assert.match(editorSource, /let canEdit = noteContext\.access\?\.can_edit === true/);
     assert.match(editorSource, /editable: canEdit/);
-    assert.match(editorSource, /if \(!canEdit \|\| !noteId \|\| !titleInput \|\| !editorInstance \|\| noteCollaborationEnabled\) return/);
+    assert.match(editorSource, /if \(!getCanEdit\(\) \|\| !noteId \|\| !titleInput \|\| !getEditor\(\) \|\| getNoteCollaborationEnabled\(\)\) return/);
     assert.match(editorSource, /canEdit \? React\.createElement\(SuggestionMenuController/);
     assert.match(editorSource, /canEdit \? React\.createElement\(SideMenuController/);
     assert.match(editorSource, /if \(!canEdit\) \{\s*button\?\.remove\(\);/);
@@ -906,9 +924,8 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
         assert.match(source, new RegExp(endpoint.replaceAll("/", "\\/")));
     }
 
-    assert.doesNotMatch(template, /appwrite@|js\/core\/appwrite\.js/);
+    assert.doesNotMatch(template, /appwrite@/);
     assert.match(template, /\{% set settings_assets_version = 'settings-[^']+' %\}/);
-    assert.match(template, /data-probe-appwrite-session="false"/);
     assert.match(template, /id="settings-skeleton"/);
     assert.match(template, /settings-sections[^"]*is-loading/);
     assert.match(source, /const SETTINGS_SECTION_IDS = \['account', 'tier', 'data', 'preferences', 'notifications'\]/);
@@ -996,27 +1013,8 @@ test("task app shell keeps data-layer wiring, destructive confirms, and mount co
     assert.match(template, /task-skeleton-layout/);
     assert.doesNotMatch(source, /APStudySkeleton\?\.fieldSet/);
     assert.doesNotMatch(source, /use-sound|useSound/);
-    assert.doesNotMatch(template, /appwrite@|js\/core\/appwrite\.js|use-sound/);
-    assert.match(template, /data-probe-appwrite-session="false"/);
+    assert.doesNotMatch(template, /appwrite@|use-sound/);
     assert.match(template, /data-command-palette-preload="false"/);
-});
-
-test("appwrite bootstrap exposes configured SDK clients globally", async () => {
-    const source = await sourceFor("static/js/core/appwrite.js");
-
-    assert.match(source, /document\.querySelector\('meta\[name="apstudy-appwrite-endpoint"\]'\)\?\.content/);
-    assert.match(source, /document\.querySelector\('meta\[name="apstudy-appwrite-project-id"\]'\)\?\.content/);
-    assert.match(source, /const APPWRITE_ENDPOINT = configMeta\.endpoint \|\| "https:\/\/nyc\.cloud\.appwrite\.io\/v1"/);
-    assert.match(source, /const APPWRITE_PROJECT_ID = configMeta\.projectId \|\| "69f77663000c16abdff2"/);
-    assert.match(source, /new Appwrite\.Client\(\)/);
-    assert.match(source, /\.setEndpoint\(APPWRITE_ENDPOINT\)/);
-    assert.match(source, /\.setProject\(APPWRITE_PROJECT_ID\)/);
-    assert.match(source, /window\.account = account/);
-    assert.match(source, /window\.databases = databases/);
-    assert.match(source, /window\.storage = storage/);
-    assert.doesNotMatch(source, /window\.presences/);
-    assert.doesNotMatch(source, /window\.realtime/);
-    assert.doesNotMatch(source, /window\.Channel = Appwrite\.Channel/);
 });
 
 test("calendar context menu keeps task, event, override, and keyboard flows wired", async () => {
@@ -1061,15 +1059,7 @@ test("global chrome keeps lifecycle, navigation, mutation, confirmation, loader,
     assert.match(source, /window\.APStudyDate = \{/);
     assert.match(source, /function clearClientState\(options = \{\}\)/);
     assert.match(source, /function markClientLoggedOut\(\)/);
-    assert.match(source, /function shouldEnforceAuth\(\)/);
-    assert.match(source, /APStudyAppwriteSessionProbe/);
-    assert.doesNotMatch(source, /account\.get\(/);
     assert.doesNotMatch(source, /window\.location\.replace\(`\$\{window\.location\.origin\}\/logout`\)/);
-    assert.match(source, /account\.deleteSession\("current"\)/);
-    const stopHeartbeatIndex = source.indexOf('window.APStudyPresenceHeartbeat?.stop?.();');
-    const deleteSessionIndex = source.indexOf('account.deleteSession("current")');
-    assert.ok(stopHeartbeatIndex >= 0, "logout stops presence heartbeats");
-    assert.ok(stopHeartbeatIndex < deleteSessionIndex, "logout stops heartbeats before revoking the session");
     assert.match(source, /stop: stopHeartbeat/);
     assert.match(source, /clearClientState\(\{ includeCookies: false \}\)/);
     assert.match(source, /document\.querySelectorAll\("\[data-logout\]"\)/);
@@ -1083,7 +1073,6 @@ test("login template uses server-started Appwrite OAuth links", async () => {
     assert.match(source, /url_for\('auth\.appwrite_oauth_start', provider='discord'\)/);
     assert.doesNotMatch(source, /createOAuth2Session/);
     assert.doesNotMatch(source, /js\/login\.js/);
-    assert.doesNotMatch(source, /js\/appwrite\.js/);
 });
 
 test("landing page keeps product proof visible and wires the new signup journey accessibly", async () => {
@@ -1268,7 +1257,7 @@ test("browser notifications preflight capabilities and never use native alert di
 });
 
 test("shared selection controls avoid browser-default checkbox and radio rendering", async () => {
-    const source = await sourceFor("static/css/global.css");
+    const source = await readCssSource(repoRoot, "static/css/global.css");
 
     assert.match(source, /:where\(input\[type="checkbox"\], input\[type="radio"\]\):not\(\[data-native-control\]\)/);
     assert.match(source, /appearance:\s*none/);
@@ -1302,7 +1291,7 @@ test("tier badge assets and admin controls stay wired to the supported roles", a
     const authUsersTemplate = await sourceFor("templates/partials/admin_auth_users.html");
     const detailTemplate = await sourceFor("templates/admin_detail.html");
     const entitlementService = await sourceFor("services/entitlements.py");
-    const globalStyles = await sourceFor("static/css/global.css");
+    const globalStyles = await readCssSource(repoRoot, "static/css/global.css");
 
     for (const asset of [
         "grade-a-egg.png",

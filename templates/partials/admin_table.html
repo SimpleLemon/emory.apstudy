@@ -1,0 +1,7 @@
+{% macro admin_table(rows, empty_message) -%}
+  {% if rows %}
+    <table class="admin-table">{{ caller() }}</table>
+  {% else %}
+    <p>{{ empty_message }}</p>
+  {% endif %}
+{%- endmacro %}

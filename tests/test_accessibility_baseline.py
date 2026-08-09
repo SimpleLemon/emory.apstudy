@@ -87,7 +87,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
             self.assertTrue((ROOT / "static/fonts" / asset).is_file(), asset)
 
     def test_first_party_css_uses_visual_system_contract(self):
-        global_css = (ROOT / "static/css/global.css").read_text()
+        global_css = (ROOT / "static/css/global-foundation.css").read_text()
         for token in (
             "--radius-control: 6px", "--radius-card: 12px", "--radius-panel: 18px",
             "--radius-dialog: 24px", "--radius-pill: 999px", "--radius-avatar: 50%",
@@ -246,7 +246,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
         self.assertEqual([], problems)
 
     def test_shared_accessibility_layer_covers_focus_dialogs_and_motion(self):
-        css = (ROOT / "static/css/global.css").read_text()
+        css = (ROOT / "static/css/global-foundation.css").read_text()
         javascript = (ROOT / "static/js/core/global.js").read_text()
         self.assertIn(".apstudy-skip-link", css)
         self.assertRegex(css, r"::selection\s*\{[^}]*--color-on-surface")
@@ -266,7 +266,12 @@ class AccessibilityBaselineTests(unittest.TestCase):
         sources = (ROOT / "static/js/calendar/integrations/sources.js").read_text()
         share = (ROOT / "static/js/calendar/integrations/share.js").read_text()
         courses = (ROOT / "static/js/courses/panel.js").read_text()
-        chat = (ROOT / "static/js/chat/runtime.js").read_text()
+        chat = "\n".join(
+            (
+                (ROOT / "static/js/chat/runtime.js").read_text(),
+                (ROOT / "static/js/chat/rooms.js").read_text(),
+            )
+        )
         self.assertIn('role="dialog" aria-modal="true" aria-labelledby="courses-modal-title"', course_modal)
         self.assertIn('aria-label="Search courses"', course_modal)
         self.assertIn('aria-label="Filter by term"', course_modal)
@@ -295,7 +300,7 @@ class AccessibilityBaselineTests(unittest.TestCase):
         self.assertIn('label: "Move list earlier"', tasks)
         self.assertIn('label: "Move task earlier"', tasks)
         self.assertIn("Move to ${list.name}", tasks)
-        for relative_path in ("static/js/dashboard/index.js", "static/js/tasks/task-components.js"):
+        for relative_path in ("static/js/dashboard/layout-editor.js", "static/js/tasks/task-components.js"):
             self.assertIn("prefersReducedMotion", (ROOT / relative_path).read_text())
 
 

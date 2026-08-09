@@ -33,6 +33,13 @@ test("Tasks loads one local bundle without framework import maps or runtime CDNs
     assert.equal(parsedPackage.scripts["build:tasks"], "vite build --config vite.tasks.config.mjs");
 });
 
+test("Tasks stylesheet uses the APStudy primary fallback", async () => {
+    const taskCss = await read("static/css/task.css");
+
+    assert.match(taskCss, /var\(--color-primary, #0060aa\)/);
+    assert.doesNotMatch(taskCss, /var\(--color-primary, #3b82f6\)/);
+});
+
 function createLoaderEnvironment() {
     const windowListeners = new Map();
     const documentListeners = new Map();

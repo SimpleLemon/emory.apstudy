@@ -9,6 +9,7 @@ from appwrite.services.users import Users
 from appwrite_client import COLLECTIONS
 from appwrite_client import client as appwrite_client
 from appwrite_helpers import first_row, get_row_safe, list_rows_all
+from services.row_utils import row_id as _row_id
 from services.universities import normalize_school_key, school_payload
 
 
@@ -35,11 +36,6 @@ def _is_chat_presence_label(label):
 
 def _is_valid_appwrite_label(label):
     return bool(APPWRITE_LABEL_RE.fullmatch(str(label or "")))
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
-
 
 def _school_key_for_user_doc(user_doc):
     if not user_doc:

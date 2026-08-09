@@ -90,25 +90,10 @@ export function normalizeList(list) {
 }
 
 export async function fetchJson(url, options = {}) {
-    if (window.APStudyHttp?.fetchJson) {
-        return window.APStudyHttp.fetchJson(url, {
-            ...options,
-            pendingLabel: options.pendingLabel || "task-save",
-        });
-    }
-    const method = String(options.method || "GET").toUpperCase();
-    const request = fetch(url, {
-        headers: { "Content-Type": "application/json", ...(options.headers || {}) },
+    return window.APStudyHttp.fetchJson(url, {
         ...options,
+        pendingLabel: options.pendingLabel || "task-save",
     });
-    const response = await (method === "GET"
-        ? request
-        : window.APStudyPendingMutations?.track(request, "task-save") || request);
-    const payload = await response.json().catch(() => ({}));
-    if (!response.ok) {
-        throw new Error(payload.error || "Request failed.");
-    }
-    return payload;
 }
 
 export function clearCalendarCache() {

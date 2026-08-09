@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 process.env.TZ = "America/New_York";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
-globalThis.window = {};
+globalThis.window = { APStudyUIPrimitives: { escapeHtml: String } };
 const source = await readFile(path.join(repoRoot, "static/js/calendar/utils.js"), "utf8");
 await import(`data:text/javascript;base64,${Buffer.from(source).toString("base64")}`);
 

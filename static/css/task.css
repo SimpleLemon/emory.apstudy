@@ -58,8 +58,8 @@
 .task-icon-button:hover,
 .task-icon-button:focus-visible,
 .task-icon-button.is-on {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent) !important;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 12%, var(--color-surface-container-low, #f7f6f3));
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent) !important;
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 12%, var(--color-surface-container-low, #f7f6f3));
     color: var(--color-on-surface, #202124);
     outline: none;
 }
@@ -104,7 +104,7 @@
     justify-content: center;
     gap: 6px;
     border-radius: var(--radius-control);
-    background: var(--color-primary, #3b82f6);
+    background: var(--color-primary, #0060aa);
     color: var(--color-on-primary, #ffffff);
     font-size: 13px;
     font-weight: 700;
@@ -170,7 +170,7 @@
 .task-list-nav-item:hover,
 .task-list-all.is-active,
 .task-list-nav-item.is-active {
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 12%, transparent);
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 12%, transparent);
     color: var(--color-on-surface, #202124);
 }
 
@@ -233,7 +233,7 @@
 }
 
 .task-list-title-input:focus {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 50%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 50%, transparent);
     background: var(--color-surface, #ffffff);
     outline: none;
 }
@@ -266,8 +266,8 @@
 }
 
 .task-row.is-highlighted {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 70%, transparent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #3b82f6) 18%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 70%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary, #0060aa) 18%, transparent);
 }
 
 .task-row.is-completed {
@@ -299,8 +299,8 @@
 }
 
 .task-checkbox.is-checked {
-    border-color: var(--color-primary, #3b82f6) !important;
-    background: var(--color-primary, #3b82f6);
+    border-color: var(--color-primary, #0060aa) !important;
+    background: var(--color-primary, #0060aa);
 }
 
 .task-checkbox .material-symbols-outlined {
@@ -323,7 +323,7 @@
 }
 
 .task-title-input:focus {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 45%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 45%, transparent);
     background: var(--color-surface-container-lowest, #ffffff);
     outline: none;
     padding: 0 8px;
@@ -477,12 +477,12 @@
 }
 
 .task-repeat-end-option.is-selected {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent);
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 9%, var(--color-surface-container-lowest, #ffffff));
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent);
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 9%, var(--color-surface-container-lowest, #ffffff));
 }
 
 .task-repeat-end-option .material-symbols-outlined {
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 18px;
 }
 
@@ -501,9 +501,9 @@
 
 .task-add-form:focus-within,
 .task-add-form.is-expanded {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent);
     background: color-mix(in srgb, var(--color-surface-container-low, #f7f6f3) 86%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #3b82f6) 12%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #0060aa) 12%, transparent);
 }
 
 .task-add-primary {
@@ -556,8 +556,8 @@
 .task-add-control:focus-visible,
 .task-add-control.is-active {
     outline: none;
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent) !important;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 10%, var(--color-surface-container-low, #f7f6f3));
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent) !important;
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 10%, var(--color-surface-container-low, #f7f6f3));
     color: var(--color-on-surface, #202124);
 }
 
@@ -629,8 +629,8 @@
 .task-custom-select.is-open .task-custom-select-trigger,
 .task-date-picker.is-open .task-date-picker-trigger {
     outline: none;
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 68%, transparent) !important;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #3b82f6) 16%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 68%, transparent) !important;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary, #0060aa) 16%, transparent);
 }
 
 .task-custom-select-trigger .material-symbols-outlined,
@@ -677,11 +677,11 @@
 .task-custom-select-menu button:focus-visible,
 .task-custom-select-menu button.is-selected {
     outline: none;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 11%, var(--color-surface, #ffffff));
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 11%, var(--color-surface, #ffffff));
 }
 
 .task-custom-select-menu .material-symbols-outlined {
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 18px;
 }
 
@@ -769,11 +769,11 @@
 }
 
 .task-calendar-grid button.is-today {
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #3b82f6) 60%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary, #0060aa) 60%, transparent);
 }
 
 .task-calendar-grid button.is-selected {
-    background: var(--color-primary, #3b82f6);
+    background: var(--color-primary, #0060aa);
     color: var(--color-on-primary, #ffffff);
     font-weight: 800;
 }
@@ -781,7 +781,7 @@
 .task-calendar-today {
     align-self: flex-start;
     padding: 0 9px;
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 12px;
     font-weight: 750;
 }
@@ -824,7 +824,7 @@
     gap: 5px;
     border: 0 !important;
     border-radius: var(--radius-control);
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 12px;
     font-weight: 750;
     padding: 0 7px;
@@ -834,7 +834,7 @@
 .task-deadline-time-toggle:hover,
 .task-deadline-time-toggle:focus-visible {
     outline: none;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 10%, transparent);
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 10%, transparent);
 }
 
 .task-deadline-time-toggle .material-symbols-outlined {
@@ -906,7 +906,7 @@
 }
 
 .task-reminder-icon {
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
 }
 
 .task-add-popover-field,
@@ -982,12 +982,12 @@
 .task-repeat-option:focus-visible,
 .task-repeat-option.is-active {
     outline: none;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 12%, var(--color-surface-container-low, #f7f6f3));
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 12%, var(--color-surface-container-low, #f7f6f3));
 }
 
 .task-add-choice-list .material-symbols-outlined,
 .task-repeat-option .material-symbols-outlined {
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 20px;
 }
 
@@ -1056,8 +1056,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--radius-card);
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 14%, transparent);
-    color: var(--color-primary, #3b82f6);
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 14%, transparent);
+    color: var(--color-primary, #0060aa);
 }
 
 .task-empty-icon .material-symbols-outlined {
@@ -1096,7 +1096,7 @@
 }
 
 .task-sortable-chosen {
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent) !important;
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent) !important;
 }
 
 .task-primary-button,
@@ -1117,10 +1117,10 @@
 
 .task-primary-button {
     padding: 0 16px;
-    border: 1px solid color-mix(in srgb, var(--color-primary, #3b82f6) 58%, transparent) !important;
-    background: var(--color-primary, #3b82f6);
+    border: 1px solid color-mix(in srgb, var(--color-primary, #0060aa) 58%, transparent) !important;
+    background: var(--color-primary, #0060aa);
     color: var(--color-on-primary, #ffffff);
-    box-shadow: 0 12px 28px color-mix(in srgb, var(--color-primary, #3b82f6) 20%, transparent);
+    box-shadow: 0 12px 28px color-mix(in srgb, var(--color-primary, #0060aa) 20%, transparent);
 }
 
 .task-secondary-button {
@@ -1187,7 +1187,7 @@
 .task-rail-primary:focus-visible,
 .task-rail-primary.is-active {
     outline: none;
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 12%, var(--color-surface, #ffffff));
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 12%, var(--color-surface, #ffffff));
     color: var(--color-on-surface, #202124);
 }
 
@@ -1245,7 +1245,7 @@
 .task-create-list-small:hover,
 .task-create-list-small:focus-visible {
     outline: none;
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 55%, transparent) !important;
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 55%, transparent) !important;
     background: var(--color-surface-container-high, #efede8);
 }
 
@@ -1262,7 +1262,7 @@
 
 .task-list-nav-item:hover,
 .task-list-nav-item.is-active {
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 10%, var(--color-surface, #ffffff));
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 10%, var(--color-surface, #ffffff));
 }
 
 .task-list-nav-item.is-hidden-list {
@@ -1287,12 +1287,12 @@
 .task-list-visibility:focus-visible {
     outline: none;
     transform: scale(1.04);
-    border-color: color-mix(in srgb, var(--color-primary, #3b82f6) 65%, transparent) !important;
+    border-color: color-mix(in srgb, var(--color-primary, #0060aa) 65%, transparent) !important;
 }
 
 .task-list-visibility.is-checked {
-    border-color: var(--color-primary, #3b82f6) !important;
-    background: var(--color-primary, #3b82f6);
+    border-color: var(--color-primary, #0060aa) !important;
+    background: var(--color-primary, #0060aa);
 }
 
 .task-list-visibility .material-symbols-outlined {
@@ -1316,7 +1316,7 @@
 }
 
 .task-list-nav-content:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--color-primary, #3b82f6) 60%, transparent);
+    outline: 2px solid color-mix(in srgb, var(--color-primary, #0060aa) 60%, transparent);
     outline-offset: 2px;
 }
 
@@ -1391,7 +1391,7 @@
 }
 
 .task-action-menu button.is-checked {
-    background: color-mix(in srgb, var(--color-primary, #3b82f6) 13%, var(--color-surface-container-low, #f7f6f3));
+    background: color-mix(in srgb, var(--color-primary, #0060aa) 13%, var(--color-surface-container-low, #f7f6f3));
     color: var(--color-on-surface, #202124);
     font-weight: 760;
 }
@@ -1403,7 +1403,7 @@
 
 .task-action-menu button .material-symbols-outlined {
     flex: 0 0 24px;
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
     font-size: 22px;
 }
 
@@ -1639,7 +1639,7 @@
 
 .task-hidden-empty > .material-symbols-outlined {
     font-size: 34px;
-    color: var(--color-primary, #3b82f6);
+    color: var(--color-primary, #0060aa);
 }
 
 .task-hidden-empty h2 {
@@ -1914,14 +1914,14 @@
     }
 
     .task-list-visibility.is-checked::before {
-        border-color: var(--color-primary, #3b82f6);
-        background: color-mix(in srgb, var(--color-primary, #3b82f6) 34%, var(--color-surface-container-lowest, #ffffff));
+        border-color: var(--color-primary, #0060aa);
+        background: color-mix(in srgb, var(--color-primary, #0060aa) 34%, var(--color-surface-container-lowest, #ffffff));
     }
 
     .task-list-visibility .material-symbols-outlined {
         position: relative;
         z-index: 1;
-        color: var(--color-primary, #3b82f6);
+        color: var(--color-primary, #0060aa);
     }
 
     .task-star-button {
@@ -2011,8 +2011,8 @@
     }
 
     .task-checkbox.is-checked::before {
-        border-color: var(--color-primary, #3b82f6);
-        background: var(--color-primary, #3b82f6);
+        border-color: var(--color-primary, #0060aa);
+        background: var(--color-primary, #0060aa);
     }
 
     .task-checkbox .material-symbols-outlined {

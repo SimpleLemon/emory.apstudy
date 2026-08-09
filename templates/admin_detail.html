@@ -1,23 +1,25 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8" />
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport" />
+{% extends "base.html" %}
+{% from "partials/admin_table.html" import admin_table %}
+
+{% block html_attrs %}lang="en"{% endblock %}
+
+{% block head_early %}
     <title>Admin - {{ user.name or user.id }}</title>
     <script>window.APSTUDY_THEME_PREFERENCE = "{{ theme_preference or '' }}";</script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}" />
+{% endblock %}
+
+{% block title %}{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/admin/responsive.css') }}" />
-</head>
-<body class="admin-page" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block shared_head_scripts %}{% endblock %}
+
+{% block body_attrs %} class="admin-page" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     {% include "_admin_sidebar.html" %}
     <main class="admin-shell">
         {% set display_name = user.name or user.username or "User" %}
@@ -350,8 +352,7 @@
                             <p class="admin-subtitle admin-subtitle--compact">Simple values are shown directly; structured values stay collapsed until needed.</p>
                         </div>
                     </div>
-                    {% if settings %}
-                        <table class="admin-table">
+                    {% call admin_table(settings, "No settings found.") %}
                             <thead>
                                 <tr>
                                     <th>Key</th>
@@ -393,10 +394,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No settings found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
@@ -425,8 +423,7 @@
                 </div>
                 <div class="admin-card">
                     <h2 class="admin-title">Folders</h2>
-                    {% if folders %}
-                        <table class="admin-table">
+                    {% call admin_table(folders, "No folders found.") %}
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -463,16 +460,12 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No folders found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Files</h2>
-                    {% if files %}
-                        <table class="admin-table">
+                    {% call admin_table(files, "No files found.") %}
                             <thead>
                                 <tr>
                                     <th>Filename</th>
@@ -514,10 +507,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No files found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
             </section>
         {% endif %}
@@ -536,8 +526,7 @@
                 </div>
                 <div class="admin-card">
                     <h2 class="admin-title">Note Folders</h2>
-                    {% if note_folders %}
-                        <table class="admin-table">
+                    {% call admin_table(note_folders, "No note folders found.") %}
                             <thead>
                                 <tr>
                                     <th>Name</th>
@@ -562,10 +551,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No note folders found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
@@ -679,8 +665,7 @@
                 <div class="admin-card">
                     <h2 class="admin-title">Calendar Cache</h2>
                     {% set cache_rows = section_data.calendar_cache %}
-                    {% if cache_rows %}
-                        <table class="admin-table">
+                    {% call admin_table(cache_rows, "No cached events found.") %}
                             <thead>
                                 <tr>
                                     <th>Title</th>
@@ -707,17 +692,13 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No cached events found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Calendar Preferences</h2>
                     {% set prefs = section_data.calendar_preferences %}
-                    {% if prefs %}
-                        <table class="admin-table">
+                    {% call admin_table(prefs, "No preferences found.") %}
                             <thead>
                                 <tr>
                                     <th>Calendar</th>
@@ -744,17 +725,13 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No preferences found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Calendar Sources</h2>
                     {% set sources = section_data.calendar_sources %}
-                    {% if sources %}
-                        <table class="admin-table">
+                    {% call admin_table(sources, "No sources found.") %}
                             <thead>
                                 <tr>
                                     <th>Source</th>
@@ -779,17 +756,13 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No sources found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">User Events</h2>
                     {% set events = section_data.calendar_events %}
-                    {% if events %}
-                        <table class="admin-table">
+                    {% call admin_table(events, "No user events found.") %}
                             <thead>
                                 <tr>
                                     <th>Title</th>
@@ -816,17 +789,13 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No user events found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Event Overrides</h2>
                     {% set overrides = section_data.calendar_overrides %}
-                    {% if overrides %}
-                        <table class="admin-table">
+                    {% call admin_table(overrides, "No overrides found.") %}
                             <thead>
                                 <tr>
                                     <th>Event Ref</th>
@@ -851,10 +820,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No overrides found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
             </section>
         {% endif %}
@@ -872,8 +838,7 @@
                 </div>
                 <div class="admin-card">
                     <h2 class="admin-title">Courses</h2>
-                    {% if courses %}
-                        <table class="admin-table">
+                    {% call admin_table(courses, "No courses found.") %}
                             <thead>
                                 <tr>
                                     <th>Term</th>
@@ -904,10 +869,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No courses found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
             </section>
         {% endif %}
@@ -931,8 +893,7 @@
                         <input type="hidden" name="return_to" value="{{ return_to }}" />
                         <button class="admin-button" type="submit">Disable all seat tracks</button>
                     </form>
-                    {% if tracks %}
-                        <table class="admin-table">
+                    {% call admin_table(tracks, "No seat tracks found.") %}
                             <thead>
                                 <tr>
                                     <th>Course Code</th>
@@ -961,10 +922,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No seat tracks found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
             </section>
         {% endif %}
@@ -985,8 +943,7 @@
                 <div class="admin-card">
                     <h2 class="admin-title">Chat Messages</h2>
                     <p class="admin-subtitle">Includes messages deleted by the user so abuse and spam reports can be audited.</p>
-                    {% if messages %}
-                        <table class="admin-table">
+                    {% call admin_table(messages, "No chat messages found.") %}
                             <thead>
                                 <tr>
                                     <th>Created</th>
@@ -1031,16 +988,12 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No chat messages found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Direct Message Threads</h2>
-                    {% if dm_threads %}
-                        <table class="admin-table">
+                    {% call admin_table(dm_threads, "No direct message threads found.") %}
                             <thead>
                                 <tr>
                                     <th>Thread</th>
@@ -1067,16 +1020,12 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No direct message threads found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
 
                 <div class="admin-card">
                     <h2 class="admin-title">Blocks</h2>
-                    {% if blocks %}
-                        <table class="admin-table">
+                    {% call admin_table(blocks, "No blocks found.") %}
                             <thead>
                                 <tr>
                                     <th>Blocker</th>
@@ -1101,10 +1050,7 @@
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                        </table>
-                    {% else %}
-                        <p>No blocks found.</p>
-                    {% endif %}
+                    {% endcall %}
                 </div>
             </section>
         {% endif %}
@@ -1113,9 +1059,11 @@
             {% include "partials/admin_user_invites.html" %}
         {% endif %}
     </main>
+{% endblock %}
+
+{% block body_scripts %}
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-nav.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-timezone.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/admin-delete-undo.js') }}" defer></script>
-</body>
-</html>
+{% endblock %}

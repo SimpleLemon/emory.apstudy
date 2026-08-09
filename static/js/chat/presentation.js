@@ -1,9 +1,9 @@
+import { escapeHtml } from "../core/ui-primitives-module.js";
+
 const DEFAULT_AVATAR = "data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2096%2096'%3E%3Crect%20width='96'%20height='96'%20rx='24'%20fill='%23e5e7eb'/%3E%3Ccircle%20cx='48'%20cy='35'%20r='17'%20fill='%239ca3af'/%3E%3Cpath%20d='M20%2082c4-18%2017-28%2028-28s24%2010%2028%2028'%20fill='%239ca3af'/%3E%3C/svg%3E";
 const MESSAGE_GROUP_WINDOW_MS = 7 * 60 * 1000;
 
-export function escapeHtml(value) {
-  return String(value || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-}
+export { escapeHtml };
 
 export function avatarUrl(url, size = 64) {
   const candidate = url || DEFAULT_AVATAR;

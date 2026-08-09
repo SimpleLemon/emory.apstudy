@@ -9,10 +9,7 @@ if ROOT not in sys.path:
 from appwrite_client import COLLECTIONS
 from appwrite_helpers import list_appwrite_rows_all as list_rows_all
 from services.calendar_store import CALENDAR_TABLES, init_calendar_store, upsert_calendar_row
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
+from services.row_utils import row_id as _row_id
 
 
 def migrate_table(table_id):

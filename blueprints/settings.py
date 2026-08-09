@@ -13,7 +13,6 @@ import secrets
 import logging
 import shutil
 from datetime import datetime
-from urllib.parse import urlparse, urlunparse
 
 from flask import Blueprint, render_template, request, jsonify, redirect, url_for
 from flask_login import login_required, current_user
@@ -28,7 +27,7 @@ from appwrite.services.account import Account
 from appwrite.services.storage import Storage
 from appwrite.services.users import Users
 from appwrite_client import client as appwrite_client
-from appwrite_client import COLLECTIONS, FILE_SHARE_BUCKET_ID, PROFILE_AVATAR_BUCKET_ID
+from appwrite_client import COLLECTIONS, PROFILE_AVATAR_BUCKET_ID
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
@@ -39,11 +38,20 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.atlas_client import DEFAULT_TERM
-from services.avatar_storage import build_avatar_view_url, delete_avatar_file
+from services.avatar_storage import (
+    ALLOWED_AVATAR_MIME_TYPES,
+    MAX_AVATAR_BYTES,
+    build_avatar_view_url,
+    delete_avatar_file,
+)
 from services.chat_presence import sync_chat_presence_labels_for_user
 from services.discord_audit import emit_creation_event, emit_user_event, format_actor
 from services import discord_bridge, invites
 from services.calendar_store import delete_calendar_rows_by_user
+from services.calendar_events import (
+    _normalize_canvas_calendar_url,
+    _validate_other_calendar_urls,
+)
 from services.calendar_urls import (
     MAX_OTHER_CALENDAR_URLS,
     iter_valid_other_calendar_urls as _iter_valid_other_calendar_urls,
@@ -51,8 +59,28 @@ from services.calendar_urls import (
     normalize_calendar_url as _normalize_calendar_url,
 )
 from services.user_cleanup import delete_user_data
+from services.user_profile import (
+    DEFAULT_BANNER_COLOR,
+    USERNAME_MAX_LENGTH,
+    USERNAME_MIN_LENGTH,
+    USERNAME_PATTERN,
+)
 from services.universities import school_payload
 from services.entitlements import EntitlementError, EntitlementLimitError, check_limit, entitlement_payload, request_entitlements
+from services.note_page_setup import (
+    PAGE_SETUP_COLORS as NOTES_PAGE_SETUP_COLORS,
+    PAGE_SETUP_FONT_TYPES as NOTES_PAGE_SETUP_FONT_TYPES,
+    PAGE_SETUP_MARGIN_MAX as NOTES_PAGE_SETUP_MARGIN_MAX,
+    PAGE_SETUP_MARGIN_MIN as NOTES_PAGE_SETUP_MARGIN_MIN,
+)
+from services.onboarding import (
+    save_onboarding_step_five,
+    save_onboarding_step_four,
+    save_onboarding_step_one,
+    save_onboarding_step_three,
+    save_onboarding_step_two,
+)
+from services.settings_defaults import settings_defaults as _settings_defaults_service
 
 settings_bp = Blueprint("settings", __name__)
 logger = logging.getLogger(__name__)
@@ -60,17 +88,7 @@ logger = logging.getLogger(__name__)
 CANVAS_CALENDAR_HOST_PREFIX = "canvas."
 CANVAS_CALENDAR_HOST_SUFFIX = ".edu"
 CANVAS_CALENDAR_PATH_PREFIXES = ("/feeds/calendar", "/feeds/calendars")
-DEFAULT_BANNER_COLOR = "#fecae1"
-MAX_AVATAR_BYTES = 10 * 1024 * 1024
-ALLOWED_AVATAR_MIME_TYPES = {"image/jpeg", "image/png", "image/gif", "image/webp"}
 ALLOWED_AVATAR_EXTENSIONS = {"jpg", "jpeg", "png", "gif", "webp"}
-USERNAME_MIN_LENGTH = 3
-USERNAME_MAX_LENGTH = 20
-USERNAME_PATTERN = re.compile(r"^[a-zA-Z0-9_-]+$")
-NOTES_PAGE_SETUP_COLORS = {"default", "paper", "warm", "blue", "green", "rose", "dark"}
-NOTES_PAGE_SETUP_FONT_TYPES = {"default", "sans", "display", "serif", "mono"}
-NOTES_PAGE_SETUP_MARGIN_MIN = 2
-NOTES_PAGE_SETUP_MARGIN_MAX = 18
 USERNAME_RESERVED = {
     "account",
     "admin",
@@ -147,18 +165,6 @@ def _avatar_view_url(file_id):
 
 def _delete_avatar_file(file_id):
     delete_avatar_file(file_id)
-
-
-def _delete_file_share_storage_file(file_row):
-    storage_file_id = file_row.get("storage_file_id")
-    if not storage_file_id:
-        return
-    try:
-        Storage(appwrite_client).delete_file(file_row.get("storage_bucket_id") or FILE_SHARE_BUCKET_ID, storage_file_id)
-    except AppwriteException as exc:
-        status = getattr(exc, "code", None) or getattr(exc, "response_code", None)
-        if int(status or 0) != 404:
-            logger.exception("Failed to delete shared file from Appwrite Storage")
 
 
 def _normalize_theme_value(value):
@@ -313,25 +319,7 @@ def _profile_doc_payload():
 
 
 def _settings_defaults(user_id):
-    return {
-        "user_id": user_id,
-        "ics_secret_token": secrets.token_urlsafe(32),
-        "feed_refresh_minutes": 15,
-        "preferred_calendar_view": "week",
-        "interface_theme": "obsidian-dark",
-        "theme": "dark",
-        "sidebar_default": "expanded",
-        "email_notifications": True,
-        "product_updates": True,
-        "task_sound_enabled": True,
-        "chat_sound_enabled": True,
-        "language": "en",
-        "timezone": "",
-        "dashboard_layout_json": "[]",
-        "dashboard_checklist_hidden_signature": "",
-        "notes_page_setup_json": "{}",
-        "created_at": format_datetime(datetime.utcnow()),
-    }
+    return _settings_defaults_service(user_id)
 
 
 def _settings_payload(settings):
@@ -483,81 +471,6 @@ def delete_account():
     return jsonify({"status": "ok"})
 
 
-def _normalize_canvas_calendar_url(url):
-    """Return a normalized Canvas calendar URL, or None if invalid."""
-    if not isinstance(url, str):
-        return None
-
-    raw = url.strip()
-    if not raw:
-        return None
-
-    if "://" not in raw:
-        raw = f"https://{raw}"
-
-    parsed = urlparse(raw)
-    if parsed.scheme.lower() != "https":
-        return None
-
-    host = parsed.netloc.lower()
-    if not (host.startswith(CANVAS_CALENDAR_HOST_PREFIX) and host.endswith(CANVAS_CALENDAR_HOST_SUFFIX)):
-        return None
-
-    path = parsed.path or ""
-    if not path.startswith(CANVAS_CALENDAR_PATH_PREFIXES):
-        return None
-
-    normalized_path = path.rstrip("/")
-    return urlunparse((
-        "https",
-        host,
-        normalized_path,
-        "",
-        parsed.query,
-        "",
-    ))
-
-
-def _validate_other_calendar_urls(other_urls, canvas_url):
-    """Validate optional external calendar links and prevent duplicates."""
-    if other_urls is None:
-        return []
-    if not isinstance(other_urls, list):
-        raise ValueError("other_ical_urls must be a list.")
-
-    cleaned = []
-    seen = set()
-    normalized_canvas = _normalize_calendar_url(canvas_url)
-
-    for raw in other_urls:
-        if not isinstance(raw, str):
-            raise ValueError("Each calendar URL must be a string.")
-
-        value = raw.strip()
-        if not value:
-            continue
-
-        normalized = _normalize_calendar_url(value)
-        if not normalized:
-            raise ValueError(
-                "Each optional calendar link must be a valid http(s) or webcal URL."
-            )
-
-        if normalized_canvas and normalized == normalized_canvas:
-            raise ValueError("Optional calendar links cannot duplicate the Nest Canvas calendar.")
-
-        if normalized in seen:
-            raise ValueError("Duplicate optional calendar links are not allowed.")
-
-        seen.add(normalized)
-        cleaned.append(normalized)
-
-    if len(cleaned) > MAX_OTHER_CALENDAR_URLS:
-        raise ValueError(f"You can add up to {MAX_OTHER_CALENDAR_URLS} optional calendar links.")
-
-    return cleaned
-
-
 EDUCATION_LEVELS = {
     "High School",
     "Undergraduate",
@@ -649,6 +562,16 @@ def _onboarding_context():
     }
 
 
+def _onboarding_chat_dependencies():
+    """Resolve post-onboarding chat hooks at request time for patchability."""
+    from blueprints import chat_api
+
+    return {
+        "create_welcome_dm_for_user": chat_api.create_welcome_dm_for_user,
+        "initialize_new_user_discord_read_states": chat_api.initialize_new_user_discord_read_states,
+    }
+
+
 # ── Page routes ───────────────────────────────────────────────────────────────
 
 @settings_bp.route("/onboarding")
@@ -673,287 +596,56 @@ def save_onboarding():
     step = int(payload.get("step", current_user.onboarding_step or 1))
     action = payload.get("action", "continue")
     user_id = str(current_user.id)
+    dependencies = {
+        "AppwriteException": AppwriteException,
+        "EntitlementError": EntitlementError,
+        "EntitlementLimitError": EntitlementLimitError,
+        "ID": ID,
+        "Query": Query,
+        "check_limit": check_limit,
+        "collections": COLLECTIONS,
+        "create_row_safe": create_row_safe,
+        "datetime": datetime,
+        "default_term": DEFAULT_TERM,
+        "emit_creation_event": emit_creation_event,
+        "emit_user_event": emit_user_event,
+        "format_actor": format_actor,
+        "format_datetime": format_datetime,
+        "invites": invites,
+        "jsonify": jsonify,
+        "list_rows_all": list_rows_all,
+        "logger": logger,
+        "normalize_education_level": _normalize_education_level,
+        "normalize_emory_email": _normalize_emory_email,
+        "normalize_emory_student": _normalize_emory_student,
+        "request_entitlements": request_entitlements,
+        "school_payload": school_payload,
+        "sync_chat_presence_labels_for_user": sync_chat_presence_labels_for_user,
+        "update_row_safe": update_row_safe,
+        "url_for": url_for,
+        "username_is_taken": _username_is_taken,
+        "validate_username": _validate_username,
+    }
 
     if step == 1:
-        display_name = (payload.get("display_name") or "").strip()
-        if not display_name:
-            return jsonify({"error": "Display name is required."}), 400
-
-        try:
-            username = _validate_username(payload.get("username"))
-        except ValueError as error:
-            return jsonify({"error": str(error)}), 400
-
-        if _username_is_taken(username, user_id):
-            return jsonify({"error": "That username is already taken."}), 409
-
-        next_step = max(current_user.onboarding_step or 1, 2)
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "name": display_name,
-                    "username": username,
-                    "onboarding_step": next_step,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding step")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_step = next_step
-        current_user.name = display_name
-        current_user.username = username
-        return jsonify({"status": "ok", "next_step": 2})
-
+        return save_onboarding_step_one(payload, current_user, user_id, dependencies)
     if step == 2:
-        education_level = _normalize_education_level(payload.get("education_level"))
-        if not education_level:
-            return jsonify({"error": "Select an education level before continuing."}), 400
-
-        class_year = (payload.get("class_year") or "").strip() or None
-        emory_student = _normalize_emory_student(payload.get("emory_student"))
-        emory_email = payload.get("emory_email")
-        school_updates = school_payload(None)
-
-        if education_level in {"High School", "Undergraduate"}:
-            if not class_year or len(class_year) != 4 or not class_year.isdigit():
-                return jsonify({"error": "Enter a valid 4-digit class year."}), 400
-        else:
-            class_year = None
-
-        if education_level == "Undergraduate":
-            if emory_student is None:
-                return jsonify({"error": "Select whether you are an Emory University student."}), 400
-            if emory_student:
-                try:
-                    emory_email = _normalize_emory_email(emory_email)
-                except ValueError as error:
-                    return jsonify({"error": str(error)}), 400
-                school_updates = school_payload("Emory University")
-            else:
-                emory_email = None
-                school_updates = school_payload(payload.get("school"))
-        else:
-            emory_student = None
-            emory_email = None
-
-        next_step = 3 if education_level == "Undergraduate" and emory_student else 4
-
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "education_level": education_level,
-                    "class_year": class_year,
-                    "emory_student": emory_student,
-                    "emory_email": emory_email,
-                    **school_updates,
-                    "onboarding_step": next_step,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding profile")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.education_level = education_level
-        current_user.class_year = class_year
-        current_user.emory_student = emory_student
-        current_user.emory_email = emory_email
-        current_user.school = school_updates.get("school")
-        current_user.school_key = school_updates.get("school_key")
-        current_user.school_source = school_updates.get("school_source")
-        current_user.scorecard_id = school_updates.get("scorecard_id")
-        current_user.onboarding_step = next_step
-        sync_chat_presence_labels_for_user(user_id)
-        return jsonify({"status": "ok", "next_step": next_step})
-
+        return save_onboarding_step_two(payload, current_user, user_id, dependencies)
     if step == 3:
-        if action == "add_course":
-            course_code = (payload.get("course_code") or "").strip().upper()
-            course_name = (payload.get("course_name") or "").strip() or None
-            section_number = (payload.get("section_number") or "").strip() or None
-            instructor_name = (payload.get("instructor_name") or "").strip() or None
-            term = (payload.get("term") or DEFAULT_TERM).strip() or DEFAULT_TERM
-
-            subject = (payload.get("subject") or "").strip().upper()
-            catalog = (payload.get("catalog") or "").strip()
-
-            if course_code and (not subject or not catalog):
-                parts = course_code.split()
-                if len(parts) >= 2:
-                    subject = parts[0].upper()
-                    catalog = parts[1]
-
-            if not subject or not catalog:
-                return jsonify({"error": "Course code is required."}), 400
-
-            try:
-                candidates = list_rows_all(
-                    COLLECTIONS["user_courses"],
-                    [
-                        Query.equal("user_id", [user_id]),
-                        Query.equal("term", [term]),
-                        Query.equal("subject", [subject]),
-                        Query.equal("catalog", [catalog]),
-                        Query.equal("source", ["onboarding"]),
-                    ],
-                )
-            except AppwriteException:
-                logger.exception("Failed to check onboarding course")
-                return jsonify({"error": "Unable to save course."}), 500
-
-            existing = next(
-                (doc for doc in candidates if not doc.get("crn")),
-                None,
-            )
-            if existing:
-                return jsonify({"error": "Course already added."}), 409
-
-            try:
-                entitlements = request_entitlements(current_user)
-                check_limit(entitlements, "max_saved_courses", entitlements["usage"]["saved_courses"])
-            except EntitlementLimitError as exc:
-                return jsonify(exc.payload()), 403
-            except EntitlementError:
-                logger.exception("Failed to verify onboarding course limits")
-                return jsonify({"error": "Unable to verify your course limits right now.", "code": "tier_check_unavailable"}), 503
-
-            try:
-                course = create_row_safe(
-                    COLLECTIONS["user_courses"],
-                    row_id=ID.unique(),
-                    data={
-                        "user_id": user_id,
-                        "term": term,
-                        "subject": subject,
-                        "catalog": catalog,
-                        "course_name": course_name,
-                        "section_number": section_number,
-                        "instructor_name": instructor_name,
-                        "source": "onboarding",
-                        "added_at": format_datetime(datetime.utcnow()),
-                    },
-                )
-            except AppwriteException:
-                logger.exception("Failed to add onboarding course")
-                return jsonify({"error": "Unable to save course."}), 500
-
-            try:
-                invites.record_activation(user_id, "course")
-            except Exception:
-                logger.exception("Failed to record invite activation for onboarding course")
-
-            emit_creation_event(
-                "Onboarding Course Added",
-                actor=format_actor(current_user),
-                target=f"{subject} {catalog}",
-                metadata={
-                    "page_context": "onboarding",
-                    "resource_type": "user_course",
-                    "resource_id": course.get("$id") or course.get("id"),
-                    "course_name": course_name,
-                    "section_number": section_number,
-                    "teacher": instructor_name,
-                    "term": term,
-                },
-                color="green",
-            )
-            return jsonify({
-                "status": "ok",
-                "course": {
-                    "id": course.get("$id"),
-                    "course_code": f"{subject} {catalog}",
-                    "course_name": course_name,
-                    "section_number": section_number,
-                    "instructor_name": instructor_name,
-                    "term": term,
-                },
-            }), 201
-
-        if action in {"advance", "continue", "review"}:
-            try:
-                update_row_safe(
-                    COLLECTIONS["users"],
-                    user_id,
-                    {"onboarding_step": 4},
-                )
-            except AppwriteException:
-                logger.exception("Failed to update onboarding step")
-                return jsonify({"error": "Unable to save onboarding."}), 500
-            current_user.onboarding_step = 4
-            return jsonify({"status": "ok", "next_step": 4})
-
-        if action == "complete":
-            return jsonify({"error": "Complete onboarding from the confirm step."}), 400
-
+        response = save_onboarding_step_three(
+            payload,
+            action,
+            current_user,
+            user_id,
+            dependencies,
+        )
+        if response is not None:
+            return response
     if step == 4:
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {"onboarding_step": 5},
-            )
-        except AppwriteException:
-            logger.exception("Failed to update onboarding step")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_step = 5
-        return jsonify({"status": "ok", "next_step": 5})
-
+        return save_onboarding_step_four(current_user, user_id, dependencies)
     if step == 5:
-        try:
-            update_row_safe(
-                COLLECTIONS["users"],
-                user_id,
-                {
-                    "onboarding_complete": True,
-                    "onboarding_step": 5,
-                },
-            )
-        except AppwriteException:
-            logger.exception("Failed to complete onboarding")
-            return jsonify({"error": "Unable to save onboarding."}), 500
-        current_user.onboarding_complete = True
-        current_user.onboarding_step = 5
-        from blueprints.chat_api import (
-            create_welcome_dm_for_user,
-            initialize_new_user_discord_read_states,
-        )
-
-        try:
-            initialize_new_user_discord_read_states(user_id)
-        except Exception:
-            logger.exception("Failed to initialize Discord read states after onboarding")
-        try:
-            create_welcome_dm_for_user(user_id)
-        except Exception:
-            logger.exception("Failed to create welcome DM after onboarding")
-        try:
-            invites.promote_if_activated(user_id)
-        except Exception:
-            logger.exception("Failed to promote activated invite after onboarding")
-        emit_user_event(
-            "Onboarding Complete",
-            actor=format_actor(current_user),
-            target=str(current_user.id),
-            metadata={
-                "page_context": "onboarding",
-                "resource_type": "user",
-                "resource_id": user_id,
-                "education_level": getattr(current_user, "education_level", None),
-                "class_year": getattr(current_user, "class_year", None),
-                "school": getattr(current_user, "school", None),
-                "school_key": getattr(current_user, "school_key", None),
-                "school_source": getattr(current_user, "school_source", None),
-                "scorecard_id": getattr(current_user, "scorecard_id", None),
-                "major": getattr(current_user, "major", None),
-                "graduation_year": getattr(current_user, "graduation_year", None),
-                "emory_student": getattr(current_user, "emory_student", None),
-                "emory_email": getattr(current_user, "emory_email", None),
-            },
-            color="green",
-        )
-        return jsonify({"status": "ok", "redirect_url": url_for("dashboard.dashboard")})
+        dependencies.update(_onboarding_chat_dependencies())
+        return save_onboarding_step_five(current_user, user_id, dependencies)
 
     return jsonify({"error": "Invalid onboarding step."}), 400
 
@@ -973,7 +665,7 @@ def settings_page():
                 {"created_at": format_datetime(datetime.utcnow())},
             )
         except AppwriteException:
-            logger.exception("Failed to set user created_at")
+            logger.exception("Failed to set created_at for user %s", current_user.id)
         current_user.created_at = datetime.utcnow()
 
     user_settings = _load_user_settings(str(current_user.id))
@@ -1054,7 +746,7 @@ def unlink_discord():
             },
         )
     except AppwriteException:
-        logger.exception("Failed to clear Discord link fields")
+        logger.exception("Failed to clear Discord link fields for user %s", current_user.id)
         return jsonify({"error": "Unable to unlink Discord account."}), 500
 
     current_user.discord_id = None

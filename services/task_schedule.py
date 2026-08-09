@@ -6,12 +6,10 @@ from collections import defaultdict
 from datetime import date, datetime, time, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+from services.row_utils import row_id as _row_id
+
 
 MAX_EXPANDED_OCCURRENCES = 1500
-
-
-def _row_id(row):
-    return (row.get("$id") or row.get("id")) if row else None
 
 
 def _coerce_utc(value):

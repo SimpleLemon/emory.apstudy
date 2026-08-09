@@ -1,5 +1,6 @@
 /* files/utils.js - shared File Share helpers */
 (() => {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const DEFAULT_ALLOWED_EXPIRY = [1, 3, 7, 14, 30];
 
     function normalizeExpiryConfig(config = {}) {
@@ -298,30 +299,10 @@
     }
 
     async function apiJson(url, options = {}) {
-        if (window.APStudyHttp?.fetchJson && !(options.body instanceof FormData)) {
-            return window.APStudyHttp.fetchJson(url, {
-                ...options,
-                pendingLabel: options.pendingLabel || "files-save",
-            });
-        }
-        const headers = { ...(options.headers || {}) };
-        if (options.body && !(options.body instanceof FormData) && !headers["Content-Type"]) {
-            headers["Content-Type"] = "application/json";
-        }
-        const method = String(options.method || "GET").toUpperCase();
-        const request = fetch(url, {
+        return window.APStudyHttp.fetchJson(url, {
             ...options,
-            headers,
+            pendingLabel: options.pendingLabel || "files-save",
         });
-        const response = await (method === "GET"
-            ? request
-            : window.APStudyPendingMutations?.track(request, "files-save") || request);
-        const contentType = response.headers.get("Content-Type") || "";
-        const payload = contentType.includes("application/json") ? await response.json() : null;
-        if (!response.ok) {
-            throw new Error(payload?.error || payload?.message || response.statusText || "Request failed.");
-        }
-        return payload || {};
     }
 
     function flattenFolders(allFolders) {
@@ -398,15 +379,6 @@
     function cssEscape(value) {
         if (window.CSS?.escape) return window.CSS.escape(value);
         return String(value).replace(/["\\]/g, "\\$&");
-    }
-
-    function escapeHtml(value) {
-        return String(value ?? "")
-            .replaceAll("&", "&amp;")
-            .replaceAll("<", "&lt;")
-            .replaceAll(">", "&gt;")
-            .replaceAll('"', "&quot;")
-            .replaceAll("'", "&#39;");
     }
 
     window.APStudyFilesUtils = {

@@ -202,17 +202,29 @@ Table: file_folders
 - updated_at DATETIME -> datetime attribute: updated_at
 """
 
-import os
-
 from appwrite.client import Client
 from appwrite.services.tables_db import TablesDB
+from flask import current_app, has_app_context
+
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, EnvironmentConfig, load_environment_config
+
+
+def _load_environment_config() -> EnvironmentConfig:
+	if has_app_context():
+		configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+		if configured is not None:
+			return configured
+	return load_environment_config()
+
+
+environment_config = _load_environment_config()
 
 
 client = Client()
-_endpoint = os.environ.get("APPWRITE_ENDPOINT")
-_project = os.environ.get("APPWRITE_PROJECT_ID")
-_api_key = os.environ.get("APPWRITE_API_KEY")
-_database_id = os.environ.get("APPWRITE_DATABASE_ID")
+_endpoint = environment_config.appwrite_endpoint
+_project = environment_config.appwrite_project_id
+_api_key = environment_config.appwrite_api_key
+_database_id = environment_config.appwrite_database_id_raw
 
 if _endpoint:
 	client.set_endpoint(_endpoint)
@@ -226,10 +238,10 @@ tablesdb = TablesDB(client) if _endpoint and _project else None
 DATABASE_ID = _database_id
 PROJECT_ID = _project
 ENDPOINT = _endpoint
-PROFILE_AVATAR_BUCKET_ID = os.environ.get("APPWRITE_PROFILE_AVATAR_BUCKET_ID", "profile_avatars")
-FILE_SHARE_BUCKET_ID = os.environ.get("APPWRITE_FILE_SHARE_BUCKET_ID", "file_share_files")
-NOTES_MEDIA_BUCKET_ID = os.environ.get("APPWRITE_NOTES_MEDIA_BUCKET_ID", "notes_media")
-CHAT_ATTACHMENTS_BUCKET_ID = os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID", "chat_attachments")
+PROFILE_AVATAR_BUCKET_ID = environment_config.appwrite_profile_avatar_bucket_id
+FILE_SHARE_BUCKET_ID = environment_config.appwrite_file_share_bucket_id
+NOTES_MEDIA_BUCKET_ID = environment_config.appwrite_notes_media_bucket_id
+CHAT_ATTACHMENTS_BUCKET_ID = environment_config.appwrite_chat_attachments_bucket_id
 
 COLLECTIONS = {
 	"users": "users",

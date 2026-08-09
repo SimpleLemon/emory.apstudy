@@ -9,6 +9,7 @@ from appwrite.query import Query
 
 from appwrite_client import COLLECTIONS
 from appwrite_helpers import create_row_safe, first_row, format_datetime, update_row_safe
+from services.row_utils import row_id as _row_id
 
 
 logger = logging.getLogger(__name__)
@@ -32,11 +33,6 @@ def utc_quote_date(now=None):
 
 def _quote_table():
     return COLLECTIONS["daily_quotes"]
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
-
 
 def normalize_zenquotes_payload(data):
     item = data[0] if isinstance(data, list) and data else data

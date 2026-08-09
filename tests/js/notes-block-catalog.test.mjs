@@ -70,7 +70,10 @@ test("notes image block renderer keeps image props and lazy-loads previews", asy
 });
 
 test("notes editor handles image clipboard uploads and selected-image alignment", async () => {
-    const editor = await readFile(path.join(repoRoot, "static/js/notes/editor.js"), "utf8");
+    const editor = [
+        await readFile(path.join(repoRoot, "static/js/notes/editor.js"), "utf8"),
+        await readFile(path.join(repoRoot, "static/js/notes/editor/paste.js"), "utf8"),
+    ].join("\n");
     const images = await readFile(path.join(repoRoot, "static/js/notes/editor/images.js"), "utf8");
     const runtime = await readFile(path.join(repoRoot, "static/js/notes/editor/image-runtime.js"), "utf8");
 

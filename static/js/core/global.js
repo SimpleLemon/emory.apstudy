@@ -336,23 +336,6 @@ function markClientLoggedOut() {
     }
 }
 
-function shouldEnforceAuth() {
-    if (window.location.pathname === "/login") {
-        return false;
-    }
-    const nav = document.querySelector("global.thenav");
-    if (nav && nav.hasAttribute("data-profile-picture")) {
-        return true;
-    }
-    return document.body?.dataset?.requiresAuth === "true";
-}
-
-async function ensureAppwriteSession() {
-    if (document.body?.dataset?.probeAppwriteSession !== "true" || !shouldEnforceAuth()) return;
-    if (typeof window.APStudyAppwriteSessionProbe !== "function") return;
-    await window.APStudyAppwriteSessionProbe();
-}
-
 async function runLogoutFlow() {
     window.APStudyPresenceHeartbeat?.stop?.();
     try {
@@ -360,14 +343,6 @@ async function runLogoutFlow() {
     } catch (error) {
         console.warn('Unable to revoke this browser notification subscription during logout.', error);
     }
-    if (window.account && typeof account.deleteSession === "function") {
-        try {
-            await account.deleteSession("current");
-        } catch (error) {
-            console.warn("Failed to clear Appwrite session", error);
-        }
-    }
-
     clearClientState({ includeCookies: false });
     markClientLoggedOut();
     try {
@@ -421,20 +396,34 @@ function drainServerToasts() {
 
 window.APStudyHttp = window.APStudyHttp || {
     async fetchJson(url, options = {}) {
-        const headers = { ...(options.headers || {}) };
-        if (options.body && !headers["Content-Type"]) {
+        const {
+            errorFactory = null,
+            jsonMode = "content-type",
+            pendingLabel = null,
+            ...requestOptions
+        } = options;
+        const headers = { ...(requestOptions.headers || {}) };
+        if (requestOptions.body && !headers["Content-Type"]) {
             headers["Content-Type"] = "application/json";
         }
-        const method = String(options.method || "GET").toUpperCase();
-        let request = fetch(url, { ...options, headers });
-        const pendingLabel = options.pendingLabel || null;
+        const method = String(requestOptions.method || "GET").toUpperCase();
+        let request = fetch(url, { ...requestOptions, headers });
         if (method !== "GET" && pendingLabel && window.APStudyPendingMutations?.track) {
             request = window.APStudyPendingMutations.track(request, pendingLabel);
         }
         const response = await request;
         const contentType = response.headers.get("Content-Type") || "";
-        const payload = contentType.includes("application/json") ? await response.json() : null;
+        const payload = jsonMode === "required"
+            ? await response.json()
+            : jsonMode === "optional"
+              ? await response.json().catch(() => ({}))
+              : contentType.includes("application/json")
+                ? await response.json()
+                : null;
         if (!response.ok) {
+            if (typeof errorFactory === "function") {
+                throw errorFactory(payload, response);
+            }
             const message = payload?.error || payload?.message || response.statusText || "Request failed.";
             const error = new Error(message);
             if (payload && typeof payload === "object") {
@@ -589,7 +578,6 @@ function initializePresenceHeartbeat() {
 }
 
 function initializeGlobalChrome() {
-    ensureAppwriteSession();
     drainServerToasts();
     initializePresenceHeartbeat();
     initializeTierBadgeTooltips();

@@ -1,4 +1,5 @@
 (() => {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const nav = document.querySelector("[data-landing-nav]");
     const navToggle = document.querySelector("[data-landing-nav-toggle]");
     const navMenu = document.querySelector("[data-landing-nav-menu]");
@@ -219,6 +220,7 @@
 })();
 
 (() => {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const title = document.querySelector("[data-landing-calendar-title]");
     const daysRoot = document.querySelector("[data-landing-calendar-days]");
     const eventsRoot = document.querySelector("[data-landing-calendar-events]");
@@ -246,16 +248,6 @@
         { day: 5, title: "ECS 101", time: "11:00AM-11:50AM", start: "11:00", end: "11:50", tone: "cyan" },
         { day: 6, title: "Hangout", time: "3:00PM-4:30PM", start: "15:00", end: "16:30", tone: "pink" },
     ];
-
-    function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (char) => ({
-            "&": "&amp;",
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#39;",
-        }[char]));
-    }
 
     function minutesFromMidnight(time) {
         const [hour, minute] = time.split(":").map(Number);

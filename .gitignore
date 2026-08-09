@@ -58,6 +58,15 @@ static/js/notes/dist/*
 static/js/tasks/dist/*
 !static/js/tasks/dist/task-app.js
 
+# Local-only markdown planning and handoff documents
+*.md
+REFACTOR_P_PROMPTS
+
+# The classic-script Sortable bridge is built locally from the pinned npm package.
+!static/js/vendor/dist/
+static/js/vendor/dist/*
+!static/js/vendor/dist/sortable-global.js
+
 # Testing / coverage
 .pytest_cache/
 .coverage
@@ -115,8 +124,6 @@ AGENTS.md
 AGENTS.local.md
 COMMIT_PUSH.md
 VPS_CONTEXT.md
-SIDEQUEST.md
-REFACTOR.md
 CLAUDE.local.md
 GEMINI.local.md
 DEREK.md
@@ -151,7 +158,11 @@ logs/
 
 # Local-only project files and automation
 .agents/
-.github/
+.github/*
+!.github/workflows/
+.github/workflows/*
+!.github/workflows/*.yml
+!.github/workflows/*.yaml
 codex-attention-notifier
 docs/
 .scorecard.png

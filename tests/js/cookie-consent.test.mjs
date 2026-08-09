@@ -4,10 +4,11 @@ import vm from "node:vm";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = await readFile(path.join(repoRoot, "static/js/core/cookie-consent.js"), "utf8");
-const globalStyles = `${await readFile(path.join(repoRoot, "static/css/global.css"), "utf8")}\n${await readFile(path.join(repoRoot, "static/css/core/feedback-overlays.css"), "utf8")}`;
+const globalStyles = `${await readCssSource(repoRoot, "static/css/global.css")}\n${await readFile(path.join(repoRoot, "static/css/core/feedback-overlays.css"), "utf8")}`;
 
 class FakeElement {
     constructor(tagName, document) {
@@ -100,6 +101,12 @@ function decision(choice, ageMs = 0) {
         choice,
         decidedAt: new Date(Date.now() - ageMs).toISOString(),
     });
+}
+
+function isConcreteFullPage(name, source) {
+    return name !== "base.html" && (
+        source.includes("<!DOCTYPE html>") || /\{%\s*extends\s+["']base\.html["']\s*%\}/.test(source)
+    );
 }
 
 test("public analytics stays off until an explicit choice is stored", () => {
@@ -227,7 +234,7 @@ test("full templates declare authenticated, public-choice, hybrid, or off analyt
     for (const name of templateNames) {
         const templateSource = await readFile(path.join(templateDirectory, name), "utf8");
         assert.doesNotMatch(templateSource, /googletagmanager\.com\/gtag/, `${name} must not load GA directly`);
-        if (!templateSource.includes("<!DOCTYPE html>")) continue;
+        if (!isConcreteFullPage(name, templateSource)) continue;
         if (authenticatedTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="authenticated"/);
         else if (publicTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="public-choice"/);
         else if (offTemplates.includes(name)) assert.match(templateSource, /data-analytics-mode="off"/);

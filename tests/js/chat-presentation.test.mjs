@@ -4,10 +4,10 @@ import test from 'node:test';
 
 globalThis.window = {};
 const source = await readFile(new URL('../../static/js/chat/presentation.js', import.meta.url), 'utf8');
-const presentation = await import(`data:text/javascript,${encodeURIComponent(source)}`);
+const escapeBridge = `data:text/javascript,${encodeURIComponent('export const escapeHtml = (value) => String(value);')}`;
+const presentation = await import(`data:text/javascript,${encodeURIComponent(source.replace('../core/ui-primitives-module.js', escapeBridge))}`);
 
-test('chat presentation escapes markup and groups nearby messages by author and day', () => {
-    assert.equal(presentation.escapeHtml('<b>"x"</b>'), '&lt;b&gt;&quot;x&quot;&lt;/b&gt;');
+test('chat presentation groups nearby messages by author and day', () => {
     const messages = [
         { id: '1', user_id: 'a', created_at: '2026-07-18T10:00:00Z' },
         { id: '2', user_id: 'a', created_at: '2026-07-18T10:05:00Z' },

@@ -3,13 +3,14 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = (file) => readFile(path.join(root, file), "utf8");
 
 test("full-height application shells use the shared dynamic viewport fallback", async () => {
     const files = [
-        "static/css/layout.css", "static/css/sidebar.css", "static/css/chat.css",
+        "static/css/layout.css", "static/css/chat.css",
         "static/css/onboarding.css", "static/css/courses.css", "static/css/notes.css",
         "static/css/landing.css", "static/css/landing-demos.css",
     ];
@@ -17,7 +18,7 @@ test("full-height application shells use the shared dynamic viewport fallback", 
         const css = await source(file);
         assert.match(css, /--app-viewport-height/, `${file} must use the shared viewport height`);
     }
-    const globalStyles = await source("static/css/global.css");
+    const globalStyles = await readCssSource(root, "static/css/global.css");
     assert.match(globalStyles, /--app-viewport-height:\s*100vh/);
     assert.match(globalStyles, /@supports \(height: 100dvh\)/);
     assert.match(globalStyles, /\.min-h-screen[\s\S]*var\(--app-viewport-height\)/);

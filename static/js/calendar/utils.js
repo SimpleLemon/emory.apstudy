@@ -1,4 +1,5 @@
 (function () {
+    const { escapeHtml } = window.APStudyUIPrimitives;
     const TASK_CALENDAR_ID = "local:tasks";
 
     function formatDateKey(date) {
@@ -326,10 +327,6 @@
         const rgb = hexToRgb(hex);
         if (!rgb) return `rgba(99, 102, 241, ${alpha})`;
         return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
-    }
-
-    function escapeHtml(value) {
-        return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
     }
 
     function formatMultilineText(text) {

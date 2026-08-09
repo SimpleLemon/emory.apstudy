@@ -1,4 +1,6 @@
 (function () {
+    const { escapeHtml } = window.APStudyUIPrimitives;
+
     const TILE_META = {
         calendar: {
             title: "Monthly Calendar",
@@ -90,30 +92,12 @@
     const MAX_TILES = 12;
     const MAX_DUPLICATE_TILES = 4;
 
-    function escapeHtml(value) {
-        const div = document.createElement("div");
-        div.textContent = value == null ? "" : String(value);
-        return div.innerHTML;
-    }
-
     function escapeAttr(value) {
         return escapeHtml(value).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
     }
 
     function fetchJson(url, options = {}) {
-        if (window.APStudyHttp?.fetchJson) {
-            return window.APStudyHttp.fetchJson(url, options);
-        }
-        return fetch(url, {
-            headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-            ...options,
-        }).then(async (response) => {
-            const data = await response.json().catch(() => ({}));
-            if (!response.ok) {
-                throw new Error(data.error || "Request failed");
-            }
-            return data;
-        });
+        return window.APStudyHttp.fetchJson(url, options);
     }
 
     function formatDateTime(value) {

@@ -1,12 +1,8 @@
-import hashlib
-import html
 import io
 import json
 import logging
-import os
 import re
 import secrets
-import sqlite3
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -21,6 +17,7 @@ from appwrite.query import Query
 from appwrite.role import Role
 
 from appwrite_client import COLLECTIONS
+from config import load_environment_config
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
@@ -35,6 +32,78 @@ from appwrite_helpers import (
 )
 from avatar_images import DEFAULT_AVATAR_URL
 from services.chat_formatting import extract_links, fetch_link_preview, render_markdown, url_hash
+from services.chat_read_state import (
+    ChatReadStateDependencies as _ChatReadStateDependencies,
+    clear_read_state as _clear_read_state_service,
+    latest_unread_target as _latest_unread_target_service,
+    latest_visible_message as _latest_visible_message_service,
+    initialize_new_user_discord_read_states as _initialize_new_user_discord_read_states_service,
+    mark_read as _mark_read_service,
+    mark_unread as _mark_unread_service,
+    message_can_be_unread_target as _message_can_be_unread_target_service,
+    message_for_current_user as _message_for_current_user_service,
+    message_in_scope as _message_in_scope_service,
+    message_scope_field as _message_scope_field_service,
+    message_visible_for_user as _message_visible_for_user_service,
+    persist_read_state as _persist_read_state_service,
+    previous_visible_message as _previous_visible_message_service,
+    read_key as _read_key_service,
+    read_state_for_scope as _read_state_for_scope_service,
+    unread_count as _unread_count_service,
+)
+from services.chat_threads import (
+    blocked_user_ids as _blocked_user_ids_service,
+    create_welcome_dm_for_user as _create_welcome_dm_for_user_service,
+    get_or_create_thread as _get_or_create_thread_service,
+    get_or_create_thread_between as _get_or_create_thread_between_service,
+    is_blocked_between as _is_blocked_between_service,
+    other_participant as _other_participant_service,
+    thread_accessible_by_user as _thread_accessible_by_user_service,
+    thread_for_user as _thread_for_user_service,
+    thread_key as _thread_key_service,
+    thread_participant_ids as _thread_participant_ids_service,
+)
+from services.chat_discord_formatting import (
+    DISCORD_CUSTOM_EMOJI_RE,
+    DISCORD_IMAGE_EXTENSIONS,
+    DISCORD_ROLE_MENTION_RE,
+    DISCORD_USER_MENTION_RE,
+    discord_attachment_is_image as _discord_attachment_is_image_service,
+    discord_avatar as _discord_avatar_service,
+    discord_images as _discord_images_service,
+    discord_media_json as _discord_media_json_service,
+    discord_message_external_id as _discord_message_external_id_service,
+    discord_message_payload as _discord_message_payload_service,
+    discord_message_row_id as _discord_message_row_id_service,
+    discord_previews as _discord_previews_service,
+    discord_role_mentions as _discord_role_mentions_service,
+    discord_user_mention_label as _discord_user_mention_label_service,
+    discord_user_mentions as _discord_user_mentions_service,
+    discord_mention_name as _discord_mention_name_service,
+    emoji_img as _emoji_img_service,
+    mention_span as _mention_span_service,
+    render_discord_content as _render_discord_content_service,
+)
+from services.chat_discord_sync import (
+    DiscordSyncDependencies as _DiscordSyncDependencies,
+    apply_discord_message_changes as _apply_discord_message_changes_service,
+    can_sync_discord_channel as _can_sync_discord_channel_service,
+    default_channels as _default_channels_service,
+    delete_discord_gateway_message as _delete_discord_gateway_message_service,
+    delete_discord_gateway_messages as _delete_discord_gateway_messages_service,
+    discord_channel_for_discord_id as _discord_channel_for_discord_id_service,
+    discord_message_changes as _discord_message_changes_service,
+    ensure_discord_channel as _ensure_discord_channel_service,
+    find_discord_message_row as _find_discord_message_row_service,
+    ingest_discord_gateway_message as _ingest_discord_gateway_message_service,
+    log_discord_upsert_failure as _log_discord_upsert_failure_service,
+    prune_discord_messages as _prune_discord_messages_service,
+    reconcile_discord_deletes as _reconcile_discord_deletes_service,
+    soft_delete_discord_message as _soft_delete_discord_message_service,
+    sync_discord_channel as _sync_discord_channel_service,
+    sync_discord_channels as _sync_discord_channels_service,
+    upsert_discord_message as _upsert_discord_message_service,
+)
 from services.chat_attachments import (
     AttachmentError,
     MAX_ATTACHMENTS_PER_MESSAGE,
@@ -47,6 +116,35 @@ from services.chat_attachments import (
     get_attachment,
     serialize_attachment,
 )
+from services.chat_message_delivery import (
+    AttachmentOwnershipError as _AttachmentOwnershipError,
+    AttachmentBindingError as _AttachmentBindingError,
+    AttachmentUnavailableError as _AttachmentUnavailableError,
+    ChatMessageDeliveryDependencies as _ChatMessageDeliveryDependencies,
+    DirectMessageBlockedError as _DirectMessageBlockedError,
+    DirectMessagePersistenceError as _DirectMessagePersistenceError,
+    DiscordDeliveryError as _DiscordDeliveryError,
+    MessageExpiredError as _MessageExpiredError,
+    MessageNotFoundError as _MessageNotFoundError,
+    MessageOwnershipError as _MessageOwnershipError,
+    MessagePersistenceError as _MessagePersistenceError,
+    PendingAttachmentNotFoundError as _PendingAttachmentNotFoundError,
+    attachment_scope_access as _attachment_scope_access_service,
+    cancel_pending_attachment as _cancel_pending_attachment_service,
+    can_access_attachment as _can_access_attachment_service,
+    create_chat_attachment as _create_chat_attachment_service,
+    create_direct_thread as _create_direct_thread_service,
+    delete_chat_message as _delete_chat_message_service,
+    get_message_for_current_user as _get_message_for_current_user_service,
+    list_room_messages as _list_room_messages_service,
+    list_thread_payloads as _list_thread_payloads_service,
+    list_threads_for_current_user as _list_threads_for_current_user_service,
+    read_attachment as _read_attachment_service,
+    search_direct_message_users as _search_direct_message_users_service,
+    send_channel_message as _send_channel_message_service,
+    send_direct_message as _send_direct_message_service,
+    update_block as _update_block_service,
+)
 from services.discord_bridge import (
     DiscordBridgeError,
     delete_webhook_message,
@@ -56,25 +154,88 @@ from services.discord_bridge import (
     fetch_guild_roles,
 )
 from services.discord_audit import DiscordAuditEvent, emit_audit_event, format_actor
+from services.environment_config import runtime_environment_config
 from services.chat_presence import sync_chat_presence_labels_for_user, university_presence_label
+from services.chat_presence_runtime import (
+    fresh_presence_rows as _fresh_presence_rows_service,
+    fresh_presence_rows_by_scope as _fresh_presence_rows_by_scope_service,
+    presence_cutoff as _presence_cutoff_service,
+    presence_fresh_seconds as _presence_fresh_seconds_service,
+    presence_status_from_scopes as _presence_status_from_scopes_service,
+    presence_statuses_for_users as _presence_statuses_for_users_service,
+)
+from services.chat_presence_views import (
+    fresh_chat_room_presence as _fresh_chat_room_presence_service,
+    fresh_typing_room_presence as _fresh_typing_room_presence_service,
+    online_users_for_channel as _online_users_for_channel_service,
+    presence_online_users as _presence_online_users_service,
+    presence_scope_allowed as _presence_scope_allowed_service,
+    school_key_for_user_row as _school_key_for_user_row_service,
+    upsert_presence as _upsert_presence_service,
+    user_can_access_channel_presence as _user_can_access_channel_presence_service,
+)
+from services.chat_summary_runtime import (
+    assemble_bootstrap_payload as _assemble_bootstrap_payload_service,
+    assemble_chat_summary_payload as _assemble_chat_summary_payload_service,
+    channel_payload as _channel_payload_service,
+    ensure_university_request as _ensure_university_request_service,
+    existing_visible_channels_for_summary as _existing_visible_channels_for_summary_service,
+    thread_payload as _thread_payload_service,
+    university_placeholder_channel as _university_placeholder_channel_service,
+)
+from services.chat_event_runtime import (
+    event_visible_for_user as _event_visible_for_user_service,
+    list_chat_events_after as _list_chat_events_after_service,
+    serialize_chat_event as _serialize_chat_event_service,
+)
+from services.chat_events import (
+    create_university_channel as _create_university_channel_service,
+    emit_chat_event as _emit_chat_event_service,
+)
+from services.discord_chat import register_discord_chat_handlers
 from services import invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
+from services.row_utils import row_id as _row_id
+from services.time_utils import utcnow as _now
 from services.universities import normalize_school_key, school_payload, search_universities
+from services.user_profile import (
+    DEFAULT_BANNER_COLOR,
+    is_early_member as _is_early_member,
+    is_emory_school as _is_emory_school,
+    normalize_banner_color as _normalize_banner_color,
+    profile_handle as _profile_handle,
+)
 
 
 chat_api_bp = Blueprint("chat_api", __name__)
+
+
+def _appwrite_chat_attachments_enabled():
+    return runtime_environment_config().appwrite_chat_attachments_enabled
+
+
 logger = logging.getLogger(__name__)
 
-CHAT_EVENTS_POLL_SECONDS = float(os.environ.get("CHAT_EVENTS_POLL_SECONDS", "1"))
-CHAT_EVENTS_KEEPALIVE_SECONDS = float(os.environ.get("CHAT_EVENTS_KEEPALIVE_SECONDS", "15"))
-CHAT_EVENTS_STREAM_LIMIT = int(os.environ.get("CHAT_EVENTS_STREAM_LIMIT", "50"))
-PRESENCE_CHAT_FRESH_SECONDS = int(os.environ.get("PRESENCE_CHAT_FRESH_SECONDS", "30"))
-PRESENCE_SITE_FRESH_SECONDS = int(os.environ.get("PRESENCE_SITE_FRESH_SECONDS", "180"))
-PRESENCE_TYPING_FRESH_SECONDS = int(os.environ.get("PRESENCE_TYPING_FRESH_SECONDS", "10"))
+_IMPORT_ENVIRONMENT_CONFIG = load_environment_config()
+CHAT_EVENTS_POLL_SECONDS = float(_IMPORT_ENVIRONMENT_CONFIG.chat_events_poll_seconds_raw)
+CHAT_EVENTS_KEEPALIVE_SECONDS = float(
+    _IMPORT_ENVIRONMENT_CONFIG.chat_events_keepalive_seconds_raw
+)
+CHAT_EVENTS_STREAM_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.chat_events_stream_limit_raw)
+PRESENCE_CHAT_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_chat_fresh_seconds_raw
+)
+PRESENCE_SITE_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_site_fresh_seconds_raw
+)
+PRESENCE_TYPING_FRESH_SECONDS = int(
+    _IMPORT_ENVIRONMENT_CONFIG.presence_typing_fresh_seconds_raw
+)
 PRESENCE_FRESH_SECONDS = PRESENCE_CHAT_FRESH_SECONDS
-PRESENCE_LOOKUP_LIMIT = int(os.environ.get("PRESENCE_LOOKUP_LIMIT", "200"))
-PRESENCE_ONLINE_LIMIT = int(os.environ.get("PRESENCE_ONLINE_LIMIT", "500"))
+PRESENCE_LOOKUP_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.presence_lookup_limit_raw)
+PRESENCE_ONLINE_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.presence_online_limit_raw)
+del _IMPORT_ENVIRONMENT_CONFIG
 
 _chat_event_listener_lock = threading.Lock()
 _chat_event_listeners = []
@@ -83,12 +244,6 @@ DISCORD_MESSAGE_LIMIT = 50
 MESSAGE_PAGE_SIZE = 50
 DELETE_WINDOW_SECONDS = 5 * 60
 DEFAULT_AVATAR = DEFAULT_AVATAR_URL
-DEFAULT_BANNER_COLOR = "#fecae1"
-DISCORD_IMAGE_EXTENSIONS = {".gif", ".jpeg", ".jpg", ".png", ".webp"}
-DISCORD_USER_MENTION_RE = re.compile(r"&lt;@!?(\d+)&gt;")
-DISCORD_ROLE_MENTION_RE = re.compile(r"&lt;@(?:&amp;|&)(\d+)&gt;")
-DISCORD_CUSTOM_EMOJI_RE = re.compile(r"&lt;(a?):([A-Za-z0-9_]{2,32}):(\d+)&gt;")
-DISCORD_INGEST_SECRET_ENV_KEYS = ("DISCORD_CHAT_INGEST_SECRET", "DISCORD_CHAT_SYNC_SECRET", "DISCORD_BRIDGE_SECRET")
 CHAT_MESSAGE_STRING_LIMITS = {
     "channel_id": 64,
     "thread_id": 64,
@@ -126,12 +281,61 @@ WELCOME_DM_TEXT = (
 )
 
 
-def _now():
-    return datetime.now(timezone.utc)
+def _chat_delivery_dependencies():
+    """Build delivery callbacks from blueprint symbols at request time.
 
+    Resolving these callbacks lazily keeps historical ``blueprints.chat_api``
+    patch targets effective for both registered-route and direct route tests.
+    """
 
-def _row_id(row):
-    return row.get("$id") or row.get("id")
+    return _ChatMessageDeliveryDependencies(
+        collections=COLLECTIONS,
+        appwrite_exception=AppwriteException,
+        attachment_error=AttachmentError,
+        current_user_fn=lambda: current_user,
+        current_user_id_fn=_current_user_id,
+        message_media_payload_fn=_message_media_payload,
+        previews_for_content_fn=_previews_for_content,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        render_markdown_fn=render_markdown,
+        row_id_fn=_row_id,
+        get_row_fn=get_row_safe,
+        create_row_fn=create_row_safe,
+        insert_row_ignore_fn=insert_row_ignore_safe,
+        update_row_fn=update_row_safe,
+        delete_row_fn=delete_row_safe,
+        id_unique_fn=ID.unique,
+        get_attachment_fn=get_attachment,
+        attachment_bytes_fn=attachment_bytes,
+        bind_pending_fn=bind_pending,
+        delete_message_attachments_fn=delete_message_attachments,
+        emit_chat_event_fn=emit_chat_event,
+        serialize_message_fn=_serialize_message,
+        discord_external_id_fn=_discord_message_external_id,
+        discord_row_id_fn=_discord_message_row_id,
+        find_discord_message_row_fn=_find_discord_message_row,
+        prune_discord_fn=_prune_discord_messages,
+        execute_chat_webhook_fn=execute_chat_webhook,
+        delete_webhook_message_fn=delete_webhook_message,
+        notification_fn=notifications.notify,
+        invite_activation_fn=invites.record_activation,
+        first_row_fn=first_row,
+        query_cls=Query,
+        users_collection=COLLECTIONS["users"],
+        thread_participant_ids_fn=_thread_participant_ids,
+        thread_for_user_fn=_thread_for_user,
+        other_participant_fn=_other_participant,
+        is_blocked_between_fn=_is_blocked_between,
+        threads_for_current_user_fn=_threads_for_current_user,
+        logger=logger,
+        attachment_download_url_fn=lambda attachment_id: (
+            f"{request.url_root.rstrip('/')}/api/chat/attachments/{attachment_id}/download"
+        ),
+        delete_window_seconds=DELETE_WINDOW_SECONDS,
+        message_timestamp_fn=_message_timestamp,
+        audit_delete_fn=_emit_chat_delete_audit,
+    )
 
 
 def _bounded_string(value, limit, *, empty_as_none=False):
@@ -189,263 +393,140 @@ def _presence_scope(scope_type, scope_id):
 
 
 def _presence_cutoff(seconds=PRESENCE_FRESH_SECONDS):
-    return format_datetime(_now() - timedelta(seconds=seconds))
+    return _presence_cutoff_service(
+        seconds,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+    )
 
 
 def _presence_fresh_seconds(scope_type):
-    scope = str(scope_type or "")
-    if scope == "site":
-        return PRESENCE_SITE_FRESH_SECONDS
-    if scope in {"typing_channel", "typing_thread"}:
-        return PRESENCE_TYPING_FRESH_SECONDS
-    return PRESENCE_CHAT_FRESH_SECONDS
+    return _presence_fresh_seconds_service(
+        scope_type,
+        chat_fresh_seconds=PRESENCE_CHAT_FRESH_SECONDS,
+        site_fresh_seconds=PRESENCE_SITE_FRESH_SECONDS,
+        typing_fresh_seconds=PRESENCE_TYPING_FRESH_SECONDS,
+    )
 
 
 def _presence_status_from_scopes(scopes):
-    values = {str(scope or "") for scope in scopes}
-    if "chat" in values:
-        return "active"
-    if "site" in values:
-        return "busy"
-    return "offline"
+    return _presence_status_from_scopes_service(scopes)
 
 
 def _fresh_presence_rows(scope_types=None, *, user_ids=None, seconds=PRESENCE_FRESH_SECONDS, limit=1000):
-    queries = [
-        Query.greater_than_equal("last_seen_at", _presence_cutoff(seconds)),
-        Query.order_desc("last_seen_at"),
-        Query.limit(limit),
-    ]
-    if scope_types:
-        queries.insert(0, Query.equal("scope_type", [str(value) for value in scope_types if value]))
-    if user_ids:
-        queries.insert(0, Query.equal("user_id", [str(value) for value in user_ids if value]))
-    try:
-        return list_rows_safe(COLLECTIONS["chat_presence"], queries).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to list fresh presence rows")
-        return []
+    return _fresh_presence_rows_service(
+        scope_types,
+        user_ids=user_ids,
+        seconds=seconds,
+        limit=limit,
+        cutoff_fn=_presence_cutoff,
+        query_cls=Query,
+        list_rows_fn=list_rows_safe,
+        presence_collection=COLLECTIONS["chat_presence"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _fresh_presence_rows_by_scope(scope_types, *, user_ids=None, limit=1000):
-    rows = []
-    seen = set()
-    for scope_type in scope_types or []:
-        scope = str(scope_type or "").strip()
-        if not scope:
-            continue
-        scoped_rows = _fresh_presence_rows(
-            [scope],
-            user_ids=user_ids,
-            seconds=_presence_fresh_seconds(scope),
-            limit=limit,
-        )
-        for row in scoped_rows:
-            key = _row_id(row) or row.get("presence_key") or (
-                row.get("user_id"),
-                row.get("scope_type"),
-                row.get("scope_id"),
-                row.get("last_seen_at"),
-            )
-            if key in seen:
-                continue
-            seen.add(key)
-            rows.append(row)
-    rows.sort(key=lambda row: row.get("last_seen_at") or "", reverse=True)
-    return rows[:limit]
+    return _fresh_presence_rows_by_scope_service(
+        scope_types,
+        user_ids=user_ids,
+        limit=limit,
+        fresh_presence_rows_fn=_fresh_presence_rows,
+        presence_fresh_seconds_fn=_presence_fresh_seconds,
+        row_id_fn=_row_id,
+    )
 
 
 def _presence_statuses_for_users(user_ids):
-    ordered_ids = []
-    for value in user_ids or []:
-        user_id = str(value or "").strip()
-        if user_id and user_id not in ordered_ids:
-            ordered_ids.append(user_id)
-        if len(ordered_ids) >= PRESENCE_LOOKUP_LIMIT:
-            break
-    statuses = {user_id: "offline" for user_id in ordered_ids}
-    if not ordered_ids:
-        return statuses
-    scopes_by_user = {user_id: set() for user_id in ordered_ids}
-    rows = _fresh_presence_rows_by_scope(["chat", "site"], user_ids=ordered_ids, limit=max(len(ordered_ids) * 4, 20))
-    for row in rows:
-        user_id = str(row.get("user_id") or "")
-        if user_id in scopes_by_user:
-            scopes_by_user[user_id].add(row.get("scope_type"))
-    for user_id, scopes in scopes_by_user.items():
-        statuses[user_id] = _presence_status_from_scopes(scopes)
-    try:
-        from services.focus_mode import active_focus_user_ids
-        for user_id in active_focus_user_ids(ordered_ids):
-            statuses[user_id] = "focus"
-    except sqlite3.OperationalError:
-        pass
-    return statuses
+    return _presence_statuses_for_users_service(
+        user_ids,
+        lookup_limit=PRESENCE_LOOKUP_LIMIT,
+        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        presence_status_from_scopes_fn=_presence_status_from_scopes,
+    )
+
+
+def _presence_focus_user_ids():
+    from services.focus_mode import active_focus_user_ids
+
+    return active_focus_user_ids()
 
 
 def _presence_online_users():
-    rows = _fresh_presence_rows_by_scope(
-        ["site", "chat", "typing_channel", "typing_thread"],
-        limit=PRESENCE_ONLINE_LIMIT * 8,
+    return _presence_online_users_service(
+        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        presence_online_limit=PRESENCE_ONLINE_LIMIT,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+        public_user_fn=_public_user,
+        presence_status_from_scopes_fn=_presence_status_from_scopes,
+        focus_user_ids_fn=_presence_focus_user_ids,
     )
-    scopes_by_user = {}
-    chat_scopes_by_user = {}
-    typing_channels_by_user = {}
-    typing_threads_by_user = {}
-    latest_by_user = {}
-    for row in rows:
-        user_id = str(row.get("user_id") or "")
-        if not user_id:
-            continue
-        scope_type = str(row.get("scope_type") or "")
-        scope_id = str(row.get("scope_id") or "")
-        if scope_type in {"site", "chat"}:
-            scopes_by_user.setdefault(user_id, set()).add(scope_type)
-        if scope_type == "chat" and scope_id and scope_id != "global":
-            chat_scopes_by_user.setdefault(user_id, set()).add(scope_id)
-        elif scope_type == "typing_channel" and scope_id:
-            typing_channels_by_user.setdefault(user_id, set()).add(scope_id)
-        elif scope_type == "typing_thread" and scope_id:
-            typing_threads_by_user.setdefault(user_id, set()).add(scope_id)
-        latest = row.get("last_seen_at") or ""
-        if latest > latest_by_user.get(user_id, ""):
-            latest_by_user[user_id] = latest
-    try:
-        from services.focus_mode import active_focus_user_ids
-        focus_user_ids = active_focus_user_ids()
-        for user_id in focus_user_ids:
-            scopes_by_user.setdefault(user_id, {"site"})
-    except sqlite3.OperationalError:
-        focus_user_ids = set()
-    users = []
-    for user_id, scopes in scopes_by_user.items():
-        try:
-            user = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
-        except AppwriteException:
-            logger.exception("Failed to resolve online user %s", user_id)
-            continue
-        public_user = _public_user(user)
-        if not public_user:
-            continue
-        public_user["presence_status"] = "focus" if user_id in focus_user_ids else _presence_status_from_scopes(scopes)
-        public_user["online"] = public_user["presence_status"] != "offline"
-        public_user["last_seen_at"] = latest_by_user.get(user_id)
-        public_user["active_chat_scopes"] = sorted(chat_scopes_by_user.get(user_id, set()))
-        public_user["typing_channel_ids"] = sorted(typing_channels_by_user.get(user_id, set()))
-        public_user["typing_thread_ids"] = sorted(typing_threads_by_user.get(user_id, set()))
-        users.append(public_user)
-    users.sort(key=lambda user: (user.get("presence_status") != "active", user.get("name") or ""))
-    return users[:PRESENCE_ONLINE_LIMIT]
 
 
 def _fresh_chat_room_presence(scope_type, scope_id):
-    rows = _fresh_presence_rows([scope_type], seconds=_presence_fresh_seconds(scope_type), limit=1000)
-    users = []
-    seen = set()
-    for row in rows:
-        if str(row.get("scope_id") or "") != str(scope_id or ""):
-            continue
-        user_id = str(row.get("user_id") or "")
-        if not user_id or user_id in seen:
-            continue
-        seen.add(user_id)
-        try:
-            user = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
-        except AppwriteException:
-            logger.exception("Failed to resolve room presence user %s", user_id)
-            continue
-        public_user = _public_user(user)
-        if public_user:
-            public_user["presence_status"] = "active"
-            public_user["online"] = True
-            users.append(public_user)
-    statuses = _presence_statuses_for_users([user["id"] for user in users])
-    for user in users:
-        user["presence_status"] = statuses.get(user["id"], "active")
-    users.sort(key=lambda user: user.get("name") or "")
-    return users
+    return _fresh_chat_room_presence_service(
+        scope_type,
+        scope_id,
+        fresh_presence_rows_fn=_fresh_presence_rows,
+        presence_fresh_seconds_fn=_presence_fresh_seconds,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+        public_user_fn=_public_user,
+        presence_statuses_for_users_fn=_presence_statuses_for_users,
+    )
 
 
 def _fresh_typing_room_presence(scope_type, scope_id):
-    rows = _fresh_presence_rows([scope_type], seconds=_presence_fresh_seconds(scope_type), limit=1000)
-    users = []
-    seen = set()
-    typing_user_ids = []
-    for row in rows:
-        if str(row.get("scope_id") or "") != str(scope_id or ""):
-            continue
-        user_id = str(row.get("user_id") or "")
-        if not user_id or user_id in seen or user_id == _current_user_id():
-            continue
-        seen.add(user_id)
-        typing_user_ids.append(user_id)
-        try:
-            user = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
-        except AppwriteException:
-            logger.exception("Failed to resolve typing presence user %s", user_id)
-            continue
-        public_user = _public_user(user)
-        if public_user:
-            if scope_type == "typing_channel":
-                public_user["typing_channel_ids"] = [str(scope_id)]
-            else:
-                public_user["typing_thread_ids"] = [str(scope_id)]
-            users.append(public_user)
-    statuses = _presence_statuses_for_users(typing_user_ids)
-    for user in users:
-        user["presence_status"] = statuses.get(user["id"], "offline")
-        user["online"] = user["presence_status"] != "offline"
-    users.sort(key=lambda user: user.get("name") or "")
-    return users
+    return _fresh_typing_room_presence_service(
+        scope_type,
+        scope_id,
+        fresh_presence_rows_fn=_fresh_presence_rows,
+        presence_fresh_seconds_fn=_presence_fresh_seconds,
+        current_user_id_fn=_current_user_id,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+        public_user_fn=_public_user,
+        presence_statuses_for_users_fn=_presence_statuses_for_users,
+    )
 
 
 def _school_key_for_user_row(user):
-    if not user:
-        return ""
-    return user.get("school_key") or school_payload(user.get("school")).get("school_key") or ""
+    return _school_key_for_user_row_service(
+        user,
+        school_payload_fn=school_payload,
+    )
 
 
 def _user_can_access_channel_presence(channel, user):
-    if not channel or not user:
-        return False
-    if channel.get("kind") == "discord":
-        return True
-    if channel.get("kind") == "university":
-        return bool(channel.get("approved")) and _school_key_for_user_row(user) == channel.get("school_key")
-    return False
+    return _user_can_access_channel_presence_service(
+        channel,
+        user,
+        school_key_for_user_row_fn=_school_key_for_user_row,
+    )
 
 
 def _online_users_for_channel(channel):
-    rows = _fresh_presence_rows_by_scope(["chat", "site"], limit=PRESENCE_ONLINE_LIMIT * 4)
-    scopes_by_user = {}
-    latest_by_user = {}
-    for row in rows:
-        user_id = str(row.get("user_id") or "")
-        if not user_id:
-            continue
-        scopes_by_user.setdefault(user_id, set()).add(row.get("scope_type"))
-        latest = row.get("last_seen_at") or ""
-        if latest > latest_by_user.get(user_id, ""):
-            latest_by_user[user_id] = latest
-
-    users = []
-    for user_id, scopes in scopes_by_user.items():
-        try:
-            user = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
-        except AppwriteException:
-            logger.exception("Failed to resolve channel online user %s", user_id)
-            continue
-        if not _user_can_access_channel_presence(channel, user):
-            continue
-        public_user = _public_user(user)
-        if not public_user:
-            continue
-        public_user["presence_status"] = _presence_status_from_scopes(scopes)
-        public_user["online"] = public_user["presence_status"] != "offline"
-        public_user["last_seen_at"] = latest_by_user.get(user_id)
-        users.append(public_user)
-    users.sort(key=lambda user: (user.get("presence_status") != "active", user.get("name") or ""))
-    return users[:PRESENCE_ONLINE_LIMIT]
+    return _online_users_for_channel_service(
+        channel,
+        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        presence_online_limit=PRESENCE_ONLINE_LIMIT,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+        user_can_access_channel_presence_fn=_user_can_access_channel_presence,
+        public_user_fn=_public_user,
+        presence_status_from_scopes_fn=_presence_status_from_scopes,
+    )
 
 
 def _event_read_permissions(scope_type, *, channel=None, readable_user_ids=None):
@@ -467,110 +548,78 @@ def _notify_chat_event_waiters():
 
 
 def _thread_accessible_by_user(thread_id, user_id):
-    thread = get_row_safe(COLLECTIONS["chat_dm_threads"], thread_id, allow_missing=True)
-    if not thread:
-        return False
-    return user_id in {thread.get("participant_a"), thread.get("participant_b")}
+    return _thread_accessible_by_user_service(
+        thread_id,
+        user_id,
+        get_row_fn=get_row_safe,
+        threads_collection=COLLECTIONS["chat_dm_threads"],
+    )
 
 
 def _event_visible_for_user(event):
-    scope_type = (event or {}).get("scope_type")
-    scope_id = (event or {}).get("scope_id")
-    if not scope_type or not scope_id:
-        return False
-    user_id = _current_user_id()
-    if scope_type == "channel":
-        channel = get_row_safe(COLLECTIONS["chat_channels"], scope_id, allow_missing=True)
-        return _can_access_channel(channel)
-    if scope_type == "thread":
-        return _thread_accessible_by_user(scope_id, user_id)
-    if scope_type == "university":
-        school = school_payload(current_user.school)
-        user_school_key = school.get("school_key") or getattr(current_user, "school_key", None)
-        return bool(user_school_key) and user_school_key == scope_id
-    return False
+    return _event_visible_for_user_service(
+        event,
+        current_user_fn=lambda: current_user,
+        current_user_id_fn=_current_user_id,
+        get_row_fn=get_row_safe,
+        channels_collection=COLLECTIONS["chat_channels"],
+        can_access_channel_fn=_can_access_channel,
+        thread_accessible_by_user_fn=_thread_accessible_by_user,
+        school_payload_fn=school_payload,
+    )
 
 
 def _serialize_chat_event(row):
-    event_id = _row_id(row)
-    return {
-        "$id": event_id,
-        "id": event_id,
-        "scope_type": row.get("scope_type"),
-        "scope_id": row.get("scope_id"),
-        "event_type": row.get("event_type"),
-        "message_id": row.get("message_id"),
-        "thread_id": row.get("thread_id"),
-        "channel_id": row.get("channel_id"),
-        "actor_id": row.get("actor_id"),
-        "created_at": row.get("created_at"),
-    }
+    return _serialize_chat_event_service(row, row_id_fn=_row_id)
 
 
 def _list_chat_events_after(since=None, after_id=None, *, limit=CHAT_EVENTS_STREAM_LIMIT):
-    queries = [Query.order_asc("created_at"), Query.order_asc("$id"), Query.limit(limit)]
-    if since:
-        queries.insert(0, Query.greater_than_equal("created_at", since))
-    try:
-        rows = list_rows_safe(COLLECTIONS["chat_events"], queries).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to list chat events")
-        return []
-    visible = []
-    for row in rows:
-        row_id = _row_id(row)
-        if since and after_id and row.get("created_at") == since and row_id == after_id:
-            continue
-        if not _event_visible_for_user(row):
-            continue
-        visible.append(row)
-    return visible
+    return _list_chat_events_after_service(
+        since,
+        after_id,
+        limit=limit,
+        query_cls=Query,
+        list_rows_fn=list_rows_safe,
+        events_collection=COLLECTIONS["chat_events"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+        event_visible_for_user_fn=_event_visible_for_user,
+        row_id_fn=_row_id,
+    )
 
 
 def _presence_scope_allowed(scope_type, scope_id):
-    if scope_type == "site":
-        return scope_id == "global"
-    if scope_type == "chat":
-        if scope_id == "global":
-            return True
-        channel = get_row_safe(COLLECTIONS["chat_channels"], scope_id, allow_missing=True)
-        if _can_access_channel(channel):
-            return True
-        return bool(_thread_for_user(scope_id))
-    if scope_type == "typing_channel":
-        channel = get_row_safe(COLLECTIONS["chat_channels"], scope_id, allow_missing=True)
-        return bool(_can_access_channel(channel) and not channel.get("read_only"))
-    if scope_type == "typing_thread":
-        thread = _thread_for_user(scope_id)
-        if not thread:
-            return False
-        other = _other_participant(thread)
-        return bool(other and not _is_blocked_between(_current_user_id(), _row_id(other)))
-    return False
+    return _presence_scope_allowed_service(
+        scope_type,
+        scope_id,
+        get_row_fn=get_row_safe,
+        channels_collection=COLLECTIONS["chat_channels"],
+        can_access_channel_fn=_can_access_channel,
+        thread_for_user_fn=_thread_for_user,
+        other_participant_fn=_other_participant,
+        is_blocked_between_fn=_is_blocked_between,
+        current_user_id_fn=_current_user_id,
+        row_id_fn=_row_id,
+    )
 
 
 def _upsert_presence(scope_type, scope_id, tab_id):
-    user_id = _current_user_id()
-    scope_type = str(scope_type or "").strip()
-    scope_id = str(scope_id or "").strip() or "global"
-    tab_id = re.sub(r"[^A-Za-z0-9_-]", "", str(tab_id or "").strip())[:64] or "default"
-    if scope_type not in {"site", "chat", "typing_channel", "typing_thread"}:
-        raise ValueError("Unsupported presence scope.")
-    if not _presence_scope_allowed(scope_type, scope_id):
-        raise PermissionError("Presence scope unavailable.")
-    now = format_datetime(_now())
-    presence_key = f"{user_id}:{scope_type}:{scope_id}:{tab_id}"
-    payload = {
-        "user_id": user_id,
-        "scope_type": scope_type,
-        "scope_id": scope_id,
-        "presence_key": presence_key,
-        "last_seen_at": now,
-    }
-    existing = first_row(COLLECTIONS["chat_presence"], [Query.equal("presence_key", [presence_key])])
-    if existing:
-        return update_row_safe(COLLECTIONS["chat_presence"], _row_id(existing), payload)
-    return create_row_safe(COLLECTIONS["chat_presence"], row_id=ID.unique(), data=payload)
+    return _upsert_presence_service(
+        scope_type,
+        scope_id,
+        tab_id,
+        current_user_id_fn=_current_user_id,
+        presence_scope_allowed_fn=_presence_scope_allowed,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        presence_collection=COLLECTIONS["chat_presence"],
+        query_cls=Query,
+        first_row_fn=first_row,
+        update_row_fn=update_row_safe,
+        create_row_fn=create_row_safe,
+        id_unique_fn=ID.unique,
+        row_id_fn=_row_id,
+    )
 
 
 def emit_chat_event(
@@ -585,37 +634,23 @@ def emit_chat_event(
     readable_user_ids=None,
     channel=None,
 ):
-    if not scope_type or not scope_id or not event_type:
-        return None
-    now = format_datetime(_now())
-    event_id = ID.unique()
-    data = {
-        "scope_type": str(scope_type),
-        "scope_id": str(scope_id),
-        "event_type": str(event_type),
-        "message_id": str(message_id) if message_id else None,
-        "thread_id": str(thread_id) if thread_id else None,
-        "channel_id": str(channel_id) if channel_id else None,
-        "actor_id": str(actor_id) if actor_id else None,
-        "created_at": now,
-    }
-    permissions = _event_read_permissions(
+    return _emit_chat_event_service(
         scope_type,
-        channel=channel,
+        scope_id,
+        event_type,
+        message_id=message_id,
+        thread_id=thread_id,
+        channel_id=channel_id,
+        actor_id=actor_id,
         readable_user_ids=readable_user_ids,
+        channel=channel,
+        now_fn=_now,
+        id_fn=ID.unique,
+        create_row_fn=create_row_safe,
+        event_read_permissions_fn=_event_read_permissions,
+        notify_fn=_notify_chat_event_waiters,
+        error_logger=logger,
     )
-    try:
-        row = create_row_safe(
-            COLLECTIONS["chat_events"],
-            row_id=event_id,
-            data=data,
-            permissions=permissions,
-        )
-    except AppwriteException:
-        logger.exception("Failed to emit chat event to SQLite")
-        return None
-    _notify_chat_event_waiters()
-    return row
 
 
 def _message_timestamp(row):
@@ -630,42 +665,6 @@ def _format_member_since(value):
     if parsed:
         return parsed.strftime("%b %d, %Y")
     return str(value) if value else ""
-
-
-def _normalize_banner_color(value):
-    if not isinstance(value, str):
-        return DEFAULT_BANNER_COLOR
-    normalized = value.strip()
-    if not normalized.startswith("#"):
-        normalized = f"#{normalized}"
-    if len(normalized) != 7:
-        return DEFAULT_BANNER_COLOR
-    try:
-        int(normalized[1:], 16)
-    except ValueError:
-        return DEFAULT_BANNER_COLOR
-    return normalized.lower()
-
-
-def _profile_handle(name, user_id, username=None):
-    if username:
-        return f"@{username}"
-    base = "".join(char.lower() if char.isalnum() else "-" for char in (name or "")).strip("-")
-    base = "-".join(part for part in base.split("-") if part)
-    return f"@{base or user_id or 'apstudy-user'}"
-
-
-def _is_emory_school(value):
-    return str(value or "").strip().lower() in {"emory", "emory university"}
-
-
-def _is_early_member(value):
-    created_at = parse_datetime(value)
-    if not created_at:
-        return False
-    if created_at.tzinfo is not None:
-        created_at = created_at.replace(tzinfo=None)
-    return created_at < datetime(2026, 8, 20)
 
 
 def _public_user(row):
@@ -728,53 +727,64 @@ def _settings_payload():
     }
 
 
+def _discord_sync_dependencies():
+    return _DiscordSyncDependencies(
+        collections=COLLECTIONS,
+        appwrite_exception=AppwriteException,
+        query_cls=Query,
+        id_unique_fn=ID.unique,
+        row_id_fn=_row_id,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        parse_datetime_fn=parse_datetime,
+        message_timestamp_fn=_message_timestamp,
+        runtime_environment_config_fn=runtime_environment_config,
+        default_channels_fn=_default_channels,
+        get_row_fn=get_row_safe,
+        first_row_fn=first_row,
+        create_row_fn=create_row_safe,
+        insert_row_ignore_fn=insert_row_ignore_safe,
+        update_row_fn=update_row_safe,
+        delete_row_fn=delete_row_safe,
+        list_rows_all_fn=list_rows_all,
+        emit_chat_event_fn=emit_chat_event,
+        delete_message_attachments_fn=delete_message_attachments,
+        fetch_channel_messages_fn=fetch_channel_messages,
+        ensure_discord_channel_fn=_ensure_discord_channel,
+        discord_message_payload_fn=_discord_message_payload,
+        discord_message_row_id_fn=_discord_message_row_id,
+        discord_message_external_id_fn=_discord_message_external_id,
+        discord_message_changes_fn=_discord_message_changes,
+        find_discord_message_row_fn=_find_discord_message_row,
+        apply_discord_message_changes_fn=_apply_discord_message_changes,
+        upsert_discord_message_fn=_upsert_discord_message,
+        log_discord_upsert_failure_fn=_log_discord_upsert_failure,
+        soft_delete_discord_message_fn=_soft_delete_discord_message,
+        reconcile_discord_deletes_fn=_reconcile_discord_deletes,
+        sync_discord_channel_fn=_sync_discord_channel,
+        delete_discord_gateway_message_fn=delete_discord_gateway_message,
+        can_sync_discord_channel_fn=_can_sync_discord_channel,
+        discord_channel_for_discord_id_fn=_discord_channel_for_discord_id,
+        prune_discord_messages_fn=_prune_discord_messages,
+        logger=logger,
+        discord_message_limit=DISCORD_MESSAGE_LIMIT,
+        partial_create_required_fields=DISCORD_PARTIAL_CREATE_REQUIRED_FIELDS,
+    )
+
+
 def _ensure_discord_channel(row_id, name, label, channel_id, read_only):
-    now = format_datetime(_now())
-    existing = get_row_safe(COLLECTIONS["chat_channels"], row_id, allow_missing=True)
-    stable_payload = {
-        "kind": "discord",
-        "name": name,
-        "label": label,
-        "section": "nest",
-        "discord_channel_id": channel_id,
-        "read_only": read_only,
-        "approved": True,
-    }
-    if existing:
-        if all(existing.get(key) == value for key, value in stable_payload.items()):
-            return existing
-        return update_row_safe(COLLECTIONS["chat_channels"], row_id, {**stable_payload, "updated_at": now})
-    return create_row_safe(
-        COLLECTIONS["chat_channels"],
-        row_id=row_id,
-        data={**stable_payload, "created_at": now, "updated_at": now},
+    return _ensure_discord_channel_service(
+        row_id,
+        name,
+        label,
+        channel_id,
+        read_only,
+        dependencies=_discord_sync_dependencies(),
     )
 
 
 def _default_channels():
-    channels = []
-    announcements_id = (os.environ.get("DISCORD_ANNOUNCEMENTS_CHANNEL_ID") or "").strip()
-    chat_id = (os.environ.get("DISCORD_CHAT_CHANNEL_ID") or "").strip()
-    try:
-        if announcements_id:
-            channels.append(_ensure_discord_channel(
-                "nest_announcements",
-                "nest-announcements",
-                "Nest Announcements",
-                announcements_id,
-                True,
-            ))
-        if chat_id:
-            channels.append(_ensure_discord_channel(
-                "nest_chat",
-                "chat",
-                "Chat",
-                chat_id,
-                False,
-            ))
-    except AppwriteException:
-        logger.exception("Failed to ensure default chat channels")
-    return channels
+    return _default_channels_service(dependencies=_discord_sync_dependencies())
 
 
 def _university_channel_id(school_key):
@@ -795,129 +805,57 @@ def _find_university_channel(school_key):
 
 
 def create_university_channel(school_key, school_name):
-    now = format_datetime(_now())
-    channel_id = _university_channel_id(school_key)
-    existing = get_row_safe(COLLECTIONS["chat_channels"], channel_id, allow_missing=True)
-    payload = {
-        "kind": "university",
-        "name": school_name or "University",
-        "label": school_name or "University",
-        "section": "nest",
-        "school_key": school_key,
-        "school_name": school_name,
-        "read_only": False,
-        "approved": True,
-        "updated_at": now,
-    }
-    if existing:
-        return update_row_safe(COLLECTIONS["chat_channels"], channel_id, payload)
-    return create_row_safe(
-        COLLECTIONS["chat_channels"],
-        row_id=channel_id,
-        data={**payload, "created_at": now},
+    return _create_university_channel_service(
+        school_key,
+        school_name,
+        now_fn=_now,
+        normalize_school_key_fn=normalize_school_key,
+        get_row_fn=get_row_safe,
+        create_row_fn=create_row_safe,
+        update_row_fn=update_row_safe,
     )
 
 
 def _university_placeholder_channel(school_key, school_name, status):
-    if not school_key or not school_name:
-        return None
-    return {
-        "$id": _university_channel_id(school_key),
-        "kind": "university",
-        "name": school_name,
-        "label": school_name,
-        "section": "nest",
-        "school_key": school_key,
-        "school_name": school_name,
-        "read_only": True,
-        "approved": False,
-        "university_status": status,
-        "created_at": format_datetime(_now()),
-        "updated_at": format_datetime(_now()),
-    }
+    return _university_placeholder_channel_service(
+        school_key,
+        school_name,
+        status,
+        channel_id_fn=_university_channel_id,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+    )
 
 
 def _ensure_university_request():
-    school = school_payload(current_user.school)
-    school_key = school.get("school_key") or getattr(current_user, "school_key", None)
-    school_name = school.get("school") or current_user.school
-    if not school_key or not school_name:
-        return {"status": "none", "channel": None, "request": None}
-
-    try:
-        channel = _find_university_channel(school_key)
-        if channel:
-            return {"status": "approved", "channel": channel, "request": None}
-
-        request_row = first_row(
-            COLLECTIONS["admin_requests"],
-            [
-                Query.equal("request_type", ["uni_channel_approval"]),
-                Query.equal("school_key", [school_key]),
-            ],
-        )
-        if request_row and request_row.get("status") == "approved":
-            channel = create_university_channel(school_key, school_name)
-            return {"status": "approved", "channel": channel, "request": request_row}
-        if request_row:
-            status = request_row.get("status") or "pending"
-            return {
-                "status": status,
-                "channel": _university_placeholder_channel(school_key, school_name, status),
-                "request": request_row,
-            }
-
-        now = format_datetime(_now())
-        request_row = create_row_safe(
-            COLLECTIONS["admin_requests"],
-            row_id=ID.unique(),
-            data={
-                "request_type": "uni_channel_approval",
-                "label": "[Uni Channel Approval]",
-                "status": "pending",
-                "school_key": school_key,
-                "school_name": school_name,
-                "requested_by": _current_user_id(),
-                "request_count": 1,
-                "last_requested_at": now,
-                "created_at": now,
-                "updated_at": now,
-            },
-        )
-        return {
-            "status": "pending",
-            "channel": _university_placeholder_channel(school_key, school_name, "pending"),
-            "request": request_row,
-        }
-    except AppwriteException:
-        logger.exception("Failed to ensure university request")
-        return {"status": "error", "channel": None, "request": None}
+    return _ensure_university_request_service(
+        current_user,
+        school_payload_fn=school_payload,
+        current_user_id_fn=_current_user_id,
+        find_university_channel_fn=_find_university_channel,
+        first_row_fn=first_row,
+        query_cls=Query,
+        collections=COLLECTIONS,
+        create_university_channel_fn=create_university_channel,
+        placeholder_channel_fn=_university_placeholder_channel,
+        create_row_fn=create_row_safe,
+        id_unique_fn=ID.unique,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _channel_payload(channel, university_status=None):
-    if not channel:
-        return None
-    channel_id = _row_id(channel)
-    online_users = _online_users_for_channel(channel)
-    return {
-        "id": channel_id,
-        "kind": channel.get("kind"),
-        "name": channel.get("name"),
-        "label": channel.get("label") or channel.get("name"),
-        "school_key": channel.get("school_key"),
-        "school_name": channel.get("school_name"),
-        "read_only": bool(channel.get("read_only")),
-        "approved": bool(channel.get("approved")),
-        "active_count": len(online_users),
-        "active_users": online_users,
-        "online_count": len(online_users),
-        "online_users": online_users,
-        "history_limited": channel.get("kind") == "discord",
-        "university_status": university_status or channel.get("university_status"),
-        "presence_scope": _presence_scope("channel", channel_id),
-        "presence_read_permissions": _presence_read_permissions_for_channel(channel),
-        "presence_profile_resolve_allowed": bool(channel.get("approved") or channel.get("kind") == "discord"),
-    }
+    return _channel_payload_service(
+        channel,
+        university_status,
+        row_id_fn=_row_id,
+        online_users_for_channel_fn=_online_users_for_channel,
+        presence_scope_fn=_presence_scope,
+        presence_read_permissions_for_channel_fn=_presence_read_permissions_for_channel,
+    )
 
 
 def _can_access_channel(channel):
@@ -987,258 +925,142 @@ def _previews_for_content(content):
 
 
 def _discord_previews(message):
-    previews = []
-    for embed in message.get("embeds") or []:
-        image = embed.get("image") or embed.get("thumbnail") or {}
-        previews.append({
-            "url": embed.get("url") or "",
-            "title": embed.get("title") or "",
-            "description": embed.get("description") or "",
-            "image_url": image.get("url") or "",
-            "site_name": (embed.get("provider") or {}).get("name") or "",
-            "content_type": embed.get("type") or "",
-        })
-    return previews[:2]
+    return _discord_previews_service(message)
 
 
 def _discord_images(message):
-    images = []
-    for attachment in message.get("attachments") or []:
-        if not _discord_attachment_is_image(attachment):
-            continue
-        url = attachment.get("url") or attachment.get("proxy_url") or ""
-        if not url:
-            continue
-        images.append({
-            "kind": "discord_image",
-            "url": url,
-            "proxy_url": attachment.get("proxy_url") or "",
-            "filename": attachment.get("filename") or "Image",
-            "width": attachment.get("width"),
-            "height": attachment.get("height"),
-            "content_type": attachment.get("content_type") or "",
-        })
-    return images[:4]
+    return _discord_images_service(
+        message,
+        attachment_is_image_fn=_discord_attachment_is_image,
+    )
 
 
 def _discord_attachment_is_image(attachment):
-    content_type = str(attachment.get("content_type") or "").split(";", 1)[0].strip().lower()
-    if content_type.startswith("image/"):
-        return True
-    filename = str(attachment.get("filename") or "").lower()
-    return any(filename.endswith(extension) for extension in DISCORD_IMAGE_EXTENSIONS)
+    return _discord_attachment_is_image_service(
+        attachment,
+        image_extensions=DISCORD_IMAGE_EXTENSIONS,
+    )
 
 
 def _discord_media_json(previews, images):
-    media = list(previews or []) + list(images or [])
-    compact_media = []
-    for item in media:
-        if not isinstance(item, dict):
-            continue
-        compact_media.append({
-            key: _bounded_string(value, 2048) if isinstance(value, str) else value
-            for key, value in item.items()
-            if value not in (None, "")
-        })
-
-    while compact_media:
-        text = json.dumps(compact_media, separators=(",", ":"))
-        if len(text) <= CHAT_MESSAGE_TEXT_LIMIT:
-            return text
-        compact_media.pop()
-    return "[]"
+    return _discord_media_json_service(
+        previews,
+        images,
+        bounded_string_fn=_bounded_string,
+        text_limit=CHAT_MESSAGE_TEXT_LIMIT,
+    )
 
 
 def _discord_message_row_id(channel, discord_message_id):
-    discord_channel_id = str(channel.get("discord_channel_id") or "")
-    discord_id = str(discord_message_id or "")
-    if not discord_channel_id or not discord_id:
-        return None
-    digest = hashlib.sha1(f"{discord_channel_id}:{discord_id}".encode("utf-8")).hexdigest()[:24]
-    return f"discord_{digest}"
+    return _discord_message_row_id_service(channel, discord_message_id)
 
 
 def _discord_message_external_id(channel, discord_message_id):
-    discord_channel_id = str(channel.get("discord_channel_id") or "")
-    discord_id = str(discord_message_id or "")
-    if not discord_channel_id or not discord_id:
-        return None
-    return f"discord:{discord_channel_id}:{discord_id}"
+    return _discord_message_external_id_service(channel, discord_message_id)
 
 
 def _discord_message_payload(channel, message, *, partial=False):
-    channel_id = _row_id(channel)
-    discord_id = str(message.get("id") or "")
-    if not discord_id:
-        return None
-    external_id = _discord_message_external_id(channel, discord_id)
-    author = message.get("author") or {}
-    payload = {
-        "channel_id": channel_id,
-        "source": "discord",
-        "external_id": external_id,
-        "discord_message_id": discord_id,
-        "updated_at": format_datetime(_now()),
-    }
-    if author or not partial:
-        payload.update({
-            "author_name": author.get("global_name") or author.get("username") or "Discord User",
-            "author_username": author.get("username") or "",
-            "author_avatar_url": _discord_avatar(author),
-        })
-    if "content" in message or not partial:
-        content = message.get("content") or ""
-        payload.update({
-            "content": content,
-            "rendered_html": _render_discord_content(content, message),
-        })
-    if any(key in message for key in ("embeds", "attachments")) or not partial:
-        payload["link_preview_json"] = _discord_media_json(_discord_previews(message), _discord_images(message))
-    if "webhook_id" in message or not partial:
-        payload["discord_webhook_id"] = message.get("webhook_id")
-    if "timestamp" in message or not partial:
-        payload["created_at"] = format_datetime(message.get("timestamp") or _now())
-    return {
-        key: _bounded_chat_message_value(key, value)
-        for key, value in payload.items()
-    }
+    return _discord_message_payload_service(
+        channel,
+        message,
+        partial=partial,
+        row_id_fn=_row_id,
+        external_id_fn=_discord_message_external_id,
+        format_datetime_fn=format_datetime,
+        now_fn=_now,
+        discord_avatar_fn=_discord_avatar,
+        render_discord_content_fn=_render_discord_content,
+        media_json_fn=_discord_media_json,
+        previews_fn=_discord_previews,
+        images_fn=_discord_images,
+        bounded_chat_message_value_fn=_bounded_chat_message_value,
+    )
 
 
 def _discord_message_changes(existing, payload):
-    changes = {}
-    for key in DISCORD_SYNC_COMPARE_FIELDS:
-        if key not in payload:
-            continue
-        incoming = payload.get(key)
-        if existing.get(key) != incoming:
-            changes[key] = incoming
-    if changes:
-        changes["updated_at"] = payload.get("updated_at")
-    return changes
+    return _discord_message_changes_service(
+        existing,
+        payload,
+        compare_fields=DISCORD_SYNC_COMPARE_FIELDS,
+    )
 
 
 def _find_discord_message_row(row_id, external_id):
-    existing = None
-    if row_id:
-        existing = get_row_safe(COLLECTIONS["chat_messages"], row_id, allow_missing=True)
-    if not existing and external_id:
-        existing = first_row(
-            COLLECTIONS["chat_messages"],
-            [Query.equal("external_id", [external_id])],
-        )
-    return existing
+    return _find_discord_message_row_service(
+        row_id,
+        external_id,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _apply_discord_message_changes(existing, payload, message, *, partial=False, emit_event=False, channel=None):
-    channel_id = payload.get("channel_id")
-    row_id = _row_id(existing)
-    changes = _discord_message_changes(existing, payload)
-    if existing.get("user_id"):
-        for field in ("content", "rendered_html", "link_preview_json", "author_name", "author_username", "author_avatar_url"):
-            changes.pop(field, None)
-    if partial and not changes and message.get("edited_timestamp"):
-        changes = {"updated_at": payload.get("updated_at")}
-    if not changes:
-        return existing, False
-    try:
-        row = update_row_safe(COLLECTIONS["chat_messages"], row_id, changes)
-    except AppwriteException:
-        return existing, False
-    if emit_event:
-        emit_chat_event(
-            "channel",
-            channel_id,
-            "message_updated",
-            message_id=row_id,
-            channel_id=channel_id,
-            channel=channel,
-        )
-    return row, False
+    return _apply_discord_message_changes_service(
+        existing,
+        payload,
+        message,
+        partial=partial,
+        emit_event=emit_event,
+        channel=channel,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _log_discord_upsert_failure(row_id, external_id, discord_id, changes):
-    logger.error(
-        "Failed to upsert Discord message row_id=%s external_id=%s discord_message_id=%s changed_fields=%s value_lengths=%s",
+    return _log_discord_upsert_failure_service(
         row_id,
         external_id,
         discord_id,
-        sorted((changes or {}).keys()),
-        {
-            key: len(value) if isinstance(value, str) else None
-            for key, value in (changes or {}).items()
-        },
+        changes,
+        logger=logger,
     )
 
 
 def _discord_mention_name(user):
-    return (
-        user.get("global_name")
-        or user.get("nick")
-        or user.get("username")
-        or "Discord User"
-    )
+    return _discord_mention_name_service(user)
 
 
 def _discord_user_mentions(message):
-    mentions = {}
-    for user in message.get("mentions") or []:
-        user_id = str(user.get("id") or "")
-        if user_id:
-            mentions[user_id] = _discord_mention_name(user)
-    return mentions
-
-
-def _discord_user_mention_label(user_id, mentions):
-    label = mentions.get(user_id)
-    if label:
-        return label
-    fetched = fetch_discord_user(user_id)
-    if fetched:
-        return _discord_mention_name(fetched)
-    return "Discord User"
-
-
-def _discord_role_mentions():
-    roles = {}
-    for role in fetch_guild_roles():
-        role_id = str(role.get("id") or "")
-        if role_id:
-            roles[role_id] = role.get("name") or "Unknown Role"
-    return roles
-
-
-def _mention_span(label, class_name="chat-mention"):
-    return f'<span class="{class_name}">{html.escape(label)}</span>'
-
-
-def _emoji_img(animated, name, emoji_id):
-    extension = "gif" if animated else "png"
-    url = f"https://cdn.discordapp.com/emojis/{emoji_id}.{extension}?size=48&quality=lossless"
-    escaped_url = html.escape(url, quote=True)
-    escaped_name = html.escape(name)
-    return (
-        f'<img class="chat-custom-emoji" '
-        f'src="{escaped_url}" alt=":{escaped_name}:" title=":{escaped_name}:" '
-        'loading="lazy" decoding="async">'
+    return _discord_user_mentions_service(
+        message,
+        mention_name_fn=_discord_mention_name,
     )
 
 
+def _discord_user_mention_label(user_id, mentions):
+    return _discord_user_mention_label_service(
+        user_id,
+        mentions,
+        fetch_user_fn=fetch_discord_user,
+        mention_name_fn=_discord_mention_name,
+    )
+
+
+def _discord_role_mentions():
+    return _discord_role_mentions_service(fetch_roles_fn=fetch_guild_roles)
+
+
+def _mention_span(label, class_name="chat-mention"):
+    return _mention_span_service(label, class_name)
+
+
+def _emoji_img(animated, name, emoji_id):
+    return _emoji_img_service(animated, name, emoji_id)
+
+
 def _render_discord_content(content, message):
-    rendered = render_markdown(content)
-    user_mentions = _discord_user_mentions(message)
-    role_mentions = _discord_role_mentions() if "&lt;@&" in rendered or "&lt;@&amp;" in rendered else {}
-
-    def replace_user(match):
-        label = _discord_user_mention_label(match.group(1), user_mentions)
-        return _mention_span(f"@{label}")
-
-    def replace_role(match):
-        label = role_mentions.get(match.group(1), "Unknown Role")
-        return _mention_span(f"@{label}", "chat-mention chat-mention-role")
-
-    rendered = DISCORD_ROLE_MENTION_RE.sub(replace_role, rendered)
-    rendered = DISCORD_USER_MENTION_RE.sub(replace_user, rendered)
-    return DISCORD_CUSTOM_EMOJI_RE.sub(lambda match: _emoji_img(match.group(1), match.group(2), match.group(3)), rendered)
+    return _render_discord_content_service(
+        content,
+        message,
+        render_markdown_fn=render_markdown,
+        user_mentions_fn=_discord_user_mentions,
+        role_mentions_fn=_discord_role_mentions,
+        user_mention_label_fn=_discord_user_mention_label,
+        mention_span_fn=_mention_span,
+        emoji_img_fn=_emoji_img,
+        role_mention_re=DISCORD_ROLE_MENTION_RE,
+        user_mention_re=DISCORD_USER_MENTION_RE,
+        custom_emoji_re=DISCORD_CUSTOM_EMOJI_RE,
+    )
 
 
 def _load_users_by_id(user_ids):
@@ -1441,113 +1263,26 @@ def _list_messages(scope_type, scope_id, before=None, after=None, after_message_
 
 
 def _upsert_discord_message(channel, message, emit_event=False, *, partial=False):
-    payload = _discord_message_payload(channel, message, partial=partial)
-    if not payload:
-        return None, False
-    channel_id = payload.get("channel_id")
-    external_id = payload.get("external_id")
-    discord_id = payload.get("discord_message_id")
-    row_id = _discord_message_row_id(channel, discord_id)
-    existing = _find_discord_message_row(row_id, external_id)
-    if existing:
-        return _apply_discord_message_changes(
-            existing,
-            payload,
-            message,
-            partial=partial,
-            emit_event=emit_event,
-            channel=channel,
-        )
-    if partial and any(key not in payload for key in DISCORD_PARTIAL_CREATE_REQUIRED_FIELDS):
-        logger.info("Skipping partial Discord message update for unknown message %s", discord_id)
-        return None, False
-
-    insert_id = row_id or ID.unique()
-    inserted = insert_row_ignore_safe(COLLECTIONS["chat_messages"], row_id=insert_id, data=payload)
-    if inserted:
-        row = get_row_safe(COLLECTIONS["chat_messages"], insert_id)
-        if emit_event:
-            emit_chat_event(
-                "channel",
-                channel_id,
-                "message_created",
-                message_id=_row_id(row),
-                channel_id=channel_id,
-                channel=channel,
-            )
-        return row, True
-
-    existing = _find_discord_message_row(insert_id, external_id)
-    if existing:
-        return _apply_discord_message_changes(
-            existing,
-            payload,
-            message,
-            partial=partial,
-            emit_event=emit_event,
-            channel=channel,
-        )
-
-    _log_discord_upsert_failure(row_id, external_id, discord_id, payload)
-    return None, False
+    return _upsert_discord_message_service(
+        channel,
+        message,
+        emit_event=emit_event,
+        partial=partial,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _soft_delete_discord_message(channel, discord_message_id, *, emit_event=False):
-    if not channel or not discord_message_id:
-        return None
-    channel_id = _row_id(channel)
-    external_id = _discord_message_external_id(channel, discord_message_id)
-    row_id = _discord_message_row_id(channel, discord_message_id)
-    try:
-        row = None
-        if row_id:
-            row = get_row_safe(COLLECTIONS["chat_messages"], row_id, allow_missing=True)
-        if not row and external_id:
-            row = first_row(COLLECTIONS["chat_messages"], [Query.equal("external_id", [external_id])])
-        if not row:
-            row = first_row(
-                COLLECTIONS["chat_messages"],
-                [
-                    Query.equal("channel_id", [channel_id]),
-                    Query.equal("discord_message_id", [str(discord_message_id)]),
-                ],
-            )
-        if not row or row.get("deleted_at"):
-            return row
-        deleted_at = format_datetime(_now())
-        update_row_safe(
-            COLLECTIONS["chat_messages"],
-            _row_id(row),
-            {
-                "deleted_at": deleted_at,
-                "deleted_by": "discord",
-                "updated_at": deleted_at,
-            },
-        )
-        delete_message_attachments(_row_id(row))
-        if emit_event:
-            emit_chat_event(
-                "channel",
-                channel_id,
-                "message_deleted",
-                message_id=_row_id(row),
-                channel_id=channel_id,
-                actor_id="discord",
-                channel=channel,
-            )
-        return row
-    except AppwriteException:
-        logger.exception("Failed to soft-delete Discord message %s", discord_message_id)
-        return None
+    return _soft_delete_discord_message_service(
+        channel,
+        discord_message_id,
+        emit_event=emit_event,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _discord_avatar(author):
-    avatar_hash = author.get("avatar")
-    user_id = author.get("id")
-    if avatar_hash and user_id:
-        extension = "gif" if str(avatar_hash).startswith("a_") else "png"
-        return f"https://cdn.discordapp.com/avatars/{user_id}/{avatar_hash}.{extension}?size=128"
-    return DEFAULT_AVATAR
+    return _discord_avatar_service(author, default_avatar=DEFAULT_AVATAR)
 
 
 def _emit_chat_delete_audit(row, deleted_at):
@@ -1580,155 +1315,73 @@ def _emit_chat_delete_audit(row, deleted_at):
 
 
 def _reconcile_discord_deletes(channel, discord_messages, *, emit_events=False):
-    if not channel or not discord_messages:
-        return 0
-    channel_id = _row_id(channel)
-    discord_ids = {str(message.get("id")) for message in discord_messages if message.get("id")}
-    oldest_ts = None
-    for message in discord_messages:
-        timestamp = message.get("timestamp")
-        if not timestamp:
-            continue
-        parsed = parse_datetime(timestamp)
-        if parsed and (oldest_ts is None or parsed < oldest_ts):
-            oldest_ts = parsed
-    if oldest_ts is None:
-        return 0
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["chat_messages"],
-            [Query.equal("channel_id", [channel_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to list Discord chat messages for delete reconciliation")
-        return 0
-    deleted_count = 0
-    for row in rows:
-        if row.get("deleted_at"):
-            continue
-        if (row.get("source") or "") != "discord":
-            continue
-        discord_message_id = row.get("discord_message_id")
-        if not discord_message_id:
-            continue
-        if str(discord_message_id) in discord_ids:
-            continue
-        created = _message_timestamp(row)
-        if created < oldest_ts:
-            continue
-        result = _soft_delete_discord_message(
-            channel,
-            discord_message_id,
-            emit_event=emit_events,
-        )
-        if result is not None and not result.get("deleted_at"):
-            deleted_count += 1
-    return deleted_count
+    return _reconcile_discord_deletes_service(
+        channel,
+        discord_messages,
+        emit_events=emit_events,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _sync_discord_channel(channel, emit_events=False, emit_delete_events=None):
-    discord_channel_id = channel.get("discord_channel_id")
-    if not discord_channel_id:
-        return 0, 0
-    if emit_delete_events is None:
-        emit_delete_events = emit_events
-    messages = fetch_channel_messages(discord_channel_id, DISCORD_MESSAGE_LIMIT)
-    created_count = 0
-    for message in messages:
-        _, created = _upsert_discord_message(channel, message, emit_event=emit_events)
-        if created:
-            created_count += 1
-    deleted_count = _reconcile_discord_deletes(channel, messages, emit_events=emit_delete_events)
-    _prune_discord_messages(_row_id(channel))
-    return created_count, deleted_count
+    return _sync_discord_channel_service(
+        channel,
+        emit_events=emit_events,
+        emit_delete_events=emit_delete_events,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def sync_discord_channels(emit_events=True, emit_delete_events=None):
-    _default_channels()
-    try:
-        channels = list_rows_all(
-            COLLECTIONS["chat_channels"],
-            [Query.equal("kind", ["discord"])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to list Discord chat channels for sync")
-        return 0, 0
-    created_count = 0
-    deleted_count = 0
-    for channel in channels:
-        if not _can_sync_discord_channel(channel):
-            continue
-        created, deleted = _sync_discord_channel(
-            channel,
-            emit_events=emit_events,
-            emit_delete_events=emit_delete_events,
-        )
-        created_count += created
-        deleted_count += deleted
-    return created_count, deleted_count
+    return _sync_discord_channels_service(
+        emit_events=emit_events,
+        emit_delete_events=emit_delete_events,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def ingest_discord_gateway_message(message, *, event_type="create"):
-    channel = _discord_channel_for_discord_id((message or {}).get("channel_id"))
-    if not _can_sync_discord_channel(channel):
-        return None, False
-    partial = event_type == "update"
-    row, created = _upsert_discord_message(channel, message, emit_event=True, partial=partial)
-    if row:
-        _prune_discord_messages(_row_id(channel))
-    return row, created
+    return _ingest_discord_gateway_message_service(
+        message,
+        event_type=event_type,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def delete_discord_gateway_message(discord_channel_id, discord_message_id):
-    channel = _discord_channel_for_discord_id(discord_channel_id)
-    if not _can_sync_discord_channel(channel):
-        return None
-    row = _soft_delete_discord_message(channel, discord_message_id, emit_event=True)
-    if row is None:
-        logger.warning(
-            "Discord delete received for channel %s message %s but no matching chat row was found.",
-            discord_channel_id,
-            discord_message_id,
-        )
-    return row
+    return _delete_discord_gateway_message_service(
+        discord_channel_id,
+        discord_message_id,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def delete_discord_gateway_messages(discord_channel_id, discord_message_ids):
-    deleted = 0
-    for message_id in discord_message_ids or []:
-        row = delete_discord_gateway_message(discord_channel_id, message_id)
-        if row:
-            deleted += 1
-    return deleted
+    return _delete_discord_gateway_messages_service(
+        discord_channel_id,
+        discord_message_ids,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _can_sync_discord_channel(channel):
-    return bool(channel and channel.get("kind") == "discord" and channel.get("discord_channel_id"))
+    return _can_sync_discord_channel_service(channel)
 
 
 def _discord_channel_for_discord_id(discord_channel_id):
-    if not discord_channel_id:
-        return None
-    try:
-        channel = first_row(
-            COLLECTIONS["chat_channels"],
-            [Query.equal("discord_channel_id", [str(discord_channel_id)])],
-        )
-        if channel:
-            return channel
-        _default_channels()
-        return first_row(
-            COLLECTIONS["chat_channels"],
-            [Query.equal("discord_channel_id", [str(discord_channel_id)])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to resolve Discord chat channel %s", discord_channel_id)
-        return None
+    return _discord_channel_for_discord_id_service(
+        discord_channel_id,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _discord_ingest_secret():
-    for key in DISCORD_INGEST_SECRET_ENV_KEYS:
-        value = os.environ.get(key)
+    configured = runtime_environment_config()
+    for value in (
+        configured.discord_chat_ingest_secret,
+        configured.discord_chat_sync_secret,
+        configured.discord_bridge_secret,
+    ):
         if value:
             return value.strip()
     return ""
@@ -1748,434 +1401,296 @@ def _valid_discord_ingest_request():
 
 
 def _prune_discord_messages(channel_id):
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["chat_messages"],
-            [
-                Query.equal("channel_id", [channel_id]),
-                Query.order_desc("created_at"),
-            ],
-        )
-    except AppwriteException:
-        return
-    for row in rows[DISCORD_MESSAGE_LIMIT:]:
-        try:
-            delete_row_safe(COLLECTIONS["chat_messages"], _row_id(row))
-        except AppwriteException:
-            logger.exception("Failed to prune old Discord message")
+    return _prune_discord_messages_service(
+        channel_id,
+        dependencies=_discord_sync_dependencies(),
+    )
 
 
 def _blocked_user_ids(user_id):
-    try:
-        rows = list_rows_all(COLLECTIONS["chat_blocks"], [Query.equal("blocker_id", [user_id])])
-    except AppwriteException:
-        return set()
-    return {row.get("blocked_id") for row in rows if row.get("blocked_id")}
+    return _blocked_user_ids_service(
+        user_id,
+        list_rows_fn=list_rows_all,
+        query_cls=Query,
+        blocks_collection=COLLECTIONS["chat_blocks"],
+        appwrite_exception=AppwriteException,
+    )
 
 
 def _is_blocked_between(user_a, user_b):
-    keys = [f"{user_a}:{user_b}", f"{user_b}:{user_a}"]
-    try:
-        return bool(first_row(COLLECTIONS["chat_blocks"], [Query.equal("block_key", keys)]))
-    except AppwriteException:
-        logger.exception("Failed to check chat block")
-        return True
+    return _is_blocked_between_service(
+        user_a,
+        user_b,
+        first_row_fn=first_row,
+        query_cls=Query,
+        blocks_collection=COLLECTIONS["chat_blocks"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _thread_key(user_a, user_b):
-    return ":".join(sorted([str(user_a), str(user_b)]))
+    return _thread_key_service(user_a, user_b)
 
 
 def _get_or_create_thread_between(user_a, user_b):
-    key = _thread_key(user_a, user_b)
-    existing = first_row(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_key", [key])])
-    if existing:
-        return existing
-    now = format_datetime(_now())
-    participant_a, participant_b = key.split(":", 1)
-    return create_row_safe(
-        COLLECTIONS["chat_dm_threads"],
-        row_id=ID.unique(),
-        data={
-            "participant_a": participant_a,
-            "participant_b": participant_b,
-            "participant_key": key,
-            "created_at": now,
-            "updated_at": now,
-        },
+    return _get_or_create_thread_between_service(
+        user_a,
+        user_b,
+        thread_key_fn=_thread_key,
+        first_row_fn=first_row,
+        query_cls=Query,
+        threads_collection=COLLECTIONS["chat_dm_threads"],
+        format_datetime_fn=format_datetime,
+        now_fn=_now,
+        create_row_fn=create_row_safe,
+        id_unique_fn=ID.unique,
     )
 
 
 def initialize_new_user_discord_read_states(user_id):
-    user_id = str(user_id or "").strip()
-    if not user_id:
-        return
-    _default_channels()
-    try:
-        channels = list_rows_all(COLLECTIONS["chat_channels"], [Query.equal("kind", ["discord"])])
-    except AppwriteException:
-        logger.exception("Failed to list Discord channels for onboarding read init")
-        return
-    for channel in channels:
-        channel_id = _row_id(channel)
-        if not channel_id:
-            continue
-        latest = _latest_visible_message("channel", channel_id)
-        if latest:
-            _persist_read_state(user_id, "channel", channel_id, latest)
+    return _initialize_new_user_discord_read_states_service(
+        user_id,
+        default_channels_fn=_default_channels,
+        list_rows_all_fn=list_rows_all,
+        query_cls=Query,
+        channels_collection=COLLECTIONS["chat_channels"],
+        row_id_fn=_row_id,
+        latest_visible_message_fn=_latest_visible_message,
+        persist_read_state_fn=_persist_read_state,
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def create_welcome_dm_for_user(user_id):
-    user_id = str(user_id or "").strip()
-    if not user_id or user_id == WELCOME_DM_SENDER_ID:
-        return None
-    external_id = f"welcome:{WELCOME_DM_SENDER_ID}:{user_id}"
-    try:
-        existing = first_row(COLLECTIONS["chat_messages"], [Query.equal("external_id", [external_id])])
-    except AppwriteException:
-        logger.exception("Failed to check welcome DM for user %s", user_id)
-        return None
-    if existing:
-        return existing
-
-    sender = get_row_safe(COLLECTIONS["users"], WELCOME_DM_SENDER_ID, allow_missing=True)
-    try:
-        thread = _get_or_create_thread_between(WELCOME_DM_SENDER_ID, user_id)
-    except AppwriteException:
-        logger.exception("Failed to create welcome DM thread for user %s", user_id)
-        return None
-
-    thread_id = _row_id(thread)
-    now = format_datetime(_now())
-    content = WELCOME_DM_TEXT
-    try:
-        row = create_row_safe(
-            COLLECTIONS["chat_messages"],
-            row_id=ID.unique(),
-            data={
-                "thread_id": thread_id,
-                "source": "system",
-                "external_id": external_id,
-                "user_id": WELCOME_DM_SENDER_ID,
-                "author_name": (sender or {}).get("name") or (sender or {}).get("username") or "Nest User",
-                "author_username": (sender or {}).get("username") or "",
-                "author_avatar_url": (sender or {}).get("picture_url") or "",
-                "content": content,
-                "rendered_html": render_markdown(content),
-                "link_preview_json": "[]",
-                "created_at": now,
-                "updated_at": now,
-            },
-        )
-        update_row_safe(
-            COLLECTIONS["chat_dm_threads"],
-            thread_id,
-            {"last_message_at": now, "updated_at": now},
-        )
-        emit_chat_event(
-            "thread",
-            thread_id,
-            "message_created",
-            message_id=_row_id(row),
-            thread_id=thread_id,
-            actor_id=WELCOME_DM_SENDER_ID,
-            readable_user_ids=_thread_participant_ids(thread),
-        )
-        return row
-    except AppwriteException:
-        logger.exception("Failed to create welcome DM for user %s", user_id)
-        return None
+    return _create_welcome_dm_for_user_service(
+        user_id,
+        welcome_sender_id=WELCOME_DM_SENDER_ID,
+        welcome_text=WELCOME_DM_TEXT,
+        first_row_fn=first_row,
+        query_cls=Query,
+        messages_collection=COLLECTIONS["chat_messages"],
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        get_or_create_thread_between_fn=_get_or_create_thread_between,
+        create_row_fn=create_row_safe,
+        id_unique_fn=ID.unique,
+        update_row_fn=update_row_safe,
+        threads_collection=COLLECTIONS["chat_dm_threads"],
+        row_id_fn=_row_id,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        render_markdown_fn=render_markdown,
+        emit_chat_event_fn=emit_chat_event,
+        thread_participant_ids_fn=_thread_participant_ids,
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _get_or_create_thread(other_user_id):
-    user_id = _current_user_id()
-    if other_user_id == user_id:
-        raise ValueError("You cannot start a DM with yourself.")
-    other = get_row_safe(COLLECTIONS["users"], other_user_id, allow_missing=True)
-    if not other:
-        raise ValueError("User not found.")
-    return _get_or_create_thread_between(user_id, other_user_id)
+    return _get_or_create_thread_service(
+        other_user_id,
+        current_user_id_fn=_current_user_id,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+        get_or_create_thread_between_fn=_get_or_create_thread_between,
+    )
 
 
 def _thread_for_user(thread_id):
-    thread = get_row_safe(COLLECTIONS["chat_dm_threads"], thread_id, allow_missing=True)
-    if not thread:
-        return None
-    user_id = _current_user_id()
-    if user_id not in {thread.get("participant_a"), thread.get("participant_b")}:
-        return None
-    return thread
+    return _thread_for_user_service(
+        thread_id,
+        get_row_fn=get_row_safe,
+        threads_collection=COLLECTIONS["chat_dm_threads"],
+        current_user_id_fn=_current_user_id,
+    )
 
 
 def _other_participant(thread):
-    user_id = _current_user_id()
-    other_id = thread.get("participant_b") if thread.get("participant_a") == user_id else thread.get("participant_a")
-    return get_row_safe(COLLECTIONS["users"], other_id, allow_missing=True)
+    return _other_participant_service(
+        thread,
+        current_user_id_fn=_current_user_id,
+        get_row_fn=get_row_safe,
+        users_collection=COLLECTIONS["users"],
+    )
 
 
 def _thread_participant_ids(thread):
-    return [
-        str(value)
-        for value in (thread.get("participant_a"), thread.get("participant_b"))
-        if value
-    ]
+    return _thread_participant_ids_service(thread)
+
+
+def _read_state_dependencies():
+    return _ChatReadStateDependencies(
+        collections=COLLECTIONS,
+        appwrite_exception=AppwriteException,
+        query_cls=Query,
+        id_unique_fn=ID.unique,
+        row_id_fn=_row_id,
+        now_fn=_now,
+        format_datetime_fn=format_datetime,
+        current_user_id_fn=_current_user_id,
+        get_row_fn=get_row_safe,
+        first_row_fn=first_row,
+        create_row_fn=create_row_safe,
+        update_row_fn=update_row_safe,
+        delete_row_fn=delete_row_safe,
+        list_rows_fn=list_rows_safe,
+        read_key_fn=_read_key,
+        message_timestamp_fn=_message_timestamp,
+        message_scope_field_fn=_message_scope_field,
+        message_in_scope_fn=_message_in_scope,
+        message_visible_for_user_fn=_message_visible_for_user,
+        message_can_be_unread_target_fn=_message_can_be_unread_target,
+        blocked_user_ids_fn=_blocked_user_ids,
+        thread_for_user_fn=_thread_for_user,
+        can_access_channel_fn=_can_access_channel,
+        latest_visible_message_fn=_latest_visible_message,
+        persist_read_state_fn=_persist_read_state,
+        read_state_for_scope_fn=_read_state_for_scope,
+        latest_unread_target_fn=_latest_unread_target,
+        previous_visible_message_fn=_previous_visible_message,
+        clear_read_state_fn=_clear_read_state,
+        error_logger=logger,
+        summary_scan_limit=CHAT_SUMMARY_SCAN_LIMIT,
+        unread_cap=CHAT_UNREAD_CAP,
+    )
 
 
 def _read_key(user_id, scope_type, scope_id):
-    return f"{user_id}:{scope_type}:{scope_id}"
+    return _read_key_service(user_id, scope_type, scope_id)
 
 
 def _read_state_for_scope(user_id, scope_type, scope_id):
-    try:
-        return first_row(
-            COLLECTIONS["chat_read_states"],
-            [Query.equal("read_key", [_read_key(user_id, scope_type, scope_id)])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to load chat read state")
-        return None
+    return _read_state_for_scope_service(
+        user_id,
+        scope_type,
+        scope_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _latest_visible_message(scope_type, scope_id):
-    field = "channel_id" if scope_type == "channel" else "thread_id"
-    try:
-        rows = list_rows_safe(
-            COLLECTIONS["chat_messages"],
-            [
-                Query.equal(field, [scope_id]),
-                Query.order_desc("created_at"),
-                Query.limit(10),
-            ],
-        ).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to load latest chat message")
-        return None
-    for row in rows:
-        if not row.get("deleted_at"):
-            return row
-    return None
+    return _latest_visible_message_service(
+        scope_type,
+        scope_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _message_scope_field(scope_type):
-    return "channel_id" if scope_type == "channel" else "thread_id"
+    return _message_scope_field_service(scope_type)
 
 
 def _message_in_scope(row, scope_type, scope_id):
-    return bool(row and row.get(_message_scope_field(scope_type)) == scope_id)
+    return _message_in_scope_service(
+        row,
+        scope_type,
+        scope_id,
+        message_scope_field_fn=_message_scope_field,
+    )
 
 
 def _message_for_current_user(message_id):
-    row = get_row_safe(COLLECTIONS["chat_messages"], message_id, allow_missing=True)
-    if not row or row.get("deleted_at"):
-        return None
-    channel_id = row.get("channel_id")
-    thread_id = row.get("thread_id")
-    if channel_id:
-        channel = get_row_safe(COLLECTIONS["chat_channels"], channel_id, allow_missing=True)
-        if not _can_access_channel(channel):
-            return None
-    elif thread_id:
-        if not _thread_for_user(thread_id):
-            return None
-        if str(row.get("user_id") or "") in _blocked_user_ids(_current_user_id()):
-            return None
-    else:
-        return None
-    return row
+    return _message_for_current_user_service(
+        message_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _message_visible_for_user(row, scope_type, blocked_user_ids=None):
-    if not row or row.get("deleted_at"):
-        return False
-    if scope_type == "thread" and str(row.get("user_id") or "") in (blocked_user_ids or set()):
-        return False
-    return True
+    return _message_visible_for_user_service(row, scope_type, blocked_user_ids)
 
 
 def _message_can_be_unread_target(row, scope_type, user_id, blocked_user_ids=None):
-    if not _message_visible_for_user(row, scope_type, blocked_user_ids):
-        return False
-    return str(row.get("user_id") or "") != str(user_id)
+    return _message_can_be_unread_target_service(
+        row,
+        scope_type,
+        user_id,
+        blocked_user_ids,
+        message_visible_for_user_fn=_message_visible_for_user,
+    )
 
 
 def _persist_read_state(user_id, scope_type, scope_id, latest, *, fallback_to_now=True):
-    read_key = _read_key(user_id, scope_type, scope_id)
-    last_read_at = latest.get("created_at") if latest else (format_datetime(_now()) if fallback_to_now else None)
-    payload = {
-        "user_id": user_id,
-        "scope_type": scope_type,
-        "scope_id": scope_id,
-        "read_key": read_key,
-        "last_read_message_id": _row_id(latest) if latest else None,
-        "last_read_at": last_read_at,
-    }
-    try:
-        existing = first_row(COLLECTIONS["chat_read_states"], [Query.equal("read_key", [read_key])])
-        if existing:
-            return update_row_safe(COLLECTIONS["chat_read_states"], _row_id(existing), payload)
-        return create_row_safe(COLLECTIONS["chat_read_states"], row_id=ID.unique(), data=payload)
-    except AppwriteException:
-        logger.exception("Failed to persist chat read state")
-        return None
+    return _persist_read_state_service(
+        user_id,
+        scope_type,
+        scope_id,
+        latest,
+        fallback_to_now=fallback_to_now,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _mark_read(scope_type, scope_id, message_id=None):
-    user_id = _current_user_id()
-    latest = None
-    if message_id:
-        try:
-            latest = get_row_safe(COLLECTIONS["chat_messages"], message_id, allow_missing=True)
-        except AppwriteException:
-            latest = None
-        if latest:
-            if not _message_in_scope(latest, scope_type, scope_id) or latest.get("deleted_at"):
-                latest = None
-    server_latest = _latest_visible_message(scope_type, scope_id)
-    if server_latest:
-        if not latest or _message_timestamp(server_latest) > _message_timestamp(latest):
-            latest = server_latest
-    elif not latest:
-        latest = None
-    return _persist_read_state(user_id, scope_type, scope_id, latest)
+    return _mark_read_service(
+        scope_type,
+        scope_id,
+        message_id=message_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _latest_unread_target(scope_type, scope_id, user_id, blocked_user_ids):
-    field = _message_scope_field(scope_type)
-    offset = 0
-    while True:
-        try:
-            rows = list_rows_safe(
-                COLLECTIONS["chat_messages"],
-                [
-                    Query.equal(field, [scope_id]),
-                    Query.order_desc("created_at"),
-                    Query.limit(CHAT_SUMMARY_SCAN_LIMIT),
-                    Query.offset(offset),
-                ],
-            ).get("rows", [])
-        except AppwriteException:
-            logger.exception("Failed to load latest unread chat target")
-            return None
-        for row in rows:
-            if _message_can_be_unread_target(row, scope_type, user_id, blocked_user_ids):
-                return row
-        if len(rows) < CHAT_SUMMARY_SCAN_LIMIT:
-            return None
-        offset += CHAT_SUMMARY_SCAN_LIMIT
+    return _latest_unread_target_service(
+        scope_type,
+        scope_id,
+        user_id,
+        blocked_user_ids,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _previous_visible_message(scope_type, scope_id, target, blocked_user_ids):
-    created_at = target.get("created_at") if target else None
-    if not created_at:
-        return None
-    field = _message_scope_field(scope_type)
-    offset = 0
-    while True:
-        try:
-            rows = list_rows_safe(
-                COLLECTIONS["chat_messages"],
-                [
-                    Query.equal(field, [scope_id]),
-                    Query.less_than("created_at", created_at),
-                    Query.order_desc("created_at"),
-                    Query.limit(CHAT_SUMMARY_SCAN_LIMIT),
-                    Query.offset(offset),
-                ],
-            ).get("rows", [])
-        except AppwriteException:
-            logger.exception("Failed to load previous chat read boundary")
-            return None
-        for row in rows:
-            if _message_visible_for_user(row, scope_type, blocked_user_ids):
-                return row
-        if len(rows) < CHAT_SUMMARY_SCAN_LIMIT:
-            return None
-        offset += CHAT_SUMMARY_SCAN_LIMIT
+    return _previous_visible_message_service(
+        scope_type,
+        scope_id,
+        target,
+        blocked_user_ids,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _clear_read_state(user_id, scope_type, scope_id):
-    read_key = _read_key(user_id, scope_type, scope_id)
-    try:
-        existing = first_row(COLLECTIONS["chat_read_states"], [Query.equal("read_key", [read_key])])
-        if existing:
-            delete_row_safe(COLLECTIONS["chat_read_states"], _row_id(existing))
-    except AppwriteException:
-        logger.exception("Failed to clear chat read state")
-    return None
+    return _clear_read_state_service(
+        user_id,
+        scope_type,
+        scope_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _mark_unread(scope_type, scope_id, message_id=None):
-    user_id = _current_user_id()
-    blocked_user_ids = _blocked_user_ids(user_id) if scope_type == "thread" else set()
-    target = None
-    if message_id:
-        try:
-            candidate = get_row_safe(COLLECTIONS["chat_messages"], message_id, allow_missing=True)
-        except AppwriteException:
-            candidate = None
-        if (
-            _message_in_scope(candidate, scope_type, scope_id)
-            and _message_can_be_unread_target(candidate, scope_type, user_id, blocked_user_ids)
-        ):
-            target = candidate
-    if not target:
-        target = _latest_unread_target(scope_type, scope_id, user_id, blocked_user_ids)
-    if not target:
-        return _read_state_for_scope(user_id, scope_type, scope_id)
-
-    previous = _previous_visible_message(scope_type, scope_id, target, blocked_user_ids)
-    if previous:
-        return _persist_read_state(user_id, scope_type, scope_id, previous, fallback_to_now=False)
-    _clear_read_state(user_id, scope_type, scope_id)
-    return {}
+    return _mark_unread_service(
+        scope_type,
+        scope_id,
+        message_id=message_id,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 def _existing_visible_channels_for_summary():
-    _default_channels()
-    try:
-        rows = list_rows_all(COLLECTIONS["chat_channels"], [Query.equal("kind", ["discord", "university"])])
-    except AppwriteException:
-        logger.exception("Failed to list chat summary channels")
-        return []
-    return [row for row in rows if _can_access_channel(row)]
+    return _existing_visible_channels_for_summary_service(
+        default_channels_fn=_default_channels,
+        list_rows_all_fn=list_rows_all,
+        channels_collection=COLLECTIONS["chat_channels"],
+        query_cls=Query,
+        can_access_channel_fn=_can_access_channel,
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _unread_count(scope_type, scope_id, user_id, last_read_at):
-    field = "channel_id" if scope_type == "channel" else "thread_id"
-    offset = 0
-    blocked_user_ids = _blocked_user_ids(user_id) if scope_type == "thread" else set()
-    count = 0
-
-    while True:
-        queries = [
-            Query.equal(field, [scope_id]),
-            Query.order_desc("created_at"),
-            Query.limit(CHAT_SUMMARY_SCAN_LIMIT),
-            Query.offset(offset),
-        ]
-        if last_read_at:
-            queries.insert(1, Query.greater_than("created_at", last_read_at))
-        try:
-            rows = list_rows_safe(COLLECTIONS["chat_messages"], queries).get("rows", [])
-        except AppwriteException:
-            logger.exception("Failed to count unread chat messages")
-            return 0, False
-
-        for row in rows:
-            if row.get("deleted_at"):
-                continue
-            message_user_id = str(row.get("user_id") or "")
-            if message_user_id == str(user_id):
-                continue
-            if message_user_id in blocked_user_ids:
-                continue
-            count += 1
-            if count >= CHAT_UNREAD_CAP:
-                return CHAT_UNREAD_CAP, True
-
-        if len(rows) < CHAT_SUMMARY_SCAN_LIMIT:
-            return count, False
-        offset += CHAT_SUMMARY_SCAN_LIMIT
+    return _unread_count_service(
+        scope_type,
+        scope_id,
+        user_id,
+        last_read_at,
+        dependencies=_read_state_dependencies(),
+    )
 
 
 @chat_api_bp.route("/api/universities")
@@ -2341,73 +1856,40 @@ def bootstrap():
     sync_chat_presence_labels_for_user(_current_user_id())
     dm_threads = _list_threads()
     entitlements = request_entitlements(current_user)
-    return jsonify({
-        "user": _current_user_payload(),
-        "settings": _settings_payload(),
-        "sections": {
-            "nest": [_channel_payload(channel, university.get("status") if channel == university.get("channel") else None) for channel in channels],
-            "direct_messages": dm_threads,
-        },
-        "university": {
-            "status": university.get("status"),
-            "school": current_user.school,
-            "school_key": getattr(current_user, "school_key", None),
-        },
-        "discord_invite_url": os.environ.get("DISCORD_INVITE_URL", ""),
-        "capabilities": {
-            "attachments": bool(os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID")),
-            "max_attachment_size_bytes": entitlements["limits"].get("max_chat_attachment_size_bytes"),
-            "max_attachments_per_message": MAX_ATTACHMENTS_PER_MESSAGE,
-            "giphy": {
-                "available": giphy_available(),
-                "api_key": giphy_api_key() if giphy_available() else "",
-                "rating": "pg",
-            },
-        },
-    })
+    return jsonify(
+        _assemble_bootstrap_payload_service(
+            current_user=current_user,
+            channels=channels,
+            university=university,
+            dm_threads=dm_threads,
+            entitlements=entitlements,
+            current_user_payload_fn=_current_user_payload,
+            settings_payload_fn=_settings_payload,
+            channel_payload_fn=_channel_payload,
+            sync_environment_config_fn=runtime_environment_config,
+            attachments_enabled_fn=_appwrite_chat_attachments_enabled,
+            max_attachments_per_message=MAX_ATTACHMENTS_PER_MESSAGE,
+            giphy_available_fn=giphy_available,
+            giphy_api_key_fn=giphy_api_key,
+        )
+    )
 
 
 @chat_api_bp.route("/api/chat/summary")
 @login_required
 def chat_summary():
     user_id = _current_user_id()
-    rooms = []
-    total_unread = 0
-    has_capped_room = False
-
-    for channel in _existing_visible_channels_for_summary():
-        channel_id = _row_id(channel)
-        read_state = _read_state_for_scope(user_id, "channel", channel_id)
-        unread, capped = _unread_count("channel", channel_id, user_id, (read_state or {}).get("last_read_at"))
-        total_unread += unread
-        has_capped_room = has_capped_room or capped
-        rooms.append({
-            "type": "channel",
-            "id": channel_id,
-            "label": channel.get("label") or channel.get("name") or "Chat",
-            "unread_count": min(unread, CHAT_UNREAD_CAP),
-            "has_unread": unread > 0,
-        })
-
-    for thread in _threads_for_current_user():
-        thread_id = _row_id(thread)
-        read_state = _read_state_for_scope(user_id, "thread", thread_id)
-        unread, capped = _unread_count("thread", thread_id, user_id, (read_state or {}).get("last_read_at"))
-        total_unread += unread
-        has_capped_room = has_capped_room or capped
-        rooms.append({
-            "type": "thread",
-            "id": thread_id,
-            "unread_count": min(unread, CHAT_UNREAD_CAP),
-            "has_unread": unread > 0,
-        })
-
-    return jsonify({
-        "total_unread": min(total_unread, CHAT_UNREAD_CAP),
-        "unread_capped": total_unread >= CHAT_UNREAD_CAP or has_capped_room,
-        "has_unread": total_unread > 0,
-        "rooms": rooms,
-    })
+    return jsonify(
+        _assemble_chat_summary_payload_service(
+            user_id,
+            _existing_visible_channels_for_summary(),
+            threads_fn=_threads_for_current_user,
+            row_id_fn=_row_id,
+            read_state_for_scope_fn=_read_state_for_scope,
+            unread_count_fn=_unread_count,
+            unread_cap=CHAT_UNREAD_CAP,
+        )
+    )
 
 
 @chat_api_bp.route("/api/chat/read", methods=["POST"])
@@ -2451,65 +1933,55 @@ def mark_chat_unread():
 
 
 def _threads_for_current_user():
-    user_id = _current_user_id()
-    try:
-        rows_a = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_a", [user_id])])
-        rows_b = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_b", [user_id])])
-    except AppwriteException:
-        logger.exception("Failed to list DM threads")
-        return []
-    threads = {(_row_id(row)): row for row in rows_a + rows_b}.values()
-    return list(threads)
+    return _list_threads_for_current_user_service(
+        _current_user_id(),
+        list_rows_all_fn=list_rows_all,
+        query_cls=Query,
+        threads_collection=COLLECTIONS["chat_dm_threads"],
+        appwrite_exception=AppwriteException,
+        error_logger=logger,
+    )
 
 
 def _thread_payload(thread):
-    other = _public_user(_other_participant(thread))
-    if not other:
-        return None
-    status = _presence_statuses_for_users([other["id"]]).get(other["id"], "offline")
-    other["online"] = status != "offline"
-    other["presence_status"] = status
-    thread_id = _row_id(thread)
-    active_users = _fresh_chat_room_presence("chat", thread_id)
-    return {
-        "id": thread_id,
-        "other_user": other,
-        "last_message_at": thread.get("last_message_at") or thread.get("updated_at") or thread.get("created_at"),
-        "blocked": _is_blocked_between(_current_user_id(), other["id"]),
-        "active_count": len(active_users),
-        "presence_status": status,
-        "presence_scope": _presence_scope("thread", thread_id),
-        "presence_read_permissions": _presence_read_permissions_for_thread(thread),
-        "presence_profile_resolve_allowed": True,
-    }
+    return _thread_payload_service(
+        thread,
+        other_participant_fn=_other_participant,
+        public_user_fn=_public_user,
+        presence_statuses_for_users_fn=_presence_statuses_for_users,
+        current_user_id_fn=_current_user_id,
+        row_id_fn=_row_id,
+        fresh_chat_room_presence_fn=_fresh_chat_room_presence,
+        is_blocked_between_fn=_is_blocked_between,
+        presence_scope_fn=_presence_scope,
+        presence_read_permissions_for_thread_fn=_presence_read_permissions_for_thread,
+    )
 
 
 def _list_threads():
-    threads = _threads_for_current_user()
-    payload = []
-    for thread in threads:
-        item = _thread_payload(thread)
-        if item:
-            payload.append(item)
-    payload.sort(key=lambda item: item.get("last_message_at") or "", reverse=True)
-    return payload
+    return _list_thread_payloads_service(
+        _threads_for_current_user(),
+        thread_payload_fn=_thread_payload,
+    )
 
 
 def _attachment_scope_access(scope_type, scope_id):
-    if scope_type == "channel":
-        channel = get_row_safe(COLLECTIONS["chat_channels"], str(scope_id), allow_missing=True)
-        return bool(_can_access_channel(channel))
-    if scope_type == "thread":
-        return bool(_thread_for_user(str(scope_id)))
-    return False
+    return _attachment_scope_access_service(
+        scope_type,
+        scope_id,
+        get_row_fn=get_row_safe,
+        collections=COLLECTIONS,
+        can_access_channel_fn=_can_access_channel,
+        thread_for_user_fn=_thread_for_user,
+    )
 
 
 def _can_access_attachment(row):
-    if not row:
-        return False
-    if row.get("status") == "pending":
-        return str(row.get("user_id") or "") == _current_user_id()
-    return row.get("status") == "active" and _attachment_scope_access(row.get("scope_type"), row.get("scope_id"))
+    return _can_access_attachment_service(
+        row,
+        current_user_id=_current_user_id(),
+        attachment_scope_access_fn=_attachment_scope_access,
+    )
 
 
 @chat_api_bp.route("/api/chat/attachments", methods=["POST"])
@@ -2523,7 +1995,7 @@ def upload_chat_attachment():
     if not _attachment_scope_access(scope_type, scope_id):
         return jsonify({"error": "Conversation unavailable."}), 404
     try:
-        row = create_attachment(
+        row = _create_chat_attachment_service(
             user_id=_current_user_id(),
             scope_type=scope_type,
             scope_id=scope_id,
@@ -2531,6 +2003,7 @@ def upload_chat_attachment():
             entitlements=request_entitlements(current_user),
             original_size=request.form.get("original_size_bytes"),
             upload_encoding=request.form.get("content_encoding") or "identity",
+            create_attachment_fn=create_attachment,
         )
     except EntitlementLimitError as exc:
         return jsonify(exc.payload()), 413
@@ -2545,25 +2018,34 @@ def upload_chat_attachment():
 @chat_api_bp.route("/api/chat/attachments/<attachment_id>", methods=["DELETE"])
 @login_required
 def cancel_chat_attachment(attachment_id):
-    row = get_attachment(attachment_id)
-    if not row or row.get("status") != "pending":
+    try:
+        _cancel_pending_attachment_service(
+            attachment_id,
+            get_attachment_fn=get_attachment,
+            current_user_id=_current_user_id(),
+            delete_attachment_fn=delete_attachment,
+        )
+    except _PendingAttachmentNotFoundError:
         return jsonify({"error": "Pending attachment not found."}), 404
-    if str(row.get("user_id") or "") != _current_user_id():
+    except _AttachmentOwnershipError:
         return jsonify({"error": "You cannot cancel this attachment."}), 403
-    delete_attachment(row)
     return jsonify({"status": "ok"})
 
 
 @chat_api_bp.route("/api/chat/attachments/<attachment_id>/preview")
 @login_required
 def preview_chat_attachment(attachment_id):
-    row = get_attachment(attachment_id)
-    if not _can_access_attachment(row) or row.get("kind") not in {"image", "pdf"}:
+    try:
+        row, data = _read_attachment_service(
+            attachment_id,
+            preview=True,
+            get_attachment_fn=get_attachment,
+            can_access_attachment_fn=_can_access_attachment,
+            attachment_bytes_fn=attachment_bytes,
+        )
+    except _AttachmentUnavailableError:
         return jsonify({"error": "Preview unavailable."}), 404
     use_preview = row.get("kind") == "pdf"
-    data = attachment_bytes(row, preview=use_preview)
-    if not data:
-        return jsonify({"error": "Preview unavailable."}), 404
     response = send_file(
         io.BytesIO(data),
         mimetype="image/webp" if use_preview else row.get("mime_type"),
@@ -2579,11 +2061,15 @@ def preview_chat_attachment(attachment_id):
 @chat_api_bp.route("/api/chat/attachments/<attachment_id>/download")
 @login_required
 def download_chat_attachment(attachment_id):
-    row = get_attachment(attachment_id)
-    if not _can_access_attachment(row):
-        return jsonify({"error": "Attachment unavailable."}), 404
-    data = attachment_bytes(row)
-    if data is None:
+    try:
+        row, data = _read_attachment_service(
+            attachment_id,
+            preview=False,
+            get_attachment_fn=get_attachment,
+            can_access_attachment_fn=_can_access_attachment,
+            attachment_bytes_fn=attachment_bytes,
+        )
+    except _AttachmentUnavailableError:
         return jsonify({"error": "Attachment unavailable."}), 404
     response = send_file(
         io.BytesIO(data),
@@ -2605,16 +2091,19 @@ def channel_messages(channel_id):
         return jsonify({"error": "Channel unavailable."}), 404
     after = request.args.get("after")
     after_message_id = request.args.get("after_message_id")
-    rows = _list_messages(
+    rows, has_more = _list_room_messages_service(
         "channel",
         channel_id,
         request.args.get("before"),
         after,
-        after_message_id=after_message_id,
+        after_message_id,
+        list_messages_fn=_list_messages,
+        page_size=MESSAGE_PAGE_SIZE,
+        history_limited=channel.get("kind") == "discord",
     )
     return jsonify({
         "messages": _serialize_messages(rows),
-        "has_more": not after and not after_message_id and channel.get("kind") != "discord" and len(rows) == MESSAGE_PAGE_SIZE,
+        "has_more": has_more,
         "channel": _channel_payload(channel),
         **_room_message_metadata("channel", channel_id),
     })
@@ -2629,157 +2118,19 @@ def send_channel_message(channel_id):
     if channel.get("read_only"):
         return jsonify({"error": "This channel is read-only."}), 403
     try:
-        content, attachment_ids, gif = _message_media_payload()
+        row, _created = _send_channel_message_service(
+            channel_id,
+            channel,
+            dependencies=_chat_delivery_dependencies(),
+        )
     except (AttachmentError, GiphyError) as exc:
         return jsonify({"error": str(exc)}), 400
-
-    now = format_datetime(_now())
-    previews = _previews_for_content(content)
-    if gif:
-        previews.append(gif)
-    base_payload = {
-        "channel_id": channel_id,
-        "user_id": _current_user_id(),
-        "author_name": current_user.name or current_user.username or "Nest User",
-        "author_username": current_user.username or "",
-        "author_avatar_url": current_user.picture_url or "",
-        "content": content,
-        "rendered_html": render_markdown(content),
-        "link_preview_json": json.dumps(previews),
-        "created_at": now,
-        "updated_at": now,
-    }
-
-    if channel.get("kind") == "discord":
-        bridge_files = []
-        bridge_links = []
-        for attachment_id in attachment_ids:
-            attachment = get_attachment(attachment_id)
-            if (
-                not attachment
-                or attachment.get("status") != "pending"
-                or str(attachment.get("user_id") or "") != _current_user_id()
-                or attachment.get("scope_type") != "channel"
-                or str(attachment.get("scope_id") or "") != str(channel_id)
-            ):
-                return jsonify({"error": "An attachment is unavailable or belongs to a different conversation."}), 400
-            if int(attachment.get("original_size_bytes") or 0) <= 10 * 1024 * 1024:
-                bridge_files.append({
-                    "filename": attachment.get("original_filename") or "attachment",
-                    "mime_type": attachment.get("mime_type") or "application/octet-stream",
-                    "data": attachment_bytes(attachment),
-                })
-            else:
-                bridge_links.append(
-                    f"{attachment.get('original_filename') or 'Attachment'}: "
-                    f"{request.url_root.rstrip('/')}/api/chat/attachments/{attachment_id}/download"
-                )
-        bridge_content = content
-        if gif:
-            bridge_content = "\n".join(value for value in (bridge_content, gif.get("url")) if value)
-        if bridge_links:
-            bridge_content = "\n".join(value for value in (bridge_content, *bridge_links) if value)
-        try:
-            discord_message, webhook = execute_chat_webhook(
-                bridge_content,
-                current_user.name or current_user.username or "Nest User",
-                current_user.picture_url,
-                files=bridge_files,
-            )
-        except (DiscordBridgeError, Exception):
-            logger.exception("Failed to send Discord webhook message")
-            return jsonify({"error": "Unable to send to Discord right now."}), 502
-        base_payload.update({
-            "source": "discord",
-            "external_id": _discord_message_external_id(channel, discord_message.get("id")),
-            "discord_message_id": discord_message.get("id"),
-            "discord_webhook_id": discord_message.get("webhook_id") or webhook.get("id"),
-            "created_at": discord_message.get("timestamp") or now,
-        })
-    else:
-        base_payload["source"] = "appwrite"
-
-    row_id = None
-    if channel.get("kind") == "discord" and base_payload.get("discord_message_id"):
-        row_id = _discord_message_row_id(channel, base_payload.get("discord_message_id"))
-
-    created = False
-    if row_id:
-        inserted = insert_row_ignore_safe(
-            COLLECTIONS["chat_messages"],
-            row_id=row_id,
-            data=base_payload,
-        )
-        if inserted:
-            row = get_row_safe(COLLECTIONS["chat_messages"], row_id)
-            created = True
-        else:
-            existing = _find_discord_message_row(row_id, base_payload.get("external_id"))
-            if not existing:
-                logger.error("Failed to persist channel message after duplicate insert race row_id=%s", row_id)
-                return jsonify({"error": "Unable to save message."}), 500
-            row = existing
-    else:
-        try:
-            row = create_row_safe(
-                COLLECTIONS["chat_messages"],
-                row_id=ID.unique(),
-                data=base_payload,
-            )
-            created = True
-        except AppwriteException:
-            logger.exception("Failed to persist channel message")
-            return jsonify({"error": "Unable to save message."}), 500
-    try:
-        if attachment_ids:
-            bind_pending(
-                attachment_ids,
-                user_id=_current_user_id(),
-                scope_type="channel",
-                scope_id=channel_id,
-                message_id=_row_id(row),
-            )
-    except (AttachmentError, AppwriteException) as exc:
-        logger.exception("Failed to bind channel message attachments")
-        try:
-            delete_row_safe(COLLECTIONS["chat_messages"], _row_id(row))
-        except AppwriteException:
-            logger.exception("Failed to roll back channel message")
+    except _DiscordDeliveryError:
+        return jsonify({"error": "Unable to send to Discord right now."}), 502
+    except _AttachmentBindingError as exc:
         return jsonify({"error": str(exc) or "Unable to attach files."}), 400
-    try:
-        if channel.get("kind") == "discord":
-            _prune_discord_messages(channel_id)
-        if created:
-            emit_chat_event(
-                "channel",
-                channel_id,
-                "message_created",
-                message_id=_row_id(row),
-                channel_id=channel_id,
-                actor_id=_current_user_id(),
-                channel=channel,
-            )
-            mentioned = {match.lower() for match in re.findall(r"(?<![\w@])@([A-Za-z0-9._-]{2,64})", content)}
-            for username in mentioned:
-                try:
-                    recipient = first_row(COLLECTIONS["users"], [Query.equal("username", [username])])
-                    recipient_id = _row_id(recipient)
-                    if recipient_id and recipient_id != _current_user_id():
-                        notifications.notify(
-                            recipient_id, "chat_mention", f"{current_user.name or current_user.username} mentioned you",
-                            content, f"/chat?channel={channel_id}&message={_row_id(row)}", source_ref=_row_id(row),
-                            dedupe_key=f"mention:{_row_id(row)}:{recipient_id}", tag=f"mention:{channel_id}", actor_user_id=_current_user_id(),
-                        )
-                except Exception:
-                    logger.exception("Failed to dispatch channel mention notification")
-    except AppwriteException:
-        logger.exception("Failed to finalize channel message")
+    except _MessagePersistenceError:
         return jsonify({"error": "Unable to save message."}), 500
-    if created:
-        try:
-            invites.record_activation(_current_user_id(), "chat_message")
-        except Exception:
-            logger.exception("Failed to record invite activation for channel message")
     return jsonify({"message": _serialize_message(row)}), 201
 
 
@@ -2787,63 +2138,29 @@ def send_channel_message(channel_id):
 @login_required
 def delete_message(message_id):
     if request.method == "GET":
-        row = _message_for_current_user(message_id)
-        if not row:
-            return jsonify({"error": "Message not found."}), 404
-        return jsonify({"message": _serialize_message(row)})
-
-    row = get_row_safe(COLLECTIONS["chat_messages"], message_id, allow_missing=True)
-    if not row or row.get("deleted_at"):
-        return jsonify({"error": "Message not found."}), 404
-    if str(row.get("user_id") or "") != _current_user_id():
-        return jsonify({"error": "You can only delete your own messages."}), 403
-    created = _message_timestamp(row)
-    if (_now() - created).total_seconds() > DELETE_WINDOW_SECONDS:
-        return jsonify({"error": "Messages can only be deleted within 5 minutes of sending."}), 403
-
-    if row.get("source") == "discord" and row.get("discord_message_id"):
         try:
-            delete_webhook_message(row.get("discord_webhook_id"), row.get("discord_message_id"))
-        except Exception:
-            logger.exception("Failed to delete Discord webhook message")
-            return jsonify({"error": "Unable to delete the Discord message right now."}), 502
+            message = _get_message_for_current_user_service(
+                message_id,
+                message_for_current_user_fn=_message_for_current_user,
+                serialize_message_fn=_serialize_message,
+            )
+        except _MessageNotFoundError:
+            return jsonify({"error": "Message not found."}), 404
+        return jsonify({"message": message})
     try:
-        deleted_at = format_datetime(_now())
-        update_row_safe(
-            COLLECTIONS["chat_messages"],
+        _delete_chat_message_service(
             message_id,
-            {
-                "deleted_at": deleted_at,
-                "deleted_by": _current_user_id(),
-                "updated_at": deleted_at,
-            },
+            dependencies=_chat_delivery_dependencies(),
         )
-        delete_message_attachments(message_id)
-        if row.get("channel_id"):
-            channel = get_row_safe(COLLECTIONS["chat_channels"], row.get("channel_id"), allow_missing=True)
-            emit_chat_event(
-                "channel",
-                row.get("channel_id"),
-                "message_deleted",
-                message_id=message_id,
-                channel_id=row.get("channel_id"),
-                actor_id=_current_user_id(),
-                channel=channel,
-            )
-        elif row.get("thread_id"):
-            thread = get_row_safe(COLLECTIONS["chat_dm_threads"], row.get("thread_id"), allow_missing=True)
-            emit_chat_event(
-                "thread",
-                row.get("thread_id"),
-                "message_deleted",
-                message_id=message_id,
-                thread_id=row.get("thread_id"),
-                actor_id=_current_user_id(),
-                readable_user_ids=_thread_participant_ids(thread or {}),
-            )
-        _emit_chat_delete_audit(row, deleted_at)
-    except AppwriteException:
-        logger.exception("Failed to delete chat message")
+    except _MessageNotFoundError:
+        return jsonify({"error": "Message not found."}), 404
+    except _MessageOwnershipError:
+        return jsonify({"error": "You can only delete your own messages."}), 403
+    except _MessageExpiredError:
+        return jsonify({"error": "Messages can only be deleted within 5 minutes of sending."}), 403
+    except _DiscordDeliveryError:
+        return jsonify({"error": "Unable to delete the Discord message right now."}), 502
+    except _MessagePersistenceError:
         return jsonify({"error": "Unable to delete message."}), 500
     return jsonify({"status": "ok"})
 
@@ -2852,30 +2169,19 @@ def delete_message(message_id):
 @login_required
 def dm_search():
     query = (request.args.get("q") or "").strip().lower()
-    if len(query) < 2:
-        return jsonify({"results": []})
-    try:
-        users = list_rows_all(COLLECTIONS["users"], [Query.order_desc("created_at")], limit=100)
-    except AppwriteException:
-        logger.exception("Failed to search DM users")
-        return jsonify({"results": []})
-    results = []
-    for user in users:
-        if _row_id(user) == _current_user_id():
-            continue
-        haystack = " ".join([
-            user.get("name") or "",
-            user.get("username") or "",
-            user.get("school") or "",
-            user.get("major") or "",
-            user.get("graduation_year") or "",
-            user.get("class_year") or "",
-        ]).lower()
-        if query in haystack:
-            results.append(_public_user(user))
-        if len(results) >= 20:
-            break
-    return jsonify({"results": results})
+    return jsonify({
+        "results": _search_direct_message_users_service(
+            query,
+            current_user_id=_current_user_id(),
+            list_rows_all_fn=list_rows_all,
+            query_cls=Query,
+            users_collection=COLLECTIONS["users"],
+            row_id_fn=_row_id,
+            public_user_fn=_public_user,
+            appwrite_exception=AppwriteException,
+            error_logger=logger,
+        )
+    })
 
 
 @chat_api_bp.route("/api/chat/dm/threads", methods=["GET", "POST"])
@@ -2885,7 +2191,13 @@ def dm_threads():
         return jsonify({"threads": _list_threads()})
     other_user_id = str((request.get_json(silent=True) or {}).get("user_id") or "").strip()
     try:
-        thread = _get_or_create_thread(other_user_id)
+        thread = _create_direct_thread_service(
+            other_user_id,
+            get_or_create_thread_fn=_get_or_create_thread,
+            current_user_id=_current_user_id(),
+            row_id_fn=_row_id,
+            thread_participant_ids_fn=_thread_participant_ids,
+        )
     except (ValueError, AppwriteException) as exc:
         return jsonify({"error": str(exc) or "Unable to create thread."}), 400
     emit_chat_event(
@@ -2921,17 +2233,19 @@ def dm_thread_messages(thread_id):
     if request.method == "GET":
         after = request.args.get("after")
         after_message_id = request.args.get("after_message_id")
-        rows = _list_messages(
+        rows, has_more = _list_room_messages_service(
             "thread",
             thread_id,
             request.args.get("before"),
             after,
-            after_message_id=after_message_id,
+            after_message_id,
+            list_messages_fn=_list_messages,
+            page_size=MESSAGE_PAGE_SIZE,
         )
         thread_payload = _thread_payload(thread) or {}
         return jsonify({
             "messages": _serialize_messages(rows),
-            "has_more": not after and not after_message_id and len(rows) == MESSAGE_PAGE_SIZE,
+            "has_more": has_more,
             "thread": {
                 "id": thread_id,
                 "other_user": thread_payload.get("other_user", other),
@@ -2947,75 +2261,19 @@ def dm_thread_messages(thread_id):
 
     if not other:
         return jsonify({"error": "Recipient unavailable."}), 404
-    if _is_blocked_between(_current_user_id(), other["id"]):
-        return jsonify({"error": "This conversation is blocked."}), 403
     try:
-        content, attachment_ids, gif = _message_media_payload()
+        row = _send_direct_message_service(
+            thread_id,
+            thread,
+            other,
+            dependencies=_chat_delivery_dependencies(),
+        )
     except (AttachmentError, GiphyError) as exc:
         return jsonify({"error": str(exc)}), 400
-    now = format_datetime(_now())
-    previews = _previews_for_content(content)
-    if gif:
-        previews.append(gif)
-    try:
-        row = create_row_safe(
-            COLLECTIONS["chat_messages"],
-            row_id=ID.unique(),
-            data={
-                "thread_id": thread_id,
-                "source": "appwrite",
-                "user_id": _current_user_id(),
-                "author_name": current_user.name or current_user.username or "Nest User",
-                "author_username": current_user.username or "",
-                "author_avatar_url": current_user.picture_url or "",
-                "content": content,
-                "rendered_html": render_markdown(content),
-                "link_preview_json": json.dumps(previews),
-                "created_at": now,
-                "updated_at": now,
-            },
-        )
-        if attachment_ids:
-            bind_pending(
-                attachment_ids,
-                user_id=_current_user_id(),
-                scope_type="thread",
-                scope_id=thread_id,
-                message_id=_row_id(row),
-            )
-        update_row_safe(COLLECTIONS["chat_dm_threads"], thread_id, {"last_message_at": now, "updated_at": now})
-        emit_chat_event(
-            "thread",
-            thread_id,
-            "message_created",
-            message_id=_row_id(row),
-            thread_id=thread_id,
-            actor_id=_current_user_id(),
-            readable_user_ids=_thread_participant_ids(thread),
-        )
-        recipient_id = str(other.get("id") or other.get("$id") or "")
-        if recipient_id:
-            try:
-                notifications.notify(
-                    recipient_id, "chat_dm", current_user.name or current_user.username or "New direct message",
-                    content or ("Sent a GIF" if gif else "Sent an attachment"), f"/chat?thread={thread_id}&message={_row_id(row)}", source_ref=_row_id(row),
-                    dedupe_key=f"chat:{_row_id(row)}", tag=f"dm:{thread_id}", actor_user_id=_current_user_id(),
-                )
-            except Exception:
-                logger.exception("Failed to dispatch DM notification")
-    except (AppwriteException, AttachmentError):
-        logger.exception("Failed to save DM")
-        if 'row' in locals():
-            try:
-                delete_message_attachments(_row_id(row))
-                delete_row_safe(COLLECTIONS["chat_messages"], _row_id(row))
-            except AppwriteException:
-                logger.exception("Failed to roll back DM message")
+    except _DirectMessageBlockedError:
+        return jsonify({"error": "This conversation is blocked."}), 403
+    except _DirectMessagePersistenceError:
         return jsonify({"error": "Unable to send message."}), 500
-    try:
-        invites.record_activation(_current_user_id(), "chat_message")
-    except Exception:
-        logger.exception("Failed to record invite activation for direct message")
     return jsonify({"message": _serialize_message(row)}), 201
 
 
@@ -3025,54 +2283,17 @@ def blocks(user_id):
     target_id = str(user_id or "").strip()
     if target_id == _current_user_id():
         return jsonify({"error": "You cannot block yourself."}), 400
-    key = f"{_current_user_id()}:{target_id}"
-    if request.method == "DELETE":
-        try:
-            row = first_row(COLLECTIONS["chat_blocks"], [Query.equal("block_key", [key])])
-            if row:
-                delete_row_safe(COLLECTIONS["chat_blocks"], _row_id(row))
-            for thread in _threads_for_current_user():
-                if target_id in _thread_participant_ids(thread):
-                    emit_chat_event(
-                        "thread",
-                        _row_id(thread),
-                        "block_updated",
-                        thread_id=_row_id(thread),
-                        actor_id=_current_user_id(),
-                        readable_user_ids=_thread_participant_ids(thread),
-                    )
-        except AppwriteException:
-            logger.exception("Failed to unblock user")
-            return jsonify({"error": "Unable to unblock user."}), 500
-        return jsonify({"status": "ok", "blocked": False})
-
     try:
-        existing = first_row(COLLECTIONS["chat_blocks"], [Query.equal("block_key", [key])])
-        if not existing:
-            create_row_safe(
-                COLLECTIONS["chat_blocks"],
-                row_id=ID.unique(),
-                data={
-                    "blocker_id": _current_user_id(),
-                    "blocked_id": target_id,
-                    "block_key": key,
-                    "created_at": format_datetime(_now()),
-                },
-            )
-        for thread in _threads_for_current_user():
-            if target_id in _thread_participant_ids(thread):
-                emit_chat_event(
-                    "thread",
-                    _row_id(thread),
-                    "block_updated",
-                    thread_id=_row_id(thread),
-                    actor_id=_current_user_id(),
-                    readable_user_ids=_thread_participant_ids(thread),
-                )
+        blocked = _update_block_service(
+            target_id,
+            method=request.method,
+            dependencies=_chat_delivery_dependencies(),
+        )
     except AppwriteException:
-        logger.exception("Failed to block user")
+        if request.method == "DELETE":
+            return jsonify({"error": "Unable to unblock user."}), 500
         return jsonify({"error": "Unable to block user."}), 500
-    return jsonify({"status": "ok", "blocked": True})
+    return jsonify({"status": "ok", "blocked": blocked})
 
 
 @chat_api_bp.route("/api/chat/presence/users", methods=["POST"])
@@ -3127,3 +2348,27 @@ def presence():
         "users": _presence_online_users(),
         "dm_statuses": {},
     })
+
+
+def _sync_discord_channels_for_background(*args, **kwargs):
+    return sync_discord_channels(*args, **kwargs)
+
+
+def _ingest_discord_gateway_message_for_background(*args, **kwargs):
+    return ingest_discord_gateway_message(*args, **kwargs)
+
+
+def _delete_discord_gateway_message_for_background(*args, **kwargs):
+    return delete_discord_gateway_message(*args, **kwargs)
+
+
+def _delete_discord_gateway_messages_for_background(*args, **kwargs):
+    return delete_discord_gateway_messages(*args, **kwargs)
+
+
+register_discord_chat_handlers(
+    sync_discord_channels=_sync_discord_channels_for_background,
+    ingest_discord_gateway_message=_ingest_discord_gateway_message_for_background,
+    delete_discord_gateway_message=_delete_discord_gateway_message_for_background,
+    delete_discord_gateway_messages=_delete_discord_gateway_messages_for_background,
+)

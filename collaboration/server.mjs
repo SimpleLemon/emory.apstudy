@@ -165,9 +165,6 @@ const server = Server.configure({
         if (update?.byteLength > MAX_UPDATE_BYTES) {
             throw new Error('Collaboration update is too large.');
         }
-        if (connection.readOnly) {
-            throw new Error('This collaboration connection is read-only.');
-        }
     },
 
     async onAwarenessUpdate({ context, added, updated }) {

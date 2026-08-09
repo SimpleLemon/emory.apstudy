@@ -141,7 +141,7 @@ class GlobalSearchAggregationTests(unittest.TestCase):
             "calendar_id": "feed:canvas",
         }
         with patch.object(global_search, "first_row", return_value=None), \
-                patch("blueprints.calendar_api._load_serialized_calendar_events", return_value=([event], [], [])):
+                patch.object(global_search, "_load_serialized_calendar_events", return_value=([event], [], [])):
             results = global_search._search_events("search-user", "midterm")
 
         self.assertEqual(

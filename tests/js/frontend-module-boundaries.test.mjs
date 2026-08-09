@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
+const repoRoot = fileURLToPath(new URL("../..", import.meta.url));
 const read = (relativePath) => readFile(new URL(`../../${relativePath}`, import.meta.url), "utf8");
 
 test("onboarding keeps executable behavior out of the server-rendered template", async () => {
@@ -15,23 +18,50 @@ test("onboarding keeps executable behavior out of the server-rendered template",
   assert.match(entry, /import \{ createThemeSelector \} from '\.\/theme-selector\.js'/);
 });
 
-test("chat runtime delegates cache and presentation responsibilities", async () => {
-  const [runtime, cache, presentation] = await Promise.all([
+test("chat runtime delegates cache, presentation, realtime, presence, message DOM, room, and composer responsibilities", async () => {
+  const [runtime, cache, presentation, realtime, presence, messagesDom, rooms, composer] = await Promise.all([
     read("static/js/chat/runtime.js"),
     read("static/js/chat/cache.js"),
     read("static/js/chat/presentation.js"),
+    read("static/js/chat/realtime.js"),
+    read("static/js/chat/presence.js"),
+    read("static/js/chat/messages-dom.js"),
+    read("static/js/chat/rooms.js"),
+    read("static/js/chat/composer.js"),
   ]);
   assert.match(runtime, /from "\.\/cache\.js"/);
   assert.match(runtime, /from "\.\/presentation\.js"/);
+  assert.match(runtime, /from "\.\/realtime\.js"/);
+  assert.match(runtime, /from "\.\/presence\.js"/);
+  assert.match(runtime, /from "\.\/messages-dom\.js"/);
+  assert.match(runtime, /from "\.\/rooms\.js"/);
+  assert.match(runtime, /from "\.\/composer\.js"/);
   assert.doesNotMatch(runtime, /function openChatCacheDb|function groupMessages|function escapeHtml/);
   assert.match(cache, /export function createPersistentChatCache/);
+  assert.match(presentation, /import \{ escapeHtml \} from "\.\.\/core\/ui-primitives-module\.js"/);
+  assert.match(presentation, /export \{ escapeHtml \}/);
   assert.match(presentation, /export function groupMessages/);
+  assert.match(realtime, /export function createChatRealtime/);
+  assert.match(realtime, /function handleRealtimePayload/);
+  assert.match(realtime, /function startRealtimeFallback/);
+  assert.match(presence, /export function createChatPresence/);
+  assert.match(presence, /function renderPresenceDrivenUi/);
+  assert.match(presence, /function scheduleTypingPresence/);
+  assert.match(messagesDom, /export function createChatMessagesDom/);
+  assert.match(messagesDom, /function syncMessagesToDom/);
+  assert.match(messagesDom, /function renderLeadMessage/);
+  assert.match(rooms, /export function createChatRooms/);
+  assert.match(rooms, /async function selectRoom/);
+  assert.match(rooms, /function markRoomRead/);
+  assert.match(composer, /export function createChatComposer/);
+  assert.match(composer, /async function sendActiveMessage/);
+  assert.match(composer, /async function retryMessage/);
 });
 
 test("shared and feature stylesheets load their extracted responsibilities in cascade order", async () => {
   const [sharedAssets, globalCss, overlays, notesTemplate, notesCss, notesEditorCss, analyticsTemplate, adminCss, analyticsCss, responsiveCss] = await Promise.all([
     read("templates/_shared_runtime_assets.html"),
-    read("static/css/global.css"),
+    readCssSource(repoRoot, "static/css/global.css"),
     read("static/css/core/feedback-overlays.css"),
     read("templates/notes_editor.html"),
     read("static/css/notes.css"),

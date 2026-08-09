@@ -7,6 +7,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import threading
 from functools import wraps
 from datetime import datetime, timezone
 
@@ -30,9 +31,11 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from extensions import csrf
-from blueprints.settings import _settings_defaults
-from blueprints.chat_api import create_university_channel, emit_chat_event
+from services.chat_events import create_university_channel, emit_chat_event
+from services.settings_defaults import settings_defaults as _settings_defaults
 from services.chat_presence import sync_chat_presence_labels_for_school
+from services.redaction import SECRET_TEXT_RE
+from services.row_utils import row_id as _row_id
 from services.toasts import push_toast
 from services.user_cleanup import delete_user_data
 from services.user_profile import (
@@ -48,6 +51,34 @@ from services.app_config import (
     spring_course_tracking_open,
 )
 from services.admin_access import admin_user_ids
+from services.admin_user_sections import (
+    load_calendars_section,
+    load_chat_section,
+    load_courses_section,
+    load_files_section,
+    load_invites_section,
+    load_notes_section,
+    load_seat_tracks_section,
+    load_settings_section,
+)
+from services.host_admin import (
+    SCHEDULER_COMMAND_TIMEOUT_SECONDS,
+    SCHEDULER_ENV_PATH,
+    SCHEDULER_EXECUTABLE_FALLBACKS,
+    SCHEDULER_SERVICE_NAME,
+    SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
+    SYSTEM_GIT_REPO_PATH,
+    SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS,
+    SYSTEM_RESTART_DELAY_SECONDS,
+    SYSTEM_STORAGE_LIMIT_GB,
+    git_pull_already_up_to_date as _git_pull_already_up_to_date,
+    resolve_scheduler_executable as _resolve_scheduler_executable_service,
+    run_scheduler_control_action as _run_scheduler_control_action_service,
+    run_system_git_pull as _run_system_git_pull_service,
+    schedule_system_restart as _schedule_system_restart_service,
+    scheduler_command_for_action as _scheduler_command_for_action_service,
+    scheduler_command_label as _scheduler_command_label,
+)
 from services.scheduler import update_course_tracking_refresh_interval
 from services.discord_audit import discord_audit_status, emit_admin_event, format_actor, format_user_target
 import services.apswiftly_control as apswiftly_control_service
@@ -82,23 +113,6 @@ except ImportError:  # pragma: no cover - optional dependency for monitoring
 admin_bp = Blueprint("admin", __name__)
 logger = logging.getLogger(__name__)
 admin_actions_logger = logging.getLogger("admin_actions")
-SECRET_TEXT_RE = re.compile(r"((?:[?&]|\b)(?:secret|key|token|password)=)[^&\s]+", re.IGNORECASE)
-SCHEDULER_ENV_PATH = "/var/www/nest.apstudy.org/.env"
-SCHEDULER_SERVICE_NAME = "nest"
-SCHEDULER_COMMAND_TIMEOUT_SECONDS = 20
-SYSTEM_GIT_REPO_PATH = "/var/www/nest.apstudy.org"
-SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS = 60
-SYSTEM_RESTART_DELAY_SECONDS = 2
-SYSTEM_STORAGE_LIMIT_GB = 150
-SCHEDULER_EXECUTABLE_FALLBACKS = {
-    "git": ("/usr/bin/git", "/bin/git"),
-    "sed": ("/usr/bin/sed", "/bin/sed"),
-    "sh": ("/bin/sh", "/usr/bin/sh"),
-    "ssh": ("/usr/bin/ssh", "/bin/ssh"),
-    "sudo": ("/usr/bin/sudo", "/bin/sudo"),
-    "systemctl": ("/usr/bin/systemctl", "/bin/systemctl"),
-}
-
 ALLOWED_SECTIONS = {
     "overview",
     "settings",
@@ -110,10 +124,6 @@ ALLOWED_SECTIONS = {
     "chat",
     "invites",
 }
-
-
-def _row_id(row):
-    return row.get("$id") or row.get("id")
 
 
 def _format_admin_date(value):
@@ -184,7 +194,7 @@ def _read_os_pretty():
             if pretty:
                 return pretty
     except Exception:
-        pass
+        logger.debug("Failed to read freedesktop OS release metadata", exc_info=True)
     try:
         return platform.platform()
     except Exception:
@@ -209,32 +219,34 @@ def _system_status():
 
         status.update(scheduler_status())
     except Exception:
-        logger.exception("Failed to read scheduler status")
+        logger.exception("Failed to read scheduler status for admin system overview")
     if psutil is None:
         return status
+    metrics = {}
     try:
-        status["cpu_percent"] = round(psutil.cpu_percent(interval=0.1), 1)
+        metrics["cpu_percent"] = round(psutil.cpu_percent(interval=0.1), 1)
     except Exception:
-        pass
+        logger.debug("Failed to read CPU utilization", exc_info=True)
     try:
-        status["cpu_logical"] = psutil.cpu_count(logical=True)
-        status["cpu_physical"] = psutil.cpu_count(logical=False)
+        metrics["cpu_logical"] = psutil.cpu_count(logical=True)
+        metrics["cpu_physical"] = psutil.cpu_count(logical=False)
     except Exception:
-        pass
+        logger.debug("Failed to read CPU counts", exc_info=True)
     try:
         memory = psutil.virtual_memory()
-        status["mem_percent"] = round(memory.percent, 1)
-        status["mem_used_gb"] = round(memory.used / (1024**3), 1)
-        status["mem_total_gb"] = round(memory.total / (1024**3), 1)
+        metrics["mem_percent"] = round(memory.percent, 1)
+        metrics["mem_used_gb"] = round(memory.used / (1024**3), 1)
+        metrics["mem_total_gb"] = round(memory.total / (1024**3), 1)
     except Exception:
-        pass
+        logger.debug("Failed to read memory utilization", exc_info=True)
     try:
         disk = shutil.disk_usage("/")
         storage_used_gb = disk.used / (1024**3)
-        status["storage_used_gb"] = round(storage_used_gb, 1)
-        status["storage_percent"] = round((storage_used_gb / SYSTEM_STORAGE_LIMIT_GB) * 100, 1)
+        metrics["storage_used_gb"] = round(storage_used_gb, 1)
+        metrics["storage_percent"] = round((storage_used_gb / SYSTEM_STORAGE_LIMIT_GB) * 100, 1)
     except Exception:
-        pass
+        logger.debug("Failed to read disk utilization", exc_info=True)
+    status.update(metrics)
     return status
 
 
@@ -244,87 +256,55 @@ def _sanitize_admin_error(error):
 
 
 def _resolve_scheduler_executable(name):
-    found = shutil.which(name)
-    if found:
-        return found
-    for candidate in SCHEDULER_EXECUTABLE_FALLBACKS.get(name, ()):
-        if os.path.exists(candidate) and os.access(candidate, os.X_OK):
-            return candidate
-    raise FileNotFoundError(f"Required scheduler command not found: {name}")
+    return _resolve_scheduler_executable_service(
+        name,
+        shutil.which,
+        os.path.exists,
+        os.access,
+        SCHEDULER_EXECUTABLE_FALLBACKS,
+    )
 
 
 def _scheduler_command_for_action(action):
-    if action == "pause":
-        replacement = "s/SCHEDULER_ENABLED=1/SCHEDULER_ENABLED=0/g"
-    elif action == "resume":
-        replacement = "s/SCHEDULER_ENABLED=0/SCHEDULER_ENABLED=1/g"
-    else:
-        raise ValueError("Unsupported scheduler action.")
-    return [
-        [_resolve_scheduler_executable("sed"), "-i", replacement, SCHEDULER_ENV_PATH],
-        [_resolve_scheduler_executable("systemctl"), "restart", SCHEDULER_SERVICE_NAME],
-    ]
+    return _scheduler_command_for_action_service(
+        action,
+        _resolve_scheduler_executable,
+        SCHEDULER_ENV_PATH,
+        SCHEDULER_SERVICE_NAME,
+    )
 
 
 def _run_scheduler_control_action(action):
-    commands = _scheduler_command_for_action(action)
-    completed = []
-    for command in commands:
-        subprocess.run(
-            command,
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=SCHEDULER_COMMAND_TIMEOUT_SECONDS,
-        )
-        completed.append(command[0])
-    return completed
+    return _run_scheduler_control_action_service(
+        action,
+        _scheduler_command_for_action,
+        subprocess.run,
+        SCHEDULER_COMMAND_TIMEOUT_SECONDS,
+    )
 
 
 def _run_system_git_pull():
-    git_env = os.environ.copy()
-    git_env["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    git_env["GIT_SSH"] = _resolve_scheduler_executable("ssh")
-    command = [_resolve_scheduler_executable("git"), "-C", SYSTEM_GIT_REPO_PATH, "pull"]
-    return subprocess.run(
-        command,
-        check=True,
-        capture_output=True,
-        text=True,
-        env=git_env,
-        timeout=SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
+    return _run_system_git_pull_service(
+        os.environ,
+        _resolve_scheduler_executable,
+        subprocess.run,
+        SYSTEM_GIT_REPO_PATH,
+        SYSTEM_GIT_COMMAND_TIMEOUT_SECONDS,
     )
 
 
 def _schedule_system_restart():
-    restart_env = os.environ.copy()
-    restart_env["PATH"] = "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
-    sudo_path = _resolve_scheduler_executable("sudo")
-    systemctl_path = _resolve_scheduler_executable("systemctl")
-    command = [
-        _resolve_scheduler_executable("sh"),
-        "-c",
-        f"sleep {SYSTEM_RESTART_DELAY_SECONDS}; exec {sudo_path} {systemctl_path} restart {SCHEDULER_SERVICE_NAME}",
-    ]
-    return subprocess.Popen(
-        command,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL,
-        env=restart_env,
-        start_new_session=True,
+    return _schedule_system_restart_service(
+        os.environ,
+        _resolve_scheduler_executable,
+        subprocess.Popen,
+        subprocess.DEVNULL,
+        subprocess.TimeoutExpired,
+        threading.Thread,
+        SYSTEM_RESTART_DELAY_SECONDS,
+        SYSTEM_RESTART_COMMAND_TIMEOUT_SECONDS,
+        SCHEDULER_SERVICE_NAME,
     )
-
-
-def _git_pull_already_up_to_date(completed):
-    output = f"{completed.stdout or ''}\n{completed.stderr or ''}".lower()
-    return "already up to date" in output or "already up-to-date" in output
-
-
-def _scheduler_command_label(command):
-    if isinstance(command, (list, tuple)):
-        return " ".join(str(part) for part in command)
-    return str(command or "")
 
 
 def _require_admin():
@@ -760,6 +740,19 @@ def _delete_user_rows(user_id):
     return delete_user_data(user_id)
 
 
+def _section_loader_dependencies():
+    return {
+        "collections": COLLECTIONS,
+        "first_row": first_row,
+        "list_calendar_rows_all": list_calendar_rows_all,
+        "list_rows_all": list_rows_all,
+        "row_id": _row_id,
+        "user_chat_blocks": _user_chat_blocks,
+        "user_chat_messages": _user_chat_messages,
+        "user_dm_threads": _user_dm_threads,
+    }
+
+
 def _configured_feed_count(user_id):
     settings = first_row(
         COLLECTIONS["user_settings"],
@@ -833,181 +826,36 @@ def _build_configured_feeds(settings, feed_rows):
 
 
 def _load_section(section, user_id):
+    dependencies = _section_loader_dependencies()
     if section == "invites":
-        try:
-            owned_invites = list_rows_all(
-                COLLECTIONS["user_invites"],
-                [
-                    Query.equal("owner_user_id", [user_id]),
-                    Query.order_desc("created_at"),
-                ],
-            )
-            owned_attributions = list_rows_all(
-                COLLECTIONS["user_invite_attributions"],
-                [
-                    Query.equal("inviter_user_id", [user_id]),
-                    Query.order_desc("signed_up_at"),
-                ],
-            )
-            received_attribution = first_row(
-                COLLECTIONS["user_invite_attributions"],
-                [Query.equal("invited_user_id", [user_id])],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load invite records for admin")
-            return {
-                "invites": [],
-                "received_attribution": None,
-            }
-
-        attributions_by_invite = {}
-        for attribution in owned_attributions:
-            attributions_by_invite.setdefault(
-                str(attribution.get("invite_id") or ""),
-                [],
-            ).append(attribution)
-        return {
-            "invites": [
-                {
-                    "invite": invitation,
-                    "attributions": attributions_by_invite.get(
-                        str(_row_id(invitation) or ""),
-                        [],
-                    ),
-                }
-                for invitation in owned_invites
-            ],
-            "received_attribution": received_attribution,
-        }
-
+        return load_invites_section(user_id, dependencies)
     if section == "settings":
-        try:
-            return {
-                "settings": first_row(
-                    COLLECTIONS["user_settings"],
-                    [Query.equal("user_id", [user_id])],
-                )
-            }
-        except AppwriteException:
-            logger.exception("Failed to load user settings")
-            return {"settings": None}
-
+        return load_settings_section(user_id, dependencies)
     if section == "files":
-        try:
-            folders = list_rows_all(
-                COLLECTIONS["file_folders"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("created_at")],
-            )
-            files = list_rows_all(
-                COLLECTIONS["shared_files"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("created_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load files for admin")
-            return {"folders": [], "files": []}
-        return {
-            "folders": folders,
-            "files": files,
-        }
-
+        return load_files_section(user_id, dependencies)
     if section == "notes":
-        try:
-            notes = list_rows_all(
-                COLLECTIONS["notes"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            folders = list_rows_all(
-                COLLECTIONS["note_folders"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("created_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load notes for admin")
-            return {"notes": [], "note_folders": []}
-        return {
-            "notes": notes,
-            "note_folders": folders,
-        }
-
+        return load_notes_section(user_id, dependencies)
     if section == "calendars":
+        section_data = load_calendars_section(user_id, dependencies)
         try:
             settings = first_row(
                 COLLECTIONS["user_settings"],
                 [Query.equal("user_id", [user_id])],
             )
-            cache_rows = list_calendar_rows_all(
-                COLLECTIONS["calendar_cache"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("event_start")],
-            )
-            feeds = list_calendar_rows_all(
-                COLLECTIONS["calendar_feeds"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            preferences = list_calendar_rows_all(
-                COLLECTIONS["user_calendar_preferences"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("calendar_name")],
-            )
-            sources = list_calendar_rows_all(
-                COLLECTIONS["user_calendar_sources"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-            events = list_calendar_rows_all(
-                COLLECTIONS["user_events"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("start")],
-            )
-            overrides = list_calendar_rows_all(
-                COLLECTIONS["user_event_overrides"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
+            section_data["configured_feeds"] = _build_configured_feeds(
+                settings,
+                section_data.get("calendar_feeds"),
             )
         except AppwriteException:
-            logger.exception("Failed to load calendar data for admin")
-            return {
-                "calendar_cache": [],
-                "calendar_feeds": [],
-                "configured_feeds": [],
-                "calendar_preferences": [],
-                "calendar_sources": [],
-                "calendar_events": [],
-                "calendar_overrides": [],
-            }
-        return {
-            "calendar_cache": cache_rows,
-            "calendar_feeds": feeds,
-            "configured_feeds": _build_configured_feeds(settings, feeds),
-            "calendar_preferences": preferences,
-            "calendar_sources": sources,
-            "calendar_events": events,
-            "calendar_overrides": overrides,
-        }
-
+            logger.exception("Failed to load calendar feed health for admin")
+            section_data["configured_feeds"] = []
+        return section_data
     if section == "courses":
-        try:
-            courses = list_rows_all(
-                COLLECTIONS["user_courses"],
-                [Query.equal("user_id", [user_id]), Query.order_asc("term")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load courses for admin")
-            courses = []
-        return {"courses": courses}
-
+        return load_courses_section(user_id, dependencies)
     if section == "seat_tracks":
-        try:
-            tracks = list_rows_all(
-                COLLECTIONS["course_seat_tracks"],
-                [Query.equal("user_id", [user_id]), Query.order_desc("updated_at")],
-            )
-        except AppwriteException:
-            logger.exception("Failed to load seat tracks for admin")
-            tracks = []
-        return {"seat_tracks": tracks}
-
+        return load_seat_tracks_section(user_id, dependencies)
     if section == "chat":
-        return {
-            "messages": _user_chat_messages(user_id),
-            "dm_threads": _user_dm_threads(user_id),
-            "blocks": _user_chat_blocks(user_id),
-        }
-
+        return load_chat_section(user_id, dependencies)
     return {}
 
 
@@ -1632,8 +1480,9 @@ def _course_tracking_diagnostics():
     from services.scheduler import scheduler_status
 
     enabled_count, enabled_error = _enabled_course_track_count()
+    scheduler_payload = scheduler_status()
     payload = {
-        **scheduler_status(),
+        **scheduler_payload,
         **discord_audit_status(),
         "enabled_track_count": enabled_count,
         "enabled_track_count_error": enabled_error,
@@ -1641,7 +1490,7 @@ def _course_tracking_diagnostics():
     }
     payload["course_tracking_job_registered"] = any(
         job.get("id") == "check_course_seat_tracks"
-        for job in payload.get("jobs", [])
+        for job in scheduler_payload.get("jobs", [])
     )
     return payload
 

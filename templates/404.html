@@ -1,24 +1,18 @@
-<!DOCTYPE html>
-<html lang="en" data-apstudy-theme-preference="system-match" data-apstudy-theme-locked="true">
-<head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/themes.css') }}">
-    <title>404 - APStudy Nest</title>
-    <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" alt="APStudy Logo">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/manifest.json">
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/global.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tailwind.css') }}">
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en" data-apstudy-theme-preference="system-match" data-apstudy-theme-locked="true"{% endblock %}
+
+{% block title %}<title>404 - APStudy Nest</title>{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/404.css') }}">
-    <meta name="description" content="Page not found."/>
-    <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
-    <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
-</head>
-<body class="error-page" data-analytics-mode="off">
+{% endblock %}
+
+{% block description %}<meta name="description" content="Page not found."/>{% endblock %}
+
+{% block body_attrs %} class="error-page" data-analytics-mode="off"{% endblock %}
+
+{% block body_content %}
     <div class="error-shell">
         <main class="error-content" role="main">
             <section class="error-card" aria-labelledby="error-title">
@@ -37,5 +31,4 @@
             <span class="error-tile"></span>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

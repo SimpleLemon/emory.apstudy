@@ -1,8 +1,9 @@
-import os
+from services.environment_config import runtime_environment_config
 
 
 def admin_user_ids():
-    raw = os.environ.get("ADMIN_USER_IDS") or os.environ.get("ADMIN_USER_ID") or ""
+    configured = runtime_environment_config()
+    raw = configured.admin_user_ids_raw or configured.admin_user_id_raw or ""
     return {item.strip() for item in raw.split(",") if item.strip()}
 
 

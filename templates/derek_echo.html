@@ -1,21 +1,32 @@
-<!DOCTYPE html>
-<html lang="en" data-apstudy-theme-preference="dark">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="description" content="Echo Show dashboard for Nest." />
-    <title>Echo Show · Nest</title>
+{% extends "base.html" %}
+
+{% block html_attrs %}lang="en" data-apstudy-theme-preference="dark"{% endblock %}
+
+{% block head_early %}
     <script>window.APSTUDY_THEME_PREFERENCE = "dark";</script>
-    <script src="{{ url_for('static', filename='js/core/theme-init.js') }}"></script>
-    {% include "_diagnostics_assets.html" %}
+{% endblock %}
+
+{% block title %}<title>Echo Show · Nest</title>{% endblock %}
+
+{% block shared_brand_links %}
     <link rel="icon" href="{{ url_for('static', filename='images/brand/nest-logo-v1-32.png') }}" />
-    {% include "_font_assets.html" %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/themes.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/global.css') }}" />
+{% endblock %}
+
+{% block tailwind %}{% endblock %}
+
+{% block feature_styles %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/derek-echo.css') }}" />
+{% endblock %}
+
+{% block description %}<meta name="description" content="Echo Show dashboard for Nest." />{% endblock %}
+
+{% block shared_head_scripts %}
     <script type="module" src="{{ url_for('static', filename='js/derek/echo.js') }}"></script>
-</head>
-<body class="echo-body" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L">
+{% endblock %}
+
+{% block body_attrs %} class="echo-body" data-analytics-mode="authenticated" data-analytics-measurement-id="G-0NT330ZX5L"{% endblock %}
+
+{% block body_content %}
     <main class="echo-dash" data-echo-dash data-mode="home">
         <section class="echo-clock" data-echo-clock aria-labelledby="echo-clock-label">
             <div class="echo-clock-face" aria-hidden="true">
@@ -125,5 +136,4 @@
             </div>
         </div>
     </div>
-</body>
-</html>
+{% endblock %}

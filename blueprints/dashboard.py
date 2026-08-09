@@ -3,8 +3,7 @@
 import hashlib
 import json
 import logging
-import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 
 from flask import Blueprint, g, jsonify, render_template, redirect, request, url_for
 from flask_login import login_required, current_user
@@ -18,13 +17,43 @@ from appwrite_helpers import (
     format_datetime,
     list_rows_safe,
     list_rows_all,
-    parse_datetime,
     update_row_safe,
 )
 from services.discord_audit import emit_server_log_event
+from services.environment_config import runtime_environment_config
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
-from services.calendar_store import list_calendar_rows_all
+from services.calendar_store import first_calendar_row, list_calendar_rows_all
+from services.dashboard_summary import (
+    DASHBOARD_CALENDAR_UPCOMING_LIMIT,
+    DASHBOARD_LIST_LIMIT,
+    DASHBOARD_TASK_FILTER_SOURCE_LIMIT,
+    DASHBOARD_TASK_LIMIT,
+    DASHBOARD_TASK_PRIORITY_RANK,
+    as_utc as dashboard_as_utc,
+    can_access_channel,
+    dashboard_task_bucket,
+    date_key as dashboard_date_key,
+    load_courses_summary,
+    load_calendar_summary,
+    load_message_rooms,
+    load_recent_files,
+    load_recent_notes,
+    load_tasks_summary,
+    save_dashboard_layout,
+    sort_key as dashboard_sort_key,
+    task_is_complete,
+    task_list_payload,
+    task_payload,
+    task_priority_rank,
+)
+from services.dashboard_context import (
+    is_emory_or_oxford_user,
+    load_user_settings,
+    theme_from_settings,
+    user_payload,
+)
+from services.row_utils import row_id as _row_id
 from services.toasts import pop_toasts
 from services import note_store
 
@@ -52,10 +81,6 @@ DASHBOARD_ALLOWED_TILE_SIZES = {
 DASHBOARD_LAYOUT_VERSION = 4
 DASHBOARD_CALENDAR_VIEWS = ("month", "week", "upcoming")
 DASHBOARD_DEFAULT_CALENDAR_VIEW = "month"
-DASHBOARD_CALENDAR_UPCOMING_LIMIT = 80
-DASHBOARD_LIST_LIMIT = 8
-DASHBOARD_TASK_LIMIT = 8
-DASHBOARD_TASK_FILTER_SOURCE_LIMIT = 100
 DASHBOARD_TILE_LIMIT = 12
 DASHBOARD_DUPLICATE_TILE_LIMIT = 4
 DASHBOARD_DUPLICATE_TILE_TYPES = {"calendar", "tasks"}
@@ -65,30 +90,10 @@ DASHBOARD_CALENDAR_UPCOMING_DAYS = (7, 14, 30)
 DASHBOARD_TASK_DEADLINE_DAYS = (7, 30)
 DASHBOARD_TASK_PRIORITIES = ("high", "medium", "low", "none")
 DASHBOARD_TITLE_MAX_LENGTH = 60
-DASHBOARD_TASK_PRIORITY_RANK = {
-    "high": 0,
-    "medium": 1,
-    "low": 2,
-}
 
 
 def _is_emory_or_oxford_user():
-    school = str(getattr(current_user, "school", "") or "").strip().lower()
-    school_key = str(getattr(current_user, "school_key", "") or "").strip().lower()
-    return bool(getattr(current_user, "emory_student", False)) or school in {
-        "emory",
-        "emory university",
-        "emory university-oxford",
-        "emory university oxford",
-        "oxford college",
-        "oxford college of emory university",
-    } or school_key in {
-        "emory",
-        "emory-university",
-        "emory-university-oxford",
-        "oxford-college",
-        "oxford-college-of-emory-university",
-    }
+    return is_emory_or_oxford_user(current_user)
 
 
 def _default_courses_campus():
@@ -135,32 +140,16 @@ def _daily_quote_error_metadata(payload):
 
 
 def _user_payload():
-    return {
-        "id": str(current_user.id),
-        "name": current_user.name,
-        "username": current_user.username,
-        "email": current_user.email,
-        "picture": current_user.picture_url,
-        "emory_student": _is_emory_or_oxford_user(),
-        "school": current_user.school,
-        "school_key": getattr(current_user, "school_key", None),
-    }
+    return user_payload(current_user, emory_predicate=_is_emory_or_oxford_user)
 
 
 def _load_user_settings():
-    if hasattr(g, "_apstudy_user_settings"):
-        return g._apstudy_user_settings
-    try:
-        settings = first_row(
-            COLLECTIONS["user_settings"],
-            [Query.equal("user_id", [str(current_user.id)])],
-        )
-        g._apstudy_user_settings = settings
-        return settings
-    except AppwriteException:
-        logger.exception("Failed to load user settings")
-        g._apstudy_user_settings = None
-        return None
+    return load_user_settings(
+        current_user,
+        g,
+        first_row_fn=first_row,
+        error_logger=logger,
+    )
 
 
 def _settings_row_id(settings):
@@ -184,34 +173,99 @@ def _ensure_user_settings(user_id):
     )
 
 
+def _configured_feed_urls(settings):
+    from services.calendar_events import _configured_feed_urls as service_fn
+
+    return service_fn(settings)
+
+
+def _load_calendar_feed_metadata(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_calendar_feed_metadata as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _load_local_calendar_sources(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_local_calendar_sources as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _load_calendar_preferences(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_calendar_preferences as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _configured_calendar_sources(*args, **kwargs):
+    from services.calendar_events import _configured_calendar_sources as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _filter_configured_cache_events(*args, **kwargs):
+    from services.calendar_events import _filter_configured_cache_events as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _serialize_event(*args, **kwargs):
+    from services.calendar_events import _serialize_event as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _serialize_user_event(*args, **kwargs):
+    from services.calendar_events import _serialize_user_event as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _task_calendar_events_for_user(user_id, range_start=None, range_end=None):
+    from services.task_calendar import task_calendar_events_for_user as service_fn
+
+    return service_fn(
+        user_id,
+        range_start,
+        range_end,
+        list_rows_fn=list_rows_all,
+    )
+
+
 def _theme_from_settings(user_settings):
-    return user_settings.get("interface_theme") if user_settings else None
+    return theme_from_settings(user_settings)
 
 
-def _row_id(row):
-    return row.get("$id") or row.get("id") if row else None
+def _resolve_calendar_share_by_code(share_code, active_only=True):
+    from services.calendar_events import (
+        _resolve_calendar_share_by_code as resolve_calendar_share_by_code,
+    )
+
+    return resolve_calendar_share_by_code(
+        share_code,
+        active_only,
+        first_calendar_row_fn=first_calendar_row,
+    )
+
+
+def _public_calendar_share_context(share):
+    from services.calendar_events import (
+        _public_calendar_share_context as public_calendar_share_context,
+    )
+
+    return public_calendar_share_context(share)
 
 
 def _as_utc(value):
-    parsed = parse_datetime(value)
-    if not parsed:
-        return None
-    if parsed.tzinfo is None:
-        return parsed.replace(tzinfo=timezone.utc)
-    return parsed.astimezone(timezone.utc)
+    return dashboard_as_utc(value)
 
 
 def _date_key(value):
-    parsed = _as_utc(value)
-    if parsed:
-        return parsed.date().isoformat()
-    text = str(value or "").strip()
-    return text[:10] if len(text) >= 10 else ""
+    return dashboard_date_key(value)
 
 
 def _sort_key(value):
-    parsed = _as_utc(value)
-    return parsed or datetime.min.replace(tzinfo=timezone.utc)
+    return dashboard_sort_key(value)
 
 
 def _default_tile_size(tile_id):
@@ -427,20 +481,6 @@ def _ordered_tile_layout(saved_layout, available_tile_ids):
     return ordered
 
 
-def _ordered_tiles(saved_order, available_tile_ids):
-    if isinstance(saved_order, dict):
-        return [tile["type"] for tile in _ordered_tile_layout(saved_order, available_tile_ids)]
-    available = [tile_id for tile_id in available_tile_ids if tile_id in DASHBOARD_TILE_IDS]
-    ordered = []
-    for item in saved_order:
-        tile_id = str(item or "").strip()
-        if tile_id in available and tile_id not in ordered:
-            ordered.append(tile_id)
-    ordered.extend(tile_id for tile_id in DEFAULT_DASHBOARD_TILE_ORDER if tile_id in available and tile_id not in ordered)
-    ordered.extend(tile_id for tile_id in available if tile_id not in ordered)
-    return ordered
-
-
 def _validated_tile_size(tile_id, raw_size):
     if raw_size is None or str(raw_size).strip() == "":
         return _default_tile_size(tile_id)
@@ -517,398 +557,105 @@ def _build_checklist(calendar_complete=False, tasks_complete=False):
 
 
 def _load_calendar_summary(user_id, user_settings):
-    today = datetime.now(timezone.utc).date()
-    today_start = datetime(today.year, today.month, today.day, tzinfo=timezone.utc)
-    week_start_date = today - timedelta(days=(today.weekday() + 1) % 7)
-    week_start = datetime(week_start_date.year, week_start_date.month, week_start_date.day, tzinfo=timezone.utc)
-    week_end = week_start + timedelta(days=7)
-    upcoming_end = today_start + timedelta(days=31)
-    month_start = datetime(today.year, today.month, 1, tzinfo=timezone.utc)
-    if today.month == 12:
-        month_end = datetime(today.year + 1, 1, 1, tzinfo=timezone.utc)
-    else:
-        month_end = datetime(today.year, today.month + 1, 1, tzinfo=timezone.utc)
-    range_start = min(month_start, week_start, today_start)
-    range_end = max(month_end, week_end, upcoming_end)
-
-    try:
-        from blueprints.calendar_api import (
-            _configured_calendar_sources,
-            _configured_feed_urls,
-            _filter_configured_cache_events,
-            _load_calendar_feed_metadata,
-            _load_calendar_preferences,
-            _load_local_calendar_sources,
-            _serialize_event,
-            _serialize_user_event,
-        )
-
-        feed_urls = _configured_feed_urls(user_settings)
-        cache_rows = list_calendar_rows_all(
-            COLLECTIONS["calendar_cache"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("event_start"),
-            ],
-        )
-        event_rows = list_calendar_rows_all(
-            COLLECTIONS["user_events"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("start"),
-            ],
-        )
-        preferences = _load_calendar_preferences(user_id)
-        local_sources = _load_local_calendar_sources(user_id)
-        feed_metadata = _load_calendar_feed_metadata(user_id)
-        sources = _configured_calendar_sources(
-            user_settings,
-            cache_rows,
-            preferences,
-            feed_metadata,
-            local_sources,
-            event_rows,
-        )
-        cache_rows = _filter_configured_cache_events(cache_rows, feed_urls)
-
-        serialized = [_serialize_event(row, user_settings) for row in cache_rows]
-        serialized.extend(_serialize_user_event(row) for row in event_rows)
-
-        try:
-            from blueprints.tasks_api import task_calendar_events_for_user
-
-            serialized.extend(task_calendar_events_for_user(user_id, range_start, range_end))
-        except (AppwriteException, AttributeError):
-            logger.exception("Failed to load task events for dashboard calendar")
-
-        visible = []
-        source_by_id = {source.get("id"): source for source in sources}
-        for event in serialized:
-            start = _as_utc(event.get("start"))
-            end = _as_utc(event.get("end")) or start
-            if not start:
-                continue
-            if end and end < range_start:
-                continue
-            if start >= range_end:
-                continue
-            source = source_by_id.get(event.get("calendar_id")) or {}
-            color = event.get("color") or source.get("color_hex") or "#6366f1"
-            visible.append({
-                "id": event.get("id") or event.get("uid") or event.get("event_ref"),
-                "title": event.get("title") or "Untitled event",
-                "start": event.get("start"),
-                "end": event.get("end"),
-                "date": _date_key(event.get("start")),
-                "color": color,
-                "all_day": bool(event.get("is_all_day")),
-            })
-        visible.sort(key=lambda item: _sort_key(item.get("start")))
-        month_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= month_start and _sort_key(event.get("start")) < month_end
-        ]
-        week_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= week_start and _sort_key(event.get("start")) < week_end
-        ]
-        upcoming_events = [
-            event for event in visible
-            if _sort_key(event.get("end") or event.get("start")) >= today_start and _sort_key(event.get("start")) < upcoming_end
-        ]
-        return {
-            "month": today.isoformat()[:7],
-            "week_start": week_start.date().isoformat(),
-            "upcoming_start": today.isoformat(),
-            "upcoming_end": (today + timedelta(days=30)).isoformat(),
-            "events": month_events[:80],
-            "week_events": week_events[:40],
-            "upcoming_events": upcoming_events[:DASHBOARD_CALENDAR_UPCOMING_LIMIT],
-            "event_count": len(month_events),
-            "setup_complete": bool(feed_urls or local_sources or event_rows),
-            "error": None,
-        }
-    except AppwriteException:
-        logger.exception("Failed to build dashboard calendar summary")
-        return {
-            "month": today.isoformat()[:7],
-            "week_start": week_start.date().isoformat(),
-            "upcoming_start": today.isoformat(),
-            "upcoming_end": (today + timedelta(days=30)).isoformat(),
-            "events": [],
-            "week_events": [],
-            "upcoming_events": [],
-            "event_count": 0,
-            "setup_complete": False,
-            "error": "Unable to load calendar.",
-        }
+    return load_calendar_summary(
+        user_id,
+        user_settings,
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _task_is_complete(task):
-    if task.get("recurrence_json"):
-        return False
-    return bool(task.get("completed"))
+    return task_is_complete(task)
 
 
 def _task_payload(row, now):
-    deadline = _as_utc(row.get("deadline_at"))
-    overdue = bool(deadline and deadline < now and not _task_is_complete(row))
-    return {
-        "id": _row_id(row),
-        "title": row.get("title") or "Untitled task",
-        "list_id": row.get("list_id") or "",
-        "priority": row.get("priority") or "none",
-        "deadline_at": format_datetime(deadline) if deadline else None,
-        "overdue": overdue,
-        "starred": bool(row.get("starred")),
-    }
+    return task_payload(row, now, {
+        "as_utc": _as_utc,
+        "format_datetime": format_datetime,
+        "row_id": _row_id,
+        "task_is_complete": _task_is_complete,
+    })
 
 
 def _task_list_payload(row):
-    list_id = _row_id(row)
-    return {
-        "id": list_id,
-        "name": row.get("name") or "Untitled List",
-        "order": row.get("order") or 0,
-        "hidden": bool(row.get("hidden", False)),
-    }
+    return task_list_payload(row, {"row_id": _row_id})
 
 
 def _task_priority_rank(row):
-    priority = str(row.get("priority") or "").strip().lower()
-    return DASHBOARD_TASK_PRIORITY_RANK.get(priority, len(DASHBOARD_TASK_PRIORITY_RANK))
+    return task_priority_rank(row)
 
 
 def _dashboard_task_bucket(row, now, seven_day_end, thirty_day_end):
-    deadline = _as_utc(row.get("deadline_at"))
-    if not deadline:
-        return 2
-    if deadline <= seven_day_end:
-        return 0
-    if deadline <= thirty_day_end:
-        return 1
-    return None
+    return dashboard_task_bucket(
+        row,
+        now,
+        seven_day_end,
+        thirty_day_end,
+        _as_utc,
+    )
+
+
+def _dashboard_summary_dependencies():
+    return {
+        "as_utc": _as_utc,
+        "can_access_channel": _dashboard_can_access_channel,
+        "configured_calendar_sources": _configured_calendar_sources,
+        "configured_feed_urls": _configured_feed_urls,
+        "dashboard_task_bucket": _dashboard_task_bucket,
+        "date_key": _date_key,
+        "filter_configured_cache_events": _filter_configured_cache_events,
+        "format_datetime": format_datetime,
+        "load_calendar_feed_metadata": _load_calendar_feed_metadata,
+        "load_calendar_preferences": _load_calendar_preferences,
+        "load_local_calendar_sources": _load_local_calendar_sources,
+        "list_calendar_rows_all": list_calendar_rows_all,
+        "list_rows_all": list_rows_all,
+        "list_rows_safe": list_rows_safe,
+        "logger": logger,
+        "normalize_task_list_ids": _normalize_task_list_ids,
+        "row_id": _row_id,
+        "sort_key": _sort_key,
+        "serialize_event": _serialize_event,
+        "serialize_user_event": _serialize_user_event,
+        "task_calendar_events_for_user": _task_calendar_events_for_user,
+        "task_is_complete": _task_is_complete,
+        "task_list_payload": _task_list_payload,
+        "task_payload": _task_payload,
+        "task_priority_rank": _task_priority_rank,
+        "url_for": url_for,
+    }
 
 
 def _load_tasks_summary(user_id, selected_list_ids=None):
-    now = datetime.now(timezone.utc)
-    seven_day_end = now + timedelta(days=7)
-    thirty_day_end = now + timedelta(days=30)
-    try:
-        list_rows = list_rows_all(
-            COLLECTIONS.get("task_lists", "task_lists"),
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("order"),
-            ],
-        )
-        rows = list_rows_all(
-            COLLECTIONS["tasks"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("deadline_at"),
-            ],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard task summary")
-        return {"items": [], "lists": [], "selected_list_ids": [], "total_count": 0, "setup_complete": False, "error": "Unable to load tasks."}
-
-    lists = [_task_list_payload(row) for row in sorted(list_rows, key=lambda item: item.get("order") or 0)]
-    available_list_ids = [item["id"] for item in lists if item.get("id")]
-    selected_ids = _normalize_task_list_ids(selected_list_ids, available_list_ids)
-    selected_set = set(selected_ids)
-    candidates = []
-    for row in rows:
-        if selected_set and str(row.get("list_id") or "") not in selected_set:
-            continue
-        if _task_is_complete(row):
-            continue
-        bucket = _dashboard_task_bucket(row, now, seven_day_end, thirty_day_end)
-        if bucket is None:
-            continue
-        candidates.append((bucket, row))
-    candidates.sort(key=lambda item: (
-        item[0],
-        _task_priority_rank(item[1]),
-        _as_utc(item[1].get("deadline_at")) or datetime.max.replace(tzinfo=timezone.utc),
-        item[1].get("title") or "",
-    ))
-    upcoming = [row for _, row in candidates]
-    source_items = [_task_payload(row, now) for row in upcoming[:DASHBOARD_TASK_FILTER_SOURCE_LIMIT]]
-    return {
-        "items": source_items[:DASHBOARD_TASK_LIMIT],
-        "all_items": source_items,
-        "lists": lists,
-        "selected_list_ids": selected_ids,
-        "total_count": len(upcoming),
-        "setup_complete": bool(rows),
-        "error": None,
-    }
+    return load_tasks_summary(
+        user_id,
+        selected_list_ids,
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _load_recent_files(user_id):
-    now = datetime.now(timezone.utc)
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["shared_files"],
-            [Query.equal("user_id", [user_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard file summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load files."}
-    rows = [
-        row for row in rows
-        if not (expires_at := _as_utc(row.get("expires_at"))) or expires_at > now
-    ]
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("created_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "name": row.get("original_filename") or "Untitled file",
-                "size_bytes": row.get("file_size_bytes") or 0,
-                "updated_at": row.get("updated_at") or row.get("created_at"),
-                "href": url_for("file_share.file_share_page"),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "error": None,
-    }
+    return load_recent_files(user_id, _dashboard_summary_dependencies())
 
 
 def _load_recent_notes(user_id):
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["notes"],
-            [Query.equal("user_id", [user_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard notes summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load notes."}
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("created_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "title": row.get("title") or "Untitled note",
-                "updated_at": row.get("updated_at") or row.get("created_at"),
-                "href": url_for("dashboard.note_document", note_id=_row_id(row)),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "error": None,
-    }
+    return load_recent_notes(user_id, _dashboard_summary_dependencies())
 
 
 def _load_message_rooms(user_id):
-    try:
-        channels = list_rows_all(COLLECTIONS["chat_channels"], [Query.order_asc("created_at")])
-        thread_rows_a = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_a", [user_id])])
-        thread_rows_b = list_rows_all(COLLECTIONS["chat_dm_threads"], [Query.equal("participant_b", [user_id])])
-        message_rows = list_rows_safe(
-            COLLECTIONS["chat_messages"],
-            [Query.order_desc("created_at"), Query.limit(250)],
-        ).get("rows", [])
-    except AppwriteException:
-        logger.exception("Failed to build dashboard message summary")
-        return {"items": [], "total_count": 0, "error": "Unable to load messages."}
-
-    channel_by_id = {_row_id(row): row for row in channels if _row_id(row)}
-    thread_by_id = {_row_id(row): row for row in thread_rows_a + thread_rows_b if _row_id(row)}
-    room_latest = {}
-    for row in message_rows:
-        if row.get("deleted_at"):
-            continue
-        channel_id = row.get("channel_id")
-        thread_id = row.get("thread_id")
-        if channel_id and channel_id in channel_by_id:
-            key = ("channel", channel_id)
-        elif thread_id and thread_id in thread_by_id:
-            key = ("thread", thread_id)
-        else:
-            continue
-        created_at = row.get("created_at")
-        if key not in room_latest or _sort_key(created_at) > _sort_key(room_latest[key]):
-            room_latest[key] = created_at
-
-    rooms = []
-    for (room_type, room_id), last_at in room_latest.items():
-        if room_type == "channel":
-            row = channel_by_id.get(room_id) or {}
-            if not _dashboard_can_access_channel(row):
-                continue
-            label = row.get("label") or row.get("name") or "Channel"
-            href = url_for("dashboard.chat", channel=room_id)
-        else:
-            row = thread_by_id.get(room_id) or {}
-            other_id = row.get("participant_b") if row.get("participant_a") == user_id else row.get("participant_a")
-            label = "Direct message"
-            try:
-                from appwrite_helpers import get_row_safe
-
-                user = get_row_safe(COLLECTIONS["users"], other_id, allow_missing=True) if other_id else None
-            except AppwriteException:
-                user = None
-            if user:
-                label = user.get("name") or user.get("username") or label
-            href = url_for("dashboard.chat", thread=room_id)
-        rooms.append({
-            "id": room_id,
-            "type": room_type,
-            "label": label,
-            "last_activity_at": last_at,
-            "href": href,
-        })
-    rooms.sort(key=lambda item: _sort_key(item.get("last_activity_at")), reverse=True)
-    return {"items": rooms[:DASHBOARD_LIST_LIMIT], "total_count": len(rooms), "error": None}
+    return load_message_rooms(user_id, _dashboard_summary_dependencies())
 
 
 def _dashboard_can_access_channel(channel):
-    if not channel:
-        return False
-    kind = channel.get("kind")
-    if kind == "discord":
-        return True
-    if kind == "university":
-        return bool(channel.get("approved")) and channel.get("school_key") == getattr(current_user, "school_key", None)
-    return False
+    return can_access_channel(channel, current_user)
 
 
 def _load_courses_summary(user_id):
-    if not _is_emory_or_oxford_user():
-        return {"items": [], "total_count": 0, "available": False, "error": None}
-    try:
-        rows = list_rows_all(
-            COLLECTIONS["user_courses"],
-            [
-                Query.equal("user_id", [user_id]),
-                Query.order_asc("term"),
-                Query.order_asc("subject"),
-                Query.order_asc("catalog"),
-            ],
-        )
-    except AppwriteException:
-        logger.exception("Failed to build dashboard courses summary")
-        return {"items": [], "total_count": 0, "available": False, "error": "Unable to load courses."}
-    rows.sort(key=lambda row: _sort_key(row.get("updated_at") or row.get("added_at")), reverse=True)
-    return {
-        "items": [
-            {
-                "id": _row_id(row),
-                "code": f"{row.get('subject') or ''} {row.get('catalog') or ''}".strip() or "Course",
-                "name": row.get("course_name") or "",
-                "term": row.get("term") or "",
-                "section": row.get("section_number") or row.get("crn") or "",
-                "updated_at": row.get("updated_at") or row.get("added_at"),
-            }
-            for row in rows[:DASHBOARD_LIST_LIMIT]
-        ],
-        "total_count": len(rows),
-        "available": bool(rows),
-        "error": None,
-    }
+    return load_courses_summary(
+        user_id,
+        _is_emory_or_oxford_user(),
+        _dashboard_summary_dependencies(),
+    )
 
 
 def _dashboard_summary_payload():
@@ -1035,182 +782,54 @@ def report_dashboard_quote_error():
             color="yellow",
         )
     except Exception:
-        logger.exception("Failed to emit daily quote error to Discord server log")
+        logger.exception(
+            "Failed to emit daily quote error to Discord server log for user %s",
+            current_user.id,
+        )
 
     return jsonify({"status": "ok", "reason": metadata["reason"]})
+
+
+def _dashboard_layout_dependencies():
+    return {
+        "calendar_upcoming_days": DASHBOARD_CALENDAR_UPCOMING_DAYS,
+        "coerce_layout": _coerce_layout,
+        "densities": DASHBOARD_DENSITIES,
+        "duplicate_tile_limit": DASHBOARD_DUPLICATE_TILE_LIMIT,
+        "duplicate_tile_types": DASHBOARD_DUPLICATE_TILE_TYPES,
+        "ensure_user_settings": _ensure_user_settings,
+        "format_datetime": format_datetime,
+        "item_limits": DASHBOARD_ITEM_LIMITS,
+        "jsonify": jsonify,
+        "layout_version": _layout_version,
+        "layout_version_number": DASHBOARD_LAYOUT_VERSION,
+        "legacy_instance_id": _legacy_instance_id,
+        "list_rows_all": list_rows_all,
+        "logger": logger,
+        "normalize_task_list_ids": _normalize_task_list_ids,
+        "row_id": _row_id,
+        "settings_row_id": _settings_row_id,
+        "task_deadline_days": DASHBOARD_TASK_DEADLINE_DAYS,
+        "task_priorities": DASHBOARD_TASK_PRIORITIES,
+        "tile_ids": DASHBOARD_TILE_IDS,
+        "tile_limit": DASHBOARD_TILE_LIMIT,
+        "title_max_length": DASHBOARD_TITLE_MAX_LENGTH,
+        "update_row_safe": update_row_safe,
+        "validated_calendar_view": _validated_calendar_view,
+        "validated_tile_size": _validated_tile_size,
+    }
 
 
 @dashboard_bp.route("/api/dashboard/layout", methods=["PATCH"])
 @login_required
 def update_dashboard_layout():
     """Persist a validated v4 dashboard layout draft."""
-    if not current_user.onboarding_complete:
-        return jsonify({"error": "Onboarding is required."}), 403
-
     payload = request.get_json(silent=True) or {}
-    raw_layout = payload.get("dashboard_layout", payload.get("tile_layout", payload.get("layout")))
-    if raw_layout is None:
-        raw_layout = payload.get("tiles")
-    if raw_layout is None:
-        raw_layout = payload.get("tile_order", payload.get("order"))
-    if not isinstance(raw_layout, (dict, list)):
-        return jsonify({"error": "tile_layout must be an object or list."}), 400
-
-    raw_tiles = raw_layout.get("tiles") if isinstance(raw_layout, dict) else raw_layout
-    if not isinstance(raw_tiles, list):
-        return jsonify({"error": "tile_layout tiles must be a list."}), 400
-    if len(raw_tiles) > DASHBOARD_TILE_LIMIT:
-        return jsonify({"error": f"Dashboard layouts support at most {DASHBOARD_TILE_LIMIT} tiles."}), 400
-
-    layout_version = _layout_version(raw_layout)
-    raw_quote_visible = raw_layout.get("daily_quote_visible") if isinstance(raw_layout, dict) else True
-    if raw_quote_visible is not None and not isinstance(raw_quote_visible, bool):
-        return jsonify({"error": "daily_quote_visible must be true or false."}), 400
-    daily_quote_visible = True if raw_quote_visible is None else raw_quote_visible
-
-    user_id = str(current_user.id)
-    owned_task_list_ids = None
-    normalized_tiles = []
-    seen_instances = set()
-    type_counts = {}
-    for item in raw_tiles:
-        if isinstance(item, dict):
-            tile_id = str(item.get("type") or item.get("id") or "").strip()
-            instance_id = str(item.get("instance_id") or (item.get("id") if item.get("type") else "") or _legacy_instance_id(tile_id)).strip()
-            raw_size = item.get("size")
-            raw_view = item.get("view")
-            raw_task_list_ids = item.get("task_list_ids")
-        else:
-            tile_id = str(item or "").strip()
-            instance_id = _legacy_instance_id(tile_id)
-            raw_size = None
-            raw_view = None
-            raw_task_list_ids = None
-            item = {}
-        if tile_id not in DASHBOARD_TILE_IDS:
-            return jsonify({"error": f"Unknown dashboard tile: {tile_id or 'blank'}."}), 400
-        if not instance_id or len(instance_id) > 80 or not all(character.isalnum() or character in "-_:." for character in instance_id):
-            return jsonify({"error": f"Invalid dashboard tile instance: {instance_id or 'blank'}."}), 400
-        if instance_id in seen_instances:
-            return jsonify({"error": f"Duplicate dashboard tile instance: {instance_id}."}), 400
-        type_counts[tile_id] = type_counts.get(tile_id, 0) + 1
-        if type_counts[tile_id] > 1 and (layout_version < DASHBOARD_LAYOUT_VERSION or tile_id not in DASHBOARD_DUPLICATE_TILE_TYPES):
-            return jsonify({"error": f"Duplicate dashboard tile: {tile_id}."}), 400
-        if type_counts[tile_id] > DASHBOARD_DUPLICATE_TILE_LIMIT:
-            return jsonify({"error": f"Dashboard supports at most {DASHBOARD_DUPLICATE_TILE_LIMIT} {tile_id} tiles."}), 400
-        size = _validated_tile_size(tile_id, raw_size)
-        if size is None:
-            return jsonify({"error": f"Invalid size '{raw_size or 'blank'}' for dashboard tile: {tile_id}."}), 400
-        raw_title = item.get("title")
-        if raw_title is not None and not isinstance(raw_title, str):
-            return jsonify({"error": "Dashboard tile titles must be text."}), 400
-        title = str(raw_title or "").strip()
-        if len(title) > DASHBOARD_TITLE_MAX_LENGTH:
-            return jsonify({"error": f"Dashboard tile titles must be {DASHBOARD_TITLE_MAX_LENGTH} characters or fewer."}), 400
-        try:
-            item_limit = int(item.get("item_limit", 5))
-        except (TypeError, ValueError):
-            item_limit = None
-        if item_limit not in DASHBOARD_ITEM_LIMITS:
-            return jsonify({"error": "Dashboard tile item_limit must be 3, 5, or 8."}), 400
-        density = str(item.get("density", "comfortable")).strip().lower()
-        if density not in DASHBOARD_DENSITIES:
-            return jsonify({"error": "Dashboard tile density must be compact or comfortable."}), 400
-        tile_payload = {
-            "instance_id": instance_id,
-            "type": tile_id,
-            "size": size,
-            "density": density,
-            "item_limit": item_limit,
-        }
-        if title:
-            tile_payload["title"] = title
-        if tile_id == "calendar":
-            view = _validated_calendar_view(raw_view)
-            if view is None:
-                return jsonify({"error": f"Invalid calendar view '{raw_view or 'blank'}'."}), 400
-            upcoming_days = item.get("upcoming_days", 7)
-            if upcoming_days not in DASHBOARD_CALENDAR_UPCOMING_DAYS:
-                return jsonify({"error": "Calendar upcoming_days must be 7, 14, or 30."}), 400
-            tile_payload.update({"view": view, "upcoming_days": upcoming_days})
-        if tile_id == "tasks" and raw_task_list_ids is not None:
-            if not isinstance(raw_task_list_ids, list):
-                return jsonify({"error": "Task list filters must be a list."}), 400
-            if raw_task_list_ids:
-                if owned_task_list_ids is None:
-                    try:
-                        owned_task_list_ids = {
-                            _row_id(row)
-                            for row in list_rows_all(
-                                COLLECTIONS.get("task_lists", "task_lists"),
-                                [Query.equal("user_id", [user_id])],
-                            )
-                        }
-                    except AppwriteException:
-                        logger.exception("Failed to validate dashboard task list filters")
-                        return jsonify({"error": "Unable to validate task list filters."}), 500
-                task_list_ids = _normalize_task_list_ids(raw_task_list_ids, owned_task_list_ids)
-                if len(task_list_ids) != len({str(item or "").strip() for item in raw_task_list_ids if str(item or "").strip()}):
-                    return jsonify({"error": "Task list filters must belong to your account."}), 400
-                if not task_list_ids:
-                    return jsonify({"error": "Select at least one task list or choose All."}), 400
-                tile_payload["task_list_ids"] = task_list_ids
-        if tile_id == "tasks":
-            deadline_days = item.get("deadline_days", 30)
-            if deadline_days not in DASHBOARD_TASK_DEADLINE_DAYS:
-                return jsonify({"error": "Task deadline_days must be 7 or 30."}), 400
-            raw_priorities = item.get("priorities", list(DASHBOARD_TASK_PRIORITIES))
-            if not isinstance(raw_priorities, list):
-                return jsonify({"error": "Task priorities must be a list."}), 400
-            priorities = []
-            for raw_priority in raw_priorities:
-                priority = str(raw_priority or "").strip().lower()
-                if priority not in DASHBOARD_TASK_PRIORITIES:
-                    return jsonify({"error": f"Unknown task priority: {priority or 'blank'}."}), 400
-                if priority not in priorities:
-                    priorities.append(priority)
-            if not priorities:
-                return jsonify({"error": "Select at least one task priority."}), 400
-            for boolean_field in ("include_overdue", "include_undated", "starred_only"):
-                if boolean_field in item and not isinstance(item[boolean_field], bool):
-                    return jsonify({"error": f"{boolean_field} must be true or false."}), 400
-            tile_payload.update({
-                "deadline_days": deadline_days,
-                "include_overdue": item.get("include_overdue", True),
-                "include_undated": item.get("include_undated", True),
-                "priorities": priorities,
-                "starred_only": item.get("starred_only", False),
-            })
-        normalized_tiles.append(tile_payload)
-        seen_instances.add(instance_id)
-
-    normalized = {
-        "version": DASHBOARD_LAYOUT_VERSION,
-        "daily_quote_visible": daily_quote_visible,
-        "tiles": normalized_tiles,
-    }
-
-    try:
-        settings = _ensure_user_settings(user_id)
-        settings = update_row_safe(
-            COLLECTIONS["user_settings"],
-            _settings_row_id(settings),
-            {
-                "dashboard_layout_json": json.dumps(normalized, separators=(",", ":")),
-                "updated_at": format_datetime(datetime.now(timezone.utc)),
-            },
-        )
-    except AppwriteException:
-        logger.exception("Failed to save dashboard layout")
-        return jsonify({"error": "Unable to save dashboard layout."}), 500
-
-    saved_layout = _coerce_layout(settings.get("dashboard_layout_json"))
-    return jsonify({
-        "status": "ok",
-        "dashboard_layout": saved_layout,
-        "tile_layout": saved_layout["tiles"],
-        "tile_order": [tile["type"] for tile in saved_layout["tiles"]],
-    })
+    return save_dashboard_layout(
+        current_user,
+        payload,
+        _dashboard_layout_dependencies(),
+    )
 
 
 @dashboard_bp.route("/api/dashboard/checklist/hidden", methods=["POST"])
@@ -1260,7 +879,9 @@ def calendar():
         preferred_calendar_view = "week"
     interface_theme = _theme_from_settings(user_settings)
     try:
-        calendar_buffer_days = int(os.environ.get("CALENDAR_DATE_BUFFER_DAYS", "7"))
+        calendar_buffer_days = int(
+            runtime_environment_config().calendar_date_buffer_days_raw
+        )
     except (TypeError, ValueError):
         calendar_buffer_days = 7
     
@@ -1276,8 +897,6 @@ def calendar():
 @dashboard_bp.route("/calendar/share/<share_code>")
 def public_calendar_share(share_code):
     """Render a public read-only shared calendar page."""
-    from blueprints.calendar_api import _public_calendar_share_context, _resolve_calendar_share_by_code
-
     try:
         share = _resolve_calendar_share_by_code(share_code, active_only=True)
     except AppwriteException:
@@ -1289,7 +908,9 @@ def public_calendar_share(share_code):
         theme_preference = _theme_from_settings(_load_user_settings())
 
     try:
-        calendar_buffer_days = int(os.environ.get("CALENDAR_DATE_BUFFER_DAYS", "7"))
+        calendar_buffer_days = int(
+            runtime_environment_config().calendar_date_buffer_days_raw
+        )
     except (TypeError, ValueError):
         calendar_buffer_days = 7
 
@@ -1485,5 +1106,5 @@ def chat():
         "chat.html",
         user=_user_payload(),
         theme_preference=_theme_from_settings(user_settings),
-        discord_invite_url=os.environ.get("DISCORD_INVITE_URL", ""),
+        discord_invite_url=runtime_environment_config().discord_invite_url,
     )

@@ -6,11 +6,20 @@ import { fileURLToPath } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dataUrl = (source) => `data:text/javascript;base64,${Buffer.from(source).toString("base64")}`;
-const utilsUrl = dataUrl(await readFile(path.join(repoRoot, "static/js/derek/echo-utils.js"), "utf8"));
+const escapeBridgeUrl = dataUrl(`export const escapeHtml = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#39;");`);
+const utilsSource = await readFile(path.join(repoRoot, "static/js/derek/echo-utils.js"), "utf8");
+const utilsUrl = dataUrl(utilsSource.replace("../core/ui-primitives-module.js", escapeBridgeUrl));
 
 async function loadEchoModule(relativePath) {
   const source = await readFile(path.join(repoRoot, relativePath), "utf8");
-  return import(dataUrl(source.replaceAll('"./echo-utils.js"', `"${utilsUrl}"`)));
+  return import(dataUrl(source
+    .replace("../core/ui-primitives-module.js", escapeBridgeUrl)
+    .replaceAll('"./echo-utils.js"', `"${utilsUrl}"`)));
 }
 
 const utils = await loadEchoModule("static/js/derek/echo-utils.js");

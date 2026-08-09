@@ -6,7 +6,6 @@ import gzip
 import hashlib
 import io
 import logging
-import os
 import posixpath
 import re
 import uuid
@@ -15,6 +14,7 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from PIL import Image, ImageOps, UnidentifiedImageError
+from flask import current_app, has_app_context
 from appwrite.exception import AppwriteException
 from appwrite.input_file import InputFile
 from appwrite.query import Query
@@ -22,6 +22,7 @@ from appwrite.services.storage import Storage
 
 from appwrite_client import CHAT_ATTACHMENTS_BUCKET_ID, COLLECTIONS, client as appwrite_client
 from appwrite_helpers import create_row_safe, delete_row_safe, get_row_safe, list_rows_all, update_row_safe
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 from services.database import utcnow_iso
 from services.entitlements import EntitlementLimitError, check_storage
 
@@ -73,6 +74,14 @@ SAFE_NAME_RE = re.compile(r"[^A-Za-z0-9._()\- ]+")
 
 class AttachmentError(ValueError):
     pass
+
+
+def _chat_attachments_enabled():
+    if has_app_context():
+        configured = current_app.extensions.get(ENVIRONMENT_CONFIG_EXTENSION_KEY)
+        if configured is not None:
+            return configured.appwrite_chat_attachments_enabled
+    return load_environment_config().appwrite_chat_attachments_enabled
 
 
 def storage_service():
@@ -143,12 +152,13 @@ def _optimize_image(data, extension):
             image = ImageOps.exif_transpose(image)
             image.thumbnail((MAX_IMAGE_DIMENSION, MAX_IMAGE_DIMENSION), Image.Resampling.LANCZOS)
             output = io.BytesIO()
-            save_kwargs = {"optimize": True}
             if image_format == "JPEG":
                 image = image.convert("RGB")
-                save_kwargs.update(quality=86, progressive=True)
+                save_kwargs = {"optimize": True, "quality": 86, "progressive": True}
             elif image_format == "WEBP":
-                save_kwargs.update(quality=86, method=5)
+                save_kwargs = {"optimize": True, "quality": 86, "method": 5}
+            else:
+                save_kwargs = {"optimize": True}
             image.save(output, format=image_format, **save_kwargs)
             optimized = output.getvalue()
             if len(optimized) >= len(data) and image.size == (width, height) and not has_metadata:
@@ -324,7 +334,7 @@ def serialize_attachment(row):
 
 
 def attachments_for_messages(message_ids):
-    if not os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID"):
+    if not _chat_attachments_enabled():
         return {}
     ids = [str(value) for value in message_ids if value]
     if not ids:
@@ -398,7 +408,7 @@ def delete_attachment(row):
 
 
 def delete_message_attachments(message_id):
-    if not os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID"):
+    if not _chat_attachments_enabled():
         return
     try:
         rows = list_rows_all(TABLE_ID, [Query.equal("message_id", [str(message_id)])])
@@ -410,14 +420,14 @@ def delete_message_attachments(message_id):
 
 
 def delete_user_attachments(user_id):
-    if not os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID"):
+    if not _chat_attachments_enabled():
         return
     for row in list_rows_all(TABLE_ID, [Query.equal("user_id", [str(user_id)])]):
         delete_attachment(row)
 
 
 def cleanup_abandoned_attachments(max_age_hours=24):
-    if not os.environ.get("APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID"):
+    if not _chat_attachments_enabled():
         return 0
     cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
     rows = list_rows_all(TABLE_ID, [Query.equal("status", ["pending"])])

@@ -1,7 +1,11 @@
+import os
 import unittest
 from unittest.mock import patch
 
+from flask import Flask
+
 from appwrite_client import COLLECTIONS
+from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
 from services import entitlements
 
 
@@ -57,7 +61,11 @@ class EntitlementServiceTestCase(unittest.TestCase):
             ],
         }
 
-        with patch.object(entitlements, "_rows", side_effect=lambda table, queries: rows[table]), \
+        with patch.dict(
+                os.environ,
+                {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "chat-attachments"},
+            ), \
+                patch.object(entitlements, "_rows", side_effect=lambda table, queries: rows[table]), \
                 patch.object(entitlements, "_calendar_feed_count", return_value=2), \
                 patch.object(entitlements, "_focus_playlist_count", return_value=3):
             usage = entitlements.usage_for_user(
@@ -74,6 +82,73 @@ class EntitlementServiceTestCase(unittest.TestCase):
             "calendar_feeds": 2,
             "focus_playlists": 3,
         })
+
+    def test_usage_uses_the_registered_snapshot_when_live_environment_disagrees(self):
+        with patch.dict(
+            os.environ,
+            {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": ""},
+            clear=True,
+        ):
+            configured = load_environment_config()
+
+        app = Flask(__name__)
+        app.extensions[ENVIRONMENT_CONFIG_EXTENSION_KEY] = configured
+        rows = {
+            COLLECTIONS["shared_files"]: [],
+            COLLECTIONS["note_media"]: [],
+            COLLECTIONS["chat_attachments"]: [
+                {"stored_size_bytes": 50, "preview_size_bytes": 25, "status": "active"},
+            ],
+            COLLECTIONS["notes"]: [],
+            COLLECTIONS["user_courses"]: [],
+            COLLECTIONS["course_seat_tracks"]: [],
+        }
+
+        with patch.dict(
+            os.environ,
+            {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "live-bucket"},
+            clear=True,
+        ), app.app_context(), patch.object(
+            entitlements,
+            "_rows",
+            side_effect=lambda table, queries: rows[table],
+        ) as load_rows, patch.object(entitlements, "_calendar_feed_count", return_value=0), patch.object(
+            entitlements, "_focus_playlist_count", return_value=0
+        ):
+            usage = entitlements.usage_for_user("user-1", {"id": "user-1"})
+
+        self.assertEqual(usage["storage_bytes"], 0)
+        self.assertNotIn(
+            COLLECTIONS["chat_attachments"],
+            [call.args[0] for call in load_rows.call_args_list],
+        )
+
+    def test_usage_uses_live_environment_without_an_app_context(self):
+        rows = {
+            COLLECTIONS["shared_files"]: [],
+            COLLECTIONS["note_media"]: [],
+            COLLECTIONS["chat_attachments"]: [
+                {"stored_size_bytes": 50, "preview_size_bytes": 25, "status": "active"},
+            ],
+            COLLECTIONS["notes"]: [],
+            COLLECTIONS["user_courses"]: [],
+            COLLECTIONS["course_seat_tracks"]: [],
+        }
+
+        with patch.dict(
+            os.environ,
+            {"APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID": "standalone-bucket"},
+            clear=True,
+        ), patch.object(
+            entitlements,
+            "_rows",
+            side_effect=lambda table, queries: rows[table],
+        ), patch.object(entitlements, "_calendar_feed_count", return_value=0), patch.object(
+            entitlements, "_focus_playlist_count", return_value=0
+        ):
+            usage = entitlements.usage_for_user("user-1", {"id": "user-1"})
+
+        self.assertEqual(usage["storage_bytes"], 75)
 
     def test_lowered_limits_block_new_additions_and_unlimited_skips_checks(self):
         limited = {

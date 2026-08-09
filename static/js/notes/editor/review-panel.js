@@ -1,11 +1,4 @@
-function escapeHtml(value) {
-    return String(value || '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
-}
+import { escapeHtml } from '../../core/ui-primitives-module.js';
 
 async function apiJson(url, options = {}) {
     const response = await fetch(url, {

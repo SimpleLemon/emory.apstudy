@@ -23,8 +23,7 @@ test('first-party styles do not transition layout properties', () => {
 
 test('shared shell transitions name compositor-safe or paint-only properties', () => {
     const layout = read('static/css/layout.css');
-    const sidebar = read('static/css/sidebar.css');
-    assert.doesNotMatch(`${layout}\n${sidebar}`, /transition\s*:\s*all\b/i);
+    assert.doesNotMatch(layout, /transition\s*:\s*all\b/i);
     assert.match(layout, /\.sidebar-container[\s\S]*transition:\s*transform 180ms ease/);
     assert.match(layout, /prefers-reduced-motion:\s*reduce[\s\S]*\.sidebar-container[\s\S]*transition:\s*none !important/);
 });

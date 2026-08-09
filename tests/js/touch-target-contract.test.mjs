@@ -3,12 +3,13 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { readCssSource } from "./helpers/css-source.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = (file) => readFile(path.join(root, file), "utf8");
 
 test("shared touch targets use one coarse-pointer contract without resizing calendar event geometry", async () => {
-    const globalStyles = await source("static/css/global.css");
+    const globalStyles = await readCssSource(root, "static/css/global.css");
     assert.match(globalStyles, /--touch-target-min:\s*44px/);
     assert.match(globalStyles, /--touch-target-gap:\s*4px/);
     assert.match(globalStyles, /@media \(pointer: coarse\)/);
