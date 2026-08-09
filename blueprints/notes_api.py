@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse
 
-from flask import Blueprint, Response, abort, current_app, jsonify, request, send_file, session, url_for
+from flask import Blueprint, Response, abort, current_app, jsonify, request, session, url_for
 from flask_login import current_user, login_required
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
@@ -588,7 +588,6 @@ def delete_note_media(note_id, media_id):
         return jsonify({"error": "Unable to delete this image."}), 500
     return jsonify({"ok": True})
 
-
 @notes_api_bp.route("/api/notes/<note_id>", methods=["GET"])
 def get_note(note_id):
     note = note_store.get_note(note_id)
@@ -649,11 +648,6 @@ def update_note(note_id):
     except AppwriteException:
         logger.exception("Failed to update note")
         return jsonify({"error": "Unable to update note."}), 500
-    if "content" in updates:
-        try:
-            note_media.sync_note_media(note_id, updates["content"])
-        except AppwriteException:
-            logger.exception("Failed to synchronize note media references")
 
     try:
         global_page_setup = _load_global_notes_page_setup(updated.get("user_id") or note.get("user_id"))
@@ -681,7 +675,6 @@ def note_sharing(note_id):
 def delete_note(note_id):
     _note_owner_or_404(note_id)
     try:
-        note_media.delete_note_media(note_id)
         note_store.delete_note(note_id)
     except AppwriteException:
         logger.exception("Failed to delete note")
@@ -783,8 +776,6 @@ def delete_folder(folder_id):
     _folder_owner_or_404(folder_id)
 
     try:
-        for note in note_store.list_notes_in_folder(folder_id):
-            note_media.delete_note_media(note.get("$id") or note.get("id"))
         note_store.delete_folder_and_notes(current_user.id, folder_id)
     except AppwriteException:
         logger.exception("Failed to delete note folder")
@@ -991,12 +982,16 @@ def resolve_note_suggestion(note_id, suggestion_id, action):
 def note_comments(note_id):
     _note, access = _require_note_access(note_id, "can_review")
     if request.method == "GET":
-        return jsonify({"threads": notes_collaboration.list_comments(note_id)})
+        return jsonify({"threads": notes_collaboration.list_comments(
+            note_id,
+            current_user.id,
+            access.get("can_manage_reviews") is True,
+        )})
     try:
         thread = notes_collaboration.create_comment(note_id, current_user.id, request.get_json(silent=True) or {})
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
-    return jsonify(thread), 201
+    return jsonify(thread), 200 if thread.get("replayed") else 201
 
 
 @notes_api_bp.route("/api/notes/<note_id>/comments/<thread_id>/replies", methods=["POST"])
@@ -1005,12 +1000,75 @@ def reply_to_note_comment(note_id, thread_id):
     _note, access = _require_note_access(note_id, "can_review")
     payload = request.get_json(silent=True) or {}
     try:
-        thread = notes_collaboration.reply_to_comment(note_id, thread_id, current_user.id, payload.get("body"))
+        thread = notes_collaboration.reply_to_comment(
+            note_id,
+            thread_id,
+            current_user.id,
+            payload.get("body"),
+            payload.get("client_request_id"),
+        )
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
     if not thread:
         abort(404)
-    return jsonify(thread), 201
+    return jsonify(thread), 200 if thread.get("replayed") else 201
+
+
+@notes_api_bp.route("/api/notes/<note_id>/comments/<thread_id>", methods=["PATCH", "DELETE"])
+@login_required
+def mutate_note_comment(note_id, thread_id):
+    _note, access = _require_note_access(note_id, "can_review")
+    try:
+        if request.method == "DELETE":
+            thread = notes_collaboration.delete_comment(
+                note_id,
+                thread_id,
+                current_user.id,
+                can_manage=access.get("can_manage_reviews") is True,
+            )
+        else:
+            payload = request.get_json(silent=True) or {}
+            thread = notes_collaboration.update_comment(
+                note_id,
+                thread_id,
+                current_user.id,
+                payload.get("body"),
+                can_manage=access.get("can_manage_reviews") is True,
+            )
+    except PermissionError as exc:
+        return jsonify({"error": str(exc)}), 403
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    if not thread:
+        abort(404)
+    return jsonify(thread)
+
+
+@notes_api_bp.route(
+    "/api/notes/<note_id>/comments/<thread_id>/replies/<reply_id>",
+    methods=["PATCH", "DELETE"],
+)
+@login_required
+def mutate_note_comment_reply(note_id, thread_id, reply_id):
+    _note, access = _require_note_access(note_id, "can_review")
+    payload = request.get_json(silent=True) or {}
+    try:
+        thread = notes_collaboration.update_comment_reply(
+            note_id,
+            thread_id,
+            reply_id,
+            current_user.id,
+            payload.get("body"),
+            can_manage=access.get("can_manage_reviews") is True,
+            delete=request.method == "DELETE",
+        )
+    except PermissionError as exc:
+        return jsonify({"error": str(exc)}), 403
+    except ValueError as exc:
+        return jsonify({"error": str(exc)}), 400
+    if not thread:
+        abort(404)
+    return jsonify(thread)
 
 
 @notes_api_bp.route("/api/notes/<note_id>/comments/<thread_id>/<action>", methods=["POST"])

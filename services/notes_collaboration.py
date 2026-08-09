@@ -2,8 +2,14 @@
 
 from __future__ import annotations
 
+import base64
 import json
+import os
 import re
+import sqlite3
+import subprocess
+import urllib.error
+import urllib.request
 import uuid
 from datetime import datetime, timedelta, timezone
 
@@ -11,6 +17,7 @@ from appwrite.exception import AppwriteException
 
 from services.database import db_connection, utcnow_iso
 from services import note_store
+from services.database import BASE_DIR
 
 
 ROLE_LEVELS = {"viewer", "reviewer", "editor"}
@@ -19,6 +26,52 @@ MANAGER_ROLES = {"owner", "editor"}
 EMAIL_RE = re.compile(r"^[^\s@]+@[^\s@]+\.[^\s@]+$")
 INVITATION_DAYS = 7
 VERSION_DAYS = 30
+
+
+def _broadcast_review_event(note_id, event_type, resource_id):
+    secret = os.environ.get("NOTES_COLLABORATION_INTERNAL_SECRET") or os.environ.get("NOTES_COLLABORATION_SECRET")
+    if not secret:
+        return
+    payload = json.dumps({
+        "note_id": str(note_id),
+        "event": {
+            "id": row_id(),
+            "type": str(event_type),
+            "resource_id": str(resource_id),
+        },
+    }).encode("utf-8")
+    request = urllib.request.Request(
+        "http://127.0.0.1:1234/events",
+        data=payload,
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "X-Nest-Collaboration-Secret": secret,
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=0.75):
+            pass
+    except (OSError, urllib.error.URLError):
+        # Database state is authoritative; connected clients can still refresh manually.
+        pass
+
+
+def _reload_collaboration_document(note_id):
+    secret = os.environ.get("NOTES_COLLABORATION_INTERNAL_SECRET") or os.environ.get("NOTES_COLLABORATION_SECRET")
+    if not secret:
+        return
+    request = urllib.request.Request(
+        "http://127.0.0.1:1234/reload",
+        data=json.dumps({"note_id": str(note_id)}).encode("utf-8"),
+        method="POST",
+        headers={"Content-Type": "application/json", "X-Nest-Collaboration-Secret": secret},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=1.5):
+            pass
+    except (OSError, urllib.error.URLError):
+        pass
 
 
 def row_id():
@@ -343,21 +396,33 @@ def create_suggestion(note_id, author_user_id, payload):
     if len(encoded.encode("utf-8")) > 256_000:
         raise ValueError("Suggestion is too large.")
     now = utcnow_iso()
+    request_id = str(payload.get("client_request_id") or row_id())[:128]
+    target_kind = str(payload.get("target_kind") or "body").strip().lower()
+    if target_kind not in {"body", "title", "page_setup"}:
+        raise ValueError("Unsupported suggestion target.")
     suggestion_id = row_id()
     with db_connection() as conn:
+        existing = conn.execute(
+            "SELECT id FROM note_suggestions WHERE note_id = ? AND author_user_id = ? AND client_request_id = ?",
+            [str(note_id), str(author_user_id), request_id],
+        ).fetchone()
+        if existing:
+            return next(row for row in list_suggestions(note_id) if row["id"] == existing["id"])
         conn.execute(
             """
             INSERT INTO note_suggestions (
                 id, note_id, author_user_id, status, operation_kind, operations_json,
                 anchor_start, anchor_end, block_id, base_state_vector, summary,
-                created_at, updated_at
-            ) VALUES (?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                created_at, updated_at, client_request_id, target_kind, scope_json
+            ) VALUES (?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 suggestion_id, str(note_id), str(author_user_id),
                 str(payload.get("operation_kind") or "batch")[:64], encoded,
                 payload.get("anchor_start"), payload.get("anchor_end"), payload.get("block_id"),
                 payload.get("base_state_vector"), str(payload.get("summary") or "")[:500], now, now,
+                request_id, target_kind,
+                json.dumps(payload.get("scope") or {}, separators=(",", ":")),
             ],
         )
     for user_id in _note_participant_ids(note_id, include_reviewers=False):
@@ -365,7 +430,64 @@ def create_suggestion(note_id, author_user_id, payload):
             user_id, "note_suggestion_created", "A new note suggestion is ready for review.",
             actor_user_id=author_user_id, note_id=note_id, suggestion_id=suggestion_id,
         )
+    _broadcast_review_event(note_id, "review.suggestion.created", suggestion_id)
     return next(row for row in list_suggestions(note_id) if row["id"] == suggestion_id)
+
+
+def _apply_suggestion(note_id, row):
+    with db_connection() as conn:
+        document = conn.execute(
+            "SELECT * FROM note_collaboration_documents WHERE note_id = ?",
+            [str(note_id)],
+        ).fetchone()
+    if not document:
+        raise ValueError("suggestion_conflicted")
+    completed = subprocess.run(
+        ["node", os.path.join(BASE_DIR, "collaboration", "apply-suggestion.mjs")],
+        cwd=BASE_DIR,
+        input=json.dumps({
+            "ydoc_base64": base64.b64encode(document["ydoc_blob"]).decode("ascii"),
+            "base_state_vector": row["base_state_vector"],
+            "target_kind": row["target_kind"] or "body",
+            "operations": json.loads(row["operations_json"] or "[]"),
+        }),
+        text=True,
+        capture_output=True,
+        timeout=30,
+    )
+    if completed.returncode:
+        detail = completed.stderr or "suggestion_apply_failed"
+        if "suggestion_conflicted" in detail:
+            raise ValueError("suggestion_conflicted")
+        raise ValueError("Unable to apply suggestion.")
+    applied = json.loads(completed.stdout)
+    blob = base64.b64decode(applied["ydoc_base64"], validate=True)
+    now = utcnow_iso()
+    with db_connection() as conn:
+        conn.execute(
+            """
+            UPDATE note_collaboration_documents
+            SET ydoc_blob = ?, durable_revision = durable_revision + 1,
+                projection_revision = projection_revision + 1, updated_at = ?
+            WHERE note_id = ?
+            """,
+            [blob, now, str(note_id)],
+        )
+        updates = {"updated_at": now}
+        if applied.get("title") is not None:
+            updates["title"] = str(applied["title"]) or "Untitled"
+        if applied.get("content_json") is not None:
+            updates["content"] = applied["content_json"]
+            from services.notes_preview import preview_text_from_content
+            updates["preview_text"] = preview_text_from_content(applied["content_json"])
+        if applied.get("page_setup") is not None:
+            updates["page_setup_json"] = json.dumps(applied["page_setup"], separators=(",", ":"))
+        assignments = ", ".join(f"{key} = ?" for key in updates)
+        conn.execute(
+            f"UPDATE notes SET {assignments} WHERE id = ?",
+            [*updates.values(), str(note_id)],
+        )
+    _reload_collaboration_document(note_id)
 
 
 def resolve_suggestion(note_id, suggestion_id, resolver_user_id, status):
@@ -381,6 +503,24 @@ def resolve_suggestion(note_id, suggestion_id, resolver_user_id, status):
             return None
         if row["status"] != "open":
             raise ValueError("Suggestion is already resolved.")
+    if status == "accepted":
+        # Suggestions created before a note becomes collaboration-enabled do
+        # not have a Yjs document to apply against. Preserve the existing
+        # review workflow for those legacy notes; collaboration-enabled notes
+        # still enforce the conflict-aware apply path.
+        with db_connection() as conn:
+            has_document = conn.execute(
+                "SELECT 1 FROM note_collaboration_documents WHERE note_id = ?",
+                [str(note_id)],
+            ).fetchone() is not None
+        if has_document:
+            try:
+                _apply_suggestion(note_id, row)
+            except ValueError as exc:
+                if str(exc) != "suggestion_conflicted":
+                    raise
+                status = "conflicted"
+    with db_connection() as conn:
         conn.execute(
             """
             UPDATE note_suggestions SET status = ?, resolved_by_user_id = ?,
@@ -393,10 +533,63 @@ def resolve_suggestion(note_id, suggestion_id, resolver_user_id, status):
         f"Your note suggestion was {status}.", actor_user_id=resolver_user_id,
         note_id=note_id, suggestion_id=suggestion_id,
     )
+    _broadcast_review_event(note_id, "review.suggestion.updated", suggestion_id)
     return next(row for row in list_suggestions(note_id) if row["id"] == str(suggestion_id))
 
 
-def list_comments(note_id):
+def _comment_anchor_from_row(thread):
+    kind = thread.get("anchor_kind") or ("legacy" if thread.get("block_id") else "document")
+    return {
+        "kind": kind,
+        "version": int(thread.get("anchor_version") or 1),
+        "state": thread.get("anchor_state") or "detached",
+        "relative_start": thread.get("relative_start") or thread.get("anchor_start"),
+        "relative_end": thread.get("relative_end") or thread.get("anchor_end"),
+        "start_block_id": thread.get("start_block_id") or thread.get("block_id"),
+        "start_offset": thread.get("start_offset"),
+        "end_block_id": thread.get("end_block_id") or thread.get("block_id"),
+        "end_offset": thread.get("end_offset"),
+        "quoted_text": thread.get("quoted_text") or "",
+        "context_before": thread.get("context_before") or "",
+        "context_after": thread.get("context_after") or "",
+    }
+
+
+def _validated_comment_anchor(payload):
+    anchor = payload.get("anchor") if isinstance(payload.get("anchor"), dict) else {}
+    kind = str(anchor.get("kind") or "document").strip().lower()
+    if kind not in {"document", "legacy", "yjs"}:
+        raise ValueError("Unsupported comment anchor kind.")
+    state = str(anchor.get("state") or ("detached" if kind == "document" else "attached")).strip().lower()
+    if state not in {"attached", "detached"}:
+        raise ValueError("Unsupported comment anchor state.")
+
+    def offset(name):
+        value = anchor.get(name)
+        if value is None:
+            return None
+        value = int(value)
+        if value < 0 or value > 10_000_000:
+            raise ValueError("Comment anchor offset is invalid.")
+        return value
+
+    return {
+        "kind": kind,
+        "version": max(1, min(int(anchor.get("version") or 1), 10)),
+        "state": state,
+        "relative_start": str(anchor.get("relative_start") or "")[:8000] or None,
+        "relative_end": str(anchor.get("relative_end") or "")[:8000] or None,
+        "start_block_id": str(anchor.get("start_block_id") or "")[:255] or None,
+        "start_offset": offset("start_offset"),
+        "end_block_id": str(anchor.get("end_block_id") or "")[:255] or None,
+        "end_offset": offset("end_offset"),
+        "quoted_text": str(anchor.get("quoted_text") or payload.get("quoted_text") or "")[:1000],
+        "context_before": str(anchor.get("context_before") or "")[-250:],
+        "context_after": str(anchor.get("context_after") or "")[:250],
+    }
+
+
+def list_comments(note_id, viewer_user_id=None, can_manage=False):
     with db_connection() as conn:
         threads = _dicts(conn.execute(
             "SELECT * FROM note_comment_threads WHERE note_id = ? ORDER BY created_at ASC",
@@ -413,11 +606,30 @@ def list_comments(note_id):
     by_thread = {}
     for reply in replies:
         reply["author"] = note_store.get_safe_user(reply.get("author_user_id"))
+        reply["body"] = "" if reply.get("deleted_at") else reply.get("body", "")
+        reply["can_edit"] = bool(
+            not reply.get("deleted_at") and str(reply.get("author_user_id")) == str(viewer_user_id or "")
+        )
+        reply["can_delete"] = bool(
+            not reply.get("deleted_at")
+            and (can_manage or str(reply.get("author_user_id")) == str(viewer_user_id or ""))
+        )
         by_thread.setdefault(reply["thread_id"], []).append(reply)
     for thread in threads:
         thread["author"] = note_store.get_safe_user(thread.get("author_user_id"))
         thread["resolved_by"] = note_store.get_safe_user(thread.get("resolved_by_user_id"))
         thread["replies"] = by_thread.get(thread["id"], [])
+        thread["anchor"] = _comment_anchor_from_row(thread)
+        thread["can_edit"] = bool(
+            not thread.get("deleted_at") and str(thread.get("author_user_id")) == str(viewer_user_id or "")
+        )
+        thread["can_delete"] = bool(
+            not thread.get("deleted_at")
+            and (can_manage or str(thread.get("author_user_id")) == str(viewer_user_id or ""))
+        )
+        thread["can_resolve"] = bool(can_manage)
+        if thread.get("deleted_at"):
+            thread["body"] = ""
     return threads
 
 
@@ -425,36 +637,72 @@ def create_comment(note_id, author_user_id, payload):
     body = str(payload.get("body") or "").strip()
     if not body or len(body) > 5000:
         raise ValueError("Comment must contain 1 to 5,000 characters.")
+    request_id = str(payload.get("client_request_id") or row_id()).strip()
+    if len(request_id) > 128:
+        raise ValueError("client_request_id is too long.")
+    anchor = _validated_comment_anchor(payload)
     now = utcnow_iso()
     thread_id = row_id()
+    created = False
     with db_connection() as conn:
-        conn.execute(
-            """
-            INSERT INTO note_comment_threads (
-                id, note_id, author_user_id, body, anchor_start, anchor_end,
-                block_id, quoted_text, status, created_at, updated_at
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?)
-            """,
-            [
-                thread_id, str(note_id), str(author_user_id), body,
-                payload.get("anchor_start"), payload.get("anchor_end"), payload.get("block_id"),
-                str(payload.get("quoted_text") or "")[:1000], now, now,
-            ],
-        )
-    for user_id in _note_participant_ids(note_id):
-        create_notification(
-            user_id, "note_comment_created", "A new comment was added to a shared note.",
-            actor_user_id=author_user_id, note_id=note_id, thread_id=thread_id,
-        )
-    return next(row for row in list_comments(note_id) if row["id"] == thread_id)
+        existing = conn.execute(
+            "SELECT id FROM note_comment_threads WHERE note_id = ? AND author_user_id = ? AND client_request_id = ?",
+            [str(note_id), str(author_user_id), request_id],
+        ).fetchone()
+        if existing:
+            thread_id = existing["id"]
+        else:
+            try:
+                conn.execute(
+                    """
+                    INSERT INTO note_comment_threads (
+                        id, note_id, author_user_id, body, anchor_start, anchor_end,
+                        block_id, quoted_text, status, created_at, updated_at,
+                        client_request_id, anchor_kind, anchor_version, relative_start,
+                        relative_end, start_block_id, start_offset, end_block_id, end_offset,
+                        context_before, context_after, anchor_state
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'open', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    [
+                        thread_id, str(note_id), str(author_user_id), body,
+                        anchor["relative_start"], anchor["relative_end"], anchor["start_block_id"],
+                        anchor["quoted_text"], now, now, request_id, anchor["kind"], anchor["version"],
+                        anchor["relative_start"], anchor["relative_end"], anchor["start_block_id"],
+                        anchor["start_offset"], anchor["end_block_id"], anchor["end_offset"],
+                        anchor["context_before"], anchor["context_after"], anchor["state"],
+                    ],
+                )
+                created = True
+            except sqlite3.IntegrityError:
+                existing = conn.execute(
+                    "SELECT id FROM note_comment_threads WHERE note_id = ? AND author_user_id = ? AND client_request_id = ?",
+                    [str(note_id), str(author_user_id), request_id],
+                ).fetchone()
+                if not existing:
+                    raise
+                thread_id = existing["id"]
+    if created:
+        for user_id in _note_participant_ids(note_id):
+            create_notification(
+                user_id, "note_comment_created", "A new comment was added to a shared note.",
+                actor_user_id=author_user_id, note_id=note_id, thread_id=thread_id,
+            )
+        _broadcast_review_event(note_id, "review.comment.created", thread_id)
+    result = next(row for row in list_comments(note_id, author_user_id) if row["id"] == thread_id)
+    result["replayed"] = not created
+    return result
 
 
-def reply_to_comment(note_id, thread_id, author_user_id, body):
+def reply_to_comment(note_id, thread_id, author_user_id, body, client_request_id=None):
     body = str(body or "").strip()
     if not body or len(body) > 5000:
         raise ValueError("Reply must contain 1 to 5,000 characters.")
+    request_id = str(client_request_id or row_id()).strip()
+    if len(request_id) > 128:
+        raise ValueError("client_request_id is too long.")
     now = utcnow_iso()
     reply_id = row_id()
+    created = False
     with db_connection() as conn:
         thread = conn.execute(
             "SELECT * FROM note_comment_threads WHERE id = ? AND note_id = ?",
@@ -462,22 +710,110 @@ def reply_to_comment(note_id, thread_id, author_user_id, body):
         ).fetchone()
         if not thread:
             return None
-        conn.execute(
-            "INSERT INTO note_comment_replies (id, thread_id, author_user_id, body, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)",
-            [reply_id, str(thread_id), str(author_user_id), body, now, now],
-        )
+        existing = conn.execute(
+            "SELECT id FROM note_comment_replies WHERE thread_id = ? AND author_user_id = ? AND client_request_id = ?",
+            [str(thread_id), str(author_user_id), request_id],
+        ).fetchone()
+        if existing:
+            reply_id = existing["id"]
+        else:
+            conn.execute(
+                "INSERT INTO note_comment_replies (id, thread_id, author_user_id, body, created_at, updated_at, client_request_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                [reply_id, str(thread_id), str(author_user_id), body, now, now, request_id],
+            )
+            created = True
         conn.execute("UPDATE note_comment_threads SET updated_at = ? WHERE id = ?", [now, str(thread_id)])
         participant_rows = conn.execute(
             "SELECT DISTINCT author_user_id FROM note_comment_replies WHERE thread_id = ?",
             [str(thread_id)],
         ).fetchall()
     recipients = {str(thread["author_user_id"]), *[str(row["author_user_id"]) for row in participant_rows]}
-    for user_id in recipients:
-        create_notification(
-            user_id, "note_comment_reply", "Someone replied to a note comment.",
-            actor_user_id=author_user_id, note_id=note_id, thread_id=thread_id,
+    if created:
+        for user_id in recipients:
+            create_notification(
+                user_id, "note_comment_reply", "Someone replied to a note comment.",
+                actor_user_id=author_user_id, note_id=note_id, thread_id=thread_id,
+            )
+        _broadcast_review_event(note_id, "review.comment.replied", thread_id)
+    result = next(row for row in list_comments(note_id, author_user_id) if row["id"] == str(thread_id))
+    result["replayed"] = not created
+    return result
+
+
+def update_comment(note_id, thread_id, actor_user_id, body, *, can_manage=False):
+    body = str(body or "").strip()
+    if not body or len(body) > 5000:
+        raise ValueError("Comment must contain 1 to 5,000 characters.")
+    now = utcnow_iso()
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM note_comment_threads WHERE id = ? AND note_id = ?",
+            [str(thread_id), str(note_id)],
+        ).fetchone()
+        if not row:
+            return None
+        if row["deleted_at"]:
+            raise ValueError("Comment is deleted.")
+        if not can_manage and str(row["author_user_id"]) != str(actor_user_id):
+            raise PermissionError("You cannot edit this comment.")
+        conn.execute(
+            "UPDATE note_comment_threads SET body = ?, edited_at = ?, updated_at = ? WHERE id = ?",
+            [body, now, now, str(thread_id)],
         )
-    return next(row for row in list_comments(note_id) if row["id"] == str(thread_id))
+    _broadcast_review_event(note_id, "review.comment.updated", thread_id)
+    return next(item for item in list_comments(note_id, actor_user_id, can_manage) if item["id"] == str(thread_id))
+
+
+def delete_comment(note_id, thread_id, actor_user_id, *, can_manage=False):
+    now = utcnow_iso()
+    with db_connection() as conn:
+        row = conn.execute(
+            "SELECT * FROM note_comment_threads WHERE id = ? AND note_id = ?",
+            [str(thread_id), str(note_id)],
+        ).fetchone()
+        if not row:
+            return None
+        if not can_manage and str(row["author_user_id"]) != str(actor_user_id):
+            raise PermissionError("You cannot delete this comment.")
+        conn.execute(
+            "UPDATE note_comment_threads SET deleted_at = ?, deleted_by_user_id = ?, anchor_state = 'detached', updated_at = ? WHERE id = ?",
+            [now, str(actor_user_id), now, str(thread_id)],
+        )
+    _broadcast_review_event(note_id, "review.comment.deleted", thread_id)
+    return next(item for item in list_comments(note_id, actor_user_id, can_manage) if item["id"] == str(thread_id))
+
+
+def update_comment_reply(note_id, thread_id, reply_id, actor_user_id, body, *, can_manage=False, delete=False):
+    clean_body = str(body or "").strip()
+    if not delete and (not clean_body or len(clean_body) > 5000):
+        raise ValueError("Reply must contain 1 to 5,000 characters.")
+    now = utcnow_iso()
+    with db_connection() as conn:
+        row = conn.execute(
+            """
+            SELECT r.* FROM note_comment_replies r
+            JOIN note_comment_threads t ON t.id = r.thread_id
+            WHERE r.id = ? AND r.thread_id = ? AND t.note_id = ?
+            """,
+            [str(reply_id), str(thread_id), str(note_id)],
+        ).fetchone()
+        if not row:
+            return None
+        if not can_manage and str(row["author_user_id"]) != str(actor_user_id):
+            raise PermissionError("You cannot change this reply.")
+        if delete:
+            conn.execute(
+                "UPDATE note_comment_replies SET deleted_at = ?, deleted_by_user_id = ?, updated_at = ? WHERE id = ?",
+                [now, str(actor_user_id), now, str(reply_id)],
+            )
+        else:
+            conn.execute(
+                "UPDATE note_comment_replies SET body = ?, edited_at = ?, updated_at = ? WHERE id = ?",
+                [clean_body, now, now, str(reply_id)],
+            )
+        conn.execute("UPDATE note_comment_threads SET updated_at = ? WHERE id = ?", [now, str(thread_id)])
+    _broadcast_review_event(note_id, "review.comment.replied", thread_id)
+    return next(item for item in list_comments(note_id, actor_user_id, can_manage) if item["id"] == str(thread_id))
 
 
 def set_comment_status(note_id, thread_id, resolver_user_id, status):
@@ -507,6 +843,7 @@ def set_comment_status(note_id, thread_id, resolver_user_id, status):
         row["author_user_id"], f"note_comment_{status}", f"Your note comment was {status}.",
         actor_user_id=resolver_user_id, note_id=note_id, thread_id=thread_id,
     )
+    _broadcast_review_event(note_id, "review.comment.status", thread_id)
     return next(item for item in list_comments(note_id) if item["id"] == str(thread_id))
 
 
@@ -836,6 +1173,80 @@ def transfer_folder(folder_id, current_owner_id, new_owner_id):
         actor_user_id=current_owner_id,
     )
     return note_store.get_folder(folder_id)
+
+
+def migrate_notes_to_collaboration(*, report_only=True, note_ids=None):
+    """Convert legacy BlockNote JSON with the production schema before enabling Yjs."""
+    selected = {str(value) for value in (note_ids or []) if value}
+    with db_connection() as conn:
+        rows = _dicts(conn.execute(
+            "SELECT id, title, content, page_setup_json, collaboration_enabled FROM notes ORDER BY created_at"
+        ).fetchall())
+    if selected:
+        rows = [row for row in rows if str(row["id"]) in selected]
+
+    result = {"checked": 0, "ready": 0, "migrated": 0, "skipped": 0, "failed": []}
+    converter = os.path.join(BASE_DIR, "collaboration", "convert-note.mjs")
+    for note in rows:
+        result["checked"] += 1
+        if note.get("collaboration_enabled"):
+            result["skipped"] += 1
+            continue
+        try:
+            blocks = json.loads(note.get("content") or "[]")
+            if not isinstance(blocks, list):
+                raise ValueError("content is not a BlockNote array")
+            if not blocks:
+                blocks = [{"type": "paragraph", "content": ""}]
+            page_setup = json.loads(note.get("page_setup_json") or "{}")
+            completed = subprocess.run(
+                ["node", converter],
+                cwd=BASE_DIR,
+                input=json.dumps({
+                    "title": note.get("title") or "Untitled",
+                    "blocks": blocks,
+                    "page_setup": page_setup if isinstance(page_setup, dict) else {},
+                }),
+                text=True,
+                capture_output=True,
+                timeout=30,
+                check=True,
+            )
+            converted = json.loads(completed.stdout)
+            blob = base64.b64decode(converted["ydoc_base64"], validate=True)
+            result["ready"] += 1
+            if report_only:
+                continue
+            create_version(note["id"], reason="before_migration")
+            now = utcnow_iso()
+            with db_connection() as conn:
+                existing = conn.execute(
+                    "SELECT 1 FROM note_collaboration_documents WHERE note_id = ?",
+                    [str(note["id"])],
+                ).fetchone()
+                if existing:
+                    result["skipped"] += 1
+                    continue
+                conn.execute(
+                    """
+                    INSERT INTO note_collaboration_documents (
+                        note_id, ydoc_blob, schema_version, durable_revision,
+                        projection_revision, initialized_at, updated_at
+                    ) VALUES (?, ?, 1, 1, 1, ?, ?)
+                    """,
+                    [str(note["id"]), blob, now, now],
+                )
+                conn.execute(
+                    "UPDATE notes SET collaboration_enabled = 1, updated_at = ? WHERE id = ?",
+                    [now, str(note["id"])],
+                )
+            result["migrated"] += 1
+        except (ValueError, KeyError, json.JSONDecodeError, subprocess.SubprocessError) as exc:
+            detail = str(exc)
+            if isinstance(exc, subprocess.CalledProcessError) and exc.stderr:
+                detail = " | ".join(exc.stderr.strip().splitlines()[-8:]) or detail
+            result["failed"].append({"note_id": str(note["id"]), "error": detail[:500]})
+    return result
 
 
 def cleanup_expired_collaboration_rows():

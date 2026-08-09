@@ -111,6 +111,27 @@ async function healthPayload() {
     }
 }
 
+function readJsonBody(request) {
+    return new Promise((resolve, reject) => {
+        const chunks = [];
+        let size = 0;
+        request.on('data', (chunk) => {
+            size += chunk.length;
+            if (size > 64 * 1024) {
+                reject(new Error('Request body is too large.'));
+                request.destroy();
+                return;
+            }
+            chunks.push(chunk);
+        });
+        request.on('end', () => {
+            try { resolve(JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}')); }
+            catch (error) { reject(error); }
+        });
+        request.on('error', reject);
+    });
+}
+
 const server = Server.configure({
     name: 'nest-notes-collaboration',
     address: HOST,
@@ -126,6 +147,31 @@ const server = Server.configure({
             const payload = await healthPayload();
             response.writeHead(payload.ok ? 200 : 503, { 'Content-Type': 'application/json' });
             response.end(JSON.stringify(payload));
+            throw null;
+        }
+        if ((request.url === '/events' || request.url === '/reload') && request.method === 'POST') {
+            if (!INTERNAL_SECRET || request.headers['x-nest-collaboration-secret'] !== INTERNAL_SECRET) {
+                response.writeHead(403, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ error: 'forbidden' }));
+                throw null;
+            }
+            try {
+                const payload = await readJsonBody(request);
+                const noteId = normalizeNoteId(payload.note_id);
+                const documentName = server.documents.has(`notes:${noteId}`) ? `notes:${noteId}` : noteId;
+                const document = server.documents.get(documentName);
+                if (request.url === '/reload') {
+                    await document?.destroy();
+                    server.documents.delete(documentName);
+                } else {
+                    document?.broadcastStateless(JSON.stringify(payload.event || {}));
+                }
+                response.writeHead(200, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ ok: true, delivered: Boolean(document) }));
+            } catch (error) {
+                response.writeHead(400, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ error: error.message }));
+            }
             throw null;
         }
     },

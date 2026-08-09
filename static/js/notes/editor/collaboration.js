@@ -14,6 +14,14 @@ export function deterministicCollaboratorColor(seed) {
     return CURSOR_COLORS[Math.abs(hash) % CURSOR_COLORS.length];
 }
 
+export function collaborationStateVectorBase64(document) {
+    if (!document) return null;
+    const bytes = Y.encodeStateVector(document);
+    let binary = '';
+    bytes.forEach((value) => { binary += String.fromCharCode(value); });
+    return window.btoa(binary);
+}
+
 function initialsFor(value) {
     const words = String(value || 'Nest User').trim().split(/\s+/).filter(Boolean);
     return words.slice(0, 2).map((word) => word[0]?.toUpperCase() || '').join('') || 'N';
@@ -49,12 +57,15 @@ export function collaboratorsFromAwareness(provider, currentUserId) {
         if (!user?.id || String(user.id) === String(currentUserId || '')) return;
         const role = String(user.role || '').toLowerCase();
         if (!ACTIVE_ROLES.has(role)) return;
+        const mode = user.mode || (role === 'reviewer' ? 'suggesting' : 'editing');
+        if (mode === 'viewing') return;
         byUser.set(String(user.id), {
             id: String(user.id),
             name: user.name || user.username || 'Nest User',
             username: user.username || '',
             picture_url: user.picture_url || '',
             role,
+            mode,
             color: user.color || deterministicCollaboratorColor(user.id),
         });
     });
@@ -63,14 +74,15 @@ export function collaboratorsFromAwareness(provider, currentUserId) {
 
 function collaboratorAvatarHtml(user) {
     const color = user.color || deterministicCollaboratorColor(user.id);
-    const label = `${user.name || 'Nest User'} · ${user.role === 'reviewer' ? 'Suggesting' : 'Editing'}`;
+    const suggesting = user.mode === 'suggesting' || user.role === 'reviewer';
+    const label = `${user.name || 'Nest User'} · ${suggesting ? 'Suggesting' : 'Editing'}`;
     const image = user.picture_url
         ? `<img src="${escapeHtml(user.picture_url)}" alt="" loading="lazy">`
         : `<span aria-hidden="true">${escapeHtml(initialsFor(user.name || user.username))}</span>`;
     return `
         <button type="button" class="notes-collaborator-avatar" style="--collaborator-color: ${escapeHtml(color)}" title="${escapeHtml(label)}" aria-label="${escapeHtml(label)}">
             ${image}
-            <i aria-hidden="true" class="notes-collaborator-indicator notes-collaborator-indicator--${user.role === 'reviewer' ? 'suggesting' : 'editing'}"></i>
+            <i aria-hidden="true" class="notes-collaborator-indicator notes-collaborator-indicator--${suggesting ? 'suggesting' : 'editing'}"></i>
         </button>
     `;
 }
@@ -90,7 +102,7 @@ export function renderTopbarPresence(root, collaborators) {
                 <div class="notes-collaborator-list-row">
                     ${collaboratorAvatarHtml(user)}
                     <span>${escapeHtml(user.name)}</span>
-                    <small>${escapeHtml(user.role === 'reviewer' ? 'Suggesting' : 'Editing')}</small>
+                    <small>${escapeHtml(user.mode === 'suggesting' || user.role === 'reviewer' ? 'Suggesting' : 'Editing')}</small>
                 </div>
             `).join('')}
         </div>
@@ -113,6 +125,7 @@ export async function createNoteCollaborationSession({
     access,
     presenceRoot,
     onStatus,
+    onReviewEvent,
 } = {}) {
     if (!noteId) return null;
     const tokenResponse = await fetch(`/api/notes/${encodeURIComponent(noteId)}/collaboration-token`, {
@@ -137,6 +150,14 @@ export async function createNoteCollaborationSession({
             if (status === 'disconnected') onStatus?.('reconnecting');
         },
         onAuthenticationFailed: () => onStatus?.('offline-readonly'),
+        onStateless: ({ payload }) => {
+            try {
+                const event = JSON.parse(payload || '{}');
+                if (String(event.type || '').startsWith('review.')) onReviewEvent?.(event);
+            } catch (error) {
+                // Ignore non-review stateless messages used by other collaboration features.
+            }
+        },
     });
     const user = safeUserFromToken(tokenPayload, access);
     if (tokenPayload.awareness_allowed) {
@@ -155,6 +176,12 @@ export async function createNoteCollaborationSession({
         fragment: document.getXmlFragment('document-store'),
         user,
         access: tokenPayload.access || access,
+        setMode(mode) {
+            user.mode = mode;
+            if (tokenPayload.awareness_allowed) {
+                provider.awareness?.setLocalStateField?.('user', { ...user });
+            }
+        },
         destroy() {
             provider.destroy();
             document.destroy();
