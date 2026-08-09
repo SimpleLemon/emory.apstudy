@@ -257,6 +257,28 @@
 	line-height: 1.35;
 }
 
+.calendar-source-warning {
+	display: flex;
+	align-items: flex-start;
+	gap: 6px;
+	margin-top: 4px;
+	color: var(--color-error, #b3261e);
+	font-size: var(--text-meta);
+	line-height: 1.35;
+	white-space: normal;
+}
+
+.calendar-source-warning-icon {
+	width: 14px;
+	height: 14px;
+	flex: 0 0 auto;
+	margin-top: 1px;
+}
+
+.calendar-source-warning-text {
+	min-width: 0;
+}
+
 .calendar-source-section-head {
 	display: flex;
 	align-items: center;

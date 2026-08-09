@@ -1087,6 +1087,39 @@ def update_feed_url():
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
 
+    user_id = str(current_user.id)
+    try:
+        settings = first_row(
+            COLLECTIONS["user_settings"],
+            [Query.equal("user_id", [user_id])],
+        )
+    except AppwriteException:
+        logger.exception("Failed to load settings")
+        return jsonify({"error": "Unable to save feed URL."}), 500
+
+    existing_urls = set()
+    if settings:
+        existing_canvas = (settings.get("canvas_ical_url") or "").strip()
+        if existing_canvas:
+            existing_urls.add(_normalize_calendar_url(existing_canvas) or existing_canvas)
+        existing_urls.update(_load_other_calendar_urls(settings))
+
+    newly_added = []
+    if url and url not in existing_urls:
+        newly_added.append(url)
+    for candidate in other_ical_urls:
+        if candidate not in existing_urls:
+            newly_added.append(candidate)
+
+    if newly_added:
+        try:
+            from services.feed_fetcher import ensure_fetchable_calendar_url
+
+            for candidate in newly_added:
+                ensure_fetchable_calendar_url(candidate)
+        except ValueError as e:
+            return jsonify({"error": str(e)}), 400
+
     try:
         entitlements = request_entitlements(current_user)
         feed_limit = entitlements["limits"].get("max_calendar_feeds")
@@ -1098,16 +1131,6 @@ def update_feed_url():
     except EntitlementError:
         logger.exception("Failed to verify calendar feed limits")
         return jsonify({"error": "Unable to verify your calendar limits right now.", "code": "tier_check_unavailable"}), 503
-
-    user_id = str(current_user.id)
-    try:
-        settings = first_row(
-            COLLECTIONS["user_settings"],
-            [Query.equal("user_id", [user_id])],
-        )
-    except AppwriteException:
-        logger.exception("Failed to load settings")
-        return jsonify({"error": "Unable to save feed URL."}), 500
 
     payload = {
         "canvas_ical_url": url,
@@ -1144,7 +1167,7 @@ def update_feed_url():
         try:
             from services.feed_fetcher import fetch_and_cache_feeds
 
-            refresh_count = fetch_and_cache_feeds(user_id, feed_urls)
+            refresh_count = fetch_and_cache_feeds(user_id, feed_urls, force=True)
         except Exception as exc:
             logger.exception(
                 "Failed to refresh calendar feeds after settings save",

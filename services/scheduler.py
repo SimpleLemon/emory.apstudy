@@ -212,6 +212,20 @@ def _configured_feed_urls(settings):
     return urls
 
 
+def _all_configured_feeds_quarantined(user_id, feed_urls):
+    """Return True when every configured URL has a quarantined calendar_feeds row."""
+    if not feed_urls:
+        return False
+    from services.feed_fetcher import _feed_url_hash, _load_feed_metadata
+
+    feed_meta = _load_feed_metadata(user_id)
+    for feed_url in feed_urls:
+        meta = feed_meta.get(_feed_url_hash(feed_url)) or {}
+        if not meta.get("disabled_at"):
+            return False
+    return True
+
+
 def _refresh_all_feeds(app):
     """
     Iterate through all users with configured calendar feed URLs
@@ -241,7 +255,16 @@ def _refresh_all_feeds(app):
 
         now = datetime.now(timezone.utc)
         for settings in settings_with_feeds:
+            user_id = settings.get("user_id")
+            feed_urls = _configured_feed_urls(settings)
             try:
+                if _all_configured_feeds_quarantined(user_id, feed_urls):
+                    logger.info(
+                        "  User %s: skipping refresh; all configured feeds are quarantined.",
+                        user_id,
+                    )
+                    continue
+
                 refresh_minutes = settings.get("feed_refresh_minutes")
                 try:
                     refresh_minutes = int(refresh_minutes) if refresh_minutes is not None else None
@@ -259,7 +282,7 @@ def _refresh_all_feeds(app):
                     latest_feed = first_calendar_row(
                         feed_table,
                         [
-                            Query.equal("user_id", [settings.get("user_id")]),
+                            Query.equal("user_id", [user_id]),
                             Query.order_desc("last_fetched"),
                         ],
                     )
@@ -270,7 +293,7 @@ def _refresh_all_feeds(app):
                     latest_event = first_calendar_row(
                         COLLECTIONS["calendar_cache"],
                         [
-                            Query.equal("user_id", [settings.get("user_id")]),
+                            Query.equal("user_id", [user_id]),
                             Query.order_desc("fetched_at"),
                         ],
                     )
@@ -280,19 +303,23 @@ def _refresh_all_feeds(app):
                 # Refresh only when the user's interval has elapsed.
                 if not is_stale(last_fetched, refresh_minutes, now=now):
                     continue
-                count = fetch_and_cache_feeds(
-                    settings.get("user_id"),
-                    _configured_feed_urls(settings),
-                )
+                count = fetch_and_cache_feeds(user_id, feed_urls)
                 logger.info(
                     "  User %s: %s events cached.",
-                    settings.get("user_id"),
+                    user_id,
                     count,
                 )
             except Exception as exc:
+                if _all_configured_feeds_quarantined(user_id, feed_urls):
+                    logger.warning(
+                        "  User %s: feed refresh skipped after quarantine (%s)",
+                        user_id,
+                        type(exc).__name__,
+                    )
+                    continue
                 logger.error(
                     "  User %s: feed refresh failed (%s)",
-                    settings.get("user_id"),
+                    user_id,
                     type(exc).__name__,
                 )
 

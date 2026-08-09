@@ -754,7 +754,7 @@ def refresh_feed():
     from services.feed_fetcher import fetch_and_cache_feeds
 
     try:
-        count = fetch_and_cache_feeds(user_id, feed_urls)
+        count = fetch_and_cache_feeds(user_id, feed_urls, force=True)
         update_row_safe(
             COLLECTIONS["user_settings"],
             settings.get("$id"),

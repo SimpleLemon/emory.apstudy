@@ -40,6 +40,7 @@ from services.calendar_urls import (
     iter_valid_other_calendar_urls,
     load_other_calendar_urls,
 )
+from services.feed_fetcher import derive_feed_status
 from services.row_utils import row_id as _row_id
 from services.task_calendar import (
     task_calendar_events_for_user,
@@ -412,6 +413,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
     sources = []
     canvas_url = (settings.get("canvas_ical_url") or "").strip()
     if canvas_url:
+        canvas_hash = _feed_url_hash(canvas_url)
+        canvas_meta = feed_metadata.get(canvas_hash) or {}
         sources.append({
             "id": CANVAS_SOURCE_ID,
             "kind": "canvas",
@@ -419,6 +422,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
             "url": canvas_url,
             "editable": True,
             "legacy_names": ["Canvas"],
+            "status": derive_feed_status(canvas_meta),
+            "last_error_message": canvas_meta.get("last_error_message") or "",
         })
 
     for raw_url, url in iter_valid_other_calendar_urls(settings):
@@ -444,6 +449,8 @@ def _configured_feed_sources(settings, cache_events=None, preferences=None, feed
             "url": url,
             "editable": True,
             "legacy_names": legacy_names,
+            "status": derive_feed_status(metadata),
+            "last_error_message": metadata.get("last_error_message") or "",
         })
 
     for source in sources:

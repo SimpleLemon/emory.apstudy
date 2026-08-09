@@ -600,33 +600,65 @@
                 </div>
                 <div class="admin-card">
                     <h2 class="admin-title">Calendar Feeds</h2>
-                    {% set feeds = section_data.calendar_feeds %}
-                    {% call admin_table(feeds, "No calendar feeds found.") %}
+                    {% set feeds = section_data.configured_feeds or section_data.calendar_feeds %}
+                    {% if feeds %}
+                        <table class="admin-table">
                             <thead>
                                 <tr>
                                     <th>Name</th>
                                     <th>URL</th>
+                                    <th>Origin</th>
+                                    <th>Status</th>
                                     <th>Last Fetch</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for feed in feeds %}
                                     <tr>
                                         <td data-label="Name">{{ feed.get('calendar_name') or '--' }}</td>
-                                        <td data-label="URL">{{ feed.get('feed_url') or '--' }}</td>
+                                        <td data-label="URL">{{ feed.get('url') or feed.get('feed_url') or '--' }}</td>
+                                        <td data-label="Origin">{{ feed.get('origin') or '--' }}</td>
+                                        <td data-label="Status">{{ feed.get('status') or '--' }}</td>
                                         <td data-label="Last Fetch">{{ feed.get('last_fetched') or '--' }}</td>
+                                        <td data-label="Actions">
+                                            {% if feed.get('status') in ['quarantined', 'failing', 'orphaned'] %}
+                                                {% if feed.get('status') != 'orphaned' and feed.get('url') %}
+                                                    <form method="post" action="{{ url_for('admin.reenable_calendar_feed', user_id=user.id) }}" class="admin-inline-form">
+                                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                        <input type="hidden" name="section" value="calendars">
+                                                        <input type="hidden" name="return_to" value="{{ return_to or '' }}">
+                                                        <input type="hidden" name="feed_url" value="{{ feed.get('url') }}">
+                                                        <button type="submit" class="admin-button admin-button--small">Re-enable</button>
+                                                    </form>
+                                                {% endif %}
+                                                <form method="post" action="{{ url_for('admin.remove_calendar_feed', user_id=user.id) }}" class="admin-inline-form">
+                                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                    <input type="hidden" name="section" value="calendars">
+                                                    <input type="hidden" name="return_to" value="{{ return_to or '' }}">
+                                                    <input type="hidden" name="feed_url" value="{{ feed.get('url') or '' }}">
+                                                    <input type="hidden" name="feed_url_hash" value="{{ feed.get('feed_url_hash') or '' }}">
+                                                    <button type="submit" class="admin-button admin-button--small admin-button--danger">Remove</button>
+                                                </form>
+                                            {% else %}
+                                                --
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     <tr>
-                                        <td colspan="3">
+                                        <td colspan="6">
                                             <details class="admin-raw-details">
-                                                <summary>Technical details · {{ feed.get('calendar_name') or 'Calendar feed' }}</summary>
+                                                <summary>Technical details · {{ feed.get('calendar_name') or feed.get('url') or 'Calendar feed' }}</summary>
                                                 <pre class="admin-code-block">{{ feed | tojson }}</pre>
                                             </details>
                                         </td>
                                     </tr>
                                 {% endfor %}
                             </tbody>
-                    {% endcall %}
+                        </table>
+                    {% else %}
+                        <p>No calendar feeds found.</p>
+                    {% endif %}
                 </div>
 
                 <div class="admin-card">

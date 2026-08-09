@@ -25,7 +25,8 @@ TABLE_COLUMNS = {
     "calendar_feeds": {
         "id", "user_id", "feed_url", "feed_url_hash", "calendar_name", "etag_header",
         "last_modified_header", "last_fetch_http_code", "last_fetched", "created_at",
-        "updated_at",
+        "updated_at", "consecutive_failures", "last_error_type", "last_error_message",
+        "last_error_at", "disabled_at",
     },
     "user_calendar_preferences": {
         "id", "user_id", "calendar_name", "display_name", "color_hex", "visible",
@@ -49,6 +50,7 @@ TABLE_COLUMNS = {
         "created_at", "updated_at",
     },
 }
+
 
 def _environment_config_snapshot():
     if has_app_context():

@@ -31,6 +31,8 @@
                     editable: Boolean(options.editable),
                     sourceId: options.sourceId || null,
                     legacyNames: Array.isArray(options.legacyNames) ? options.legacyNames.filter(Boolean) : [],
+                    status: options.status || "",
+                    lastErrorMessage: options.lastErrorMessage || "",
                 };
             };
             for (const source of state.calendarSources) {
@@ -44,6 +46,8 @@
                     editable: source.editable !== false,
                     sourceId,
                     legacyNames: [source.default_name, ...(Array.isArray(source.legacy_names) ? source.legacy_names : [])],
+                    status: source.status || "",
+                    lastErrorMessage: source.last_error_message || "",
                 });
             }
             for (const event of state.events) {

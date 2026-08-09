@@ -1,4 +1,5 @@
 import io
+import json
 import logging
 import os
 import platform
@@ -84,9 +85,12 @@ import services.apswiftly_control as apswiftly_control_service
 from services.apswiftly_control import APSwiftlyControlError, apswiftly_status
 from services.calendar_store import (
     count_calendar_rows,
+    delete_calendar_row,
     delete_calendar_rows_by_user,
     list_calendar_rows_all,
 )
+from services.calendar_urls import load_other_calendar_urls, normalize_calendar_url
+from services.feed_fetcher import clear_feed_quarantine, derive_feed_status, feed_url_hash
 from services.admin_analytics import RANGE_OPTIONS, analytics_payload, normalize_range
 from services.entitlements import (
     TIER_BADGES,
@@ -749,6 +753,78 @@ def _section_loader_dependencies():
     }
 
 
+def _configured_feed_count(user_id):
+    settings = first_row(
+        COLLECTIONS["user_settings"],
+        [Query.equal("user_id", [str(user_id)])],
+    )
+    if not settings:
+        return 0
+    count = 1 if str(settings.get("canvas_ical_url") or "").strip() else 0
+    return count + len(load_other_calendar_urls(settings))
+
+
+def _build_configured_feeds(settings, feed_rows):
+    """Merge configured settings URLs with calendar_feeds health metadata."""
+    feeds_by_hash = {
+        row.get("feed_url_hash"): row
+        for row in (feed_rows or [])
+        if row.get("feed_url_hash")
+    }
+    configured = []
+    seen_hashes = set()
+
+    def append_entry(url, origin):
+        normalized = normalize_calendar_url(url) or (url or "").strip()
+        if not normalized:
+            return
+        feed_hash = feed_url_hash(normalized)
+        seen_hashes.add(feed_hash)
+        row = feeds_by_hash.get(feed_hash)
+        configured.append({
+            "url": normalized,
+            "origin": origin,
+            "feed_url_hash": feed_hash,
+            "calendar_name": (row or {}).get("calendar_name"),
+            "last_fetched": (row or {}).get("last_fetched"),
+            "consecutive_failures": (row or {}).get("consecutive_failures") or 0,
+            "last_error_type": (row or {}).get("last_error_type"),
+            "last_error_message": (row or {}).get("last_error_message"),
+            "disabled_at": (row or {}).get("disabled_at"),
+            "status": derive_feed_status(row),
+            "row": row,
+            "row_id": _row_id(row) if row else None,
+        })
+
+    if settings:
+        canvas_url = (settings.get("canvas_ical_url") or "").strip()
+        if canvas_url:
+            append_entry(canvas_url, "canvas")
+        for other_url in load_other_calendar_urls(settings):
+            append_entry(other_url, "other")
+
+    for row in feed_rows or []:
+        feed_hash = row.get("feed_url_hash")
+        if not feed_hash or feed_hash in seen_hashes:
+            continue
+        configured.append({
+            "url": row.get("feed_url") or "",
+            "origin": "orphaned",
+            "feed_url_hash": feed_hash,
+            "calendar_name": row.get("calendar_name"),
+            "last_fetched": row.get("last_fetched"),
+            "consecutive_failures": row.get("consecutive_failures") or 0,
+            "last_error_type": row.get("last_error_type"),
+            "last_error_message": row.get("last_error_message"),
+            "disabled_at": row.get("disabled_at"),
+            "status": "orphaned",
+            "row": row,
+            "row_id": _row_id(row),
+        })
+
+    return configured
+
+
 def _load_section(section, user_id):
     dependencies = _section_loader_dependencies()
     if section == "invites":
@@ -760,7 +836,20 @@ def _load_section(section, user_id):
     if section == "notes":
         return load_notes_section(user_id, dependencies)
     if section == "calendars":
-        return load_calendars_section(user_id, dependencies)
+        section_data = load_calendars_section(user_id, dependencies)
+        try:
+            settings = first_row(
+                COLLECTIONS["user_settings"],
+                [Query.equal("user_id", [user_id])],
+            )
+            section_data["configured_feeds"] = _build_configured_feeds(
+                settings,
+                section_data.get("calendar_feeds"),
+            )
+        except AppwriteException:
+            logger.exception("Failed to load calendar feed health for admin")
+            section_data["configured_feeds"] = []
+        return section_data
     if section == "courses":
         return load_courses_section(user_id, dependencies)
     if section == "seat_tracks":
@@ -1945,7 +2034,7 @@ def admin_detail(user_id):
             "folders": _safe_count_rows(COLLECTIONS["file_folders"], [Query.equal("user_id", [user_id])]),
             "notes": _safe_count_rows(COLLECTIONS["notes"], [Query.equal("user_id", [user_id])]),
             "calendar_cache": count_calendar_rows(COLLECTIONS["calendar_cache"], [Query.equal("user_id", [user_id])]),
-            "calendar_feeds": count_calendar_rows(COLLECTIONS["calendar_feeds"], [Query.equal("user_id", [user_id])]),
+            "calendar_feeds": _configured_feed_count(user_id),
             "courses": _safe_count_rows(COLLECTIONS["user_courses"], [Query.equal("user_id", [user_id])]),
             "seat_tracks": _safe_count_rows(COLLECTIONS["course_seat_tracks"], [Query.equal("user_id", [user_id])]),
             **_chat_count_summary(user_id),
@@ -2109,6 +2198,97 @@ def disable_seat_tracks(user_id):
         color="yellow",
     )
     return _redirect_detail(user_id, section, status=f"disabled-{updated}", return_to=return_to)
+
+
+@admin_bp.route("/admin/<user_id>/calendar-feeds/remove", methods=["POST"])
+@admin_required
+def remove_calendar_feed(user_id):
+    section = (request.form.get("section") or "calendars").strip() or "calendars"
+    return_to = request.form.get("return_to")
+    raw_url = (request.form.get("feed_url") or "").strip()
+    feed_hash = (request.form.get("feed_url_hash") or "").strip()
+    if not raw_url and not feed_hash:
+        return _redirect_detail(user_id, section, error="Missing calendar feed.", return_to=return_to)
+
+    normalized = normalize_calendar_url(raw_url) or raw_url
+    if not feed_hash and normalized:
+        feed_hash = feed_url_hash(normalized)
+
+    try:
+        settings = first_row(
+            COLLECTIONS["user_settings"],
+            [Query.equal("user_id", [user_id])],
+        )
+        if settings and normalized:
+            canvas_url = (settings.get("canvas_ical_url") or "").strip()
+            updates = {"updated_at": format_datetime(datetime.utcnow())}
+            if canvas_url and (normalize_calendar_url(canvas_url) or canvas_url) == normalized:
+                updates["canvas_ical_url"] = None
+            other_urls = [
+                url for url in load_other_calendar_urls(settings)
+                if url != normalized
+            ]
+            updates["other_ical_urls_json"] = json.dumps(other_urls)
+            update_row_safe(COLLECTIONS["user_settings"], settings.get("$id"), updates)
+
+        feed_rows = list_calendar_rows_all(
+            COLLECTIONS["calendar_feeds"],
+            [Query.equal("user_id", [user_id])],
+        )
+        for row in feed_rows:
+            row_hash = row.get("feed_url_hash")
+            row_url = row.get("feed_url") or ""
+            if (feed_hash and row_hash == feed_hash) or (normalized and row_url == normalized):
+                delete_calendar_row(COLLECTIONS["calendar_feeds"], _row_id(row))
+
+        if feed_hash:
+            cache_rows = list_calendar_rows_all(
+                COLLECTIONS["calendar_cache"],
+                [
+                    Query.equal("user_id", [user_id]),
+                    Query.equal("feed_url_hash", [feed_hash]),
+                ],
+            )
+            for row in cache_rows:
+                delete_calendar_row(COLLECTIONS["calendar_cache"], _row_id(row))
+    except AppwriteException:
+        logger.exception("Failed to remove calendar feed for %s", user_id)
+        return _redirect_detail(user_id, section, error="Unable to remove calendar feed.", return_to=return_to)
+
+    _log_admin_action(
+        "remove_calendar_feed",
+        f"user:{user_id}",
+        target_user={"$id": user_id},
+        metadata={"feed_url_hash": feed_hash, "feed_url": normalized},
+        color="yellow",
+    )
+    return _redirect_detail(user_id, section, status="feed-removed", return_to=return_to)
+
+
+@admin_bp.route("/admin/<user_id>/calendar-feeds/reenable", methods=["POST"])
+@admin_required
+def reenable_calendar_feed(user_id):
+    section = (request.form.get("section") or "calendars").strip() or "calendars"
+    return_to = request.form.get("return_to")
+    raw_url = (request.form.get("feed_url") or "").strip()
+    normalized = normalize_calendar_url(raw_url) or raw_url
+    if not normalized:
+        return _redirect_detail(user_id, section, error="Missing calendar feed.", return_to=return_to)
+
+    try:
+        clear_feed_quarantine(user_id, normalized)
+    except AppwriteException:
+        logger.exception("Failed to re-enable calendar feed for %s", user_id)
+        return _redirect_detail(user_id, section, error="Unable to re-enable calendar feed.", return_to=return_to)
+
+    _log_admin_action(
+        "reenable_calendar_feed",
+        f"user:{user_id}",
+        target_user={"$id": user_id},
+        metadata={"feed_url": normalized},
+        color="gray",
+    )
+    return _redirect_detail(user_id, section, status="feed-reenabled", return_to=return_to)
 
 
 @admin_bp.route("/admin/<user_id>/files/<file_id>/delete", methods=["POST"])
