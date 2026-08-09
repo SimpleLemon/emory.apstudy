@@ -1,3 +1,5 @@
+/* global URL, window, document */
+
 import { expect, test } from "playwright/test";
 import {
     authenticate,

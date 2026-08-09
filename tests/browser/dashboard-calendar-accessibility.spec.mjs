@@ -1,3 +1,5 @@
+/* global document, Event */
+
 import { expect, test } from "playwright/test";
 
 test("dashboard calendar popovers expose and clean up their accessible relationship across interactions", async ({ page, baseURL }) => {

@@ -127,7 +127,7 @@ jobs:
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
 
-      - name: Start Flask server
+      - name: Start browser auth server
         shell: bash
         run: |
           set -Eeuo pipefail
@@ -136,8 +136,7 @@ jobs:
           pid_file="${ci_dir}/flask.pid"
           mkdir -p "$ci_dir"
 
-          nohup .venv/bin/flask --app app:create_app run \
-            --host 127.0.0.1 --port 8000 --no-reload --no-debugger \
+          nohup env PORT=8000 .venv/bin/python tests/browser/auth_server.py \
             >"$log_file" 2>&1 &
           echo "$!" >"$pid_file"
 
@@ -147,14 +146,14 @@ jobs:
               exit 0
             fi
             if ! kill -0 "$(<"$pid_file")" 2>/dev/null; then
-              echo 'Flask exited before becoming ready.' >&2
+              echo 'Browser auth server exited before becoming ready.' >&2
               sed -n '1,240p' "$log_file" >&2 || true
               exit 1
             fi
             sleep 1
           done
 
-          echo 'Flask did not become ready within 60 seconds.' >&2
+          echo 'Browser auth server did not become ready within 60 seconds.' >&2
           sed -n '1,240p' "$log_file" >&2 || true
           exit 1
 
@@ -173,7 +172,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-      - name: Stop Flask server
+      - name: Stop browser auth server
         if: always()
         shell: bash
         run: |
