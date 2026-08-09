@@ -4,6 +4,7 @@ const harness = `<!doctype html><html><head>
     <link rel="stylesheet" href="/static/css/themes.css">
     <link rel="stylesheet" href="/static/css/global.css">
     <link rel="stylesheet" href="/static/css/layout.css">
+    <link rel="stylesheet" href="/static/css/core/feedback-overlays.css">
 </head><body>
     <div class="calendar-context-menu" id="dropdown" style="position:fixed;display:block;inset:20px;width:100px;height:100px"></div>
     <div class="notification-tray is-open" id="popover" style="display:block;inset:20px;width:100px;height:100px"></div>

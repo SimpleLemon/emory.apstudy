@@ -11,9 +11,9 @@ test("onboarding theme radios support keyboard-only selection and persistence ca
       <link rel="stylesheet" href="/static/css/global.css">
       <link rel="stylesheet" href="/static/css/onboarding.css">
     </head><body><fieldset id="themes"><legend>Choose a theme</legend>
-      <label class="theme-card"><input type="radio" name="theme" value="parchment-light" data-theme-input checked><span>Light</span><span class="theme-check">Selected</span></label>
-      <label class="theme-card"><input type="radio" name="theme" value="nest-dark" data-theme-input><span>Dark</span><span class="theme-check hidden">Selected</span></label>
-      <label class="theme-card"><input type="radio" name="theme" value="obsidian-dark" data-theme-input><span>Obsidian</span><span class="theme-check hidden">Selected</span></label>
+      <label class="theme-card"><input type="radio" name="theme" value="parchment-light" data-theme-input checked><span>Light</span> <span class="theme-check">Selected</span></label>
+      <label class="theme-card"><input type="radio" name="theme" value="nest-dark" data-theme-input><span>Dark</span> <span class="theme-check hidden">Selected</span></label>
+      <label class="theme-card"><input type="radio" name="theme" value="obsidian-dark" data-theme-input><span>Obsidian</span> <span class="theme-check hidden">Selected</span></label>
     </fieldset></body></html>`,
   }));
   await page.goto(`${baseURL}/onboarding-theme-harness`, { waitUntil: "networkidle" });
