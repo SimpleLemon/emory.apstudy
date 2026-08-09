@@ -58,6 +58,10 @@ static/js/notes/dist/*
 static/js/tasks/dist/*
 !static/js/tasks/dist/task-app.js
 
+# Local-only markdown planning and handoff documents
+*.md
+REFACTOR_P_PROMPTS
+
 # The classic-script Sortable bridge is built locally from the pinned npm package.
 !static/js/vendor/dist/
 static/js/vendor/dist/*
