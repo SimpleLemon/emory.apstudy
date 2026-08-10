@@ -277,7 +277,8 @@ class AccessibilityBaselineTests(unittest.TestCase):
         self.assertIn('aria-label="Filter by term"', course_modal)
         self.assertIn('aria-label="${channel.toUpperCase()} color slider"', sources)
         self.assertIn('aria-label="Share link"', share)
-        self.assertIn('aria-label="${escapeHtml(day.key)} start time"', courses)
+        self.assertIn('aria-label="Meeting start time"', courses)
+        self.assertIn('aria-label="Remove meeting"', courses)
         self.assertIn('drawer.setAttribute("aria-modal", "true")', chat)
 
     def test_keyboard_paths_cover_menus_mobile_navigation_and_drag_alternatives(self):

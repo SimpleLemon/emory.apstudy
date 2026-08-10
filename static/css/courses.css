@@ -255,6 +255,51 @@ body.courses-body {
   font-weight: 800;
 }
 
+.courses-availability-filter {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.courses-availability-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.courses-availability-options label {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 9px;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 55%, transparent);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.courses-availability-options input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--color-primary);
+}
+
+.courses-availability-options label:has(input:checked) {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 12%, var(--color-surface));
+  color: var(--color-on-surface);
+}
+
+.courses-availability-options label:has(input:focus-visible) {
+  outline: 3px solid color-mix(in srgb, var(--color-primary) 24%, transparent);
+  outline-offset: 2px;
+}
+
 .courses-day-toggle button:hover,
 .courses-week-controls button:hover {
   background: var(--color-surface-container-high);
@@ -863,7 +908,8 @@ body.courses-body {
 
 .courses-edit-field input,
 .courses-edit-field textarea,
-.courses-meeting-row input[type="time"] {
+.courses-meeting-row input[type="time"],
+.courses-meeting-row select {
   width: 100%;
   border: 1px solid color-mix(in srgb, var(--color-outline-variant) 65%, transparent);
   border-radius: var(--radius-control);
@@ -874,7 +920,8 @@ body.courses-body {
 }
 
 .courses-edit-field input,
-.courses-meeting-row input[type="time"] {
+.courses-meeting-row input[type="time"],
+.courses-meeting-row select {
   height: 40px;
   padding: 0 10px;
 }
@@ -887,7 +934,8 @@ body.courses-body {
 
 .courses-edit-field input:focus,
 .courses-edit-field textarea:focus,
-.courses-meeting-row input[type="time"]:focus {
+.courses-meeting-row input[type="time"]:focus,
+.courses-meeting-row select:focus {
   border-color: color-mix(in srgb, var(--color-primary) 70%, var(--color-outline-variant));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
 }
@@ -899,21 +947,31 @@ body.courses-body {
 
 .courses-meeting-row {
   display: grid;
-  grid-template-columns: 18px 42px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(68px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr) 34px;
   gap: 8px;
   align-items: center;
 }
 
-.courses-meeting-row span {
-  color: var(--color-on-surface);
-  font-size: 12px;
-  font-weight: 800;
+.courses-meeting-remove {
+  width: 34px;
+  height: 34px;
+  border: 1px solid color-mix(in srgb, var(--color-outline-variant) 60%, transparent);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+  color: var(--color-on-surface-variant);
+  cursor: pointer;
 }
 
-.courses-meeting-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--color-primary);
+.courses-meeting-remove:hover {
+  color: var(--color-error, #ba1a1a);
+  border-color: color-mix(in srgb, var(--color-error, #ba1a1a) 45%, var(--color-outline-variant));
+}
+
+.courses-add-meeting {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .courses-edit-actions {
@@ -1499,6 +1557,7 @@ body.courses-body {
   .courses-day-toggle button,
   .courses-week-controls button,
   .courses-detail-actions button,
+  .courses-meeting-remove,
   .course-card-action,
   .track-toggle {
     min-height: 48px;
@@ -1507,6 +1566,15 @@ body.courses-body {
 
   .courses-filter-button,
   .courses-week-controls button {
+    width: 48px;
+    height: 48px;
+  }
+
+  .courses-meeting-row {
+    grid-template-columns: minmax(62px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr) 48px;
+  }
+
+  .courses-meeting-remove {
     width: 48px;
     height: 48px;
   }

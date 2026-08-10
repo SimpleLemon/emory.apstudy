@@ -40,6 +40,7 @@
     <script src="{{ url_for('static', filename='js/courses/filters.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/panel.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/calendar.js') }}" defer></script>
+    <script src="{{ url_for('static', filename='js/courses/edit.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/controls.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/index.js') }}" defer></script>
 {% endblock %}
@@ -120,6 +121,14 @@
                             <button type="button" data-day="Fri">Fri</button>
                         </div>
                     </div>
+                    <fieldset class="courses-filter-popover-section courses-availability-filter">
+                        <legend class="courses-filter-label">Availability</legend>
+                        <div class="courses-availability-options" id="courses-availability-filter">
+                            <label><input type="checkbox" value="Open" /> <span>Open</span></label>
+                            <label><input type="checkbox" value="Closed" /> <span>Closed</span></label>
+                            <label><input type="checkbox" value="Waitlist" /> <span>Waitlist</span></label>
+                        </div>
+                    </fieldset>
                     <div class="courses-time-filter">
                         <label class="courses-time-switch">
                             <input id="courses-time-enabled" type="checkbox" />

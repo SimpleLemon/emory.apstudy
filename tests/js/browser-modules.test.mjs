@@ -832,6 +832,7 @@ test("courses page keeps Atlas APIs, filtering state, and schedule constants con
     assert.match(source, /fetchJson\("\/api\/atlas\/terms"\)/);
     assert.match(source, /new URLSearchParams\(\{\s*term,\s*include_cancelled: "0",\s*\}\)/);
     assert.match(source, /params\.set\("q", query\)/);
+    assert.match(source, /params\.set\("statuses", Array\.from\(state\.statusFilters\)\.join\(","\)\)/);
     assert.match(source, /COURSE_LIVE_HYDRATION_OVERSCAN = 5/);
     assert.match(source, /fetchJson\("\/api\/courses\/section-status\/batch"/);
     assert.match(source, /body: JSON\.stringify\(\{ section_ids: sectionIds, force: false \}\)/);
@@ -857,6 +858,12 @@ test("courses page keeps Atlas APIs, filtering state, and schedule constants con
     assert.match(combinedSource, /if \(section\?\.is_cancelled\) return false/);
     assert.match(combinedSource, /if \(seats === 0\) return true/);
     assert.match(combinedSource, /normalizeScheduleDisplay/);
+    assert.match(combinedSource, /courses-availability-filter/);
+    assert.match(combinedSource, /sectionMatchesEnrollmentStatus/);
+    assert.match(combinedSource, /form\.querySelectorAll\("\.courses-meeting-row"\)/);
+    assert.match(combinedSource, /meetings\.map\(buildMeetingRowHtml\)/);
+    assert.match(combinedSource, /meetingRemovalFocusPlan/);
+    assert.match(styles, /\.courses-meeting-remove\s*\{[\s\S]*width:\s*48px;/);
     assert.match(combinedSource, /detail: `\$\{formatAtlasTime\(meeting\.start\)\}-\$\{formatAtlasTime\(meeting\.end\)\}`/);
     assert.doesNotMatch(source, /detail: `[^`]*\| Sec/);
     assert.match(combinedSource, /No tracked courses match your filters\./);

@@ -107,6 +107,26 @@ class AtlasClientTests(unittest.TestCase):
         self.assertEqual(oxford["total"], 1)
         self.assertEqual(oxford["sections"][0]["course_code"], "OXBI 141")
 
+    def test_enrollment_status_filter_accepts_multiple_normalized_statuses(self):
+        result = {
+            "term": "Fall_2026",
+            "terms": ["Fall_2026"],
+            "sections": [
+                {"course_code": "BIO 101", "enrollment_status": "Open"},
+                {"course_code": "CHEM 150", "enrollment_status": "Closed"},
+                {"course_code": "PHYS 141", "enrollment_status": "W"},
+            ],
+            "count": 3,
+        }
+
+        filtered = _filter_sections_result(result, statuses=["open", "Waitlist"])
+
+        self.assertEqual(filtered["total"], 2)
+        self.assertEqual(
+            [section["course_code"] for section in filtered["sections"]],
+            ["BIO 101", "PHYS 141"],
+        )
+
     def test_exact_starred_general_ed_requirement_filter(self):
         requirement = "First Year Writing(*)"
         self.assertIn(requirement, get_starred_general_ed_requirements())

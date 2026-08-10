@@ -143,10 +143,12 @@
       const timeEnd = document.getElementById("courses-time-end");
       const campusFilter = document.getElementById("courses-campus-filter");
       const requirementFilter = document.getElementById("courses-requirement-filter");
+      const availabilityFilter = document.getElementById("courses-availability-filter");
       const activeFilterCount = state.dayFilters.size
         + (state.timeEnabled ? 1 : 0)
         + (state.campusFilter && state.campusFilter !== "all" ? 1 : 0)
-        + (state.requirementFilter && state.requirementFilter !== "all" ? 1 : 0);
+        + (state.requirementFilter && state.requirementFilter !== "all" ? 1 : 0)
+        + state.statusFilters.size;
       if (filterButton) {
         filterButton.setAttribute("aria-expanded", state.filtersOpen ? "true" : "false");
         filterButton.classList.toggle("is-active", state.filtersOpen || activeFilterCount > 0);
@@ -167,6 +169,9 @@
       }
       if (campusFilter) campusFilter.value = state.campusFilter || "all";
       if (requirementFilter) requirementFilter.value = state.requirementFilter || "all";
+      availabilityFilter?.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+        input.checked = state.statusFilters.has(String(input.value || "").toLowerCase());
+      });
       document.querySelectorAll("#courses-day-toggle button[data-day]").forEach((button) => {
         button.classList.toggle("is-active", state.dayFilters.has(button.dataset.day));
       });
@@ -391,21 +396,15 @@
           <section class="courses-edit-card">
             <div class="courses-edit-section-heading">
               <h3>Meeting Times</h3>
-              <span>Checked days appear in the weekly view.</span>
+              <span>Each row appears on your weekly view. Add a row for another meeting on the same day.</span>
             </div>
-            <div class="courses-meeting-editor">
-              ${COURSE_DAYS.map((day) => {
-                const meeting = meetings.find((item) => item.day === day.key);
-                return `
-                  <label class="courses-meeting-row">
-                    <input type="checkbox" data-meeting-day="${escapeHtml(day.key)}" aria-label="Include ${escapeHtml(day.key)} meeting" ${meeting ? "checked" : ""} />
-                    <span>${escapeHtml(day.key)}</span>
-                    <input type="time" data-meeting-start="${escapeHtml(day.key)}" aria-label="${escapeHtml(day.key)} start time" value="${escapeHtml(meeting?.startInput || "09:00")}" min="06:00" max="23:59" />
-                    <input type="time" data-meeting-end="${escapeHtml(day.key)}" aria-label="${escapeHtml(day.key)} end time" value="${escapeHtml(meeting?.endInput || "09:50")}" min="06:00" max="23:59" />
-                  </label>
-                `;
-              }).join("")}
+            <div class="courses-meeting-editor" data-meeting-editor>
+              ${meetings.length ? meetings.map(buildMeetingRowHtml).join("") : buildMeetingRowHtml()}
             </div>
+            <button type="button" class="courses-secondary-action courses-add-meeting" data-add-meeting>
+              <span class="material-symbols-outlined" aria-hidden="true">add</span>
+              <span>Add meeting</span>
+            </button>
           </section>
 
           <section class="courses-edit-card">
@@ -455,6 +454,22 @@
         .filter((meeting) => COURSE_DAYS.some((day) => day.key === meeting.day));
     }
 
+    function buildMeetingRowHtml(meeting = {}) {
+      const day = COURSE_DAYS.some((option) => option.key === meeting.day) ? meeting.day : COURSE_DAYS[0].key;
+      return `
+        <div class="courses-meeting-row">
+          <select data-meeting-day aria-label="Meeting day">
+            ${COURSE_DAYS.map((option) => `<option value="${escapeHtml(option.key)}" ${option.key === day ? "selected" : ""}>${escapeHtml(option.key)}</option>`).join("")}
+          </select>
+          <input type="time" data-meeting-start aria-label="Meeting start time" value="${escapeHtml(meeting.startInput || "09:00")}" min="06:00" max="23:59" />
+          <input type="time" data-meeting-end aria-label="Meeting end time" value="${escapeHtml(meeting.endInput || "09:50")}" min="06:00" max="23:59" />
+          <button type="button" class="courses-meeting-remove" data-remove-meeting aria-label="Remove meeting">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+        </div>
+      `;
+    }
+
     function atlasTokenToTimeInput(token) {
       const minutes = parseAtlasTimeToken(token);
       if (minutes === null) return "";
@@ -500,6 +515,7 @@
     return {
       cssEscape,
       getCourseColor,
+      buildMeetingRowHtml,
       renderPanel,
       renderTermSelect,
       syncFilterControls,

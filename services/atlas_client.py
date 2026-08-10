@@ -1340,6 +1340,7 @@ def get_sections_index(
     time_end=None,
     campus=None,
     requirement=None,
+    statuses=None,
 ):
     """
     Return flattened section rows for client-side course searching.
@@ -1380,6 +1381,7 @@ def get_sections_index(
             time_end=time_end,
             campus=campus,
             requirement=requirement,
+            statuses=statuses,
         )
 
     sections = []
@@ -1445,6 +1447,7 @@ def get_sections_index(
         time_end=time_end,
         campus=campus,
         requirement=requirement,
+        statuses=statuses,
     )
 
 
@@ -1458,12 +1461,18 @@ def _filter_sections_result(
     time_end=None,
     campus=None,
     requirement=None,
+    statuses=None,
 ):
     query = str(query or "").strip()
     has_schedule_filter = bool(days) or time_start not in (None, "") or time_end not in (None, "")
     has_campus_filter = str(campus or "").strip().lower() not in {"", "all"}
     has_requirement_filter = str(requirement or "").strip().lower() not in {"", "all"}
-    if not query and not has_schedule_filter and not has_campus_filter and not has_requirement_filter and limit is None and not offset:
+    normalized_statuses = {
+        _normalize_enrollment_status(status).strip().lower()
+        for status in statuses or []
+        if str(status or "").strip()
+    }
+    if not query and not has_schedule_filter and not has_campus_filter and not has_requirement_filter and not normalized_statuses and limit is None and not offset:
         return result
 
     ranked_sections = []
@@ -1473,6 +1482,8 @@ def _filter_sections_result(
         if not _campus_matches(section, campus):
             continue
         if not _requirement_matches(section, requirement):
+            continue
+        if normalized_statuses and _normalize_enrollment_status(section.get("enrollment_status")).strip().lower() not in normalized_statuses:
             continue
         rank = _section_rank(section, query) if query else 100
         if rank is None:

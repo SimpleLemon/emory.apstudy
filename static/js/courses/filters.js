@@ -22,6 +22,7 @@
         if (query && !searchBlob.includes(query)) return false;
         if (!sectionMatchesCampus(section)) return false;
         if (!sectionMatchesRequirement(section)) return false;
+        if (!sectionMatchesEnrollmentStatus(section)) return false;
         if (!sectionMatchesDay(section)) return false;
         if (!sectionMatchesTime(section)) return false;
         return true;
@@ -69,6 +70,11 @@
       if (campus === "oxford") return value.includes("oxford");
       if (campus === "atlanta") return value.includes("atlanta") || value.includes("main") || value === "emory";
       return value.includes(campus);
+    }
+
+    function sectionMatchesEnrollmentStatus(section) {
+      if (!state.statusFilters.size) return true;
+      return state.statusFilters.has(String(section.enrollment_status || "").trim().toLowerCase());
     }
 
     const GER_ALIASES = window.APSTUDY_COURSES_GER_ALIASES || {};

@@ -14,6 +14,7 @@ const COURSE_RESULT_LIMIT = 100;
 const COURSE_LIVE_HYDRATION_OVERSCAN = 5;
 const COURSE_LIVE_HYDRATION_FAILURE_TTL_MS = 2 * 60 * 1000;
 const COMPACT_COURSES_QUERY = window.matchMedia("(max-width: 640px)");
+const BODY_SCROLLING_COURSES_QUERY = window.matchMedia("(max-width: 1024px)");
 const COURSE_COLOR_PALETTE = Array.from({ length: 16 }, (_, index) => ({
   key: `course-color-${String(index + 1).padStart(2, "0")}`,
 }));
@@ -23,6 +24,7 @@ const {
   parseAtlasTimeToken,
   parseCoursesSectionDeepLink,
 } = window.APStudyCoursesUtils;
+const { collectMeetingOverrides, meetingRemovalFocusPlan } = window.APStudyCoursesEdit;
 
 const state = {
   loading: true,
@@ -46,12 +48,14 @@ const state = {
   dayFilters: new Set(),
   campusFilter: window.APSTUDY_COURSES_DEFAULT_CAMPUS || "atlanta",
   requirementFilter: "all",
+  statusFilters: new Set(),
   filtersOpen: false,
   timeEnabled: false,
   timeStart: "06:00",
   timeEnd: "23:59",
   hoveredSectionId: null,
   detailSectionId: null,
+  detailReturnContext: null,
   editingSectionId: null,
   editingSaving: false,
   detailLoading: false,
@@ -87,6 +91,7 @@ const coursePanel = window.APStudyCoursesPanel.create({
 });
 const {
   getCourseColor,
+  buildMeetingRowHtml,
   renderPanel,
   renderTermSelect,
   syncFilterControls,
@@ -113,7 +118,10 @@ const {
 const { wireControls } = window.APStudyCoursesControls.create({
   state,
   addCourse,
+  buildMeetingRowHtml,
   changeTermBy,
+  clearDetailReturnContext,
+  closeDetail,
   isCompactCoursesViewport,
   loadSectionsForTerm,
   openDetail,
@@ -127,6 +135,7 @@ const { wireControls } = window.APStudyCoursesControls.create({
   setTrack,
   startEditingCourse,
   syncFilterControls,
+  meetingRemovalFocusPlan,
 });
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -249,6 +258,9 @@ async function loadSectionsForTerm(term) {
     if (state.requirementFilter && state.requirementFilter !== "all") {
       params.set("requirement", state.requirementFilter);
     }
+    if (state.statusFilters.size) {
+      params.set("statuses", Array.from(state.statusFilters).join(","));
+    }
     const payload = await fetchJson(`/api/atlas/sections?${params.toString()}`);
     if (requestId !== state.currentSectionsRequest) return;
     state.sectionsById = Object.fromEntries(
@@ -370,6 +382,7 @@ function changeTermBy(delta) {
   const nextIndex = currentIndex + delta;
   if (nextIndex < 0 || nextIndex >= state.terms.length) return;
   state.selectedTerm = state.terms[nextIndex];
+  clearDetailReturnContext();
   state.detailSectionId = null;
   state.editingSectionId = null;
   state.filtersOpen = false;
@@ -441,23 +454,21 @@ function collectEditOverrides(form) {
     meetings: [],
   };
 
-  COURSE_DAYS.forEach((day) => {
-    const checked = form.querySelector(`[data-meeting-day="${day.key}"]`)?.checked;
-    if (!checked) return;
-    const startInput = form.querySelector(`[data-meeting-start="${day.key}"]`)?.value;
-    const endInput = form.querySelector(`[data-meeting-end="${day.key}"]`)?.value;
-    const start = timeInputToAtlasToken(startInput);
-    const end = timeInputToAtlasToken(endInput);
-    if (start && end && parseAtlasTimeToken(end) > parseAtlasTimeToken(start)) {
-      overrides.meetings.push({ day: day.key, start, end });
-    }
-  });
+  overrides.meetings = collectMeetingOverrides(
+    Array.from(form.querySelectorAll(".courses-meeting-row")).map((row) => ({
+      day: row.querySelector("[data-meeting-day]")?.value,
+      start: row.querySelector("[data-meeting-start]")?.value,
+      end: row.querySelector("[data-meeting-end]")?.value,
+    })),
+    { COURSE_DAYS, parseAtlasTimeToken, timeInputToAtlasToken },
+  );
 
   return overrides;
 }
 
-function openDetail(sectionId) {
+function openDetail(sectionId, opener = null) {
   if (!sectionId) return;
+  captureDetailReturnContext(sectionId, opener);
   state.detailSectionId = sectionId;
   state.editingSectionId = null;
   state.detailLiveError = "";
@@ -465,6 +476,83 @@ function openDetail(sectionId) {
   renderPanel();
   scrollPanelContentToTop();
   void refreshSectionStatus(sectionId, { force: false });
+}
+
+function captureDetailReturnContext(sectionId, opener) {
+  const normalizedSectionId = String(sectionId);
+  if (state.detailReturnContext?.sectionId === normalizedSectionId) return;
+  clearDetailReturnContext();
+  const content = document.getElementById("courses-panel-content");
+  const hasListOrigin = opener instanceof HTMLElement
+    && content?.contains(opener)
+    && opener.matches(".course-card[data-section-id]")
+    && String(opener.dataset.sectionId) === normalizedSectionId;
+  if (!hasListOrigin) return;
+  const focusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  state.detailReturnContext = {
+    sectionId: normalizedSectionId,
+    panelScrollTop: content?.scrollTop || 0,
+    documentScroll: BODY_SCROLLING_COURSES_QUERY.matches
+      ? { left: window.scrollX || 0, top: window.scrollY || 0 }
+      : null,
+    opener: opener instanceof HTMLElement ? opener : focusedElement,
+  };
+}
+
+function clearDetailReturnContext() {
+  state.detailReturnContext = null;
+}
+
+function closeDetail() {
+  const closingSectionId = String(state.detailSectionId || state.editingSectionId || "");
+  const returnContext = state.detailReturnContext?.sectionId === closingSectionId
+    ? state.detailReturnContext
+    : null;
+  state.detailSectionId = null;
+  state.editingSectionId = null;
+  state.detailLiveError = "";
+  clearDetailReturnContext();
+  renderPanel();
+  if (returnContext) restoreDetailReturnContext(returnContext);
+}
+
+function restoreDetailReturnContext(returnContext) {
+  const restoreScroll = () => {
+    const content = document.getElementById("courses-panel-content");
+    if (content) content.scrollTop = returnContext.panelScrollTop;
+    if (returnContext.documentScroll && BODY_SCROLLING_COURSES_QUERY.matches) {
+      window.scrollTo({
+        left: returnContext.documentScroll.left,
+        top: returnContext.documentScroll.top,
+        behavior: "auto",
+      });
+    }
+  };
+
+  restoreScroll();
+  window.requestAnimationFrame?.(restoreScroll);
+
+  const fallback = document.getElementById("courses-search-input") || document.getElementById("courses-result-summary");
+  const focusTarget = focusCourseCard(returnContext.sectionId) || getConnectedFocusTarget(returnContext.opener) || fallback;
+  if (focusTarget === document.getElementById("courses-result-summary")) {
+    focusTarget.tabIndex = -1;
+  }
+  if (focusTarget !== document.activeElement) focusTarget?.focus?.({ preventScroll: true });
+}
+
+function focusCourseCard(sectionId) {
+  const content = document.getElementById("courses-panel-content");
+  const card = content?.querySelector(`.course-card[data-section-id="${cssEscape(sectionId)}"]`);
+  card?.focus?.({ preventScroll: true });
+  return card || null;
+}
+
+function getConnectedFocusTarget(element) {
+  if (!(element instanceof HTMLElement) || !element.isConnected || element.matches(":disabled")) return null;
+  if (element.tabIndex >= 0 || element.matches("a[href], button, input, select, textarea, [contenteditable='true']")) {
+    return element;
+  }
+  return null;
 }
 
 async function refreshSectionStatus(sectionId, options = {}) {
@@ -492,7 +580,11 @@ async function refreshSectionStatus(sectionId, options = {}) {
     showToast(state.detailLiveError, true);
   } finally {
     state.detailLoading = false;
+    const focusedCardId = state.detailSectionId
+      ? null
+      : document.activeElement?.closest?.(".course-card[data-section-id]")?.dataset.sectionId;
     renderPanel();
+    if (focusedCardId) focusCourseCard(focusedCardId);
     renderCalendar();
   }
 }
@@ -534,10 +626,15 @@ async function removeCourse(courseId, sectionId) {
   const removedSection = sectionId ? getSection(sectionId) : null;
   const previousDetailSectionId = state.detailSectionId;
   const previousEditingSectionId = state.editingSectionId;
+  const restoresRemovedDetail = state.detailSectionId === sectionId || state.editingSectionId === sectionId;
+  const previousDetailReturnContext = restoresRemovedDetail && state.detailReturnContext?.sectionId === String(sectionId)
+    ? state.detailReturnContext
+    : null;
   if (sectionId) state.savedCoursesBySection.delete(String(sectionId));
   if (sectionId && state.activeCourseView === "selected" && removedSection) {
     state.removedSelectedSections.set(String(sectionId), { ...removedSection, id: String(sectionId) });
   }
+  if (restoresRemovedDetail) clearDetailReturnContext();
   if (state.detailSectionId === sectionId) state.detailSectionId = null;
   if (state.editingSectionId === sectionId) state.editingSectionId = null;
   render();
@@ -552,6 +649,9 @@ async function removeCourse(courseId, sectionId) {
       if (sectionId) state.removedSelectedSections.delete(String(sectionId));
       state.detailSectionId = previousDetailSectionId;
       state.editingSectionId = previousEditingSectionId;
+      state.detailReturnContext = restoresRemovedDetail && previousDetailReturnContext?.sectionId === String(sectionId)
+        ? previousDetailReturnContext
+        : null;
       if (sectionId) state.savingIds.delete(sectionId);
       render();
     },

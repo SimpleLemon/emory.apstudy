@@ -2,7 +2,10 @@
   function createCourseControls({
     state,
     addCourse,
+    buildMeetingRowHtml,
     changeTermBy,
+    clearDetailReturnContext,
+    closeDetail,
     isCompactCoursesViewport,
     loadSectionsForTerm,
     openDetail,
@@ -16,10 +19,12 @@
     setTrack,
     startEditingCourse,
     syncFilterControls,
+    meetingRemovalFocusPlan,
   }) {
     function wireControls() {
       let searchTimer = null;
       const scheduleSectionReload = () => {
+        clearDetailReturnContext();
         if (state.activeCourseView !== "search") {
           renderPanel();
           return;
@@ -48,6 +53,7 @@
           state.removedSelectedSections.clear();
         }
         state.activeCourseView = nextView;
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         state.filtersOpen = false;
@@ -66,6 +72,7 @@
 
       document.getElementById("courses-search-input")?.addEventListener("input", (event) => {
         state.searchQuery = event.target.value || "";
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         scheduleSectionReload();
@@ -73,6 +80,7 @@
 
       document.getElementById("courses-term-select")?.addEventListener("change", (event) => {
         state.selectedTerm = event.target.value || "";
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         state.filtersOpen = false;
@@ -91,6 +99,7 @@
         } else {
           state.dayFilters.add(day);
         }
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         scheduleSectionReload();
@@ -100,6 +109,7 @@
         state.timeEnabled = Boolean(event.target.checked);
         document.getElementById("courses-time-start").disabled = !state.timeEnabled;
         document.getElementById("courses-time-end").disabled = !state.timeEnabled;
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         scheduleSectionReload();
@@ -117,6 +127,7 @@
 
       document.getElementById("courses-campus-filter")?.addEventListener("change", (event) => {
         state.campusFilter = event.target.value || "all";
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         scheduleSectionReload();
@@ -124,6 +135,20 @@
 
       document.getElementById("courses-requirement-filter")?.addEventListener("change", (event) => {
         state.requirementFilter = event.target.value || "all";
+        clearDetailReturnContext();
+        state.detailSectionId = null;
+        state.editingSectionId = null;
+        scheduleSectionReload();
+      });
+
+      document.getElementById("courses-availability-filter")?.addEventListener("change", (event) => {
+        const input = event.target.closest('input[type="checkbox"]');
+        if (!input) return;
+        const status = String(input.value || "").trim().toLowerCase();
+        if (!status) return;
+        if (input.checked) state.statusFilters.add(status);
+        else state.statusFilters.delete(status);
+        clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
         scheduleSectionReload();
@@ -163,12 +188,11 @@
       });
 
       document.addEventListener("click", (event) => {
-        const closeDetail = event.target.closest("[data-close-detail]");
-        if (closeDetail) {
-          state.detailSectionId = null;
-          state.editingSectionId = null;
-          state.detailLiveError = "";
-          renderPanel();
+        const closeDetailButton = event.target.closest("[data-close-detail]");
+        if (closeDetailButton) {
+          event.preventDefault();
+          event.stopPropagation();
+          closeDetail();
           return;
         }
 
@@ -207,6 +231,35 @@
             button.classList.toggle("is-selected", selected);
             button.setAttribute("aria-pressed", selected ? "true" : "false");
           });
+          return;
+        }
+
+        const addMeeting = event.target.closest("[data-add-meeting]");
+        if (addMeeting) {
+          event.preventDefault();
+          event.stopPropagation();
+          const editor = addMeeting.closest(".courses-edit-card")?.querySelector("[data-meeting-editor]");
+          if (!editor) return;
+          const usedDays = new Set(Array.from(editor.querySelectorAll("[data-meeting-day]")).map((select) => select.value));
+          const nextDay = ["Mon", "Tue", "Wed", "Thu", "Fri"].find((day) => !usedDays.has(day)) || "Mon";
+          editor.insertAdjacentHTML("beforeend", buildMeetingRowHtml({ day: nextDay }));
+          editor.lastElementChild?.querySelector("[data-meeting-day]")?.focus();
+          return;
+        }
+
+        const removeMeeting = event.target.closest("[data-remove-meeting]");
+        if (removeMeeting) {
+          event.preventDefault();
+          event.stopPropagation();
+          const row = removeMeeting.closest(".courses-meeting-row");
+          const editor = row?.closest("[data-meeting-editor]");
+          const rows = editor ? Array.from(editor.querySelectorAll(".courses-meeting-row")) : [];
+          const plan = meetingRemovalFocusPlan(rows.indexOf(row), rows.length);
+          const focusTarget = Number.isInteger(plan.rowIndex)
+            ? rows[plan.rowIndex]?.querySelector("[data-meeting-day]")
+            : editor?.closest(".courses-edit-card")?.querySelector("[data-add-meeting]");
+          row?.remove();
+          focusTarget?.focus();
           return;
         }
 
@@ -261,13 +314,13 @@
 
         const eventBlock = event.target.closest(".courses-event[data-section-id], .courses-mobile-event[data-section-id]");
         if (eventBlock) {
-          openDetail(eventBlock.dataset.sectionId);
+          openDetail(eventBlock.dataset.sectionId, eventBlock);
           return;
         }
 
         const card = event.target.closest(".course-card[data-section-id]");
         if (card) {
-          openDetail(card.dataset.sectionId);
+          openDetail(card.dataset.sectionId, card);
         }
       });
 
@@ -291,9 +344,8 @@
           return;
         }
         if (event.key === "Escape" && state.detailSectionId) {
-          state.detailSectionId = null;
-          state.detailLiveError = "";
-          renderPanel();
+          event.preventDefault();
+          closeDetail();
         }
       });
     }
