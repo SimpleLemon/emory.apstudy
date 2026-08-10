@@ -113,9 +113,10 @@
     }
 
     function ui() {
+        const root = document.getElementById("apstudy-consent-root");
         return {
-            dialog: document.getElementById("apstudy-consent-dialog"),
-            settings: document.querySelector("[data-apstudy-consent-settings]"),
+            dialog: root?.querySelector?.("#apstudy-consent-dialog") || document.getElementById("apstudy-consent-dialog"),
+            settings: root?.querySelector?.("[data-apstudy-consent-settings]") || document.querySelector("[data-apstudy-consent-settings]"),
         };
     }
 
@@ -179,9 +180,14 @@
     }
 
     function renderPublicControls() {
-        const root = document.createElement("div");
-        root.id = "apstudy-consent-root";
-        root.innerHTML = `
+        let root = document.getElementById("apstudy-consent-root");
+        if (!root) {
+            root = document.createElement("div");
+            root.id = "apstudy-consent-root";
+            document.body.appendChild(root);
+        }
+        if (!root.querySelector?.("#apstudy-consent-dialog") || !root.querySelector?.("[data-apstudy-consent-settings]")) {
+            root.innerHTML = `
             <div class="apstudy-consent-stack">
                 <div id="apstudy-consent-dialog" class="apstudy-consent-dialog" role="dialog" aria-labelledby="apstudy-consent-title" aria-describedby="apstudy-consent-description" hidden>
                     <div class="apstudy-consent-dialog__panel">
@@ -205,8 +211,11 @@
                     <span class="apstudy-consent-settings__label">Cookie settings</span>
                 </button>
             </div>
-        `;
-        document.body.appendChild(root);
+            `;
+        }
+
+        if (root.dataset.apstudyConsentBound === "true") return;
+        root.dataset.apstudyConsentBound = "true";
 
         root.addEventListener("click", (event) => {
             const choiceButton = event.target.closest?.("[data-apstudy-consent-choice]");

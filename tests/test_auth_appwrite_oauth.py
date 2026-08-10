@@ -671,6 +671,54 @@ class AppwriteOauthRouteTestCase(unittest.TestCase):
         self.assertNotIn("picture_url", updates)
         self.assertNotIn("avatar_source", updates)
 
+    def test_complete_appwrite_login_preserves_existing_custom_name(self):
+        existing = {
+            "$id": "user-1",
+            "email": "student@example.com",
+            "name": "My Custom Name",
+            "avatar_source": "upload",
+            "onboarding_complete": True,
+        }
+        with self.app.test_request_context("/auth/session", method="POST"):
+            with patch.object(auth, "get_row_safe", return_value=existing), \
+                    patch.object(auth, "_fetch_provider_profile", return_value={"name": "GitHub Alias"}), \
+                    patch.object(auth, "update_row_safe", return_value=existing) as update_row, \
+                    patch.object(auth, "sync_chat_presence_labels_for_user"), \
+                    patch.object(auth, "login_user"), \
+                    patch.object(auth, "url_for", side_effect=lambda endpoint, **_kwargs: f"/{endpoint}"), \
+                    patch.object(auth, "emit_user_event"):
+                auth._complete_appwrite_login(
+                    {"$id": "user-1", "email": "student@example.com", "name": "Remote Name"},
+                    provider="github",
+                    provider_access_token="github-token",
+                )
+
+        self.assertNotIn("name", update_row.call_args.args[2])
+
+    def test_complete_appwrite_login_initializes_blank_existing_name(self):
+        existing = {
+            "$id": "user-1",
+            "email": "student@example.com",
+            "name": "  ",
+            "avatar_source": "upload",
+            "onboarding_complete": True,
+        }
+        with self.app.test_request_context("/auth/session", method="POST"):
+            with patch.object(auth, "get_row_safe", return_value=existing), \
+                    patch.object(auth, "_fetch_provider_profile", return_value={"name": "GitHub Alias"}), \
+                    patch.object(auth, "update_row_safe", return_value=existing) as update_row, \
+                    patch.object(auth, "sync_chat_presence_labels_for_user"), \
+                    patch.object(auth, "login_user"), \
+                    patch.object(auth, "url_for", side_effect=lambda endpoint, **_kwargs: f"/{endpoint}"), \
+                    patch.object(auth, "emit_user_event"):
+                auth._complete_appwrite_login(
+                    {"$id": "user-1", "email": "student@example.com", "name": "Remote Name"},
+                    provider="github",
+                    provider_access_token="github-token",
+                )
+
+        self.assertEqual(update_row.call_args.args[2]["name"], "GitHub Alias")
+
     def test_user_picture_alias_uses_picture_url(self):
         user = User({"$id": "user-1", "picture_url": "https://example.test/avatar.png"})
 
@@ -1057,6 +1105,54 @@ class AuthSessionErrorContractTestCase(unittest.TestCase):
         )
         account_from_user_id.assert_not_called()
         complete_login.assert_not_called()
+
+    def test_github_identity_diagnostic_excludes_provider_tokens(self):
+        with self.app.test_client() as client:
+            with patch.object(auth, "_fetch_provider_identity", return_value={}), \
+                    patch.object(auth, "_account_from_user_id") as account_from_user_id, \
+                    self.assertLogs("blueprints.auth", level="WARNING") as logs:
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "github",
+                        "provider_access_token": "github-secret-token",
+                    },
+                )
+
+        output = "\n".join(logs.output)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Invalid provider session."})
+        self.assertIn("provider session verification failed", output.lower())
+        self.assertIn("provider=github", output)
+        self.assertNotIn("github-secret-token", output)
+        account_from_user_id.assert_not_called()
+
+    def test_github_email_mismatch_diagnostic_excludes_email_and_token(self):
+        remote_user = {"$id": "user-1", "email": "appwrite@example.com"}
+        with self.app.test_client() as client:
+            with patch.object(
+                auth,
+                "_fetch_provider_identity",
+                return_value={"email": "provider@example.com"},
+            ), patch.object(auth, "_account_from_user_id", return_value=remote_user), \
+                    self.assertLogs("blueprints.auth", level="WARNING") as logs:
+                response = client.post(
+                    "/auth/session",
+                    json={
+                        "user_id": "user-1",
+                        "provider": "github",
+                        "provider_access_token": "github-secret-token",
+                    },
+                )
+
+        output = "\n".join(logs.output)
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.get_json(), {"error": "Email mismatch."})
+        self.assertIn("provider=github", output)
+        self.assertNotIn("provider@example.com", output)
+        self.assertNotIn("appwrite@example.com", output)
+        self.assertNotIn("github-secret-token", output)
 
     def test_session_provider_identity_uses_extracted_service_seam(self):
         remote_user = {

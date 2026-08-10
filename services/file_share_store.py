@@ -690,12 +690,11 @@ def upload_file_response(user, files, form, dependencies):
             })
             continue
 
-        is_public = visibility == "public"
-        share_code = dependencies["generate_share_code"]() if is_public else None
-        now = dependencies["utcnow"]()
-        expires_at = now + dependencies["timedelta"](days=expiry_days)
-
         try:
+            is_public = visibility == "public"
+            share_code = dependencies["generate_share_code"]() if is_public else None
+            now = dependencies["utcnow"]()
+            expires_at = now + dependencies["timedelta"](days=expiry_days)
             shared_file = dependencies["create_row_safe"](
                 COLLECTIONS["shared_files"],
                 row_id=file_id,

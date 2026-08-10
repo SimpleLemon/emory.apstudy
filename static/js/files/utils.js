@@ -248,11 +248,28 @@
 
     function parseUploadResponse(xhr) {
         if (!xhr) return null;
-        const contentType = xhr.getResponseHeader?.("Content-Type") || "";
-        if (contentType.includes("application/json") && xhr.response && typeof xhr.response === "object") {
+        const responseType = String(xhr.responseType || "").toLowerCase();
+        if (responseType === "json") {
+            return xhr.response && typeof xhr.response === "object" ? xhr.response : null;
+        }
+        let contentType = "";
+        try {
+            contentType = xhr.getResponseHeader?.("Content-Type") || "";
+        } catch (_error) {
+            contentType = "";
+        }
+        if (!responseType && contentType.toLowerCase().includes("json") && xhr.response && typeof xhr.response === "object") {
             return xhr.response;
         }
-        const raw = xhr.responseText;
+        if (responseType && responseType !== "text") return null;
+        let raw = "";
+        try {
+            raw = responseType === "text" && typeof xhr.response === "string"
+                ? xhr.response
+                : xhr.responseText;
+        } catch (_error) {
+            return null;
+        }
         if (!raw) return null;
         try {
             return JSON.parse(raw);

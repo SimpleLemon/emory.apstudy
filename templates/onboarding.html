@@ -79,15 +79,17 @@
                                             <p class="text-[clamp(0.7rem,0.9vw,0.9rem)] font-medium leading-tight break-all">{{ user.email }}</p>
                                         </div>
                                     </div>
-                                    <a href="{{ url_for('auth.logout') }}" data-logout class="ml-4 flex items-center justify-center rounded-xl bg-surface-container px-4 py-2 text-sm font-medium text-on-surface-variant no-underline hover:no-underline hover:text-error hover:bg-error-container/10 transition-colors">
+                                    <button type="submit" form="onboarding-logout-form" class="ml-4 flex items-center justify-center rounded-xl bg-surface-container px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-error hover:bg-error-container/10 transition-colors">
                                         Wrong account? Sign out
-                                    </a>
+                                    </button>
                                 </div>
                                 <div class="grid gap-4 sm:grid-cols-2">
                                     <label class="space-y-2">
                                         <span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Display name</span>
-                                        <input id="onboarding-display-name" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 text-on-surface focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 px-4 py-3 text-sm" type="text" autocomplete="name" value="{{ user.name or '' }}" aria-describedby="onboarding-display-name-help" />
+                                        <input id="onboarding-display-name" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 text-on-surface focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 px-4 py-3 text-sm" type="text" autocomplete="name" value="{{ user.name or '' }}" aria-describedby="onboarding-display-name-help onboarding-display-name-counter onboarding-display-name-error" />
                                         <p id="onboarding-display-name-help" class="hidden text-xs text-on-surface-variant">This is how others will see you. You may include special characters and Emojis.</p>
+                                        <p id="onboarding-display-name-counter" class="text-xs text-on-surface-variant">0 / 80 characters</p>
+                                        <p id="onboarding-display-name-error" class="hidden text-xs text-error" role="alert"></p>
                                     </label>
                                     <label class="space-y-2">
                                         <span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Username</span>
@@ -133,8 +135,16 @@
                                 </div>
                                 <label id="university-field" class="space-y-2 block hidden">
                                     <span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">University</span>
-                                    <input id="university-school" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 text-on-surface focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 px-4 py-3 text-sm" type="text" autocomplete="organization" list="university-options" placeholder="" />
+                                    <input id="university-school" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 text-on-surface focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 px-4 py-3 text-sm" type="text" autocomplete="organization" list="university-options" placeholder="" aria-describedby="onboarding-school-counter onboarding-school-error" />
+                                    <p id="onboarding-school-counter" class="text-xs text-on-surface-variant">0 / 160 characters</p>
+                                    <p id="onboarding-school-error" class="hidden text-xs text-error" role="alert"></p>
                                     <datalist id="university-options"></datalist>
+                                </label>
+                                <label class="space-y-2 block">
+                                    <span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Major / intended major <span class="normal-case tracking-normal">(optional)</span></span>
+                                    <input id="onboarding-major" class="w-full rounded-xl bg-surface-container-lowest border border-outline-variant/25 text-on-surface focus:border-primary/50 focus:outline-none focus:ring-1 focus:ring-primary/50 px-4 py-3 text-sm" type="text" autocomplete="organization-title" placeholder="Computer Science" aria-describedby="onboarding-major-counter onboarding-major-error" />
+                                    <p id="onboarding-major-counter" class="text-xs text-on-surface-variant">0 / 120 characters</p>
+                                    <p id="onboarding-major-error" class="hidden text-xs text-error" role="alert"></p>
                                 </label>
                                 <div id="emory-email-field" class="space-y-2 hidden">
                                     <span class="text-xs uppercase tracking-[0.16em] text-on-surface-variant">Emory email</span>
@@ -381,6 +391,9 @@
                             </div>
                         </section>
                     </form>
+                    <form id="onboarding-logout-form" method="post" action="{{ url_for('auth.logout') }}" hidden>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    </form>
                 </div>
             </section>
         </div>
@@ -395,6 +408,7 @@
             "emoryStudent": {{ emory_student | tojson }},
             "emoryEmail": {{ emory_email | tojson }},
             "school": {{ school | tojson }},
+            "major": {{ major | tojson }},
             "courses": {{ courses | tojson }},
             "endpoints": {
                 "terms": {{ url_for("atlas.list_terms") | tojson }},

@@ -18,6 +18,7 @@ from appwrite.exception import AppwriteException
 from services.database import db_connection, utcnow_iso
 from services import note_store
 from services.database import BASE_DIR
+from services.environment_config import runtime_environment_config
 
 
 ROLE_LEVELS = {"viewer", "reviewer", "editor"}
@@ -28,8 +29,13 @@ INVITATION_DAYS = 7
 VERSION_DAYS = 30
 
 
+def _collaboration_secret():
+    configured = runtime_environment_config()
+    return configured.notes_collaboration_internal_secret or configured.notes_collaboration_secret
+
+
 def _broadcast_review_event(note_id, event_type, resource_id):
-    secret = os.environ.get("NOTES_COLLABORATION_INTERNAL_SECRET") or os.environ.get("NOTES_COLLABORATION_SECRET")
+    secret = _collaboration_secret()
     if not secret:
         return
     payload = json.dumps({
@@ -58,7 +64,7 @@ def _broadcast_review_event(note_id, event_type, resource_id):
 
 
 def _reload_collaboration_document(note_id):
-    secret = os.environ.get("NOTES_COLLABORATION_INTERNAL_SECRET") or os.environ.get("NOTES_COLLABORATION_SECRET")
+    secret = _collaboration_secret()
     if not secret:
         return
     request = urllib.request.Request(

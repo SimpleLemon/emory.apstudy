@@ -433,7 +433,13 @@ def _parse_queries(conn, table_id, queries):
     return where, params, order, limit, offset
 
 
-def list_rows(table_id, queries=None, path=None):
+def list_rows(table_id, queries=None, path=None, *, include_total=True):
+    """List rows, optionally including the filtered total.
+
+    ``include_total`` remains enabled by default for compatibility with legacy
+    callers that consume Appwrite's ``total`` field. Hot-path helpers opt out
+    explicitly so their reads stay to one SELECT.
+    """
     try:
         with db_connection(path) as conn:
             table_columns(conn, table_id)
@@ -457,13 +463,20 @@ def list_rows(table_id, queries=None, path=None):
                 sql += " OFFSET ?"
                 params_for_rows.append(offset)
 
-            total = conn.execute(count_sql, params).fetchone()["total"]
+            total = (
+                conn.execute(count_sql, params).fetchone()["total"]
+                if include_total
+                else None
+            )
             rows = conn.execute(sql, params_for_rows).fetchall()
     except (sqlite3.Error, ValueError, json.JSONDecodeError) as exc:
         raise AppwriteException(str(exc)) from exc
 
     converted = [_row_to_dict(table_id, row) for row in rows]
-    return {"total": total, "rows": converted, "documents": converted}
+    response = {"rows": converted, "documents": converted}
+    if include_total:
+        response["total"] = total
+    return response
 
 
 def list_rows_all(table_id, queries=None, limit=DEFAULT_LIMIT, path=None):
@@ -473,7 +486,7 @@ def list_rows_all(table_id, queries=None, limit=DEFAULT_LIMIT, path=None):
         query_list = list(queries or [])
         query_list.append(json.dumps({"method": "limit", "values": [limit]}))
         query_list.append(json.dumps({"method": "offset", "values": [offset]}))
-        response = list_rows(table_id, query_list, path=path)
+        response = list_rows(table_id, query_list, path=path, include_total=False)
         batch = response.get("rows", [])
         rows.extend(batch)
         if len(batch) < limit:
@@ -485,7 +498,12 @@ def list_rows_all(table_id, queries=None, limit=DEFAULT_LIMIT, path=None):
 def first_row(table_id, queries=None, path=None):
     query_list = list(queries or [])
     query_list.append(json.dumps({"method": "limit", "values": [1]}))
-    rows = list_rows(table_id, query_list, path=path).get("rows", [])
+    rows = list_rows(
+        table_id,
+        query_list,
+        path=path,
+        include_total=False,
+    ).get("rows", [])
     return rows[0] if rows else None
 
 
@@ -624,7 +642,7 @@ def delete_row(table_id, row_id, path=None):
 
 
 def count_rows(table_id, queries=None, path=None):
-    return list_rows(table_id, queries, path=path).get("total", 0)
+    return list_rows(table_id, queries, path=path, include_total=True).get("total", 0)
 
 
 def delete_rows_by_user(table_ids, user_id, path=None):

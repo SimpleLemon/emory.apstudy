@@ -3,6 +3,7 @@ import json
 import logging
 import re
 import secrets
+import sqlite3
 import threading
 import time
 from datetime import datetime, timedelta, timezone
@@ -21,12 +22,9 @@ from config import load_environment_config
 from appwrite_helpers import (
     create_row_safe,
     delete_row_safe,
-    first_row,
     format_datetime,
     get_row_safe,
     insert_row_ignore_safe,
-    list_rows_all,
-    list_rows_safe,
     update_row_safe,
     parse_datetime,
 )
@@ -185,7 +183,6 @@ from services.chat_summary_runtime import (
 )
 from services.chat_event_runtime import (
     event_visible_for_user as _event_visible_for_user_service,
-    list_chat_events_after as _list_chat_events_after_service,
     serialize_chat_event as _serialize_chat_event_service,
 )
 from services.chat_events import (
@@ -193,7 +190,7 @@ from services.chat_events import (
     emit_chat_event as _emit_chat_event_service,
 )
 from services.discord_chat import register_discord_chat_handlers
-from services import invites, notifications
+from services import database, invites, notifications
 from services.entitlements import EntitlementLimitError, TIER_BADGES, TIER_LABELS, normalize_tier, request_entitlements
 from services.giphy import GiphyError, api_key as giphy_api_key, is_available as giphy_available, resolve_gif
 from services.row_utils import row_id as _row_id
@@ -217,12 +214,30 @@ def _appwrite_chat_attachments_enabled():
 
 logger = logging.getLogger(__name__)
 
+
+def list_rows_safe(table_id, queries=None):
+    return database.list_rows(table_id, queries, include_total=False)
+
+
+def list_rows_all(table_id, queries=None, limit=database.DEFAULT_LIMIT):
+    return database.list_rows_all(table_id, queries, limit=limit)
+
+
+def first_row(table_id, queries=None):
+    return database.first_row(table_id, queries)
+
 _IMPORT_ENVIRONMENT_CONFIG = load_environment_config()
 CHAT_EVENTS_POLL_SECONDS = float(_IMPORT_ENVIRONMENT_CONFIG.chat_events_poll_seconds_raw)
 CHAT_EVENTS_KEEPALIVE_SECONDS = float(
     _IMPORT_ENVIRONMENT_CONFIG.chat_events_keepalive_seconds_raw
 )
 CHAT_EVENTS_STREAM_LIMIT = int(_IMPORT_ENVIRONMENT_CONFIG.chat_events_stream_limit_raw)
+CHAT_EVENTS_SCAN_MULTIPLIER = 4
+CHAT_EVENTS_MAX_SCAN = 1000
+CHAT_EVENTS_RETENTION_DAYS = 7
+CHAT_EVENTS_MAX_ROWS = 50000
+CHAT_EVENTS_CLEANUP_BATCH = 1000
+CHAT_EVENTS_CLEANUP_INTERVAL_SECONDS = 60
 PRESENCE_CHAT_FRESH_SECONDS = int(
     _IMPORT_ENVIRONMENT_CONFIG.presence_chat_fresh_seconds_raw
 )
@@ -239,6 +254,8 @@ del _IMPORT_ENVIRONMENT_CONFIG
 
 _chat_event_listener_lock = threading.Lock()
 _chat_event_listeners = []
+_chat_event_cleanup_lock = threading.Lock()
+_chat_event_last_cleanup = time.monotonic()
 
 DISCORD_MESSAGE_LIMIT = 50
 MESSAGE_PAGE_SIZE = 50
@@ -454,27 +471,51 @@ def _presence_focus_user_ids():
     return active_focus_user_ids()
 
 
+def _presence_user_resolver(rows, extra_user_ids=None):
+    user_ids = [row.get("user_id") for row in rows]
+    user_ids.extend(extra_user_ids or [])
+    users_by_id = _load_users_by_id(user_ids)
+
+    def resolve(_collection, user_id, allow_missing=True):
+        return users_by_id.get(str(user_id))
+
+    return resolve
+
+
 def _presence_online_users():
+    rows = _fresh_presence_rows_by_scope(
+        ["site", "chat", "typing_channel", "typing_thread"],
+        limit=PRESENCE_ONLINE_LIMIT * 8,
+    )
+    try:
+        focus_user_ids = _presence_focus_user_ids()
+    except sqlite3.OperationalError:
+        focus_user_ids = set()
     return _presence_online_users_service(
-        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        fresh_presence_rows_by_scope_fn=lambda _scope_types, limit: rows,
         presence_online_limit=PRESENCE_ONLINE_LIMIT,
-        get_row_fn=get_row_safe,
+        get_row_fn=_presence_user_resolver(rows, focus_user_ids),
         users_collection=COLLECTIONS["users"],
         appwrite_exception=AppwriteException,
         error_logger=logger,
         public_user_fn=_public_user,
         presence_status_from_scopes_fn=_presence_status_from_scopes,
-        focus_user_ids_fn=_presence_focus_user_ids,
+        focus_user_ids_fn=lambda: focus_user_ids,
     )
 
 
 def _fresh_chat_room_presence(scope_type, scope_id):
+    rows = _fresh_presence_rows(
+        [scope_type],
+        seconds=_presence_fresh_seconds(scope_type),
+        limit=1000,
+    )
     return _fresh_chat_room_presence_service(
         scope_type,
         scope_id,
-        fresh_presence_rows_fn=_fresh_presence_rows,
+        fresh_presence_rows_fn=lambda _scope_types, seconds, limit: rows,
         presence_fresh_seconds_fn=_presence_fresh_seconds,
-        get_row_fn=get_row_safe,
+        get_row_fn=_presence_user_resolver(rows),
         users_collection=COLLECTIONS["users"],
         appwrite_exception=AppwriteException,
         error_logger=logger,
@@ -484,13 +525,18 @@ def _fresh_chat_room_presence(scope_type, scope_id):
 
 
 def _fresh_typing_room_presence(scope_type, scope_id):
+    rows = _fresh_presence_rows(
+        [scope_type],
+        seconds=_presence_fresh_seconds(scope_type),
+        limit=1000,
+    )
     return _fresh_typing_room_presence_service(
         scope_type,
         scope_id,
-        fresh_presence_rows_fn=_fresh_presence_rows,
+        fresh_presence_rows_fn=lambda _scope_types, seconds, limit: rows,
         presence_fresh_seconds_fn=_presence_fresh_seconds,
         current_user_id_fn=_current_user_id,
-        get_row_fn=get_row_safe,
+        get_row_fn=_presence_user_resolver(rows),
         users_collection=COLLECTIONS["users"],
         appwrite_exception=AppwriteException,
         error_logger=logger,
@@ -515,11 +561,15 @@ def _user_can_access_channel_presence(channel, user):
 
 
 def _online_users_for_channel(channel):
+    rows = _fresh_presence_rows_by_scope(
+        ["chat", "site"],
+        limit=PRESENCE_ONLINE_LIMIT * 4,
+    )
     return _online_users_for_channel_service(
         channel,
-        fresh_presence_rows_by_scope_fn=_fresh_presence_rows_by_scope,
+        fresh_presence_rows_by_scope_fn=lambda _scope_types, limit: rows,
         presence_online_limit=PRESENCE_ONLINE_LIMIT,
-        get_row_fn=get_row_safe,
+        get_row_fn=_presence_user_resolver(rows),
         users_collection=COLLECTIONS["users"],
         appwrite_exception=AppwriteException,
         error_logger=logger,
@@ -573,19 +623,118 @@ def _serialize_chat_event(row):
     return _serialize_chat_event_service(row, row_id_fn=_row_id)
 
 
+class _ChatEventPage(list):
+    def __init__(self, rows=(), *, scan_cursor=None):
+        super().__init__(rows)
+        self.scan_cursor = scan_cursor
+
+
 def _list_chat_events_after(since=None, after_id=None, *, limit=CHAT_EVENTS_STREAM_LIMIT):
-    return _list_chat_events_after_service(
-        since,
-        after_id,
-        limit=limit,
-        query_cls=Query,
-        list_rows_fn=list_rows_safe,
-        events_collection=COLLECTIONS["chat_events"],
-        appwrite_exception=AppwriteException,
-        error_logger=logger,
-        event_visible_for_user_fn=_event_visible_for_user,
-        row_id_fn=_row_id,
-    )
+    limit = min(max(int(limit), 1), CHAT_EVENTS_STREAM_LIMIT)
+    scan_budget = min(max(limit * CHAT_EVENTS_SCAN_MULTIPLIER, limit), CHAT_EVENTS_MAX_SCAN)
+    visible = []
+    seen_ids = set()
+    visibility_cache = {}
+    scanned = 0
+    scan_cursor = (since, after_id) if since and after_id else None
+    if since and after_id:
+        query_stages = [
+            [Query.equal("created_at", [since]), Query.greater_than("$id", after_id)],
+            [Query.greater_than("created_at", since)],
+        ]
+    elif since:
+        query_stages = [[Query.greater_than_equal("created_at", since)]]
+    else:
+        query_stages = [[]]
+
+    for constraints in query_stages:
+        offset = 0
+        while scanned < scan_budget and len(visible) < limit:
+            batch_limit = min(limit, scan_budget - scanned)
+            queries = [*constraints, Query.order_asc("created_at"), Query.order_asc("$id"), Query.limit(batch_limit)]
+            if offset:
+                queries.append(Query.offset(offset))
+            try:
+                rows = database.list_rows(
+                    COLLECTIONS["chat_events"],
+                    queries,
+                    include_total=False,
+                ).get("rows", [])
+            except AppwriteException:
+                logger.exception("Failed to list chat events")
+                return _ChatEventPage(visible, scan_cursor=scan_cursor)
+            if not rows:
+                break
+            scanned_before_batch = scanned
+            for row in rows:
+                row_id = _row_id(row)
+                if not row_id or row_id in seen_ids:
+                    continue
+                seen_ids.add(row_id)
+                scanned += 1
+                created_at = row.get("created_at") or ""
+                candidate_cursor = (created_at, row_id)
+                if scan_cursor is None or candidate_cursor > scan_cursor:
+                    scan_cursor = candidate_cursor
+                if since and created_at == since and after_id and row_id <= after_id:
+                    continue
+                scope_key = (row.get("scope_type"), row.get("scope_id"))
+                if all(scope_key):
+                    if scope_key not in visibility_cache:
+                        visibility_cache[scope_key] = _event_visible_for_user(row)
+                    row_visible = visibility_cache[scope_key]
+                else:
+                    row_visible = _event_visible_for_user(row)
+                if row_visible:
+                    visible.append(row)
+                    if len(visible) >= limit:
+                        break
+            if scanned == scanned_before_batch or len(rows) < batch_limit or len(visible) >= limit:
+                break
+            offset += len(rows)
+    return _ChatEventPage(visible, scan_cursor=scan_cursor)
+
+
+def _cleanup_chat_events(*, now=None, path=None):
+    now = now or _now()
+    cutoff = format_datetime(now - timedelta(days=CHAT_EVENTS_RETENTION_DAYS))
+    with database.db_connection(path) as conn:
+        expired = conn.execute(
+            """DELETE FROM chat_events WHERE id IN (
+                   SELECT id FROM chat_events WHERE created_at < ?
+                   ORDER BY created_at, id LIMIT ?
+               )""",
+            [cutoff, CHAT_EVENTS_CLEANUP_BATCH],
+        ).rowcount
+        remaining_budget = CHAT_EVENTS_CLEANUP_BATCH - expired
+        overflow = 0
+        if remaining_budget:
+            overflow = conn.execute(
+                """DELETE FROM chat_events WHERE id IN (
+                       SELECT id FROM chat_events
+                       ORDER BY created_at DESC, id DESC
+                       LIMIT ? OFFSET ?
+                   )""",
+                [remaining_budget, CHAT_EVENTS_MAX_ROWS],
+            ).rowcount
+    return expired + overflow
+
+
+def _maybe_cleanup_chat_events():
+    global _chat_event_last_cleanup
+    now_monotonic = time.monotonic()
+    if now_monotonic - _chat_event_last_cleanup < CHAT_EVENTS_CLEANUP_INTERVAL_SECONDS:
+        return 0
+    with _chat_event_cleanup_lock:
+        now_monotonic = time.monotonic()
+        if now_monotonic - _chat_event_last_cleanup < CHAT_EVENTS_CLEANUP_INTERVAL_SECONDS:
+            return 0
+        _chat_event_last_cleanup = now_monotonic
+    try:
+        return _cleanup_chat_events()
+    except Exception:
+        logger.exception("Failed to clean up chat events")
+        return 0
 
 
 def _presence_scope_allowed(scope_type, scope_id):
@@ -634,7 +783,7 @@ def emit_chat_event(
     readable_user_ids=None,
     channel=None,
 ):
-    return _emit_chat_event_service(
+    row = _emit_chat_event_service(
         scope_type,
         scope_id,
         event_type,
@@ -651,6 +800,9 @@ def emit_chat_event(
         notify_fn=_notify_chat_event_waiters,
         error_logger=logger,
     )
+    if row:
+        _maybe_cleanup_chat_events()
+    return row
 
 
 def _message_timestamp(row):
@@ -1065,13 +1217,20 @@ def _render_discord_content(content, message):
 
 def _load_users_by_id(user_ids):
     users_by_id = {}
-    for user_id in sorted({str(value) for value in (user_ids or []) if value}):
+    requested_ids = sorted({str(value) for value in (user_ids or []) if value})
+    for start in range(0, len(requested_ids), 100):
+        batch = requested_ids[start:start + 100]
         try:
-            row = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
+            rows = database.list_rows(
+                COLLECTIONS["users"],
+                [Query.equal("$id", batch), Query.limit(len(batch))],
+                include_total=False,
+            ).get("rows", [])
         except AppwriteException:
-            row = None
-        if row:
-            users_by_id[user_id] = row
+            logger.exception("Failed to resolve chat users in batch")
+            continue
+        for row in rows:
+            users_by_id[_row_id(row)] = row
     return users_by_id
 
 
@@ -1748,6 +1907,9 @@ def chat_events_stream():
                     cursor_since = event.get("created_at") or cursor_since
                     cursor_after_id = _row_id(event)
                     last_keepalive = time.monotonic()
+                scan_cursor = getattr(events, "scan_cursor", None)
+                if scan_cursor:
+                    cursor_since, cursor_after_id = scan_cursor
                 now = time.monotonic()
                 if now - last_keepalive >= CHAT_EVENTS_KEEPALIVE_SECONDS:
                     yield ": keepalive\n\n"
@@ -1778,13 +1940,28 @@ def chat_events_stream():
 @chat_api_bp.route("/api/presence/heartbeat", methods=["POST"])
 @login_required
 def presence_heartbeat():
-    data = request.get_json(silent=True) or {}
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Presence heartbeat body must be a JSON object."}), 400
+    scopes = data.get("scopes")
+    if scopes is None:
+        scopes = [{
+            "scope_type": data.get("scope_type"),
+            "scope_id": data.get("scope_id") or "global",
+        }]
+    if not isinstance(scopes, list) or not scopes or len(scopes) > 8:
+        return jsonify({"error": "Presence scopes must contain between 1 and 8 entries."}), 400
+    if not all(isinstance(scope, dict) for scope in scopes):
+        return jsonify({"error": "Each presence scope must be an object."}), 400
     try:
-        row = _upsert_presence(
-            data.get("scope_type"),
-            data.get("scope_id") or "global",
-            data.get("tab_id"),
-        )
+        rows = [
+            _upsert_presence(
+                scope.get("scope_type"),
+                scope.get("scope_id") or "global",
+                data.get("tab_id"),
+            )
+            for scope in scopes
+        ]
     except PermissionError:
         return jsonify({"error": "Presence scope unavailable."}), 404
     except ValueError as exc:
@@ -1792,13 +1969,15 @@ def presence_heartbeat():
     except AppwriteException:
         logger.exception("Failed to update presence heartbeat")
         return jsonify({"error": "Unable to update presence."}), 500
+    presences = [{
+        "scope_type": row.get("scope_type"),
+        "scope_id": row.get("scope_id"),
+        "last_seen_at": row.get("last_seen_at"),
+    } for row in rows]
     return jsonify({
         "status": "ok",
-        "presence": {
-            "scope_type": row.get("scope_type"),
-            "scope_id": row.get("scope_id"),
-            "last_seen_at": row.get("last_seen_at"),
-        },
+        "presence": presences[0],
+        "presences": presences,
     })
 
 
@@ -2323,15 +2502,14 @@ def presence_users():
     else:
         return jsonify({"error": "Unsupported presence scope."}), 400
 
+    visible_ids = [
+        user_id for user_id in requested_ids
+        if allowed_ids is None or user_id in allowed_ids
+    ]
+    users_by_id = _load_users_by_id(visible_ids)
     users = []
-    for user_id in requested_ids:
-        if allowed_ids is not None and user_id not in allowed_ids:
-            continue
-        try:
-            user = get_row_safe(COLLECTIONS["users"], user_id, allow_missing=True)
-        except AppwriteException:
-            logger.exception("Failed to resolve presence user %s", user_id)
-            continue
+    for user_id in visible_ids:
+        user = users_by_id.get(user_id)
         public_user = _public_user(user)
         if public_user:
             users.append(public_user)

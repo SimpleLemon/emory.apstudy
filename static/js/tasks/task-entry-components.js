@@ -17,6 +17,14 @@ function cx(...parts) {
     return parts.filter(Boolean).join(" ");
 }
 
+export function validateTaskTitle(value) {
+    return String(value || "").trim() ? "" : "Enter a task title before adding it.";
+}
+
+export function taskErrorMessage(error, fallback) {
+    return error?.message || fallback;
+}
+
 function MaterialIcon({ name, className = "" }) {
     return h("span", { className: `material-symbols-outlined ${className}`, "aria-hidden": "true" }, name);
 }
@@ -94,15 +102,19 @@ function TaskDetails({ task, updateTask }) {
         setDetailPopover(null);
     };
 
-    const clearRepeat = () => {
-        updateTask(task.id, { recurrence: null });
+    const clearRepeat = async () => {
+        const result = await updateTask(task.id, { recurrence: null });
+        if (result?.ok === false) return result;
         setRepeatDraft(createDefaultRecurrence());
         setDetailPopover(null);
+        return result;
     };
 
-    const saveRepeat = () => {
-        updateTask(task.id, { recurrence: repeatDraft });
+    const saveRepeat = async () => {
+        const result = await updateTask(task.id, { recurrence: repeatDraft });
+        if (result?.ok === false) return result;
         setDetailPopover(null);
+        return result;
     };
 
     return h("div", { className: "task-details" },
@@ -141,17 +153,20 @@ function TaskDetails({ task, updateTask }) {
                 h("span", null, task.recurrence ? formatRepeat(task.recurrence) : "Repeat")
             )
         ),
-        h(AddTaskPopover, { popover: detailPopover, onClose: closeDetailPopover },
+        h(AddTaskPopover, { popover: detailPopover, onClose: closeDetailPopover }, ({ floatingOwner }) => (
             detailPopover?.type === "due" ? h(DeadlinePanel, {
                 value: task,
                 onCancel: closeDetailPopover,
-                onClear: () => {
-                    updateTask(task.id, { deadline_at: null, deadline_time: null, reminder_minutes: -1 });
-                    setDetailPopover(null);
+                floatingOwner,
+                onClear: async () => {
+                    const result = await updateTask(task.id, { deadline_at: null, deadline_time: null, reminder_minutes: -1 });
+                    if (result?.ok !== false) setDetailPopover(null);
+                    return result;
                 },
-                onApply: (payload) => {
-                    updateTask(task.id, payload);
-                    setDetailPopover(null);
+                onApply: async (payload) => {
+                    const result = await updateTask(task.id, payload);
+                    if (result?.ok !== false) setDetailPopover(null);
+                    return result;
                 },
             }) : h(RepeatMenuContent, {
                 recurrence: repeatDraft,
@@ -159,8 +174,9 @@ function TaskDetails({ task, updateTask }) {
                 onCancel: closeDetailPopover,
                 onClear: clearRepeat,
                 onDone: saveRepeat,
+                floatingOwner,
             })
-        )
+        ))
     );
 }
 
@@ -245,6 +261,10 @@ export function AddTaskForm({ listId, createTask }) {
     const [repeatDraft, setRepeatDraft] = React.useState(createDefaultRecurrence);
     const [popover, setPopover] = React.useState(null);
     const [saving, setSaving] = React.useState(false);
+    const [titleError, setTitleError] = React.useState("");
+    const [submitError, setSubmitError] = React.useState("");
+    const titleRef = React.useRef(null);
+    const titleErrorId = React.useId();
     const expanded = focused || title || deadline.deadline_at || repeatEnabled || priority !== "none" || Boolean(popover);
 
     const reset = () => {
@@ -255,6 +275,8 @@ export function AddTaskForm({ listId, createTask }) {
         setRecurrence(createDefaultRecurrence());
         setRepeatDraft(createDefaultRecurrence());
         setPopover(null);
+        setTitleError("");
+        setSubmitError("");
     };
 
     const openPopover = (type, event) => {
@@ -289,11 +311,12 @@ export function AddTaskForm({ listId, createTask }) {
         h("span", null, value || label)
     );
 
-    const popoverContent = () => {
+    const popoverContent = (floatingOwner) => {
         if (!popover) return null;
         if (popover.type === "due") {
             return h(DeadlinePanel, {
                 value: deadline,
+                floatingOwner,
                 onCancel: () => setPopover(null),
                 onClear: () => {
                     setDeadline({ deadline_at: null, deadline_time: null, reminder_minutes: -1 });
@@ -326,6 +349,7 @@ export function AddTaskForm({ listId, createTask }) {
         return h(RepeatMenuContent, {
             recurrence: repeatDraft,
             onChange: setRepeatDraft,
+            floatingOwner,
             onCancel: () => {
                 setRepeatDraft(recurrence);
                 setPopover(null);
@@ -354,7 +378,15 @@ export function AddTaskForm({ listId, createTask }) {
         },
         onSubmit: async (event) => {
             event.preventDefault();
-            if (!title.trim()) return;
+            const nextTitleError = validateTaskTitle(title);
+            if (nextTitleError) {
+                setTitleError(nextTitleError);
+                setSubmitError("");
+                titleRef.current?.focus({ preventScroll: true });
+                return;
+            }
+            setTitleError("");
+            setSubmitError("");
             setSaving(true);
             try {
                 await createTask(listId, {
@@ -365,7 +397,7 @@ export function AddTaskForm({ listId, createTask }) {
                 });
                 reset();
             } catch (err) {
-                console.warn("Task creation failed; app-level error banner was shown.", err);
+                setSubmitError(taskErrorMessage(err, "Unable to create task. Try again."));
             } finally {
                 setSaving(false);
             }
@@ -374,13 +406,21 @@ export function AddTaskForm({ listId, createTask }) {
         h("div", { className: "task-add-primary" },
             h(MaterialIcon, { name: "add" }),
             h("input", {
+                ref: titleRef,
                 value: title,
-                onChange: (event) => setTitle(event.target.value),
+                onChange: (event) => {
+                    setTitle(event.target.value);
+                    setTitleError("");
+                    setSubmitError("");
+                },
                 placeholder: "Add a task",
                 disabled: saving,
+                "aria-invalid": titleError ? "true" : undefined,
+                "aria-describedby": titleError || submitError ? titleErrorId : undefined,
             }),
-            h("button", { type: "submit", disabled: saving || !title.trim() }, "Add")
+            h("button", { type: "submit", disabled: saving }, saving ? "Adding…" : "Add")
         ),
+        titleError || submitError ? h("p", { id: titleErrorId, className: "task-form-error", role: "alert" }, titleError || submitError) : null,
         expanded ? h("div", { className: "task-add-entrybar" },
             controlButton({
                 type: "due",
@@ -404,6 +444,6 @@ export function AddTaskForm({ listId, createTask }) {
                 value: repeatEnabled ? formatRepeat(recurrence) : "",
             })
         ) : null,
-        h(AddTaskPopover, { popover, onClose: () => setPopover(null) }, popoverContent())
+        h(AddTaskPopover, { popover, onClose: () => setPopover(null) }, ({ floatingOwner }) => popoverContent(floatingOwner))
     );
 }

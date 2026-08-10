@@ -1,3 +1,5 @@
+/* global window, document, console, Request, Headers, URL, CustomEvent, MutationObserver, sessionStorage, localStorage, fetch, XMLHttpRequest */
+
 import("/static/js/core/cookie-consent.js").catch((error) => {
     console.error("Unable to initialize cookie consent", error);
 });
@@ -50,6 +52,16 @@ import("/static/js/core/viewport-sizing.js")
     function isCsrfFailure(response) {
         return response.status === 400 && response.headers.get(csrfFailureHeader) === "1";
     }
+
+    function isCsrfFailureStatus(status, getHeader) {
+        return Number(status) === 400 && getHeader?.(csrfFailureHeader) === "1";
+    }
+
+    window.APStudyCsrf = {
+        token: csrfToken,
+        refresh: refreshCsrfToken,
+        isFailure: isCsrfFailureStatus,
+    };
 
     window.fetch = async (input, init = {}) => {
         const request = input instanceof Request ? input : null;
@@ -362,6 +374,9 @@ async function runLogoutFlow() {
     }
 }
 
+window.APStudyAuth = window.APStudyAuth || {};
+window.APStudyAuth.logout = runLogoutFlow;
+
 function drainServerToasts() {
     if (window.__apstudyToastsDrained) return;
     window.__apstudyToastsDrained = true;
@@ -435,6 +450,66 @@ window.APStudyHttp = window.APStudyHttp || {
         }
         return payload ?? {};
     },
+
+    async uploadXhr(url, options = {}) {
+        const {
+            body = null,
+            headers = {},
+            method = "POST",
+            onProgress = null,
+            pendingLabel = null,
+            responseType = "json",
+            timeout = 0,
+            xhrFactory = () => new XMLHttpRequest(),
+        } = options;
+        const requestUrl = new URL(String(url), window.location.href);
+        const sameOrigin = requestUrl.origin === window.location.origin;
+
+        const sendAttempt = () => new Promise((resolve, reject) => {
+            const xhr = xhrFactory();
+            xhr.open(String(method).toUpperCase(), requestUrl.href, true);
+            if (responseType) xhr.responseType = responseType;
+            if (Number(timeout) > 0) xhr.timeout = Number(timeout);
+            Object.entries(headers).forEach(([name, value]) => {
+                if (value != null) xhr.setRequestHeader(name, String(value));
+            });
+            if (sameOrigin && !Object.keys(headers).some((name) => name.toLowerCase() === "x-csrftoken")) {
+                const token = window.APStudyCsrf?.token?.();
+                if (token) xhr.setRequestHeader("X-CSRFToken", token);
+            }
+            if (xhr.upload && typeof onProgress === "function") {
+                xhr.upload.onprogress = onProgress;
+            }
+            xhr.onload = () => resolve(xhr);
+            xhr.onerror = () => resolve(xhr);
+            xhr.ontimeout = () => resolve(xhr);
+            xhr.onabort = () => {
+                const error = new Error("Upload cancelled.");
+                error.name = "AbortError";
+                error.xhr = xhr;
+                reject(error);
+            };
+            xhr.send(body);
+        });
+
+        const execute = async () => {
+            let xhr = await sendAttempt();
+            const isCsrfFailure = sameOrigin && window.APStudyCsrf?.isFailure?.(
+                xhr.status,
+                (name) => xhr.getResponseHeader?.(name),
+            );
+            if (!isCsrfFailure) return xhr;
+            await window.APStudyCsrf.refresh();
+            xhr = await sendAttempt();
+            return xhr;
+        };
+
+        let request = execute();
+        if (pendingLabel && window.APStudyPendingMutations?.track) {
+            request = window.APStudyPendingMutations.track(request, pendingLabel);
+        }
+        return request;
+    },
 };
 
 function initializePresenceHeartbeat() {
@@ -445,7 +520,7 @@ function initializePresenceHeartbeat() {
 
     const tabKey = "apstudy-presence-tab-id";
     const siteHeartbeatMs = 60000;
-    const chatHeartbeatMs = 5000;
+    const chatHeartbeatMs = 15000;
     const chatRoomScopeKey = "chat-room";
     const extraScopes = new Map();
     let intervalId = null;
@@ -472,7 +547,7 @@ function initializePresenceHeartbeat() {
     }
 
     function heartbeatIntervalMs() {
-        return isChatPage() ? chatHeartbeatMs : siteHeartbeatMs;
+        return document.hidden ? siteHeartbeatMs : (isChatPage() ? chatHeartbeatMs : siteHeartbeatMs);
     }
 
     function pageScopes() {
@@ -484,9 +559,9 @@ function initializePresenceHeartbeat() {
         return scopes;
     }
 
-    function postHeartbeat(scope, keepalive) {
+    function postHeartbeat(scopes, keepalive) {
         if (stopped) return Promise.resolve();
-        const body = JSON.stringify({ ...scope, tab_id: tabId });
+        const body = JSON.stringify({ scopes, tab_id: tabId });
         return fetch("/api/presence/heartbeat", {
             method: "POST",
             headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -497,8 +572,8 @@ function initializePresenceHeartbeat() {
     }
 
     function sendHeartbeat({ keepalive = false } = {}) {
-        if (stopped) return Promise.resolve([]);
-        return Promise.all(pageScopes().map((scope) => postHeartbeat(scope, keepalive)));
+        if (stopped) return Promise.resolve();
+        return postHeartbeat(pageScopes(), keepalive);
     }
 
     function startTimer() {
@@ -554,7 +629,10 @@ function initializePresenceHeartbeat() {
     window.addEventListener("apstudy:focus-state", (event) => {
         setFocusPaused(event.detail?.active === true);
     });
-    document.addEventListener("visibilitychange", () => sendHeartbeat({ keepalive: true }));
+    document.addEventListener("visibilitychange", () => {
+        void sendHeartbeat({ keepalive: true });
+        if (!focusPaused && !stopped) startTimer();
+    });
     if (window.APStudyPageLifecycle?.register) {
         window.APStudyPageLifecycle.register({
             pause: pauseHeartbeat,

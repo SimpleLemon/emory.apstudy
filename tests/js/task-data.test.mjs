@@ -59,6 +59,31 @@ test("builds task API payloads with normalized deadline and recurrence fields", 
     assert.match(payload.deadline_at, /^2026-05-20T/);
 });
 
+test("task payloads preserve priority and distinguish date-only from timed deadlines", () => {
+    const dateOnly = data.buildTaskDraftPayload("list-1", {
+        title: "Submit outline",
+        priority: "high",
+        deadline_at: "2026-05-20",
+        deadline_time: null,
+        reminder_minutes: -540,
+    }, "America/Chicago");
+    assert.equal(dateOnly.priority, "high");
+    assert.equal(dateOnly.deadline_time, null);
+    assert.equal(dateOnly.reminder_minutes, -540);
+    assert.match(dateOnly.deadline_at, /^2026-05-20T/);
+
+    const timed = data.buildTaskDraftPayload("list-1", {
+        title: "Join review",
+        priority: "urgent",
+        deadline_at: "2026-05-20T14:30",
+        deadline_time: "14:30",
+        reminder_minutes: 10,
+    }, "America/Chicago");
+    assert.equal(timed.priority, "urgent");
+    assert.equal(timed.deadline_time, "14:30");
+    assert.equal(timed.reminder_minutes, 10);
+});
+
 test("computes optimistic completed state for one-off and recurring tasks", () => {
     const now = new Date("2026-05-20T12:00:00Z");
     assert.deepEqual(data.buildCompletedTaskOptimistic({ id: "one-off", completed_occurrences: [] }, true, now), {

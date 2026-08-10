@@ -74,11 +74,16 @@ from services.note_page_setup import (
     PAGE_SETUP_MARGIN_MIN as NOTES_PAGE_SETUP_MARGIN_MIN,
 )
 from services.onboarding import (
+    DISPLAY_NAME_MAX_LENGTH,
+    DISPLAY_NAME_MIN_LENGTH,
+    MAJOR_MAX_LENGTH,
+    SCHOOL_MAX_LENGTH,
     save_onboarding_step_five,
     save_onboarding_step_four,
     save_onboarding_step_one,
     save_onboarding_step_three,
     save_onboarding_step_two,
+    validate_trimmed_profile_text,
 )
 from services.settings_defaults import settings_defaults as _settings_defaults_service
 
@@ -544,6 +549,7 @@ def _onboarding_context():
         "emory_student": current_user.emory_student,
         "emory_email": current_user.emory_email,
         "school": current_user.school,
+        "major": current_user.major,
         "courses": [
             {
                 "id": course.get("$id"),
@@ -592,8 +598,15 @@ def onboarding():
 @login_required
 def save_onboarding():
     """Persist each onboarding step and advance the user's progress."""
-    payload = request.get_json(silent=True) or request.form.to_dict(flat=True)
-    step = int(payload.get("step", current_user.onboarding_step or 1))
+    payload = request.get_json(silent=True)
+    if payload is None:
+        payload = request.form.to_dict(flat=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "Onboarding payload must be an object."}), 400
+    try:
+        step = int(payload.get("step", current_user.onboarding_step or 1))
+    except (TypeError, ValueError):
+        return jsonify({"error": "Invalid onboarding step."}), 400
     action = payload.get("action", "continue")
     user_id = str(current_user.id)
     dependencies = {
@@ -759,18 +772,34 @@ def unlink_discord():
 @login_required
 def update_profile():
     """Update editable profile fields for the authenticated user."""
-    data = request.get_json(silent=True) or {}
-    name = (data.get("name") or "").strip()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Profile payload must be an object."}), 400
+    try:
+        name = validate_trimmed_profile_text(
+            data.get("name", ""),
+            "Display name",
+            minimum=DISPLAY_NAME_MIN_LENGTH,
+            maximum=DISPLAY_NAME_MAX_LENGTH,
+        )
+        school = validate_trimmed_profile_text(
+            data.get("school", ""),
+            "School",
+            maximum=SCHOOL_MAX_LENGTH,
+        )
+        major = validate_trimmed_profile_text(
+            data.get("major", ""),
+            "Major",
+            maximum=MAJOR_MAX_LENGTH,
+        ) or None
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
     username_value = data.get("username")
     picture_url = (data.get("picture_url") or "").strip() or None
     avatar_source = _normalize_avatar_source(data.get("avatar_source"), picture_url)
     banner_color = _normalize_banner_color(data.get("banner_color"))
-    school_updates = school_payload(data.get("school"))
-    major = (data.get("major") or "").strip() or None
+    school_updates = school_payload(school)
     graduation_year = (data.get("graduation_year") or "").strip() or None
-
-    if not name:
-        return jsonify({"error": "Name is required."}), 400
 
     if username_value is not None:
         try:

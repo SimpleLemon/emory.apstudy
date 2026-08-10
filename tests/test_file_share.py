@@ -166,6 +166,27 @@ class FileShareTestCase(unittest.TestCase):
         self.assertEqual(stored_rows[0]["storage_bucket_id"], fs.FILE_SHARE_BUCKET_ID)
         self.assertTrue(stored_rows[0]["stored_path"].startswith("appwrite://"))
 
+    def test_public_upload_cleans_storage_when_share_code_generation_fails(self):
+        from appwrite.exception import AppwriteException
+
+        storage = Mock()
+        data = {
+            "visibility": "public",
+            "expiryDays": "1",
+            "file": (io.BytesIO(b"hello"), "notes.txt"),
+        }
+        with self.app.test_request_context("/api/files/upload", method="POST", data=data):
+            with patch.object(fs, "current_user", self.user), \
+                    patch.object(fs, "_assert_folder_target"), \
+                    patch.object(fs, "_storage", return_value=storage), \
+                    patch.object(fs, "_generate_share_code", side_effect=AppwriteException("lookup failed")):
+                response, status = fs.upload_file.__wrapped__()
+
+        self.assertEqual(status, 400)
+        self.assertEqual(response.get_json()["error"], "Unable to save file.")
+        storage.create_file.assert_called_once()
+        storage.delete_file.assert_called_once()
+
     def test_upload_rejects_more_than_five_files(self):
         storage = Mock()
         files = [(io.BytesIO(f"file-{idx}".encode("utf-8")), f"f{idx}.txt") for idx in range(6)]

@@ -191,32 +191,80 @@ def _rows(table_id, *, path=None):
         return []
 
 
-def record_authenticated_activity(user_id, *, at=None, path=None):
-    """Record signed-in product activity without creating one row per request."""
+_ACTIVITY_WRITE_INTERVAL = timedelta(minutes=1)
+_ACTIVITY_EXCLUDED_PATHS = {
+    "/api/chat/events/stream",
+    "/api/chat/presence",
+    "/api/chat/presence/users",
+    "/api/presence/heartbeat",
+    "/api/presence/online",
+    "/api/presence/room",
+    "/api/presence/statuses",
+    "/api/notifications/sync",
+    "/api/notifications/unread-count",
+}
+
+
+def _request_path_for_activity():
+    try:
+        from flask import has_request_context, request
+
+        return request.path if has_request_context() else None
+    except RuntimeError:
+        return None
+
+
+def record_authenticated_activity(user_id, *, at=None, path=None, request_path=None):
+    """Record signed-in activity at most once per user per minute.
+
+    Presence, SSE, and notification polling are transport traffic rather than
+    meaningful product activity, so those request paths are ignored entirely.
+    Returns whether the hourly activity row was inserted or updated.
+    """
     user_id = str(user_id or "").strip()
     if not user_id:
-        return
+        return False
+    activity_path = request_path if request_path is not None else _request_path_for_activity()
+    if activity_path in _ACTIVITY_EXCLUDED_PATHS:
+        return False
     seen_at = parse_utc(at) if at is not None else utcnow()
     if seen_at is None:
         seen_at = utcnow()
     hour_start = _floor_hour(seen_at)
     hour_key = iso_utc(hour_start)
     row_id = f"{user_id}:hour:{hour_key}"
+    write_cutoff = iso_utc(seen_at - _ACTIVITY_WRITE_INTERVAL)
     with database.db_connection(path) as conn:
-        conn.execute(
+        result = conn.execute(
             """
             INSERT INTO user_activity_buckets (
                 id, user_id, bucket_granularity, bucket_start, last_seen_at
-            ) VALUES (?, ?, 'hour', ?, ?)
+            )
+            SELECT ?, ?, 'hour', ?, ?
+            WHERE NOT EXISTS (
+                SELECT 1 FROM user_activity_buckets
+                WHERE user_id = ? AND last_seen_at > ?
+            )
             ON CONFLICT(user_id, bucket_granularity, bucket_start)
             DO UPDATE SET last_seen_at = excluded.last_seen_at
+            WHERE user_activity_buckets.last_seen_at <= ?
             """,
-            [row_id, user_id, hour_key, iso_utc(seen_at)],
+            [
+                row_id,
+                user_id,
+                hour_key,
+                iso_utc(seen_at),
+                user_id,
+                write_cutoff,
+                write_cutoff,
+            ],
         )
-        conn.execute(
-            "INSERT OR IGNORE INTO daily_active_users (user_id, active_date) VALUES (?, ?)",
-            [user_id, seen_at.date().isoformat()],
-        )
+        if result.rowcount:
+            conn.execute(
+                "INSERT OR IGNORE INTO daily_active_users (user_id, active_date) VALUES (?, ?)",
+                [user_id, seen_at.date().isoformat()],
+            )
+    return bool(result.rowcount)
 
 
 def _activity_rows(table_id, timestamp_column, start_utc, end_utc, *, filter_column=None, path=None):

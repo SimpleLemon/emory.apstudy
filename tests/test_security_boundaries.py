@@ -189,9 +189,13 @@ class ApplicationSecurityIntegrationTests(unittest.TestCase):
         self.assertEqual(update_note.call_args.args[0], "note-1")
         self.assertEqual(update_note.call_args.args[1]["content"], updated_note["content"])
 
-    def test_logout_is_post_only_and_csrf_protected(self):
+    def test_logout_get_is_safe_redirect_and_post_remains_csrf_protected(self):
         client = self._authenticated_client()
-        self.assertEqual(client.get("/logout").status_code, 405)
+        response = client.get("/logout")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/login")
+        with client.session_transaction() as client_session:
+            self.assertEqual(client_session["_user_id"], self.user.id)
         self.assertEqual(client.post("/logout").status_code, 400)
 
     def test_unauthenticated_api_requests_return_json_without_login_redirect(self):

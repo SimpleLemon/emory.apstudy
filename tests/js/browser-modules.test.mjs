@@ -932,6 +932,8 @@ test("settings page keeps account, theme, calendar, and destructive endpoints ce
     assert.match(source, /section\.hidden = !isActive/);
     assert.match(styles, /\.settings-section\[hidden\]\s*\{\s*display:\s*none/);
     assert.doesNotMatch(source, /global\.alert|window\.alert/);
+    assert.doesNotMatch(source, /location\.assign\(['"]\/logout['"]\)/);
+    assert.match(source, /APStudyAuth\?\.logout/);
     assert.match(source, /push_configured/);
     assert.match(source, /const SETTINGS_INTERFACE_THEMES = \[/);
     assert.match(source, /'nest-light'/);
@@ -1197,6 +1199,9 @@ test("onboarding presents five accessible stages without changing its saved step
     assert.match(template, /Step \{\{ step if step else 1 \}\} of 5/);
     assert.match(template, /role="alert" aria-live="assertive" tabindex="-1"/);
     assert.match(template, /js\/onboarding\/index\.js/);
+    assert.match(template, /button type="submit" form="onboarding-logout-form"/);
+    assert.match(template, /<form id="onboarding-logout-form" method="post" action="\{\{ url_for\('auth\.logout'\) \}\}" hidden>/);
+    assert.ok(template.indexOf('id="onboarding-logout-form"') > template.indexOf('</form>'));
     assert.doesNotMatch(template, /<script type="module">/);
     assert.match(onboardingSource, /const percent = Math\.round\(\(safeStep \/ 5\) \* 100\)/);
     assert.match(onboardingSource, /setProperty\('--onboarding-progress', String\(percent \/ 100\)\)/);
@@ -1249,6 +1254,10 @@ test("browser notifications preflight capabilities and never use native alert di
     assert.match(source, /\/api\/notifications\/sync/);
     assert.match(source, /\/api\/notifications\/foreground-ack/);
     assert.match(source, /pending_foreground_ids/);
+    assert.match(source, /const FOREGROUND_SYNC_MS = 15000/);
+    assert.match(source, /navigator\.locks\.request/);
+    assert.match(source, /BroadcastChannel/);
+    assert.match(source, /LEADER_LEASE_KEY/);
     assert.match(worker, /\/dashboard\?notifications=open/);
     assert.doesNotMatch(source, /global\.alert|window\.alert/);
     const settingsSource = await sourceFor("static/js/settings/notifications.js");

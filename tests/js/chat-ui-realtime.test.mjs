@@ -59,7 +59,8 @@ test("chat uses local presence APIs for online and typing state", async () => {
   assert.match(global, /scope_type: "chat"/);
   assert.match(global, /scope_type: "site"/);
   assert.match(global, /const siteHeartbeatMs = 60000/);
-  assert.match(global, /const chatHeartbeatMs = 5000/);
+  assert.match(global, /const chatHeartbeatMs = 15000/);
+  assert.match(global, /JSON\.stringify\(\{ scopes, tab_id: tabId \}\)/);
   assert.match(global, /setChatRoom/);
   assert.match(global, /apstudy-presence-tab-id/);
   assert.match(script, /\/api\/presence\/online/);

@@ -314,7 +314,46 @@ class TestChatFeature(unittest.TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.get_json()["presence"]["scope_type"], "site")
+        self.assertEqual(len(response.get_json()["presences"]), 1)
         upsert.assert_called_once_with("site", "global", "tab-1")
+
+    def test_presence_heartbeat_batches_global_and_room_scopes(self):
+        scopes = [
+            {"scope_type": "chat", "scope_id": "global"},
+            {"scope_type": "chat", "scope_id": "room-1"},
+        ]
+        rows = [
+            {"scope_type": scope["scope_type"], "scope_id": scope["scope_id"], "last_seen_at": "now"}
+            for scope in scopes
+        ]
+        with self.app.test_request_context(
+            "/api/presence/heartbeat",
+            method="POST",
+            json={"scopes": scopes, "tab_id": "tab-1"},
+        ):
+            with patch.object(chat_api, "current_user", self.user), \
+                    patch.object(chat_api, "_upsert_presence", side_effect=rows) as upsert:
+                response = chat_api.presence_heartbeat.__wrapped__()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual([row["scope_id"] for row in response.get_json()["presences"]], ["global", "room-1"])
+        self.assertEqual(upsert.call_count, 2)
+        upsert.assert_any_call("chat", "global", "tab-1")
+        upsert.assert_any_call("chat", "room-1", "tab-1")
+
+    def test_presence_heartbeat_rejects_non_object_json(self):
+        with self.app.test_request_context(
+            "/api/presence/heartbeat",
+            method="POST",
+            json=[],
+        ):
+            with patch.object(chat_api, "current_user", self.user), \
+                    patch.object(chat_api, "_upsert_presence") as upsert:
+                response, status = chat_api.presence_heartbeat.__wrapped__()
+
+        self.assertEqual(status, 400)
+        self.assertIn("JSON object", response.get_json()["error"])
+        upsert.assert_not_called()
 
     def test_presence_status_precedence_uses_active_before_busy(self):
         rows = [
@@ -425,10 +464,12 @@ class TestChatFeature(unittest.TestCase):
             "user-3": {"$id": "user-3", "name": "Other User", "school_key": "other-school"},
         }
         with patch.object(chat_api, "_fresh_presence_rows_by_scope", return_value=rows), \
-                patch.object(chat_api, "get_row_safe", side_effect=lambda _collection, user_id, allow_missing=True: users[user_id]):
+                patch.object(chat_api.database, "list_rows", return_value={"rows": list(users.values())}) as list_users:
             payload = chat_api._online_users_for_channel(channel)
 
         self.assertEqual([user["id"] for user in payload], ["user-2"])
+        self.assertEqual(list_users.call_count, 1)
+        self.assertIs(list_users.call_args.kwargs["include_total"], False)
         self.assertEqual(payload[0]["presence_status"], "busy")
 
     def test_dm_thread_payload_includes_presence_permissions(self):
