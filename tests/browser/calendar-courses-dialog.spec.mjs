@@ -8,7 +8,7 @@ test("courses dialog traps focus, preserves rerender focus, inerts the page, and
         <link rel="stylesheet" href="/static/css/themes.css">
         <link rel="stylesheet" href="/static/css/tailwind.css">
     </head><body>
-        <button id="courses-trigger" type="button">Open courses</button>
+        <button id="calendar-courses" type="button" aria-haspopup="dialog">Courses</button>
         <main id="background"><a href="#elsewhere">Background link</a></main>
     </body></html>`);
     await page.evaluate(async () => {
@@ -96,11 +96,10 @@ test("courses dialog traps focus, preserves rerender focus, inerts the page, and
         const formatters = new Proxy({}, { get: () => (value) => String(value ?? "") });
         window.APStudyCalendarControls.createCalendarControls({ state, callbacks, formatters }).wireControls();
         window.browserCourses = courses;
-        const trigger = document.getElementById("courses-trigger");
-        trigger.focus();
-        courses.openCoursesModal(trigger);
     });
 
+    const trigger = page.getByRole("button", { name: "Courses" });
+    await trigger.click();
     const dialog = page.getByRole("dialog", { name: "Courses" });
     await expect(dialog).toBeVisible();
     const search = dialog.getByRole("textbox", { name: "Search courses" });
@@ -128,7 +127,7 @@ test("courses dialog traps focus, preserves rerender focus, inerts the page, and
 
     await page.keyboard.press("Escape");
     await expect(dialog).toBeHidden();
-    await expect(page.locator("#courses-trigger")).toBeFocused();
+    await expect(trigger).toBeFocused();
     await expect(page.locator("#background")).not.toHaveAttribute("inert", "");
     await expect(page.locator("#background")).not.toHaveAttribute("aria-hidden", "true");
     expect(errors).toEqual([]);

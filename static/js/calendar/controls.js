@@ -77,6 +77,9 @@
                     }
                     openCoursesModal(event.detail?.trigger || document.activeElement);
                 });
+                document.getElementById("calendar-courses")?.addEventListener("click", (event) => {
+                    openCoursesModal(event.currentTarget);
+                });
             }
             document.getElementById("calendar-view-week")?.addEventListener("click", () => {
                 state.view = "week";

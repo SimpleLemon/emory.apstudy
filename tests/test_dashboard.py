@@ -20,10 +20,15 @@ class TestDashboardSummary(unittest.TestCase):
         )
         self.app.secret_key = "test"
         self.app.config["SERVER_NAME"] = "example.test"
+        self.app.jinja_env.filters["avatar_url"] = lambda value, _size: value
         self.app.register_blueprint(dashboard_bp.dashboard_bp)
 
         @self.app.route("/settings/", endpoint="settings.settings_page")
         def _settings_page():
+            return ""
+
+        @self.app.route("/files", endpoint="file_share.file_share_page")
+        def _files_page():
             return ""
 
         self.user = SimpleNamespace(
@@ -50,6 +55,22 @@ class TestDashboardSummary(unittest.TestCase):
                 self.assertIs(dashboard_bp._load_user_settings(), settings)
 
         first_row.assert_called_once()
+
+    def test_authenticated_calendar_route_renders_courses_control(self):
+        with self.app.test_request_context("/calendar"):
+            with patch.object(dashboard_bp, "current_user", self.user), \
+                    patch.object(dashboard_bp, "_load_user_settings", return_value={}), \
+                    patch.object(
+                        dashboard_bp,
+                        "runtime_environment_config",
+                        return_value=SimpleNamespace(calendar_date_buffer_days_raw="7"),
+                    ):
+                response = dashboard_bp.calendar.__wrapped__()
+
+        page = response
+        self.assertIn('id="calendar-courses"', page)
+        self.assertIn('aria-haspopup="dialog"', page)
+        self.assertIn('<span>Courses</span>', page)
 
     def _summary_with_patches(self, *, settings=None, calendar=None, tasks=None, courses=None):
         with self.app.test_request_context("/api/dashboard/summary"):
