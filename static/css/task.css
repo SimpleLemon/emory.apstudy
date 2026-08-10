@@ -529,6 +529,34 @@
     outline: none;
 }
 
+.task-add-primary:has(input[aria-invalid="true"]) {
+    box-shadow: inset 0 0 0 1px var(--color-error, #ba1a1a);
+}
+
+.task-form-error,
+.task-control-error,
+.task-operation-error {
+    margin: 0;
+    color: var(--color-error, #ba1a1a);
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.task-form-error {
+    padding: 0 12px 9px 46px;
+}
+
+.task-control-error {
+    margin-top: 5px;
+}
+
+.task-operation-error {
+    border: 1px solid color-mix(in srgb, var(--color-error, #ba1a1a) 45%, transparent);
+    border-radius: var(--radius-control);
+    background: color-mix(in srgb, var(--color-error, #ba1a1a) 9%, var(--color-surface-container-low, #f7f6f3));
+    padding: 9px 12px;
+}
+
 .task-add-entrybar {
     display: flex;
     flex-wrap: wrap;

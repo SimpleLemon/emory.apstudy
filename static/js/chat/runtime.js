@@ -69,6 +69,7 @@ export function startChatRuntime(extensions = {}) {
   let chatRuntimePaused = false;
   let chatRuntimeDisposed = false;
   let chatRequestController = new AbortController();
+  let loadingMessagesToken = null;
   let roomPrefetchIdleId = null;
   const transientChatTimers = new Set();
   const transientChatFrames = new Set();
@@ -545,7 +546,7 @@ export function startChatRuntime(extensions = {}) {
     return `/api/chat/dm/threads/${encodeURIComponent(room.id)}/messages${suffix}`;
   }
 
-  async function loadMessages({ before = null, after = null, after_message_id = null, force = false, preserveScroll = false, quiet = false, light = false } = {}) {
+  async function loadMessages({ before = null, after = null, after_message_id = null, force = false, preserveScroll = false, quiet = false, light = false, signal = null, roomSelection = null } = {}) {
     const room = state.activeRoom;
     if (!room) return [];
     const cache = cacheFor(room);
@@ -563,12 +564,21 @@ export function startChatRuntime(extensions = {}) {
     const previousTop = els.messages.scrollTop;
     const isDelta = Boolean(after || after_message_id);
     const useLight = light || (quiet && isDelta && !before);
+    const isCurrentRoomLoad = () => Boolean(
+      state.activeRoom
+      && roomKey(state.activeRoom) === roomKey(room)
+      && (!roomSelection || roomSelection.isCurrent?.(state.activeRoom))
+    );
     state.loadingMessages = true;
+    const requestToken = Symbol("chat-message-load");
+    loadingMessagesToken = requestToken;
     if (!quiet && !before && !after && !after_message_id && !cache.loaded) renderMessageLoader();
 
     try {
-      const payload = await fetchJson(currentRoomUrl(room, { before, after, after_message_id }));
-      if (!state.activeRoom || roomKey(state.activeRoom) !== roomKey(room)) return [];
+      const requestSignal = signal || roomSelection?.signal || null;
+      const requestOptions = requestSignal ? { signal: requestSignal } : {};
+      const payload = await fetchJson(currentRoomUrl(room, { before, after, after_message_id }), requestOptions);
+      if (!isCurrentRoomLoad()) return [];
 
       const messages = payload.messages || [];
       const previousMessages = cache.messages;
@@ -623,10 +633,15 @@ export function startChatRuntime(extensions = {}) {
       }
       return messages;
     } catch (error) {
-      setStatus(error.message || "Unable to load messages.", "error");
+      if (error?.name !== "AbortError" && isCurrentRoomLoad()) {
+        setStatus(error.message || "Unable to load messages.", "error");
+      }
       return [];
     } finally {
-      state.loadingMessages = false;
+      if (loadingMessagesToken === requestToken) {
+        state.loadingMessages = false;
+        loadingMessagesToken = null;
+      }
     }
   }
 
@@ -809,6 +824,7 @@ export function startChatRuntime(extensions = {}) {
     }
 
     clearTypingPresence();
+    cancelRoomSelection();
     resetRealtimeConnection();
     stopRealtimeFallback();
     stopRealtimeHeartbeat();
@@ -925,6 +941,7 @@ export function startChatRuntime(extensions = {}) {
     bindDmEvents: bindRoomDmEvents,
     bindShellEvents: bindRoomShellEvents,
     cancelUnreadSummaryRefresh,
+    cancelRoomSelection,
     channelIsPending,
     channelIsWritable,
     clearRoomUnread,
@@ -958,6 +975,7 @@ export function startChatRuntime(extensions = {}) {
     channelIsPending,
     channelIsWritable,
     clearTypingPresence,
+    cancelRoomSelection,
     closeInlineProfilePopover,
     closeRoomContextMenu,
     clearRoomUnread,
@@ -992,6 +1010,7 @@ export function startChatRuntime(extensions = {}) {
     renderHeader,
     renderMembers,
     renderApprovalNotice,
+    renderMessageLoader,
     profileMarkup,
     registerKnownUser,
     showMemberProfile,

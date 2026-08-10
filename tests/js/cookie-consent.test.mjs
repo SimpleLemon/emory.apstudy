@@ -1,3 +1,5 @@
+/* global console */
+
 import assert from "node:assert/strict";
 import test from "node:test";
 import vm from "node:vm";
@@ -41,7 +43,7 @@ class FakeElement {
     }
 }
 
-function createHarness({ stored = null, cookie = "", dnt = "0", mode = "public-choice", measurementId = "G-0NT330ZX5L" } = {}) {
+function createHarness({ stored = null, cookie = "", dnt = "0", mode = "public-choice", measurementId = "G-0NT330ZX5L", existingRoot = false } = {}) {
     const values = new Map();
     if (stored !== null) values.set("apstudy_cookie_consent", stored);
     const cookieWrites = [];
@@ -58,6 +60,11 @@ function createHarness({ stored = null, cookie = "", dnt = "0", mode = "public-c
     };
     document.head = new FakeElement("head", document);
     document.body = new FakeElement("body", document);
+    if (existingRoot) {
+        const root = document.createElement("div");
+        root.id = "apstudy-consent-root";
+        document.body.appendChild(root);
+    }
     document.body.dataset.analyticsMode = mode;
     document.body.dataset.analyticsMeasurementId = measurementId;
     Object.defineProperty(document, "cookie", {
@@ -92,7 +99,7 @@ function createHarness({ stored = null, cookie = "", dnt = "0", mode = "public-c
         CustomEvent: class CustomEvent { constructor(type, options) { this.type = type; this.detail = options?.detail; } },
     });
     vm.runInContext(source, context);
-    return { window, document, values, cookieWrites, listeners, reloads: () => reloads };
+    return { window, document, values, cookieWrites, listeners, context, reloads: () => reloads };
 }
 
 function decision(choice, ageMs = 0) {
@@ -208,6 +215,16 @@ test("first visit opens a closable anchored consent dialog without loading analy
     assert.match(source, /class="apstudy-consent-settings__icon"/);
     assert.match(source, /aria-expanded="false" aria-controls="apstudy-consent-dialog" aria-label="Open cookie settings"/);
     assert.doesNotMatch(source, /aria-modal="true"/);
+});
+
+test("consent initialization reuses an existing root and has one delegated binding", () => {
+    const harness = createHarness({ existingRoot: true });
+    vm.runInContext(source, harness.context);
+
+    assert.equal(harness.document.body.children.length, 1);
+    assert.match(source, /let root = document\.getElementById\("apstudy-consent-root"\)/);
+    assert.match(source, /root\.dataset\.apstudyConsentBound === "true"/);
+    assert.match(source, /href="\/privacy-policy#cookie-policy"/);
 });
 
 test("full templates declare authenticated, public-choice, hybrid, or off analytics modes", async () => {

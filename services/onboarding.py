@@ -1,6 +1,30 @@
 """Step handlers for the settings onboarding flow."""
 
 
+DISPLAY_NAME_MIN_LENGTH = 1
+DISPLAY_NAME_MAX_LENGTH = 80
+SCHOOL_MAX_LENGTH = 160
+MAJOR_MAX_LENGTH = 120
+
+
+def validate_trimmed_profile_text(value, label, *, minimum=0, maximum):
+    """Validate text fields by trimmed Unicode code-point length."""
+    if not isinstance(value, str):
+        raise ValueError(f"{label} must be text.")
+
+    normalized = value.strip()
+    length = len(normalized)
+    if length < minimum:
+        raise ValueError(f"{label} is required.")
+    if length > maximum:
+        if minimum:
+            raise ValueError(
+                f"{label} must be between {minimum} and {maximum} characters."
+            )
+        raise ValueError(f"{label} must be {maximum} characters or fewer.")
+    return normalized
+
+
 def save_onboarding_step_one(payload, user, user_id, dependencies):
     """Persist the user's display name and username."""
     AppwriteException = dependencies["AppwriteException"]
@@ -11,9 +35,15 @@ def save_onboarding_step_one(payload, user, user_id, dependencies):
     username_is_taken = dependencies["username_is_taken"]
     validate_username = dependencies["validate_username"]
 
-    display_name = (payload.get("display_name") or "").strip()
-    if not display_name:
-        return jsonify({"error": "Display name is required."}), 400
+    try:
+        display_name = validate_trimmed_profile_text(
+            payload.get("display_name", ""),
+            "Display name",
+            minimum=DISPLAY_NAME_MIN_LENGTH,
+            maximum=DISPLAY_NAME_MAX_LENGTH,
+        )
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
 
     try:
         username = validate_username(payload.get("username"))
@@ -60,10 +90,35 @@ def save_onboarding_step_two(payload, user, user_id, dependencies):
     if not education_level:
         return jsonify({"error": "Select an education level before continuing."}), 400
 
-    class_year = (payload.get("class_year") or "").strip() or None
+    class_year_value = payload.get("class_year", "")
+    if class_year_value is None:
+        class_year_value = ""
+    if not isinstance(class_year_value, str):
+        return jsonify({"error": "Class year must be text."}), 400
+    class_year = class_year_value.strip() or None
     emory_student = normalize_emory_student(payload.get("emory_student"))
     emory_email = payload.get("emory_email")
     school_updates = school_payload(None)
+
+    school_value = payload.get("school", "")
+    major_value = payload.get("major", "")
+    if school_value is None:
+        school_value = ""
+    if major_value is None:
+        major_value = ""
+    try:
+        school = validate_trimmed_profile_text(
+            school_value,
+            "School",
+            maximum=SCHOOL_MAX_LENGTH,
+        )
+        major = validate_trimmed_profile_text(
+            major_value,
+            "Major",
+            maximum=MAJOR_MAX_LENGTH,
+        ) or None
+    except ValueError as error:
+        return jsonify({"error": str(error)}), 400
 
     if education_level in {"High School", "Undergraduate"}:
         if not class_year or len(class_year) != 4 or not class_year.isdigit():
@@ -82,7 +137,7 @@ def save_onboarding_step_two(payload, user, user_id, dependencies):
             school_updates = school_payload("Emory University")
         else:
             emory_email = None
-            school_updates = school_payload(payload.get("school"))
+            school_updates = school_payload(school)
     else:
         emory_student = None
         emory_email = None
@@ -99,6 +154,7 @@ def save_onboarding_step_two(payload, user, user_id, dependencies):
                 "emory_student": emory_student,
                 "emory_email": emory_email,
                 **school_updates,
+                "major": major,
                 "onboarding_step": next_step,
             },
         )
@@ -113,6 +169,7 @@ def save_onboarding_step_two(payload, user, user_id, dependencies):
     user.school_key = school_updates.get("school_key")
     user.school_source = school_updates.get("school_source")
     user.scorecard_id = school_updates.get("scorecard_id")
+    user.major = major
     user.onboarding_step = next_step
     sync_chat_presence_labels_for_user(user_id)
     return jsonify({"status": "ok", "next_step": next_step})

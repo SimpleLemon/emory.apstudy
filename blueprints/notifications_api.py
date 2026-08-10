@@ -104,7 +104,7 @@ def sync_foreground():
     active = bool(payload.get("active"))
     device_class = str(payload.get("device_class") or "")
     try:
-        is_active = notifications.touch_web_presence(
+        result = notifications.sync_foreground_state(
             current_user.id,
             payload.get("tab_id"),
             active=active,
@@ -112,10 +112,9 @@ def sync_foreground():
         )
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
-    if not is_active:
-        return jsonify({"ok": True, "active": False})
-    result = notifications.list_feed(current_user.id, limit=50)
-    prefs = notifications.preferences(current_user.id)
+    if not result["active"]:
+        return jsonify(result)
+    prefs = result.pop("preferences")
     focus_active = False
     try:
         from services.focus_mode import is_focus_mode_active
@@ -129,8 +128,6 @@ def sync_foreground():
             notifications.category_delivery_enabled(item.get("category"), prefs)
             and (not focus_active or urgent)
         )
-    result["pending_foreground_ids"] = notifications.pending_foreground_ids(current_user.id)
-    result["active"] = True
     result["focus_mode_active"] = focus_active
     return jsonify(result)
 

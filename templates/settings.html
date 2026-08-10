@@ -164,7 +164,9 @@
                                         <div class="settings-field-grid settings-field-grid-vertical">
                                             <label class="settings-field">
                                                 <span class="settings-field-label">Display Name</span>
-                                                <input id="settings-display-name" name="display_name" type="text" autocomplete="name" placeholder="Your name" />
+                                                <input id="settings-display-name" name="display_name" type="text" autocomplete="name" placeholder="Your name" aria-describedby="settings-display-name-counter settings-display-name-error" />
+                                                <span id="settings-display-name-counter" class="settings-help-text">0 / 80 characters</span>
+                                                <span id="settings-display-name-error" class="settings-help-text" role="alert" hidden></span>
                                             </label>
                                             <label class="settings-field">
                                                 <span class="settings-field-label">Username</span>
@@ -186,7 +188,9 @@
                                             </label>
                                             <label class="settings-field">
                                                 <span class="settings-field-label">School</span>
-                                                <input id="settings-school" name="school" type="text" autocomplete="organization" placeholder="Nest University" list="settings-university-options" />
+                                                <input id="settings-school" name="school" type="text" autocomplete="organization" placeholder="Nest University" list="settings-university-options" aria-describedby="settings-school-counter settings-school-error" />
+                                                <span id="settings-school-counter" class="settings-help-text">0 / 160 characters</span>
+                                                <span id="settings-school-error" class="settings-help-text" role="alert" hidden></span>
                                                 <datalist id="settings-university-options"></datalist>
                                             </label>
                                             <label class="settings-field">
@@ -195,7 +199,9 @@
                                             </label>
                                             <label class="settings-field settings-field-wide">
                                                 <span class="settings-field-label">Major / Intended Major</span>
-                                                <input id="settings-major" name="major" type="text" autocomplete="off" placeholder="Computer Science" />
+                                                <input id="settings-major" name="major" type="text" autocomplete="off" placeholder="Computer Science" aria-describedby="settings-major-counter settings-major-error" />
+                                                <span id="settings-major-counter" class="settings-help-text">0 / 120 characters</span>
+                                                <span id="settings-major-error" class="settings-help-text" role="alert" hidden></span>
                                             </label>
                                         </div>
                                     </div>

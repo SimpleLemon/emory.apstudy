@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { getFloatingPosition } from "./task-floating.js";
+import { getFloatingPosition, shouldCloseFloatingLayer } from "./task-floating.js";
 
 const h = React.createElement;
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -57,20 +57,22 @@ function displayDate(value, placeholder) {
     return date ? date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" }) : placeholder;
 }
 
-export function TaskListbox({ value, options, onChange, label, disabled = false, className = "" }) {
+export function TaskListbox({ value, options, onChange, label, disabled = false, className = "", floatingOwner = "" }) {
     const [open, setOpen] = React.useState(false);
     const rootRef = React.useRef(null);
     const triggerRef = React.useRef(null);
     const listRef = React.useRef(null);
     const listId = React.useId();
+    const errorId = React.useId();
+    const [saving, setSaving] = React.useState(false);
+    const [error, setError] = React.useState("");
     const selectedIndex = Math.max(0, options.findIndex((option) => option.value === value));
     const selected = options[selectedIndex] || options[0];
 
     React.useEffect(() => {
         if (!open) return undefined;
         const closeOutside = (event) => {
-            if (rootRef.current?.contains(event.target) || listRef.current?.contains(event.target)) return;
-            setOpen(false);
+            if (shouldCloseFloatingLayer(event, { layers: [rootRef.current, listRef.current] })) setOpen(false);
         };
         document.addEventListener("pointerdown", closeOutside);
         return () => document.removeEventListener("pointerdown", closeOutside);
@@ -113,10 +115,22 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
         listRef.current?.querySelector(`[data-option-index="${selectedIndex}"]`)?.focus({ preventScroll: true });
     }, [open, selectedIndex]);
 
-    const choose = (option) => {
-        onChange(option.value);
-        setOpen(false);
-        triggerRef.current?.focus({ preventScroll: true });
+    const choose = async (option) => {
+        setError("");
+        setSaving(true);
+        try {
+            const result = await onChange(option.value);
+            if (result?.ok === false) {
+                setError(result.error || "Unable to update this field. Try again.");
+                return;
+            }
+            setOpen(false);
+            triggerRef.current?.focus({ preventScroll: true });
+        } catch (err) {
+            setError(err.message || "Unable to update this field. Try again.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const onListKeyDown = (event) => {
@@ -142,6 +156,7 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
         role: "listbox",
         "aria-label": label,
         "data-task-floating-layer": "listbox",
+        "data-task-floating-owner": floatingOwner || undefined,
         "data-task-listbox-menu": "true",
         onKeyDown: onListKeyDown,
         style: {
@@ -157,23 +172,26 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
         className: cx(option.value === value && "is-selected"),
         "aria-selected": String(option.value === value),
         "data-option-index": index,
-        onClick: () => choose(option),
+        disabled: saving,
+        onClick: () => { void choose(option); },
     },
         h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, option.value === value ? "check" : option.icon || "radio_button_unchecked"),
         h("span", null, option.label)
     ))) : null;
 
-    return h("div", { ref: rootRef, className: cx("task-custom-select", className, open && "is-open") },
+    return h("div", { ref: rootRef, className: cx("task-custom-select", className, open && "is-open", error && "has-error") },
         h("button", {
             ref: triggerRef,
             type: "button",
             className: "task-custom-select-trigger",
-            disabled,
+            disabled: disabled || saving,
             role: "combobox",
             "aria-label": label,
             "aria-haspopup": "listbox",
             "aria-expanded": String(open),
             "aria-controls": listId,
+            "aria-invalid": error ? "true" : undefined,
+            "aria-describedby": error ? errorId : undefined,
             onClick: () => setOpen((current) => !current),
             onKeyDown: (event) => {
                 if (["ArrowDown", "ArrowUp", "Enter", " "].includes(event.key)) {
@@ -185,6 +203,7 @@ export function TaskListbox({ value, options, onChange, label, disabled = false,
             h("span", null, selected?.label || "Select"),
             h("span", { className: "material-symbols-outlined", "aria-hidden": "true" }, "expand_more")
         ),
+        error ? h("p", { id: errorId, className: "task-control-error", role: "alert" }, error) : null,
         menu && (document.body ? createPortal(menu, document.body) : menu)
     );
 }
@@ -260,7 +279,7 @@ export function TaskCalendar({ value, onChange, label = "Choose date" }) {
     );
 }
 
-export function TaskDatePicker({ value, onChange, label, placeholder = "Choose date", disabled = false }) {
+export function TaskDatePicker({ value, onChange, label, placeholder = "Choose date", disabled = false, floatingOwner = "" }) {
     const [open, setOpen] = React.useState(false);
     const rootRef = React.useRef(null);
     const triggerRef = React.useRef(null);
@@ -270,8 +289,7 @@ export function TaskDatePicker({ value, onChange, label, placeholder = "Choose d
     React.useEffect(() => {
         if (!open) return undefined;
         const closeOutside = (event) => {
-            if (rootRef.current?.contains(event.target) || menuRef.current?.contains(event.target)) return;
-            setOpen(false);
+            if (shouldCloseFloatingLayer(event, { layers: [rootRef.current, menuRef.current] })) setOpen(false);
         };
         document.addEventListener("pointerdown", closeOutside);
         return () => document.removeEventListener("pointerdown", closeOutside);
@@ -310,6 +328,7 @@ export function TaskDatePicker({ value, onChange, label, placeholder = "Choose d
         role: "dialog",
         "aria-label": label,
         "data-task-floating-layer": "date-picker",
+        "data-task-floating-owner": floatingOwner || undefined,
         style: {
             top: `${position.ready ? position.top : 0}px`,
             left: `${position.ready ? position.left : 0}px`,

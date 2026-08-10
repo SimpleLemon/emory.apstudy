@@ -1,5 +1,6 @@
 import tempfile
 import unittest
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import patch
@@ -78,6 +79,58 @@ def test_course_notification_and_email_channels_are_independent():
             )
             assert neither["course_push_enabled"] is False
             assert neither["course_email_enabled"] is False
+    finally:
+        Path(path).unlink(missing_ok=True)
+
+
+def test_foreground_sync_combines_reads_and_bounds_query_count():
+    app, path = notification_app()
+    statements = []
+    original_connection = notifications.db_connection
+
+    @contextmanager
+    def tracked_connection():
+        with original_connection() as conn:
+            conn.set_trace_callback(statements.append)
+            yield conn
+
+    try:
+        with app.app_context():
+            notifications.update_preferences("u1", {"dm_enabled": False})
+            notifications.create_feed_item("u1", "calendar", "Exam", "Soon", "/dashboard")
+            with patch.object(notifications, "db_connection", tracked_connection):
+                result = notifications.sync_foreground_state(
+                    "u1", "tab-1", active=True, device_class="desktop_tablet",
+                )
+
+        data_statements = [
+            statement for statement in statements
+            if statement.lstrip().upper().startswith(("SELECT", "INSERT", "UPDATE", "DELETE"))
+        ]
+        assert result["active"] is True
+        assert result["unread_count"] == 1
+        assert result["preferences"]["dm_enabled"] is False
+        assert len(data_statements) <= 4
+    finally:
+        Path(path).unlink(missing_ok=True)
+
+
+def test_web_presence_skips_redundant_writes_inside_refresh_window():
+    app, path = notification_app()
+    try:
+        with app.app_context(), notifications.db_connection() as conn:
+            first = datetime(2026, 7, 11, 12, 0, tzinfo=timezone.utc)
+            notifications._touch_web_presence(
+                conn, "u1", "tab-1", True, "desktop_tablet", now=first,
+            )
+            notifications._touch_web_presence(
+                conn, "u1", "tab-1", True, "desktop_tablet",
+                now=first.replace(microsecond=500000),
+            )
+            row = conn.execute(
+                "SELECT last_seen_at FROM notification_web_presence WHERE user_id='u1' AND tab_id='tab-1'"
+            ).fetchone()
+        assert row["last_seen_at"] == "2026-07-11T12:00:00Z"
     finally:
         Path(path).unlink(missing_ok=True)
 

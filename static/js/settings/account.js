@@ -54,7 +54,7 @@
           }),
           restore: () => {},
           onUndo: () => showToast('Your account was kept.', 'success'),
-          onCommit: () => global.location.assign('/logout'),
+          onCommit: () => global.APStudyAuth?.logout?.(),
           errorTitle: 'Couldn’t delete account',
         });
         return;
@@ -62,7 +62,10 @@
 
       try {
         await fetchJson(endpoints.deleteAccount, { method: 'POST' });
-        global.location.assign('/logout');
+        if (typeof global.APStudyAuth?.logout !== 'function') {
+          throw new Error('Logout service is unavailable. Refresh the page and sign out.');
+        }
+        await global.APStudyAuth.logout();
       } catch (error) {
         showToast(error.message || 'Try again in a moment.', 'error', { title: 'Couldn’t delete account' });
       }

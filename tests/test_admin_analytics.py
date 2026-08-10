@@ -301,6 +301,51 @@ class AdminAnalyticsServiceTestCase(unittest.TestCase):
         self.assertEqual(may_second["value"], 1)
         self.assertEqual(payload["sources"]["featureUsage"]["label"], "Nest database")
 
+    def test_authenticated_activity_limits_writes_to_once_per_minute(self):
+        first = datetime(2026, 5, 3, 2, 10, tzinfo=timezone.utc)
+        self.assertTrue(admin_analytics.record_authenticated_activity("user-1", at=first, path=self.db_path))
+        self.assertFalse(admin_analytics.record_authenticated_activity(
+            "user-1",
+            at=datetime(2026, 5, 3, 2, 10, 30, tzinfo=timezone.utc),
+            path=self.db_path,
+        ))
+        self.assertTrue(admin_analytics.record_authenticated_activity(
+            "user-1",
+            at=datetime(2026, 5, 3, 2, 11, tzinfo=timezone.utc),
+            path=self.db_path,
+        ))
+        self.assertTrue(admin_analytics.record_authenticated_activity(
+            "boundary-user",
+            at=datetime(2026, 5, 3, 2, 59, 30, tzinfo=timezone.utc),
+            path=self.db_path,
+        ))
+        self.assertFalse(admin_analytics.record_authenticated_activity(
+            "boundary-user",
+            at=datetime(2026, 5, 3, 3, 0, tzinfo=timezone.utc),
+            path=self.db_path,
+        ))
+        with database.db_connection(self.db_path) as conn:
+            rows = conn.execute(
+                "SELECT last_seen_at FROM user_activity_buckets WHERE user_id='user-1'"
+            ).fetchall()
+            boundary_rows = conn.execute(
+                "SELECT last_seen_at FROM user_activity_buckets WHERE user_id='boundary-user'"
+            ).fetchall()
+        self.assertEqual([row["last_seen_at"] for row in rows], ["2026-05-03T02:11:00Z"])
+        self.assertEqual(
+            [row["last_seen_at"] for row in boundary_rows],
+            ["2026-05-03T02:59:30Z"],
+        )
+
+    def test_authenticated_activity_excludes_realtime_polling_paths(self):
+        app = Flask(__name__)
+        with app.test_request_context("/api/notifications/sync", method="POST"), \
+                patch.object(admin_analytics.database, "db_connection") as connect:
+            recorded = admin_analytics.record_authenticated_activity("user-1")
+
+        self.assertFalse(recorded)
+        connect.assert_not_called()
+
     def test_ga4_defaults_to_nest_property_and_filters_hostname(self):
         def fake_row(dimensions, metrics):
             return SimpleNamespace(

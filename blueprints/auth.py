@@ -130,6 +130,13 @@ AUTH_ERROR_MESSAGE = "We couldn't complete sign-in. Please try again."
 def _sanitize_log_text(value, limit=500):
     text = str(value or "")
     text = re.sub(r"((?:[?&]|\b)(?:secret|key|token)=)[^&\s]+", r"\1[redacted]", text, flags=re.IGNORECASE)
+    text = re.sub(r"(Bearer\s+)[^\s,;]+", r"\1[redacted]", text, flags=re.IGNORECASE)
+    text = re.sub(
+        r"((?:access[_-]?token|api[_-]?key|secret|token)\s*[:=]\s*)[^\s,;]+",
+        r"\1[redacted]",
+        text,
+        flags=re.IGNORECASE,
+    )
     text = re.sub(r"<(script|style)[^>]*>.*?</\1>", " ", text, flags=re.IGNORECASE | re.DOTALL)
     text = re.sub(r"<[^>]+>", " ", text)
     text = html.unescape(text)
@@ -788,6 +795,40 @@ def _complete_appwrite_login(
     provider_uid=None,
     page_context="auth/session",
 ):
+    # Provider display names initialize a new profile, but never override a
+    # non-empty name the person has already chosen in Nest.
+    remote_user = dict(remote_user or {})
+    preserve_existing_name = False
+
+    def has_custom_name(user_doc):
+        return isinstance(user_doc, dict) and bool(str(user_doc.get("name") or "").strip())
+
+    def get_user_document(*args, **kwargs):
+        nonlocal preserve_existing_name
+        user_doc = get_row_safe(*args, **kwargs)
+        if has_custom_name(user_doc):
+            preserve_existing_name = True
+            remote_user["name"] = None
+            remote_user["displayName"] = None
+        return user_doc
+
+    def find_user_document(*args, **kwargs):
+        nonlocal preserve_existing_name
+        user_doc = _find_user_by_email(*args, **kwargs)
+        if has_custom_name(user_doc):
+            preserve_existing_name = True
+            remote_user["name"] = None
+            remote_user["displayName"] = None
+        return user_doc
+
+    def fetch_provider_profile(provider_name, access_token):
+        profile = _fetch_provider_profile(provider_name, access_token) or {}
+        if not preserve_existing_name:
+            return profile
+        sanitized_profile = dict(profile)
+        sanitized_profile.pop("name", None)
+        return sanitized_profile
+
     return auth_session._complete_appwrite_login(
         remote_user,
         provider=provider,
@@ -797,12 +838,12 @@ def _complete_appwrite_login(
         page_context=page_context,
         dependencies={
             "collections": COLLECTIONS,
-            "get_row_safe": get_row_safe,
-            "find_user_by_email": _find_user_by_email,
+            "get_row_safe": get_user_document,
+            "find_user_by_email": find_user_document,
             "provider_access_token_from_identities": (
                 _provider_access_token_from_identities
             ),
-            "fetch_provider_profile": _fetch_provider_profile,
+            "fetch_provider_profile": fetch_provider_profile,
             "provider_avatar_url": _provider_avatar_url,
             "log_avatar_collection": _log_avatar_collection,
             "resolve_discord_link_identity": _resolve_discord_link_identity,
@@ -1246,10 +1287,19 @@ def appwrite_session():
         else:
             provider_identity = _fetch_provider_identity(provider, provider_access_token)
             if not provider_identity:
+                logger.warning(
+                    "Provider session verification failed: provider=%s has_access_token=%s",
+                    _sanitize_log_text(provider, limit=32),
+                    bool(provider_access_token),
+                )
                 return jsonify({"error": "Invalid provider session."}), 401
             remote_user = _account_from_user_id(user_id)
-    except Exception:
-        logger.exception("Failed to verify Appwrite session")
+    except Exception as exc:
+        logger.warning(
+            "Provider session verification failed: provider=%s error=%s",
+            _sanitize_log_text(provider, limit=32),
+            _sanitize_log_text(exc, limit=160),
+        )
         return jsonify({"error": "Invalid Appwrite user."}), 401
 
     remote_user_id = remote_user.get("$id") or remote_user.get("id")
@@ -1258,16 +1308,29 @@ def appwrite_session():
         return jsonify({"error": "Invalid Appwrite user."}), 401
     provider_email = (provider_identity or {}).get("email") or ""
     if not jwt and not provider_email:
-        logger.warning("Provider token did not expose an email during session exchange: %s", provider)
+        logger.warning(
+            "Provider identity did not expose an email: provider=%s has_access_token=%s",
+            _sanitize_log_text(provider, limit=32),
+            bool(provider_access_token),
+        )
         return jsonify({"error": "Provider email is required."}), 401
     if provider_email and remote_email and provider_email.lower() != remote_email.lower():
-        logger.warning("Provider/Appwrite email mismatch during session exchange: %s vs %s", provider_email, remote_email)
+        logger.warning(
+            "Provider/Appwrite email mismatch during session exchange: provider=%s",
+            _sanitize_log_text(provider, limit=32),
+        )
         return jsonify({"error": "Email mismatch."}), 401
     if user_id and str(user_id) != str(remote_user_id):
-        logger.warning("User id mismatch during Appwrite session exchange: %s vs %s", user_id, remote_user_id)
+        logger.warning(
+            "Provider/Appwrite user ID mismatch during session exchange: provider=%s",
+            _sanitize_log_text(provider, limit=32),
+        )
         return jsonify({"error": "User mismatch."}), 401
     if email and remote_email and email.lower() != remote_email.lower():
-        logger.warning("Email mismatch during Appwrite session exchange: %s vs %s", email, remote_email)
+        logger.warning(
+            "Appwrite session email mismatch during session exchange: provider=%s",
+            _sanitize_log_text(provider, limit=32),
+        )
         return jsonify({"error": "Email mismatch."}), 401
 
     if not email:
@@ -1297,6 +1360,12 @@ def appwrite_session():
     )
     response.delete_cookie(INVITE_COOKIE, path="/")
     return response
+
+
+@auth_bp.route("/logout", methods=["GET"])
+def logout_redirect():
+    """Keep legacy GET links safe; only POST mutates an authenticated session."""
+    return redirect(url_for("auth.login"))
 
 
 @auth_bp.route("/logout", methods=["POST"])

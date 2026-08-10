@@ -25,6 +25,7 @@ BOOL_FIELDS = {key for key, value in DEFAULT_PREFERENCES.items() if isinstance(v
 ALLOWED_LEADS = {5, 10, 30, 60, 1440, 10080}
 FOREGROUND_PRESENCE_SECONDS = 15
 FOREGROUND_FALLBACK_SECONDS = 20
+FOREGROUND_PRESENCE_WRITE_SECONDS = 5
 CATEGORY_PREFERENCE_FIELDS = {
     "calendar": "calendar_enabled",
     "courses": "course_push_enabled",
@@ -62,13 +63,7 @@ def push_configuration():
     }
 
 
-def preferences(user_id):
-    try:
-        with db_connection() as conn:
-            row = conn.execute("SELECT * FROM notification_preferences WHERE user_id = ?", [str(user_id)]).fetchone()
-    except sqlite3.OperationalError:
-        # Test/upgrade-safe fallback while an older database is awaiting migrations.
-        return dict(DEFAULT_PREFERENCES)
+def _preferences_from_row(row):
     if not row:
         return dict(DEFAULT_PREFERENCES)
     payload = dict(DEFAULT_PREFERENCES)
@@ -80,6 +75,16 @@ def preferences(user_id):
         pass
     payload["all_day_previous_time"] = row["all_day_previous_time"] or "18:00"
     return payload
+
+
+def preferences(user_id):
+    try:
+        with db_connection() as conn:
+            row = conn.execute("SELECT * FROM notification_preferences WHERE user_id = ?", [str(user_id)]).fetchone()
+    except sqlite3.OperationalError:
+        # Test/upgrade-safe fallback while an older database is awaiting migrations.
+        return dict(DEFAULT_PREFERENCES)
+    return _preferences_from_row(row)
 
 
 def update_preferences(user_id, updates):
@@ -207,8 +212,28 @@ def list_feed(user_id, *, category=None, unread=False, status=None, search=None,
         args.append(before)
     limit = min(max(int(limit), 1), 100)
     with db_connection() as conn:
-        rows = conn.execute(f"SELECT * FROM user_notifications WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT ?", [*args, limit]).fetchall()
-    return {"notifications": [dict(row) for row in rows], "unread_count": unread_count(user_id), "next_cursor": rows[-1]["created_at"] if len(rows) == limit else None}
+        rows = conn.execute(
+            f"""SELECT user_notifications.*,
+                       (SELECT COUNT(*) FROM user_notifications AS unread
+                        WHERE unread.user_id=? AND unread.is_read=0 AND unread.deleted_at IS NULL)
+                       AS _unread_count
+                FROM user_notifications
+                WHERE {' AND '.join(clauses)}
+                ORDER BY created_at DESC LIMIT ?""",
+            [str(user_id), *args, limit],
+        ).fetchall()
+        count = int(rows[0]["_unread_count"] or 0) if rows else int(
+            conn.execute(
+                "SELECT COUNT(*) FROM user_notifications WHERE user_id=? AND is_read=0 AND deleted_at IS NULL",
+                [str(user_id)],
+            ).fetchone()[0]
+        )
+    items = []
+    for row in rows:
+        item = dict(row)
+        item.pop("_unread_count", None)
+        items.append(item)
+    return {"notifications": items, "unread_count": count, "next_cursor": rows[-1]["created_at"] if len(rows) == limit else None}
 
 
 def mutate_feed(user_id, ids=None, *, read=None, delete=False, category=None):
@@ -263,22 +288,90 @@ def focus_delivery_enabled(user_id, category):
         return True
 
 
-def touch_web_presence(user_id, tab_id, *, active, device_class):
+def _web_presence_values(user_id, tab_id, active, device_class):
     tab_id = "".join(character for character in str(tab_id or "") if character.isalnum() or character in "_-")[:64]
     if not tab_id:
         raise ValueError("Missing notification tab identifier.")
     device_class = str(device_class or "")[:32]
     is_active = bool(active and device_class == "desktop_tablet")
-    now = _now()
-    with db_connection() as conn:
-        conn.execute(
-            """INSERT INTO notification_web_presence (id,user_id,tab_id,device_class,is_active,last_seen_at)
-               VALUES (?,?,?,?,?,?)
-               ON CONFLICT(user_id,tab_id) DO UPDATE SET
-               device_class=excluded.device_class,is_active=excluded.is_active,last_seen_at=excluded.last_seen_at""",
-            [_id(), str(user_id), tab_id, device_class, int(is_active), now],
-        )
+    return str(user_id), tab_id, device_class, is_active
+
+
+def _touch_web_presence(conn, user_id, tab_id, active, device_class, *, now=None):
+    user_id, tab_id, device_class, is_active = _web_presence_values(
+        user_id, tab_id, active, device_class,
+    )
+    now_dt = now or datetime.now(timezone.utc)
+    now_iso = now_dt.isoformat().replace("+00:00", "Z")
+    write_cutoff = (now_dt - timedelta(seconds=FOREGROUND_PRESENCE_WRITE_SECONDS)).isoformat().replace("+00:00", "Z")
+    conn.execute(
+        """INSERT INTO notification_web_presence (id,user_id,tab_id,device_class,is_active,last_seen_at)
+           VALUES (?,?,?,?,?,?)
+           ON CONFLICT(user_id,tab_id) DO UPDATE SET
+           device_class=excluded.device_class,is_active=excluded.is_active,last_seen_at=excluded.last_seen_at
+           WHERE notification_web_presence.device_class != excluded.device_class
+              OR notification_web_presence.is_active != excluded.is_active
+              OR notification_web_presence.last_seen_at <= ?""",
+        [_id(), user_id, tab_id, device_class, int(is_active), now_iso, write_cutoff],
+    )
     return is_active
+
+
+def touch_web_presence(user_id, tab_id, *, active, device_class):
+    with db_connection() as conn:
+        return _touch_web_presence(conn, user_id, tab_id, active, device_class)
+
+
+def sync_foreground_state(user_id, tab_id, *, active, device_class, limit=50):
+    """Touch foreground presence and read sync state in one transaction."""
+    user_id = str(user_id)
+    limit = min(max(int(limit), 1), 100)
+    with db_connection() as conn:
+        is_active = _touch_web_presence(conn, user_id, tab_id, active, device_class)
+        if not is_active:
+            return {"ok": True, "active": False}
+        rows = conn.execute(
+            """SELECT user_notifications.*,
+                      (SELECT COUNT(*) FROM user_notifications AS unread
+                       WHERE unread.user_id=? AND unread.is_read=0 AND unread.deleted_at IS NULL)
+                      AS _unread_count
+               FROM user_notifications
+               WHERE user_id=? AND deleted_at IS NULL
+               ORDER BY created_at DESC LIMIT ?""",
+            [user_id, user_id, limit],
+        ).fetchall()
+        unread = int(rows[0]["_unread_count"] or 0) if rows else int(
+            conn.execute(
+                "SELECT COUNT(*) FROM user_notifications WHERE user_id=? AND is_read=0 AND deleted_at IS NULL",
+                [user_id],
+            ).fetchone()[0]
+        )
+        try:
+            preference_row = conn.execute(
+                "SELECT * FROM notification_preferences WHERE user_id=?",
+                [user_id],
+            ).fetchone()
+        except sqlite3.OperationalError:
+            preference_row = None
+        pending = conn.execute(
+            """SELECT notification_id FROM notification_foreground_queue
+               WHERE user_id=? AND acknowledged_at IS NULL AND fallback_at IS NULL
+               ORDER BY created_at DESC LIMIT 100""",
+            [user_id],
+        ).fetchall()
+    items = []
+    for row in rows:
+        item = dict(row)
+        item.pop("_unread_count", None)
+        items.append(item)
+    return {
+        "notifications": items,
+        "unread_count": unread,
+        "next_cursor": rows[-1]["created_at"] if len(rows) == limit else None,
+        "pending_foreground_ids": [str(row["notification_id"]) for row in pending],
+        "preferences": _preferences_from_row(preference_row),
+        "active": True,
+    }
 
 
 def has_active_web_session(user_id, *, now=None):

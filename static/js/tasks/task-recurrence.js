@@ -8,7 +8,7 @@ function cx(...parts) {
     return parts.filter(Boolean).join(" ");
 }
 
-export function RecurrenceFields({ recurrence, onChange, compact = false }) {
+export function RecurrenceFields({ recurrence, onChange, compact = false, floatingOwner = "" }) {
     const update = (updates) => {
         const next = { ...recurrence, ...updates };
         if (next.endDate && next.startDate && next.endDate < next.startDate) next.endDate = next.startDate;
@@ -39,6 +39,7 @@ export function RecurrenceFields({ recurrence, onChange, compact = false }) {
                 value: recurrence.unit || "week",
                 options: REPEAT_UNITS,
                 label: "Repeat unit",
+                floatingOwner,
                 onChange: (unit) => update({ unit }),
             })
         ),
@@ -47,6 +48,7 @@ export function RecurrenceFields({ recurrence, onChange, compact = false }) {
             h(TaskDatePicker, {
                 value: recurrence.startDate || todayDateString(),
                 label: "Repeat start date",
+                floatingOwner,
                 onChange: (startDate) => update({ startDate }),
             })
         ),
@@ -69,15 +71,16 @@ export function RecurrenceFields({ recurrence, onChange, compact = false }) {
             onDate ? h(TaskDatePicker, {
                 value: endDate,
                 label: "Repeat end date",
+                floatingOwner,
                 onChange: (nextEndDate) => update({ endDate: nextEndDate }),
             }) : null
         )
     );
 }
 
-export function RepeatMenuContent({ recurrence, onChange, onCancel, onClear, onDone }) {
+export function RepeatMenuContent({ recurrence, onChange, onCancel, onClear, onDone, floatingOwner = "" }) {
     return h("div", { className: "task-add-repeat-popover" },
-        h(RecurrenceFields, { recurrence, onChange, compact: true }),
+        h(RecurrenceFields, { recurrence, onChange, compact: true, floatingOwner }),
         h("div", { className: "task-add-popover-actions" },
             onClear ? h("button", { type: "button", className: "task-secondary-button task-repeat-clear", onClick: onClear }, "Clear") : null,
             h("button", { type: "button", className: "task-secondary-button", onClick: onCancel }, "Cancel"),

@@ -215,6 +215,91 @@ class TestSettingsPreferences(unittest.TestCase):
         self.assertFalse(updates["emory_student"])
         self.assertIsNone(updates["emory_email"])
 
+    def test_profile_text_limits_use_trimmed_unicode_code_points(self):
+        self.assertEqual(
+            settings_bp.validate_trimmed_profile_text(
+                "  " + "😀" * 80 + "  ",
+                "Display name",
+                minimum=1,
+                maximum=80,
+            ),
+            "😀" * 80,
+        )
+        with self.assertRaisesRegex(ValueError, "80 characters"):
+            settings_bp.validate_trimmed_profile_text(
+                "😀" * 81,
+                "Display name",
+                minimum=1,
+                maximum=80,
+            )
+
+    def test_profile_rejects_non_string_and_oversized_text_without_saving(self):
+        cases = (
+            {"name": ["not text"], "school": "", "major": ""},
+            {"name": "Student", "school": "S" * 161, "major": ""},
+            {"name": "Student", "school": "", "major": "M" * 121},
+        )
+        for payload in cases:
+            with self.subTest(payload=payload), self.app.test_request_context(
+                "/settings/api/profile", method="POST", json=payload
+            ):
+                with patch.object(settings_bp, "current_user", SimpleNamespace(id="user-1")), \
+                        patch.object(settings_bp, "update_row_safe") as update_row:
+                    response = settings_bp.update_profile.__wrapped__()
+
+            response_body, status_code = response
+            self.assertEqual(status_code, 400)
+            self.assertIn("error", response_body.get_json())
+            update_row.assert_not_called()
+
+    def test_onboarding_step_two_rejects_non_string_and_oversized_profile_text(self):
+        base = {
+            "step": 2,
+            "education_level": "Undergraduate",
+            "class_year": "2028",
+            "emory_student": False,
+            "school": "Georgia State University",
+            "major": "Computer Science",
+        }
+        cases = (
+            {**base, "school": ["not text"]},
+            {**base, "school": "S" * 161},
+            {**base, "major": "M" * 121},
+        )
+        for payload in cases:
+            user = self._onboarding_user(onboarding_step=2)
+            with self.subTest(payload=payload), self.app.test_request_context(
+                "/onboarding", method="POST", json=payload
+            ):
+                with patch.object(settings_bp, "current_user", user), \
+                        patch.object(settings_bp, "update_row_safe") as update_row:
+                    response = settings_bp.save_onboarding.__wrapped__()
+
+            response_body, status_code = response
+            self.assertEqual(status_code, 400)
+            self.assertIn("error", response_body.get_json())
+            update_row.assert_not_called()
+
+    def test_onboarding_step_two_accepts_legacy_null_optional_profile_text(self):
+        payload = {
+            "step": 2,
+            "education_level": "Other",
+            "class_year": None,
+            "emory_student": None,
+            "school": None,
+            "major": None,
+        }
+        user = self._onboarding_user(onboarding_step=2)
+        with self.app.test_request_context("/onboarding", method="POST", json=payload):
+            with patch.object(settings_bp, "current_user", user), \
+                    patch.object(settings_bp, "update_row_safe") as update_row, \
+                    patch.object(settings_bp, "sync_chat_presence_labels_for_user"):
+                response = settings_bp.save_onboarding.__wrapped__()
+
+        self.assertEqual(response.status_code, 200)
+        updates = update_row.call_args.args[2]
+        self.assertIsNone(updates["major"])
+
 
 if __name__ == "__main__":
     unittest.main()

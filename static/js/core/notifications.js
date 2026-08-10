@@ -1,5 +1,11 @@
+/* global window, document, navigator, fetch, atob, setTimeout, clearTimeout, Notification, DOMException */
+
 (function notificationShell(global) {
-  const FOREGROUND_SYNC_MS = 8000;
+  const FOREGROUND_SYNC_MS = 15000;
+  const LEADER_RETRY_MS = 5000;
+  const LEADER_LEASE_MS = 20000;
+  const LEADER_LOCK_NAME = 'apstudy-notification-foreground-sync';
+  const LEADER_LEASE_KEY = 'apstudy-notification-sync-leader';
   const state = {
     foregroundReady: false,
     knownIds: new Set(),
@@ -8,6 +14,11 @@
     tabId: '',
     tray: null,
     unread: 0,
+    channel: null,
+    electionTimer: null,
+    isLeader: false,
+    lockPending: false,
+    releaseLock: null,
   };
 
   const csrf = () => document.cookie.match(/(?:^|; )csrf_token=([^;]*)/)?.[1] || '';
@@ -125,6 +136,14 @@
         : navigator.clearAppBadge ? navigator.clearAppBadge() : navigator.setAppBadge(0);
       Promise.resolve(badgeUpdate).catch(() => {});
     }
+  }
+
+  function broadcastSyncState(data = {}) {
+    state.channel?.postMessage?.({
+      type: 'notification-sync',
+      unread_count: state.unread,
+      focus_mode_active: data.focus_mode_active,
+    });
   }
 
   function showError(error) {
@@ -274,6 +293,7 @@
     if (!isLaptopOrTablet()) return;
     const active = !inactive && isForegroundActive();
     if (!active && !inactive) return;
+    if (active && !state.isLeader) return;
     if (state.syncing && !inactive) return;
     if (inactive) state.foregroundReady = false;
     else state.syncing = true;
@@ -305,6 +325,7 @@
       remember(items);
       state.foregroundReady = true;
       setUnreadCount(data.unread_count);
+      broadcastSyncState(data);
       await showForegroundItems(fresh);
       if (acknowledgedPendingIds.length) {
         await api('/api/notifications/foreground-ack', { method: 'POST', body: JSON.stringify({ ids: acknowledgedPendingIds }) });
@@ -316,17 +337,118 @@
     }
   }
 
-  function startForegroundDelivery() {
-    if (state.syncTimer) return;
-    void syncForeground();
-    state.syncTimer = global.setInterval(syncForeground, FOREGROUND_SYNC_MS);
-    global.addEventListener('focus', () => { void syncForeground(); });
-    global.addEventListener('blur', () => { void syncForeground({ inactive: true, keepalive: true }); });
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) void syncForeground({ inactive: true, keepalive: true });
-      else void syncForeground();
+  function stopSyncTimer() {
+    if (!state.syncTimer) return;
+    global.clearInterval(state.syncTimer);
+    state.syncTimer = null;
+  }
+
+  function setLeader(active) {
+    const next = active === true;
+    if (state.isLeader === next) return;
+    state.isLeader = next;
+    stopSyncTimer();
+    if (next && isForegroundActive()) {
+      void syncForeground();
+      state.syncTimer = global.setInterval(syncForeground, FOREGROUND_SYNC_MS);
+    }
+  }
+
+  function readLease() {
+    try {
+      return JSON.parse(global.localStorage?.getItem(LEADER_LEASE_KEY) || 'null');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function claimLease() {
+    if (!isForegroundActive()) return;
+    const now = Date.now();
+    const tabId = foregroundTabId();
+    const current = readLease();
+    if (current?.tab_id !== tabId && Number(current?.expires_at || 0) > now) {
+      setLeader(false);
+      return;
+    }
+    try {
+      global.localStorage?.setItem(LEADER_LEASE_KEY, JSON.stringify({ tab_id: tabId, expires_at: now + LEADER_LEASE_MS }));
+      setLeader(readLease()?.tab_id === tabId);
+    } catch (_) {
+      // Storage can be unavailable in strict private modes. One tab still syncs.
+      setLeader(true);
+    }
+  }
+
+  function releaseLeadership() {
+    if (state.releaseLock) {
+      state.releaseLock();
+      state.releaseLock = null;
+    }
+    if (!navigator.locks?.request) {
+      const lease = readLease();
+      if (lease?.tab_id === foregroundTabId()) {
+        try { global.localStorage?.removeItem(LEADER_LEASE_KEY); } catch (_) {}
+      }
+    }
+    setLeader(false);
+  }
+
+  function requestLeadership() {
+    if (!isForegroundActive()) return;
+    if (!navigator.locks?.request) {
+      claimLease();
+      return;
+    }
+    if (state.lockPending || state.isLeader) return;
+    state.lockPending = true;
+    void navigator.locks.request(LEADER_LOCK_NAME, { ifAvailable: true }, async (lock) => {
+      if (!lock) return;
+      setLeader(true);
+      await new Promise((resolve) => { state.releaseLock = resolve; });
+      state.releaseLock = null;
+      setLeader(false);
+    }).catch(() => {
+      claimLease();
+    }).finally(() => {
+      state.lockPending = false;
     });
-    global.addEventListener('pagehide', () => { void syncForeground({ inactive: true, keepalive: true }); });
+  }
+
+  function initializeCrossTabSync() {
+    if ('BroadcastChannel' in global) {
+      state.channel = new global.BroadcastChannel('apstudy-notification-sync');
+      state.channel.addEventListener('message', (event) => {
+        if (event.data?.type !== 'notification-sync') return;
+        setUnreadCount(event.data.unread_count);
+        if (typeof event.data.focus_mode_active === 'boolean') {
+          global.APStudyProfileStatus?.setFocusMode?.(event.data.focus_mode_active);
+        }
+      });
+    }
+    requestLeadership();
+    state.electionTimer = global.setInterval(requestLeadership, LEADER_RETRY_MS);
+  }
+
+  function startForegroundDelivery() {
+    if (state.electionTimer) return;
+    initializeCrossTabSync();
+    global.addEventListener('focus', requestLeadership);
+    global.addEventListener('blur', () => {
+      void syncForeground({ inactive: true, keepalive: true });
+      releaseLeadership();
+    });
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        void syncForeground({ inactive: true, keepalive: true });
+        releaseLeadership();
+      } else requestLeadership();
+    });
+    global.addEventListener('pagehide', () => {
+      void syncForeground({ inactive: true, keepalive: true });
+      releaseLeadership();
+      state.channel?.close?.();
+    });
   }
 
   global.APStudyNotifications = {

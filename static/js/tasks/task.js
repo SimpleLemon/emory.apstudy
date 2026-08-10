@@ -130,6 +130,7 @@ function TaskApp({ completeSound, uncompleteSound }) {
     const listsRef = React.useRef(lists);
     const tasksRef = React.useRef(tasks);
     const listMutationVersionsRef = React.useRef(new Map());
+    const taskMutationVersionsRef = React.useRef(new Map());
 
     const setListsAndRef = React.useCallback((nextListsOrUpdater) => {
         setLists((current) => {
@@ -340,17 +341,28 @@ function TaskApp({ completeSound, uncompleteSound }) {
     }, [setTasksAndRef]);
 
     const updateTask = React.useCallback(async (taskId, updates) => {
-        const previous = tasksRef.current;
-        const previousTask = previous.find((task) => task.id === taskId) || null;
+        const previousTask = tasksRef.current.find((task) => task.id === taskId) || null;
+        const versions = taskMutationVersionsRef.current;
+        const version = (versions.get(taskId) || 0) + 1;
+        versions.set(taskId, version);
+        setError("");
         setTasksAndRef((current) => mergeById(current, taskId, updates, normalizeTask));
         try {
             const updatedTask = await updateTaskRecord(taskId, updates);
+            if (versions.get(taskId) !== version) return updatedTask;
             updateTaskInState(updatedTask);
             promptForTaskNotifications(updatedTask, previousTask);
             return updatedTask;
         } catch (err) {
-            setError(err.message || "Unable to update task.");
-            setTasksAndRef(previous);
+            const message = err.message || "Unable to update task.";
+            if (versions.get(taskId) !== version) {
+                return { ok: false, stale: true, error: message };
+            }
+            setError(message);
+            if (previousTask) {
+                setTasksAndRef((current) => replaceById(current, taskId, previousTask));
+            }
+            return { ok: false, error: message };
         }
     }, [setTasksAndRef, updateTaskInState]);
 
@@ -556,6 +568,7 @@ function TaskApp({ completeSound, uncompleteSound }) {
                     h("p", { className: "workspace-page-subtitle" }, "Lists, deadlines, repeat schedules, and calendar-synced work.")
                 )
             ),
+            error ? h("p", { className: "task-operation-error", role: "alert" }, error) : null,
             lists.length === 0
                 ? h(EmptyStarter, { onCreate: openListDialog })
                 : h("div", { className: "task-layout" },

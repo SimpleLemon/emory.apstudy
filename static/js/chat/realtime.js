@@ -13,19 +13,37 @@ export function createChatRealtime(context) {
   let realtimeReconnectTimer = null;
   let chatEventSource = null;
   let chatEventCursor = { since: null, after_id: null };
+  let connectionGeneration = 0;
   const seenChatEventIds = new Set();
   const seenChatMessageIds = new Set();
+  const SEEN_ID_LIMIT = 5000;
 
-  function rememberChatMessageId(messageId) {
-    const id = String(messageId || "");
+  function rememberId(seenIds, value) {
+    const id = String(value || "");
     if (!id) return false;
-    if (seenChatMessageIds.has(id)) return false;
-    seenChatMessageIds.add(id);
-    if (seenChatMessageIds.size > 5000) {
-      seenChatMessageIds.clear();
-      seenChatMessageIds.add(id);
+    if (seenIds.has(id)) return false;
+    seenIds.add(id);
+    if (seenIds.size > SEEN_ID_LIMIT) {
+      const oldest = seenIds.values().next().value;
+      seenIds.delete(oldest);
     }
     return true;
+  }
+
+  function rememberChatEventId(eventId) {
+    return rememberId(seenChatEventIds, eventId);
+  }
+
+  function rememberChatMessageId(messageId) {
+    return rememberId(seenChatMessageIds, messageId);
+  }
+
+  function isActiveRoom(room) {
+    return Boolean(
+      room
+      && state.activeRoom
+      && actions.roomKey(state.activeRoom) === actions.roomKey(room)
+    );
   }
 
   async function fetchMessageById(messageId) {
@@ -48,12 +66,14 @@ export function createChatRealtime(context) {
         cache.messages = actions.mergeMessages(cache.messages, [message]);
         actions.updateCacheCursors(cache);
         actions.schedulePersistentRoomSave(room);
+        if (!isActiveRoom(room)) return false;
         if (actions.patchMessageInDom(message)) {
           actions.updateAnnouncementsUnreadBanner(cache.messages);
           return true;
         }
       }
     }
+    if (!isActiveRoom(room)) return false;
     await actions.loadMessages({ force: true, quiet: true, preserveScroll: true, light: true });
     return false;
   }
@@ -67,10 +87,13 @@ export function createChatRealtime(context) {
       const message = await fetchMessageById(event.message_id);
       if (message) {
         actions.applyIncomingMessages(room, [message]);
+        if (!isActiveRoom(room)) return false;
         actions.playChatSound(event.actor_id);
         return true;
       }
     }
+
+    if (!isActiveRoom(room)) return false;
 
     const delta = deltaLoadParams(cache);
     const incoming = delta.after
@@ -82,10 +105,11 @@ export function createChatRealtime(context) {
       actions.playChatSound(event.actor_id);
       return true;
     }
-    return incoming.length > 0;
+    return isActiveRoom(room) && incoming.length > 0;
   }
 
   function pollActiveRoomMessages() {
+    if (state.realtimeReady) return;
     const room = state.activeRoom;
     const cache = actions.cacheFor(room);
     if (!room || !cache) return;
@@ -117,11 +141,9 @@ export function createChatRealtime(context) {
   }
 
   function startRealtimeHeartbeat() {
-    if (lifecycle.paused || lifecycle.disposed || realtimeHeartbeatTimer) return;
-    realtimeHeartbeatTimer = window.setInterval(() => {
-      if (document.visibilityState !== "visible" || !state.realtimeReady) return;
-      pollActiveRoomMessages();
-    }, REALTIME_HEARTBEAT_MS);
+    // EventSource owns message liveness while connected. Active-room polling
+    // is reserved for the fallback loop so the two paths cannot overlap.
+    void REALTIME_HEARTBEAT_MS;
   }
 
   function stopRealtimeHeartbeat() {
@@ -131,6 +153,7 @@ export function createChatRealtime(context) {
   }
 
   function resetRealtimeConnection() {
+    connectionGeneration += 1;
     if (chatEventSource) {
       chatEventSource.close();
       chatEventSource = null;
@@ -180,11 +203,12 @@ export function createChatRealtime(context) {
       return;
     }
     state.realtimeConnecting = true;
+    const generation = ++connectionGeneration;
     try {
       const source = new EventSource(buildChatEventsStreamUrl());
       chatEventSource = source;
       source.onopen = () => {
-        if (lifecycle.paused || lifecycle.disposed) {
+        if (generation !== connectionGeneration || source !== chatEventSource || lifecycle.paused || lifecycle.disposed) {
           source.close();
           return;
         }
@@ -198,10 +222,9 @@ export function createChatRealtime(context) {
         };
         stopRealtimeFallback();
         startRealtimeHeartbeat();
-        pollActiveRoomMessages();
       };
       source.onmessage = (messageEvent) => {
-        if (lifecycle.paused || lifecycle.disposed) return;
+        if (generation !== connectionGeneration || source !== chatEventSource || lifecycle.paused || lifecycle.disposed) return;
         let payload;
         try {
           payload = JSON.parse(messageEvent.data);
@@ -209,15 +232,14 @@ export function createChatRealtime(context) {
           return;
         }
         const eventId = payload?.$id || payload?.id;
-        if (eventId && seenChatEventIds.has(eventId)) return;
-        if (eventId) seenChatEventIds.add(eventId);
+        if (eventId && !rememberChatEventId(eventId)) return;
         if (payload?.created_at) {
           chatEventCursor = { since: payload.created_at, after_id: eventId || null };
         }
         void handleRealtimePayload({ payload });
       };
       source.onerror = () => {
-        if (lifecycle.paused || lifecycle.disposed) return;
+        if (generation !== connectionGeneration || source !== chatEventSource || lifecycle.paused || lifecycle.disposed) return;
         handleRealtimeDisconnect();
       };
     } catch (error) {
@@ -262,7 +284,6 @@ export function createChatRealtime(context) {
   async function handleRealtimePayload(response) {
     const event = normalizeChatEvent(response);
     if (!eventIsRelevant(event)) return;
-    const active = state.activeRoom;
     const eventRoom = event.scope_type === "channel"
       ? { type: "channel", id: event.scope_id || event.channel_id }
       : event.scope_type === "thread"
@@ -283,6 +304,7 @@ export function createChatRealtime(context) {
           await actions.bootstrap({ preserveActive: true });
         }
       }
+      const active = state.activeRoom;
       if (eventRoom && active && actions.roomKey(eventRoom) === actions.roomKey(active)) {
         await ingestActiveRoomMessage(event);
       } else if (eventRoom) {
@@ -294,6 +316,7 @@ export function createChatRealtime(context) {
     }
 
     if (event.event_type === "message_updated") {
+      const active = state.activeRoom;
       if (eventRoom && active && actions.roomKey(eventRoom) === actions.roomKey(active)) {
         await ingestMessageUpdate(event);
       } else if (eventRoom) {
@@ -356,6 +379,7 @@ export function createChatRealtime(context) {
   return {
     bindEvents,
     clearReconnectTimer,
+    handleRealtimePayload,
     resetRealtimeConnection,
     startRealtimeFallback,
     startRealtimeHeartbeat,

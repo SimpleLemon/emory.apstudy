@@ -9,10 +9,37 @@ import {
   shouldGroupMessage,
 } from "./presentation.js";
 
+export function messageBodyMarkup(message) {
+  return message?.rendered_html || escapeHtml(message?.content || "");
+}
+
+export function messageTimestampMarkup(value) {
+  return escapeHtml(formatMessageTimestamp(value));
+}
+
+export function dedupeIncomingMessages(existingMessages, incomingMessages) {
+  const existingIds = new Set((existingMessages || []).map((message) => String(message?.id || "")).filter(Boolean));
+  const incomingIds = new Set();
+  return (incomingMessages || []).filter((message) => {
+    const id = String(message?.id || "");
+    if (!id || existingIds.has(id) || incomingIds.has(id)) return false;
+    incomingIds.add(id);
+    return true;
+  });
+}
+
 export function createChatMessagesDom(context) {
   const { root, state, els, extensions, config, actions } = context;
   const { ANNOUNCEMENTS_CHANNEL_ID, GRAMMARLY_DISABLED_ATTRS } = config;
   let inlineProfilePopover = null;
+
+  function isActiveRoom(room) {
+    return Boolean(
+      room
+      && state.activeRoom
+      && actions.roomKey(state.activeRoom) === actions.roomKey(room)
+    );
+  }
 
   function renderMessageLoader(label = "Loading messages...") {
     if (!els.messages) return;
@@ -250,7 +277,13 @@ export function createChatMessagesDom(context) {
     if (!stack) return false;
 
     const renderedIds = renderedMessageIds();
-    const unseen = newMessages.filter((message) => message?.id && !renderedIds.has(String(message.id)));
+    const unseen = [];
+    for (const message of newMessages) {
+      const id = String(message?.id || "");
+      if (!id || renderedIds.has(id)) continue;
+      renderedIds.add(id);
+      unseen.push(message);
+    }
     if (!unseen.length) return true;
 
     const empty = stack.querySelector(".chat-empty");
@@ -281,7 +314,7 @@ export function createChatMessagesDom(context) {
     const el = messageElementById(message.id);
     if (!el) return false;
     const contentHtml = `
-      <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${message.rendered_html || escapeHtml(message.content || "")}</div>
+      <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${messageBodyMarkup(message)}</div>
       ${renderImages(message.images || [])}
       ${extensions.messageMedia?.renderAttachments?.(message.attachments || []) || ""}
       ${extensions.messageMedia?.renderGif?.(message.gif) || ""}
@@ -350,14 +383,16 @@ export function createChatMessagesDom(context) {
     cache.stale = false;
     updateCacheCursors(cache);
     actions.schedulePersistentRoomSave(room);
-    const incoming = messages.filter((message) => message?.id && !previousMessages.some((row) => row.id === message.id));
-    syncMessagesToDom(cache.messages, {
-      incremental: true,
-      incoming,
-      scrollToBottom: wasNearBottom,
-    });
-    if (wasNearBottom && markRead) actions.markRoomRead(room, cache);
-    if (!wasNearBottom && incoming.length && els.newMessages) els.newMessages.hidden = false;
+    const incoming = dedupeIncomingMessages(previousMessages, messages);
+    if (isActiveRoom(room)) {
+      syncMessagesToDom(cache.messages, {
+        incremental: true,
+        incoming,
+        scrollToBottom: wasNearBottom,
+      });
+      if (wasNearBottom && markRead) actions.markRoomRead(room, cache);
+      if (!wasNearBottom && incoming.length && els.newMessages) els.newMessages.hidden = false;
+    }
     return messages;
   }
 
@@ -442,10 +477,10 @@ export function createChatMessagesDom(context) {
         <div class="chat-message-content" ${GRAMMARLY_DISABLED_ATTRS}>
           <div class="chat-message-head" ${GRAMMARLY_DISABLED_ATTRS}>
             <button type="button" class="chat-author-button" data-author-message-id="${escapeHtml(message.id)}" ${GRAMMARLY_DISABLED_ATTRS}>${escapeHtml(message.author_name || "Nest User")}</button>
-            <span class="chat-message-time">${escapeHtml(formatMessageTimestamp(message.created_at))}</span>
+            <span class="chat-message-time">${messageTimestampMarkup(message.created_at)}</span>
             ${renderDeliveryState(message)}
           </div>
-          <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${message.rendered_html || escapeHtml(message.content || "")}</div>
+          <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${messageBodyMarkup(message)}</div>
           ${renderImages(message.images || [])}
           ${extensions.messageMedia?.renderAttachments?.(message.attachments || []) || ""}
           ${extensions.messageMedia?.renderGif?.(message.gif) || ""}
@@ -459,9 +494,9 @@ export function createChatMessagesDom(context) {
   function renderContinuationMessage(message) {
     return `
       <article class="chat-message chat-message-continuation" data-message-id="${escapeHtml(message.id)}" ${GRAMMARLY_DISABLED_ATTRS}>
-        <span class="chat-message-continuation-time">${escapeHtml(formatMessageTimestamp(message.created_at))}</span>
+        <span class="chat-message-continuation-time">${messageTimestampMarkup(message.created_at)}</span>
         <div class="chat-message-content" ${GRAMMARLY_DISABLED_ATTRS}>
-          <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${message.rendered_html || escapeHtml(message.content || "")}</div>
+          <div class="chat-message-body" ${GRAMMARLY_DISABLED_ATTRS}>${messageBodyMarkup(message)}</div>
           ${renderDeliveryState(message)}
           ${renderImages(message.images || [])}
           ${extensions.messageMedia?.renderAttachments?.(message.attachments || []) || ""}

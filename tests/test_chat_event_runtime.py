@@ -1,7 +1,10 @@
 import json
+import tempfile
 import threading
 import time
 import unittest
+from datetime import datetime, timezone
+from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
 
@@ -10,6 +13,7 @@ from flask import Flask
 from extensions import login_manager
 import blueprints.chat_api as chat_api
 from services import chat_event_runtime
+from services import database
 from tests.support.harness import reset_flask_login_manager
 
 
@@ -194,12 +198,117 @@ class TestChatEventRuntime(unittest.TestCase):
 
     def test_blueprint_event_list_adapter_keeps_visibility_patch_target(self):
         row = {"$id": "event-1", "created_at": "2026-08-02T10:00:00Z"}
-        with patch.object(chat_api, "list_rows_safe", return_value={"rows": [row]}), \
+        with patch.object(chat_api.database, "list_rows", return_value={"rows": [row]}), \
                 patch.object(chat_api, "_event_visible_for_user", return_value=False) as visible:
             result = chat_api._list_chat_events_after(row["created_at"])
 
         self.assertEqual(result, [])
         visible.assert_called_once_with(row)
+
+    def test_blueprint_event_scan_pages_past_hidden_rows_with_bounded_queries(self):
+        timestamp = "2026-08-02T10:00:00Z"
+        hidden = [
+            {"$id": "event-a", "created_at": timestamp},
+            {"$id": "event-b", "created_at": timestamp},
+        ]
+        visible_row = {"$id": "event-c", "created_at": timestamp}
+        with patch.object(
+            chat_api.database,
+            "list_rows",
+            side_effect=[{"rows": hidden}, {"rows": [visible_row]}],
+        ) as list_rows, patch.object(
+            chat_api,
+            "_event_visible_for_user",
+            side_effect=lambda row: row["$id"] == "event-c",
+        ):
+            result = chat_api._list_chat_events_after(timestamp, limit=2)
+
+        self.assertEqual([row["$id"] for row in result], ["event-c"])
+        self.assertEqual(result.scan_cursor, (timestamp, "event-c"))
+        self.assertEqual(list_rows.call_count, 2)
+        self.assertLessEqual(list_rows.call_count, chat_api.CHAT_EVENTS_SCAN_MULTIPLIER)
+        self.assertTrue(all(
+            call.kwargs["include_total"] is False
+            for call in list_rows.call_args_list
+        ))
+
+    def test_blueprint_event_scan_caches_visibility_per_scope(self):
+        timestamp = "2026-08-02T10:00:00Z"
+        rows = [
+            {"$id": "event-a", "created_at": timestamp, "scope_type": "channel", "scope_id": "nest_chat"},
+            {"$id": "event-b", "created_at": timestamp, "scope_type": "channel", "scope_id": "nest_chat"},
+        ]
+        with patch.object(chat_api.database, "list_rows", return_value={"rows": rows}), \
+                patch.object(chat_api, "_event_visible_for_user", wraps=chat_api._event_visible_for_user) as visible, \
+                patch.object(chat_api, "_event_visible_for_user_service", return_value=True) as service:
+            result = chat_api._list_chat_events_after(timestamp, limit=2)
+
+        self.assertEqual([row["$id"] for row in result], ["event-a", "event-b"])
+        visible.assert_called_once_with(rows[0])
+        service.assert_called_once()
+
+    def test_blueprint_event_cursor_excludes_earlier_ids_at_same_timestamp(self):
+        timestamp = "2026-08-02T10:00:00Z"
+        rows = [
+            {"$id": "event-a", "created_at": timestamp},
+            {"$id": "event-b", "created_at": timestamp},
+            {"$id": "event-c", "created_at": timestamp},
+        ]
+        with patch.object(chat_api.database, "list_rows", return_value={"rows": rows}), \
+                patch.object(chat_api, "_event_visible_for_user", return_value=True):
+            result = chat_api._list_chat_events_after(timestamp, "event-b", limit=3)
+
+        self.assertEqual([row["$id"] for row in result], ["event-c"])
+
+    def test_blueprint_event_cursor_queries_same_timestamp_tail_then_later_rows(self):
+        timestamp = "2026-08-02T10:00:00Z"
+        later = {"$id": "event-a", "created_at": "2026-08-02T10:00:01Z"}
+        with patch.object(
+            chat_api.database,
+            "list_rows",
+            side_effect=[{"rows": []}, {"rows": [later]}],
+        ) as list_rows, patch.object(chat_api, "_event_visible_for_user", return_value=True):
+            result = chat_api._list_chat_events_after(timestamp, "event-z", limit=3)
+
+        self.assertEqual([row["$id"] for row in result], ["event-a"])
+        self.assertEqual(result.scan_cursor, (later["created_at"], "event-a"))
+        self.assertEqual(list_rows.call_count, 2)
+        first_queries = " ".join(list_rows.call_args_list[0].args[1])
+        second_queries = " ".join(list_rows.call_args_list[1].args[1])
+        self.assertIn('"method":"equal"', first_queries)
+        self.assertIn('"attribute":"$id"', first_queries)
+        self.assertIn('"method":"greaterThan"', second_queries)
+
+    def test_chat_event_cleanup_enforces_age_and_row_bounds(self):
+        path = tempfile.mktemp(suffix=".sqlite3")
+        database.init_db(path=path)
+        try:
+            with database.db_connection(path) as conn:
+                for event_id, created_at in (
+                    ("expired", "2020-01-01T00:00:00Z"),
+                    ("event-1", "2026-08-08T10:00:00Z"),
+                    ("event-2", "2026-08-08T11:00:00Z"),
+                    ("event-3", "2026-08-08T12:00:00Z"),
+                ):
+                    conn.execute(
+                        "INSERT INTO chat_events (id,scope_type,scope_id,event_type,created_at) VALUES (?,?,?,?,?)",
+                        [event_id, "channel", "nest_chat", "message_created", created_at],
+                    )
+            with patch.object(chat_api, "CHAT_EVENTS_MAX_ROWS", 2):
+                removed = chat_api._cleanup_chat_events(
+                    now=datetime(2026, 8, 9, tzinfo=timezone.utc),
+                    path=path,
+                )
+            with database.db_connection(path) as conn:
+                remaining = [
+                    row["id"] for row in conn.execute(
+                        "SELECT id FROM chat_events ORDER BY created_at"
+                    ).fetchall()
+                ]
+            self.assertEqual(removed, 2)
+            self.assertEqual(remaining, ["event-2", "event-3"])
+        finally:
+            Path(path).unlink(missing_ok=True)
 
 
 class TestRegisteredChatEventStream(unittest.TestCase):
@@ -311,7 +420,7 @@ class TestRegisteredChatEventStream(unittest.TestCase):
             return {"$id": scope_id, "kind": "unsupported"}
 
         client = self._authenticated_client()
-        with patch.object(chat_api, "list_rows_safe", return_value={"rows": rows}), \
+        with patch.object(chat_api.database, "list_rows", return_value={"rows": rows}), \
                 patch.object(chat_api, "get_row_safe", side_effect=get_row), \
                 patch.object(chat_api, "_thread_accessible_by_user", return_value=False):
             response = client.get("/api/chat/events/stream", buffered=False)

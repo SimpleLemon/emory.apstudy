@@ -1,9 +1,48 @@
 import { avatarAttrs, escapeHtml } from "./presentation.js";
 
+export function createRoomSelectionCoordinator() {
+  let generation = 0;
+  let activeController = null;
+
+  function begin(room) {
+    activeController?.abort();
+    const controller = new AbortController();
+    const selection = {
+      room,
+      generation: ++generation,
+      signal: controller.signal,
+      controller,
+    };
+    selection.isCurrent = (activeRoom) => isCurrent(selection, activeRoom);
+    activeController = controller;
+    return selection;
+  }
+
+  function isCurrent(selection, activeRoom) {
+    return Boolean(
+      selection
+      && selection.generation === generation
+      && activeController === selection.controller
+      && selection.room?.type === activeRoom?.type
+      && selection.room?.id === activeRoom?.id
+      && !selection.signal.aborted
+    );
+  }
+
+  function cancel() {
+    activeController?.abort();
+    activeController = null;
+    generation += 1;
+  }
+
+  return { begin, cancel, isCurrent };
+}
+
 export function createChatRooms(context) {
   const { root, state, els, extensions, config, actions } = context;
   const { ANNOUNCEMENTS_CHANNEL_ID, GRAMMARLY_DISABLED_ATTRS } = config;
   let unreadSummaryRefreshTimer = null;
+  const roomSelection = createRoomSelectionCoordinator();
 
   function unreadKey(type, id) {
     return actions.roomKey({ type, id });
@@ -465,6 +504,7 @@ export function createChatRooms(context) {
 
   async function selectRoom(room, options = {}) {
     const previousRoom = state.activeRoom;
+    const selection = roomSelection.begin(room);
     actions.saveActiveScroll();
     actions.closeInlineProfilePopover();
     if (previousRoom && actions.roomKey(previousRoom) !== actions.roomKey(room)) {
@@ -473,11 +513,14 @@ export function createChatRooms(context) {
     }
     state.activeRoom = room;
     state.activeProfile = null;
+    actions.renderMessageLoader?.();
     updateRoomLists();
     renderHeader();
     if (!options.suppressFocus) actions.focusComposerSoon();
     actions.setStatus(null);
     actions.handleActiveRoomPresenceChange(previousRoom);
+
+    if (!roomSelection.isCurrent(selection, state.activeRoom)) return;
 
     const channel = activeChannel();
     const thread = activeThread();
@@ -491,22 +534,30 @@ export function createChatRooms(context) {
 
     const cache = actions.cacheFor(room);
     if (!cache.loaded) await actions.hydrateRoomFromPersistentCache(room);
+    if (!roomSelection.isCurrent(selection, state.activeRoom)) return;
     if (actions.renderCachedRoom(room)) {
       if (!cache.stale || actions.latestMessageForRead(cache)) markRoomRead(room, cache);
       if (cache.latestCursor) {
         const delta = actions.deltaLoadParams(cache);
-        await actions.loadMessages({ ...delta, quiet: true, force: true, light: true });
+        await actions.loadMessages({ ...delta, quiet: true, force: true, light: true, roomSelection: selection });
+        if (!roomSelection.isCurrent(selection, state.activeRoom)) return;
         markRoomRead(room);
       } else if (cache.stale) {
-        await actions.loadMessages({ force: true, quiet: true });
+        await actions.loadMessages({ force: true, quiet: true, roomSelection: selection });
+        if (!roomSelection.isCurrent(selection, state.activeRoom)) return;
         markRoomRead(room);
       }
     } else {
-      await actions.loadMessages({ force: true });
+      await actions.loadMessages({ force: true, roomSelection: selection });
+      if (!roomSelection.isCurrent(selection, state.activeRoom)) return;
       markRoomRead(room);
     }
     actions.renderPresenceDrivenUi();
     actions.schedulePersistentBootstrapSave();
+  }
+
+  function cancelRoomSelection() {
+    roomSelection.cancel();
   }
 
   async function searchPeople() {
@@ -669,6 +720,7 @@ export function createChatRooms(context) {
     cancelUnreadSummaryRefresh,
     channelIsPending,
     channelIsWritable,
+    cancelRoomSelection,
     clearRoomUnread,
     closeRoomContextMenu,
     fetchThread,

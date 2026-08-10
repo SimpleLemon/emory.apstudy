@@ -1,6 +1,11 @@
 (function registerSettingsProfile(global) {
   const USERNAME_MIN_LENGTH = 3;
   const USERNAME_MAX_LENGTH = 20;
+  const PROFILE_TEXT_FIELDS = [
+    { element: 'displayName', counter: 'settings-display-name-counter', error: 'settings-display-name-error', label: 'Display name', minimum: 1, maximum: 80 },
+    { element: 'school', counter: 'settings-school-counter', error: 'settings-school-error', label: 'School', minimum: 0, maximum: 160 },
+    { element: 'major', counter: 'settings-major-counter', error: 'settings-major-error', label: 'Major', minimum: 0, maximum: 120 },
+  ];
   const USERNAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
   const USERNAME_RESERVED = new Set([
     'account',
@@ -46,6 +51,39 @@
     } = callbacks;
     let schoolSuggestionTimer = null;
     let avatarModalCloseTimer = null;
+
+    function codePointLength(value) {
+      return Array.from(String(value || '').trim()).length;
+    }
+
+    function validateProfileTextField(field, { announce = true } = {}) {
+      const input = elements[field.element];
+      const counter = document.getElementById(field.counter);
+      const error = document.getElementById(field.error);
+      if (!input) return true;
+      const value = input.value.trim();
+      const length = codePointLength(value);
+      let message = '';
+      if (length < field.minimum) {
+        message = `${field.label} is required.`;
+      } else if (length > field.maximum) {
+        message = `${field.label} must be ${field.maximum} characters or fewer.`;
+      }
+      if (counter) counter.textContent = `${length} / ${field.maximum} characters`;
+      if (error) {
+        error.textContent = announce ? message : '';
+        error.hidden = !message;
+      }
+      input.setCustomValidity(message);
+      input.setAttribute('aria-invalid', String(Boolean(message)));
+      if (message) global.APStudyFormField?.markInvalid?.(input);
+      else global.APStudyFormField?.clearInvalid?.(input);
+      return !message;
+    }
+
+    function validateProfileTextFields(options) {
+      return PROFILE_TEXT_FIELDS.every((field) => validateProfileTextField(field, options));
+    }
 
     function hasImageFiles(event) {
       const types = Array.from(event.dataTransfer?.types || []);
@@ -177,16 +215,25 @@
           closeAvatarModal();
         }
       });
-      elements.displayName?.addEventListener('input', renderProfilePreview);
-      elements.displayName?.addEventListener('input', updateProfileDirtyState);
+      elements.displayName?.addEventListener('input', () => {
+        validateProfileTextField(PROFILE_TEXT_FIELDS[0]);
+        renderProfilePreview();
+        updateProfileDirtyState();
+      });
       elements.username?.addEventListener('input', renderProfilePreview);
       elements.username?.addEventListener('input', updateProfileDirtyState);
       global.APStudyFormField?.bindAutoClear?.(elements.username);
-      elements.school?.addEventListener('input', renderProfilePreview);
-      elements.school?.addEventListener('input', updateProfileDirtyState);
+      elements.school?.addEventListener('input', () => {
+        validateProfileTextField(PROFILE_TEXT_FIELDS[1]);
+        renderProfilePreview();
+        updateProfileDirtyState();
+      });
       elements.school?.addEventListener('input', debounceSchoolSuggestions);
-      elements.major?.addEventListener('input', renderProfilePreview);
-      elements.major?.addEventListener('input', updateProfileDirtyState);
+      elements.major?.addEventListener('input', () => {
+        validateProfileTextField(PROFILE_TEXT_FIELDS[2]);
+        renderProfilePreview();
+        updateProfileDirtyState();
+      });
       elements.graduationYear?.addEventListener('input', renderProfilePreview);
       elements.graduationYear?.addEventListener('input', updateProfileDirtyState);
       elements.bannerColorPicker?.addEventListener('input', () => {
@@ -194,6 +241,7 @@
         paintBannerColor(nextColor);
         updateProfileDirtyState();
       });
+      validateProfileTextFields();
     }
 
     function getProfileUrl() {
@@ -235,6 +283,9 @@
 
     async function saveProfile() {
       const currentProfile = state.profile || {};
+      if (!validateProfileTextFields()) {
+        return;
+      }
       const rawUsername = elements.username?.value.trim() || '';
       if (!rawUsername) {
         global.APStudyFormField?.markInvalid?.(elements.username);
@@ -397,6 +448,7 @@
     }
 
     function renderProfilePreview() {
+      validateProfileTextFields();
       const profile = state.profile || {};
       const accountData = state.account || {};
       const displayName = elements.displayName?.value.trim() || profile.name || accountData.name || 'APStudy User';
@@ -482,6 +534,7 @@
       saveProfile,
       shareProfileLink,
       updateAvatarPreview,
+      validateProfileTextFields,
     };
   }
 

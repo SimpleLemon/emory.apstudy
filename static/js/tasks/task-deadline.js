@@ -93,12 +93,13 @@ export function formatTaskDeadline(task) {
     return date.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
-export function DeadlinePanel({ value, onApply, onCancel, onClear }) {
+export function DeadlinePanel({ value, onApply, onCancel, onClear, floatingOwner = "" }) {
     const [draft, setDraft] = React.useState(() => deadlineDraft(value));
     const [error, setError] = React.useState("");
+    const [saving, setSaving] = React.useState(false);
     const reminderOptions = draft.hasTime ? TIMED_REMINDER_OPTIONS : DATE_ONLY_REMINDER_OPTIONS;
 
-    const apply = () => {
+    const apply = async () => {
         const payload = deadlinePayload(draft);
         if (!draft.date) {
             setError("Choose a deadline date.");
@@ -109,7 +110,28 @@ export function DeadlinePanel({ value, onApply, onCancel, onClear }) {
             return;
         }
         setError("");
-        onApply(payload);
+        setSaving(true);
+        try {
+            const result = await onApply(payload);
+            if (result?.ok === false) setError(result.error || "Unable to update the deadline. Try again.");
+        } catch (err) {
+            setError(err.message || "Unable to update the deadline. Try again.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const clear = async () => {
+        setError("");
+        setSaving(true);
+        try {
+            const result = await onClear?.();
+            if (result?.ok === false) setError(result.error || "Unable to clear the deadline. Try again.");
+        } catch (err) {
+            setError(err.message || "Unable to clear the deadline. Try again.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const toggleTime = () => {
@@ -159,15 +181,16 @@ export function DeadlinePanel({ value, onApply, onCancel, onClear }) {
                 value: draft.reminderMinutes,
                 options: reminderOptions,
                 label: "Deadline alert",
+                floatingOwner,
                 onChange: (reminderMinutes) => setDraft((current) => ({ ...current, reminderMinutes })),
             })
         ) : null,
         error ? h("p", { className: "task-deadline-error", role: "alert" }, error) : null,
         h("div", { className: "task-add-popover-actions task-deadline-actions" },
-            value?.deadline_at ? h("button", { type: "button", className: "task-secondary-button task-deadline-clear", onClick: onClear }, "Clear") : null,
+            value?.deadline_at ? h("button", { type: "button", className: "task-secondary-button task-deadline-clear", disabled: saving, onClick: () => { void clear(); } }, "Clear") : null,
             h("span", { className: "task-deadline-action-spacer" }),
             h("button", { type: "button", className: "task-secondary-button", onClick: onCancel }, "Cancel"),
-            h("button", { type: "button", className: "task-primary-button", onClick: apply }, "Apply")
+            h("button", { type: "button", className: "task-primary-button", disabled: saving, onClick: () => { void apply(); } }, saving ? "Saving…" : "Apply")
         )
     );
 }

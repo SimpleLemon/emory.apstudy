@@ -10,6 +10,7 @@ const onboardingState = {
     emoryStudent: onboardingData.emoryStudent,
     emoryEmail: onboardingData.emoryEmail,
     school: onboardingData.school,
+    major: onboardingData.major,
     courses: onboardingData.courses,
     defaultTerm: document.getElementById('default-term').value,
     term: document.getElementById('default-term').value,
@@ -47,6 +48,7 @@ const emoryEmailInput = document.getElementById('emory-email');
 const universityField = document.getElementById('university-field');
 const universityInput = document.getElementById('university-school');
 const universityOptions = document.getElementById('university-options');
+const majorInput = document.getElementById('onboarding-major');
 const reviewEducationLevel = document.getElementById('review-education-level');
 const reviewClassYear = document.getElementById('review-class-year');
 const reviewEmoryStudent = document.getElementById('review-emory-student');
@@ -98,11 +100,36 @@ function suggestUsername(value) {
     return base.slice(0, USERNAME_MAX_LENGTH);
 }
 
+function codePointLength(value) {
+    return Array.from(String(value || '').trim()).length;
+}
+
+function validateProfileTextField(field) {
+    const { input, counter, error, label, minimum, maximum } = field;
+    if (!input) return true;
+    const value = input.value.trim();
+    const length = codePointLength(value);
+    let message = '';
+    if (length < minimum) message = `${label} is required.`;
+    else if (length > maximum) message = `${label} must be ${maximum} characters or fewer.`;
+    const counterElement = document.getElementById(counter);
+    const errorElement = document.getElementById(error);
+    if (counterElement) counterElement.textContent = `${length} / ${maximum} characters`;
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.toggle('hidden', !message);
+    }
+    input.setCustomValidity(message);
+    input.setAttribute('aria-invalid', String(Boolean(message)));
+    if (message) formField()?.markInvalid?.(input);
+    else formField()?.clearInvalid?.(input);
+    return !message;
+}
+
 function validateAccountStep() {
     const displayName = displayNameInput?.value.trim() || '';
-    if (!displayName) {
-        formField()?.markInvalid?.(displayNameInput);
-        showError('Display name is required.');
+    if (!validateProfileTextField(PROFILE_TEXT_FIELDS[0])) {
+        showError(displayNameInput.validationMessage);
         return false;
     }
     const rawUsername = usernameInput?.value.trim() || '';
@@ -172,6 +199,11 @@ const USERNAME_RESERVED = new Set([
     'users',
 ]);
 const EMORY_SCHOOL_NAME = 'Emory University';
+const PROFILE_TEXT_FIELDS = [
+    { input: displayNameInput, counter: 'onboarding-display-name-counter', error: 'onboarding-display-name-error', label: 'Display name', minimum: 1, maximum: 80 },
+    { input: universityInput, counter: 'onboarding-school-counter', error: 'onboarding-school-error', label: 'School', minimum: 0, maximum: 160 },
+    { input: majorInput, counter: 'onboarding-major-counter', error: 'onboarding-major-error', label: 'Major', minimum: 0, maximum: 120 },
+];
 const SEGMENTED_OPTION_CLASSES = 'inline-flex min-h-[48px] w-full items-center justify-center rounded-xl border border-outline-variant/30 bg-surface-container/[0.65] px-4 py-3 text-sm font-medium text-on-surface transition duration-200 ease-out hover:border-outline-variant/50 hover:bg-surface-container-high/90 focus:outline-none focus:ring-1 focus:ring-primary/50 aria-pressed:border-primary/30 aria-pressed:bg-primary/15';
 const COURSE_CARD_CLASSES = 'rounded-2xl border border-outline-variant/20 bg-surface-container p-4';
 const COURSE_SUGGESTION_CLASSES = 'block w-full appearance-none border-0 bg-transparent px-4 py-3 text-left text-sm text-on-surface transition-colors hover:bg-surface-container-high focus:bg-surface-container-high focus:outline-none';
@@ -543,6 +575,14 @@ function validateEducationStep() {
         }
         formField()?.clearInvalid?.(emoryEmailInput);
     }
+    if (shouldShowUniversityField() && !validateProfileTextField(PROFILE_TEXT_FIELDS[1])) {
+        showError(universityInput.validationMessage);
+        return false;
+    }
+    if (!validateProfileTextField(PROFILE_TEXT_FIELDS[2])) {
+        showError(majorInput.validationMessage);
+        return false;
+    }
     return true;
 }
 function renderCourseList() {
@@ -862,7 +902,8 @@ document.querySelectorAll('.btn-next').forEach((button) => {
                 const payload = {
                     education_level: onboardingState.educationLevel,
                     class_year: shouldShowClassYear() ? onboardingState.classYear : null,
-                    school: onboardingState.emoryStudent === true ? EMORY_SCHOOL_NAME : (shouldShowUniversityField() ? onboardingState.school : null),
+                    school: onboardingState.emoryStudent === true ? EMORY_SCHOOL_NAME : (shouldShowUniversityField() ? onboardingState.school : ''),
+                    major: onboardingState.major,
                     emory_student: shouldShowEmoryStudentToggle() ? onboardingState.emoryStudent : null,
                     emory_email: shouldShowEmoryEmail() ? onboardingState.emoryEmail : null,
                 };
@@ -947,6 +988,7 @@ document.querySelectorAll('#emory-student-group button[data-emory-student]').for
 form.addEventListener('input', (event) => {
     if (event.target === displayNameInput) {
         onboardingState.displayName = displayNameInput.value;
+        validateProfileTextField(PROFILE_TEXT_FIELDS[0]);
         markDirty();
         return;
     }
@@ -965,10 +1007,16 @@ form.addEventListener('input', (event) => {
     }
     if (event.target === universityInput) {
         syncFieldFromInput(universityInput, 'school');
+        validateProfileTextField(PROFILE_TEXT_FIELDS[1]);
         if (universitySearchTimeout) {
             window.clearTimeout(universitySearchTimeout);
         }
         universitySearchTimeout = window.setTimeout(() => searchUniversities(universityInput.value), 180);
+        return;
+    }
+    if (event.target === majorInput) {
+        syncFieldFromInput(majorInput, 'major');
+        validateProfileTextField(PROFILE_TEXT_FIELDS[2]);
         return;
     }
     if (event.target === courseSearch) {
@@ -987,6 +1035,9 @@ form.addEventListener('change', (event) => {
     }
     if (event.target === universityInput) {
         syncFieldFromInput(universityInput, 'school');
+    }
+    if (event.target === majorInput) {
+        syncFieldFromInput(majorInput, 'major');
     }
 });
 document.getElementById('add-course-button').addEventListener('click', async () => {
@@ -1100,6 +1151,9 @@ function initializeOnboarding() {
     if (onboardingState.school) {
         universityInput.value = onboardingState.school;
     }
+    if (onboardingState.major) {
+        majorInput.value = onboardingState.major;
+    }
     bindHelperText(displayNameInput, displayNameHelp);
     bindHelperText(usernameInput, usernameHelp);
     formField()?.bindAutoClear?.([
@@ -1107,6 +1161,8 @@ function initializeOnboarding() {
         usernameInput,
         classYearInput,
         emoryEmailInput,
+        universityInput,
+        majorInput,
         courseCode,
         document.getElementById('canvas-feed-url'),
     ]);
@@ -1114,6 +1170,7 @@ function initializeOnboarding() {
         formField()?.bindAutoClear?.(input);
     });
     syncEducationVisibility();
+    PROFILE_TEXT_FIELDS.forEach((field) => validateProfileTextField(field));
     renderCourseList();
     updateAddCourseButtonState();
     loadTerms();

@@ -36,6 +36,7 @@
             uploadErrorMessage,
             uploadItemHtml,
             expiryOptionForDate,
+            sendUpload,
         } = callbacks;
 
         function openUploadModal(folderId = state.currentFolderId, files = []) {
@@ -151,21 +152,26 @@
 
             setButtonBusy(els.uploadButton, true);
             showProgress(0);
-            const xhr = new XMLHttpRequest();
-            xhr.open("POST", "/api/files/upload", true);
-            xhr.responseType = "json";
-            const finishUploadMutation = global.APStudyPendingMutations?.begin("file-upload");
-            xhr.upload.onprogress = (event) => {
-                if (!event.lengthComputable) return;
-                showProgress(Math.round((event.loaded / event.total) * 100));
+            let xhr = null;
+            let finishUploadMutation = null;
+            let cleanedUp = false;
+            const cleanupUpload = () => {
+                if (cleanedUp) return;
+                cleanedUp = true;
+                setButtonBusy(els.uploadButton, false);
+                resetProgress();
+                finishUploadMutation?.();
             };
-            xhr.onload = async () => {
+            const reportUploadError = (request, error = null) => {
+                const message = error?.message || uploadErrorMessage(request, parseUploadResponse(request));
+                notify(message || "Upload failed. Try again in a moment.", "error", { modalError: els.uploadError });
+            };
+            const handleLoad = async (eventOrRequest) => {
+                const request = eventOrRequest?.currentTarget || eventOrRequest || xhr;
                 try {
-                    setButtonBusy(els.uploadButton, false);
-                    resetProgress();
-                    const payload = parseUploadResponse(xhr) || {};
-                    if (xhr.status < 200 || xhr.status >= 300) {
-                        const message = uploadErrorMessage(xhr, payload);
+                    const payload = parseUploadResponse(request) || {};
+                    if (request?.status < 200 || request?.status >= 300) {
+                        const message = uploadErrorMessage(request, payload);
                         notify(message, "error", { modalError: els.uploadError });
                         return;
                     }
@@ -176,19 +182,60 @@
                     } else {
                         showAlert("Upload complete.");
                     }
+                } catch (error) {
+                    reportUploadError(request, error);
                 } finally {
-                    finishUploadMutation?.();
+                    cleanupUpload();
                 }
             };
-            xhr.onerror = () => {
-                setButtonBusy(els.uploadButton, false);
-                resetProgress();
-                const message = uploadErrorMessage(xhr, parseUploadResponse(xhr));
-                notify(message, "error", { modalError: els.uploadError });
-                finishUploadMutation?.();
+            const handleError = (errorOrEvent) => {
+                const request = errorOrEvent?.xhr || errorOrEvent?.request
+                    || errorOrEvent?.currentTarget || xhr;
+                try {
+                    reportUploadError(request, errorOrEvent instanceof Error ? errorOrEvent : null);
+                } finally {
+                    cleanupUpload();
+                }
             };
-            xhr.onabort = () => finishUploadMutation?.();
-            xhr.send(formData);
+            const handleAbort = () => cleanupUpload();
+            const onProgress = (event) => {
+                if (!event.lengthComputable) return;
+                showProgress(Math.round((event.loaded / event.total) * 100));
+            };
+            try {
+                if (typeof global.APStudyHttp?.uploadXhr === "function") {
+                    const request = global.APStudyHttp.uploadXhr("/api/files/upload", {
+                        method: "POST",
+                        body: formData,
+                        responseType: "json",
+                        onProgress,
+                        pendingLabel: "file-upload",
+                    });
+                    Promise.resolve(request).then(handleLoad, handleError);
+                    return;
+                }
+
+                // The injected sender exists only for isolated workflow tests. In the
+                // application, refusing to send is safer than bypassing shared CSRF.
+                if (typeof sendUpload !== "function") {
+                    throw new Error("Upload service is unavailable. Refresh the page and try again.");
+                }
+                finishUploadMutation = global.APStudyPendingMutations?.begin("file-upload");
+                xhr = sendUpload({
+                    url: "/api/files/upload",
+                    method: "POST",
+                    body: formData,
+                    responseType: "json",
+                    onProgress,
+                    onLoad: handleLoad,
+                    onError: handleError,
+                    onAbort: handleAbort,
+                });
+                if (!xhr) throw new Error("Upload sender did not return a request");
+            } catch (error) {
+                reportUploadError(xhr, error);
+                cleanupUpload();
+            }
         }
 
         function openShareModal(type, item) {

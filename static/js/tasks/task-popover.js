@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createPortal } from "react-dom";
-import { getFloatingPosition } from "./task-floating.js";
+import { getFloatingPosition, shouldCloseFloatingLayer } from "./task-floating.js";
 
 const h = React.createElement;
 
@@ -8,6 +8,7 @@ export function AddTaskPopover({ popover, onClose, children }) {
     const popoverRef = React.useRef(null);
     const previousFocusRef = React.useRef(null);
     const onCloseRef = React.useRef(onClose);
+    const floatingOwner = `task-popover-${React.useId()}`;
     const popoverKey = popover ? `${popover.type}:${popover.nonce || 0}` : "";
     const [position, setPosition] = React.useState({ key: "", top: 0, left: 0, ready: false });
 
@@ -19,18 +20,20 @@ export function AddTaskPopover({ popover, onClose, children }) {
         if (!popover) return undefined;
         previousFocusRef.current = document.activeElement;
         const onPointerDown = (event) => {
-            if (popoverRef.current?.contains(event.target)) return;
-            if (event.target?.closest?.("[data-task-add-popover-trigger]")) return;
-            if (event.target?.closest?.("[data-task-floating-layer]")) return;
-            onCloseRef.current();
+            if (shouldCloseFloatingLayer(event, {
+                layers: [popoverRef.current],
+                owner: floatingOwner,
+                triggerAttribute: "data-task-add-popover-trigger",
+            })) onCloseRef.current();
         };
         const onKeyDown = (event) => {
             if (event.key === "Escape") onCloseRef.current();
         };
         const onScroll = (event) => {
-            if (popoverRef.current?.contains(event.target)) return;
-            if (event.target?.closest?.("[data-task-floating-layer]")) return;
-            onCloseRef.current();
+            if (shouldCloseFloatingLayer(event, {
+                layers: [popoverRef.current],
+                owner: floatingOwner,
+            })) onCloseRef.current();
         };
         const onResize = () => onCloseRef.current();
         document.addEventListener("pointerdown", onPointerDown);
@@ -77,11 +80,12 @@ export function AddTaskPopover({ popover, onClose, children }) {
         role: "dialog",
         "aria-label": "Task options",
         "data-task-floating-layer": "add-task-popover",
+        "data-task-floating-owner": floatingOwner,
         style: {
             top: `${ready ? position.top : 0}px`,
             left: `${ready ? position.left : 0}px`,
             visibility: ready ? "visible" : "hidden",
         },
-    }, children);
+    }, typeof children === "function" ? children({ floatingOwner }) : children);
     return document.body ? createPortal(layer, document.body) : layer;
 }

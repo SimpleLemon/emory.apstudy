@@ -1,5 +1,34 @@
 const DEFAULT_FLOATING_MARGIN = 10;
 
+export function composedEventPath(event) {
+    if (typeof event?.composedPath === "function") return event.composedPath();
+    const path = [];
+    let node = event?.target || null;
+    while (node) {
+        path.push(node);
+        node = node.parentNode || node.host || null;
+    }
+    if (typeof document !== "undefined" && !path.includes(document)) path.push(document);
+    if (typeof window !== "undefined" && !path.includes(window)) path.push(window);
+    return path;
+}
+
+function pathHasAttribute(path, attribute, value) {
+    return path.some((node) => {
+        if (typeof node?.getAttribute !== "function") return false;
+        const attributeValue = node.getAttribute(attribute);
+        return value == null ? attributeValue != null : attributeValue === value;
+    });
+}
+
+export function shouldCloseFloatingLayer(event, { layers = [], owner = "", triggerAttribute = "" } = {}) {
+    const path = composedEventPath(event);
+    if (layers.some((layer) => layer && path.includes(layer))) return false;
+    if (owner && pathHasAttribute(path, "data-task-floating-owner", owner)) return false;
+    if (triggerAttribute && pathHasAttribute(path, triggerAttribute)) return false;
+    return true;
+}
+
 function viewportSize() {
     return {
         width: Math.max(0, Number(window.innerWidth) || document.documentElement.clientWidth || 0),

@@ -16,6 +16,14 @@ export function createChatComposer(context) {
     return Boolean(thread && !thread.blocked);
   }
 
+  function isActiveRoom(room) {
+    return Boolean(
+      room
+      && state.activeRoom
+      && actions.roomKey(state.activeRoom) === actions.roomKey(room)
+    );
+  }
+
   function updateComposerSubmitState() {
     if (!els.sendButton) return;
     const hasText = Boolean(els.input?.value.trim());
@@ -67,36 +75,38 @@ export function createChatComposer(context) {
     actions.clearTypingPresence(room);
     const localId = `pending-${crypto.randomUUID()}`;
     const payloadBody = { content, attachment_ids: attachmentIds, ...gifSelection };
-    const optimistic = {
-      id: localId,
-      user_id: state.user?.id,
-      author_name: state.user?.name || state.user?.username || "You",
-      author_username: state.user?.username || "",
-      author_avatar_url: state.user?.picture_url || state.user?.picture || "",
-      content: content || (gifSelection.gif_id ? "GIF" : "Attachment"),
-      rendered_html: escapeHtml(content || ""),
-      created_at: new Date().toISOString(),
-      delivery_state: "sending",
-      can_delete: false,
-      attachments: [],
-    };
-    actions.applyIncomingMessages(room, [optimistic], { toBottom: true, markRead: false });
     try {
+      const optimistic = {
+        id: localId,
+        user_id: state.user?.id,
+        author_name: state.user?.name || state.user?.username || "You",
+        author_username: state.user?.username || "",
+        author_avatar_url: state.user?.picture_url || state.user?.picture || "",
+        content: content || (gifSelection.gif_id ? "GIF" : "Attachment"),
+        rendered_html: escapeHtml(content || ""),
+        created_at: new Date().toISOString(),
+        delivery_state: "sending",
+        can_delete: false,
+        attachments: [],
+      };
+      actions.applyIncomingMessages(room, [optimistic], { toBottom: true, markRead: false });
       const url = actions.currentRoomUrl(room);
       const payload = await fetchJson(url, {
         method: "POST",
         body: JSON.stringify(payloadBody),
       });
       actions.removeMessageFromCaches(localId);
-      els.input.value = "";
-      autosizeComposer();
-      extensions.attachments?.clear?.();
-      extensions.mediaPicker?.clear?.(true);
+      if (isActiveRoom(room)) {
+        els.input.value = "";
+        autosizeComposer();
+        extensions.attachments?.clear?.();
+        extensions.mediaPicker?.clear?.(true);
+      }
       const cache = actions.cacheFor(room);
       if (cache && payload.message) {
         actions.applyIncomingMessages(room, [payload.message], { toBottom: true });
       }
-      actions.refreshViewingPresence();
+      if (isActiveRoom(room)) actions.refreshViewingPresence();
       actions.schedulePersistentBootstrapSave();
     } catch (error) {
       const cache = actions.cacheFor(room);
@@ -104,7 +114,7 @@ export function createChatComposer(context) {
       if (failed) {
         failed.delivery_state = "failed";
         state.failedMessages.set(localId, { room, payload: payloadBody });
-        actions.patchMessageInDom(failed);
+        if (isActiveRoom(room)) actions.patchMessageInDom(failed);
         actions.schedulePersistentRoomSave(room);
       }
       actions.setStatus(error.message || "Unable to send message.", "error");
@@ -135,12 +145,14 @@ export function createChatComposer(context) {
       if (response.message) {
         actions.applyIncomingMessages(failed.room, [response.message], { toBottom: true });
       }
-      extensions.attachments?.clear?.();
-      extensions.mediaPicker?.clear?.(true);
+      if (isActiveRoom(failed.room)) {
+        extensions.attachments?.clear?.();
+        extensions.mediaPicker?.clear?.(true);
+      }
     } catch (error) {
       if (message) {
         message.delivery_state = "failed";
-        actions.patchMessageInDom(message);
+        if (isActiveRoom(failed.room)) actions.patchMessageInDom(message);
       }
       actions.setStatus(error.message || "Unable to send message.", "error");
     } finally {
@@ -181,6 +193,7 @@ export function createChatComposer(context) {
     autosizeComposer,
     bindEvents,
     retryMessage,
+    sendActiveMessage,
     setComposer,
     updateComposerSubmitState,
   };
