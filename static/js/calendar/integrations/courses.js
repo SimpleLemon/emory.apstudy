@@ -1,5 +1,8 @@
 (function () {
     function createCalendarCourses({
+        root = document,
+        lifecycle = null,
+        dataAdapter = null,
         state,
         constants,
         render,
@@ -11,6 +14,16 @@
             coursesModalAnimationMs,
             simulatedCalendarName,
         } = constants;
+
+        const query = (selector) => root?.querySelector?.(selector);
+        const doc = root.ownerDocument || document;
+        const view = doc.defaultView || window;
+        const storage = view.localStorage || localStorage;
+        const getActiveElement = () => doc.activeElement;
+
+        function requestController() {
+            return lifecycle?.trackAbortController?.() || new AbortController();
+        }
 
         function initializeCourseSelectionsFromStorage() {
             const persistedSelections = loadSelectedCourseSectionIds();
@@ -26,17 +39,19 @@
                 render();
                 return;
             }
+            const controller = requestController();
             try {
-                const res = await fetch("/api/atlas/sections/by-id", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        section_ids: missingIds,
-                        include_cancelled: true,
-                    }),
-                });
+                const result = dataAdapter?.loadCourseSectionsById
+                    ? await dataAdapter.loadCourseSectionsById({ sectionIds: missingIds, signal: controller.signal })
+                    : { response: await fetch("/api/atlas/sections/by-id", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ section_ids: missingIds, include_cancelled: true }),
+                        signal: controller.signal,
+                    }) };
+                const res = result.response || result;
                 if (!res.ok) return;
-                const payload = await res.json();
+                const payload = result.payload || await res.json();
                 const sections = Array.isArray(payload.sections) ? payload.sections : [];
                 const foundIds = new Set();
                 for (const section of sections) {
@@ -66,18 +81,20 @@
                 render();
             } catch (err) {
                 console.error("Failed to hydrate selected simulated sections:", err);
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
             }
         }
 
         function applyCoursesFiltersFromUrl() {
-            const url = new URL(window.location.href);
+            const url = new URL(view.location.href);
             state.courses.searchQuery = (url.searchParams.get("search") || "").trim();
             state.courses.searchInput = state.courses.searchQuery;
             state.courses.termFilter = (url.searchParams.get("term") || "").trim();
         }
 
         function writeCourseFiltersToUrl() {
-            const url = new URL(window.location.href);
+            const url = new URL(view.location.href);
             const search = state.courses.searchQuery.trim();
             const term = state.courses.termFilter.trim();
             if (search) {
@@ -90,7 +107,7 @@
             } else {
                 url.searchParams.delete("term");
             }
-            window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
+            view.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`);
         }
 
         function formatTermLabel(term) {
@@ -99,7 +116,7 @@
             return `${parts[0]} ${parts[1]}`;
         }
 
-        function openCoursesModal(trigger = document.activeElement) {
+        function openCoursesModal(trigger = getActiveElement()) {
             if (state.courses.modalOpen && !state.courses.isClosing) {
                 closeCoursesModal();
                 return;
@@ -112,7 +129,7 @@
             state.courses.pinnedSectionIds = new Set(state.courses.selectedSectionIds);
             state.courses.showSelectedOnly = state.courses.pinnedSectionIds.size > 0;
             applyCourseFilters();
-            document.body.classList.add("overflow-hidden");
+            root.classList.add("overflow-hidden");
             renderCoursesModal();
             setCoursesModalBackgroundInert(true);
             if (!state.courses.indexLoaded && !state.courses.loading) {
@@ -122,8 +139,8 @@
 
         function closeCoursesModal() {
             if (!state.courses.modalOpen || state.courses.isClosing) return;
-            const overlay = document.getElementById("courses-modal-overlay");
-            const panel = document.getElementById("courses-modal-panel");
+            const overlay = query("#courses-modal-overlay");
+            const panel = query("#courses-modal-panel");
             state.courses.isClosing = true;
             if (overlay) {
                 overlay.classList.add("opacity-0", "pointer-events-none");
@@ -131,14 +148,15 @@
             if (panel) {
                 panel.classList.add("-translate-y-3", "opacity-0");
             }
-            window.setTimeout(() => {
+            const schedule = lifecycle?.setTimeout || view.setTimeout.bind(view);
+            schedule(() => {
                 const trigger = state.courses.modalTriggerEl;
                 state.courses.pinnedSectionIds = new Set();
                 state.courses.showSelectedOnly = false;
                 state.courses.modalOpen = false;
                 state.courses.isClosing = false;
                 state.courses.modalTriggerEl = null;
-                document.body.classList.remove("overflow-hidden");
+                root.classList.remove("overflow-hidden");
                 renderCoursesModal();
                 setCoursesModalBackgroundInert(false);
                 if (trigger?.isConnected) trigger.focus({ preventScroll: true });
@@ -158,20 +176,20 @@
         }
 
         function loadSelectedCourseSectionIds() {
-            const raw = localStorage.getItem(coursesSelectionStorageKey);
+            const raw = storage.getItem(coursesSelectionStorageKey);
             if (!raw) return [];
             try {
                 const parsed = JSON.parse(raw);
                 return Array.isArray(parsed) ? parsed.map((item) => String(item)) : [];
             } catch (err) {
                 console.warn("Ignoring invalid saved course selections:", err);
-                localStorage.removeItem(coursesSelectionStorageKey);
+                storage.removeItem(coursesSelectionStorageKey);
                 return [];
             }
         }
 
         function saveSelectedCourseSectionIds() {
-            localStorage.setItem(
+            storage.setItem(
                 coursesSelectionStorageKey,
                 JSON.stringify(Array.from(state.courses.selectedSectionIds))
             );
@@ -188,15 +206,25 @@
             state.courses.loading = true;
             state.courses.error = "";
             renderCoursesModal();
+            const controller = requestController();
             try {
-                const [termsRes, sectionsRes] = await Promise.all([
-                    fetch("/api/atlas/terms"),
-                    fetch("/api/atlas/sections?include_cancelled=1"),
-                ]);
+                const result = dataAdapter?.loadCourses
+                    ? await dataAdapter.loadCourses({ signal: controller.signal })
+                    : await (async () => {
+                        const [termsRes, sectionsRes] = await Promise.all([
+                            fetch("/api/atlas/terms", { signal: controller.signal }),
+                            fetch("/api/atlas/sections?include_cancelled=1", { signal: controller.signal }),
+                        ]);
+                        return {
+                            termsResponse: termsRes,
+                            sectionsResponse: sectionsRes,
+                            termsPayload: await termsRes.json(),
+                            sectionsPayload: await sectionsRes.json(),
+                        };
+                    })();
+                const { termsResponse: termsRes, sectionsResponse: sectionsRes, termsPayload, sectionsPayload } = result;
                 if (!termsRes.ok) throw new Error("Unable to load terms");
                 if (!sectionsRes.ok) throw new Error("Unable to load sections");
-                const termsPayload = await termsRes.json();
-                const sectionsPayload = await sectionsRes.json();
                 state.courses.terms = Array.isArray(termsPayload.terms) ? termsPayload.terms : [];
                 state.courses.sections = Array.isArray(sectionsPayload.sections) ? sectionsPayload.sections : [];
                 state.courses.indexLoaded = true;
@@ -231,6 +259,7 @@
                 state.courses.indexLoaded = false;
                 state.courses.error = err?.message || "Failed to load courses";
             } finally {
+                lifecycle?.releaseAbortController?.(controller);
                 state.courses.loading = false;
                 render();
             }
@@ -327,6 +356,8 @@
         }
 
         const { renderCoursesModal, setCoursesModalBackgroundInert } = window.APStudyCalendarCourseModal.createCourseModalRenderer({
+            root,
+            lifecycle,
             state,
             escapeHtml,
             formatTermLabel,

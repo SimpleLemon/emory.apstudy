@@ -1,5 +1,7 @@
 (function () {
     function createCalendarData({
+        lifecycle = null,
+        dataAdapter = null,
         state,
         constants,
         buildSimulatedMeetingEvents,
@@ -21,6 +23,10 @@
             taskCalendarName,
             toggleRefreshDelayMs,
         } = constants;
+
+        function requestSignal() {
+            return lifecycle?.trackAbortController?.() || new AbortController();
+        }
 
         function parseEventDate(dateStr, isAllDay) {
             if (!dateStr) return new Date();
@@ -139,12 +145,27 @@
         }
 
         async function fetchEventsForRange(range) {
-            const res = await fetch(buildEventsUrl(range));
-            if (!res.ok) throw new Error("Unable to fetch calendar events");
-            return res.json();
+            if (lifecycle?.isDisposed?.()) return { events: [] };
+            const controller = requestSignal();
+            try {
+                if (dataAdapter?.loadRange) {
+                    return await dataAdapter.loadRange({
+                        range,
+                        readOnly: state.public.readOnly,
+                        shareCode: state.public.shareCode,
+                        signal: controller.signal,
+                    });
+                }
+                const res = await fetch(buildEventsUrl(range), { signal: controller.signal });
+                if (!res.ok) throw new Error("Unable to fetch calendar events");
+                return res.json();
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
+            }
         }
 
         async function applyEventsPayload(payload, options = {}) {
+            if (lifecycle?.isDisposed?.()) return;
             const range = options.range || null;
             state.calendarSources = Array.isArray(payload?.calendar_sources) ? payload.calendar_sources : [];
             const newEvents = normalizeEventsList(payload?.events);
@@ -192,7 +213,7 @@
         }
 
         async function maybeRefreshIfStale(payload, range) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (!shouldRefreshInBackground(payload) || state.refreshInFlight) return;
             state.refreshInFlight = true;
             try {
@@ -207,6 +228,7 @@
         }
 
         async function ensureEventsForRange(range) {
+            if (lifecycle?.isDisposed?.()) return;
             if (state.loadedRange && rangeCovers(state.loadedRange, range)) return;
             const key = getRangeKey(range);
             if (state.pendingRanges.has(key)) return;
@@ -222,7 +244,7 @@
         }
 
         async function runManualRefresh(range) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (state.refreshInFlight) return;
             state.refreshInFlight = true;
             try {
@@ -237,6 +259,7 @@
         }
 
         async function loadCalendarData() {
+            if (lifecycle?.isDisposed?.()) return;
             state.loadingDashboard = true;
             render();
 
@@ -284,11 +307,18 @@
         }
 
         async function refreshCalendarFeed() {
+            if (lifecycle?.isDisposed?.()) return false;
+            let controller = null;
             try {
-                const res = await fetch("/api/calendar/refresh", { method: "POST" });
+                controller = requestSignal();
+                const res = dataAdapter?.refresh
+                    ? await dataAdapter.refresh({ signal: controller.signal })
+                    : await fetch("/api/calendar/refresh", { method: "POST", signal: controller.signal });
                 return res.ok;
             } catch (err) {
                 console.warn("Calendar feed refresh request failed:", err);
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
             }
             return false;
         }
@@ -350,9 +380,10 @@
 
         function scheduleCalendarToggleRefresh(delayMs = toggleRefreshDelayMs) {
             if (state.ui.toggleRefreshTimer) {
-                clearTimeout(state.ui.toggleRefreshTimer);
+                lifecycle?.clearTimeout?.(state.ui.toggleRefreshTimer);
             }
-            state.ui.toggleRefreshTimer = setTimeout(() => {
+            const schedule = lifecycle?.setTimeout || window.setTimeout.bind(window);
+            state.ui.toggleRefreshTimer = schedule(() => {
                 state.ui.toggleRefreshTimer = null;
                 void runCalendarToggleRefresh();
             }, delayMs);

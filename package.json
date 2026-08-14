@@ -9,6 +9,7 @@
     "build:sortable": "vite build --config vite.sortable.config.mjs",
     "build:notes": "vite build --config vite.notes.config.mjs",
     "build:tasks": "vite build --config vite.tasks.config.mjs",
+    "build:calendar-extension": "node static/js/calendar/build-extension.mjs",
     "build": "npm run build:css && npm run build:sortable && npm run build:notes && npm run build:tasks",
     "lint": "eslint . --max-warnings 3283",
     "collab:start": "node collaboration/server.mjs",

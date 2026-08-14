@@ -1,5 +1,6 @@
 (function () {
     function createCalendarMenu({
+        root = document,
         state,
         constants,
         callbacks,
@@ -19,18 +20,20 @@
             getStartOfWeek,
         } = callbacks;
 
+        const query = (selector) => root?.querySelector?.(selector);
+
         function renderCalendarMenu() {
-            const container = document.getElementById("calendar-menu");
+            const container = query("#calendar-menu");
             if (!container) return;
             if (!state.ui.calendarMenuOpen) {
                 container.style.display = "none";
                 container.innerHTML = "";
-                document.getElementById("calendar-toggle-menu")?.setAttribute("aria-expanded", "false");
+                query("#calendar-toggle-menu")?.setAttribute("aria-expanded", "false");
                 return;
             }
             container.innerHTML = buildCalendarMenuHtml();
             container.style.display = "block";
-            document.getElementById("calendar-toggle-menu")?.setAttribute("aria-expanded", "true");
+            query("#calendar-toggle-menu")?.setAttribute("aria-expanded", "true");
         }
 
         function buildCalendarMenuHtml() {

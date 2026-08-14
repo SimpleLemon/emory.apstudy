@@ -2,6 +2,31 @@
    Dashboard Calendar & Assignments
    ──────────────────────────────────────────────────────────────────────────── */
 /* ── Constants ─────────────────────────────────────────────────────────────── */
+import { createCalendarLifecycle } from "./lifecycle.js";
+import { normalizeCalendarCapabilities } from "./capabilities.js";
+import { createCalendarExtensionUi } from "./extension-ui.js";
+
+export function mountCalendar(root, dataAdapter, capabilities = {}) {
+    if (!root || root.nodeType !== 1) return () => {};
+
+    const doc = root.ownerDocument;
+    if (!doc) return () => {};
+    const view = capabilities.view || doc.defaultView || globalThis;
+    const runtimeWindow = capabilities.window || view;
+    const window = runtimeWindow;
+    const pageRoot = capabilities.pageRoot?.nodeType === 1 ? capabilities.pageRoot : root;
+    const body = doc.body;
+    const canvasPageReadOnly = body?.dataset.calendarReadonly === "true";
+    const calendarCapabilities = normalizeCalendarCapabilities({
+        ...capabilities,
+        readOnly: canvasPageReadOnly || capabilities.readOnly === true,
+        shareMode: canvasPageReadOnly || capabilities.shareMode === true,
+    });
+    const lifecycle = capabilities.lifecycle
+        || createCalendarLifecycle({ view });
+    const adapter = dataAdapter || capabilities.dataAdapter || {};
+    let disposed = false;
+
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MINUTES_PER_DAY = 1440;
 const HOUR_HEIGHT_PX = 60;
@@ -17,18 +42,18 @@ const TASK_CALENDAR_ID = "local:tasks";
 const TASK_CALENDAR_NAME = "Tasks";
 const COURSES_SELECTION_STORAGE_KEY = "coursesSelectedSectionIds";
 const COURSES_MODAL_ANIMATION_MS = 180;
-const DEFAULT_DASHBOARD_VIEW = document.body?.dataset.defaultDashboardView === "month" ? "month" : "week";
+const DEFAULT_DASHBOARD_VIEW = body?.dataset.defaultDashboardView === "month" ? "month" : "week";
 const EVENTS_CACHE_KEY = "calendarEventsCache";
 const DEFAULT_CALENDAR_BUFFER_DAYS = 7;
 const CALENDAR_BUFFER_DAYS = Number.isFinite(
-    Number.parseInt(document.body?.dataset.calendarBufferDays, 10)
+    Number.parseInt(body?.dataset.calendarBufferDays, 10)
 )
-    ? Number.parseInt(document.body?.dataset.calendarBufferDays, 10)
+    ? Number.parseInt(body?.dataset.calendarBufferDays, 10)
     : DEFAULT_CALENDAR_BUFFER_DAYS;
-const CALENDAR_READ_ONLY = document.body?.dataset.calendarReadonly === "true";
-const PUBLIC_SHARE_CODE = document.body?.dataset.publicShareCode || "";
-const PUBLIC_CALENDAR_TITLE = document.body?.dataset.publicCalendarTitle || "Shared Calendar";
-const PUBLIC_CALENDAR_RANGE_LABEL = document.body?.dataset.publicCalendarRangeLabel || "Shared dates";
+const CALENDAR_READ_ONLY = canvasPageReadOnly;
+const PUBLIC_SHARE_CODE = body?.dataset.publicShareCode || "";
+const PUBLIC_CALENDAR_TITLE = body?.dataset.publicCalendarTitle || "Shared Calendar";
+const PUBLIC_CALENDAR_RANGE_LABEL = body?.dataset.publicCalendarRangeLabel || "Shared dates";
 const CALENDAR_SHARE_CLOSE_MS = 140;
 const PREFERENCE_SAVE_DELAY_MS = 1000;
 const PREFERENCE_SAVE_TIMEOUT_MS = 5000;
@@ -65,7 +90,7 @@ const state = window.APStudyCalendarState.createCalendarState({
     publicCalendarRangeLabel: PUBLIC_CALENDAR_RANGE_LABEL,
     publicCalendarTitle: PUBLIC_CALENDAR_TITLE,
     publicShareCode: PUBLIC_SHARE_CODE,
-    readOnly: CALENDAR_READ_ONLY,
+    readOnly: calendarCapabilities.readOnly,
 });
 const calendarCore = window.APStudyCalendarCore.createCalendarCore({
     state,
@@ -93,6 +118,7 @@ const {
     isLocalCalendar,
 } = calendarCore;
 const calendarMenu = window.APStudyCalendarMenu.createCalendarMenu({
+    root: pageRoot,
     state,
     constants: {
         canvasCalendarName: CANVAS_CALENDAR_NAME,
@@ -116,6 +142,7 @@ const {
     renderCalendarMenu,
 } = calendarMenu;
 const calendarRenderShell = window.APStudyCalendarRenderShell.createCalendarRenderShell({
+    root: pageRoot,
     state,
     constants: {
         compactCalendarQuery: COMPACT_CALENDAR_QUERY,
@@ -135,10 +162,23 @@ const calendarRenderShell = window.APStudyCalendarRenderShell.createCalendarRend
 });
 const {
     isCompactCalendarViewport,
-    render,
+    render: renderCalendarShell,
     renderCalendarView,
 } = calendarRenderShell;
+const calendarExtensionUi = createCalendarExtensionUi({
+    root: pageRoot,
+    state,
+    adapter,
+    capabilities: calendarCapabilities,
+    lifecycle,
+});
+const render = (...args) => {
+    renderCalendarShell(...args);
+    calendarExtensionUi.render();
+};
 const calendarPreferences = window.APStudyCalendarPreferences.createCalendarPreferences({
+    lifecycle,
+    dataAdapter: adapter,
     state,
     constants: {
         batchEndpoint: PREFERENCE_BATCH_ENDPOINT,
@@ -163,6 +203,9 @@ const {
     writeCalendarStateToStorage,
 } = calendarPreferences;
 const calendarCourses = window.APStudyCalendarCourses.createCalendarCourses({
+    root: pageRoot,
+    lifecycle,
+    dataAdapter: adapter,
     state,
     constants: {
         coursesSelectionStorageKey: COURSES_SELECTION_STORAGE_KEY,
@@ -188,6 +231,8 @@ const {
     buildSimulatedMeetingEvents,
 } = calendarCourses;
 const calendarData = window.APStudyCalendarData.createCalendarData({
+    lifecycle,
+    dataAdapter: adapter,
     state,
     constants: {
         calendarBufferDays: CALENDAR_BUFFER_DAYS,
@@ -245,6 +290,8 @@ const {
     getEventsForDay,
 } = calendarEventRender;
 const calendarUiActions = window.APStudyCalendarUiActions.createCalendarUiActions({
+    root: pageRoot,
+    lifecycle,
     state,
     callbacks: {
         getCalendarEventColor: getEventCalendarColor,
@@ -269,6 +316,7 @@ const {
     positionCalendarContextMenu,
 } = calendarUiActions;
 const calendarAgenda = window.APStudyCalendarAgenda.createCalendarAgenda({
+    root: pageRoot,
     state,
     callbacks: {
         getCalendarEventColor: getEventCalendarColor,
@@ -350,6 +398,9 @@ const {
     buildWeekViewHtml,
 } = calendarWeekView;
 const calendarSources = window.APStudyCalendarSources.createCalendarSources({
+    root: pageRoot,
+    lifecycle,
+    dataAdapter: adapter,
     state,
     constants: {
         eventsCacheKey: EVENTS_CACHE_KEY,
@@ -378,6 +429,9 @@ const {
     openRgbModal,
 } = calendarSources;
 const calendarShare = window.APStudyCalendarShare.createCalendarShare({
+    root: pageRoot,
+    lifecycle,
+    dataAdapter: adapter,
     state,
     constants: {
         calendarShareCloseMs: CALENDAR_SHARE_CLOSE_MS,
@@ -393,6 +447,8 @@ const {
     openCalendarShareModal,
 } = calendarShare;
 const calendarControls = window.APStudyCalendarControls.createCalendarControls({
+    root: pageRoot,
+    lifecycle,
     state,
     callbacks: {
         applyCourseFilters,
@@ -438,7 +494,22 @@ const {
     hideCalendarHoverCard,
     wireControls,
 } = calendarControls;
-window.APStudyCalendarBootstrap.createCalendarBootstrap({
+const compatibilityKeys = [
+    "state",
+    "render",
+    "loadCalendarData",
+    "refreshCalendarFeed",
+    "ensureEventsForRange",
+    "runManualRefresh",
+    "getBufferedRangeForView",
+    "getCalendarEventByRef",
+    "getCalendarOptionsForEventForm",
+    "getDefaultCalendarIdForEventForm",
+    "getCalendarColorForEventForm",
+    "getStandardCalendarColors",
+];
+const previousCompatibility = new Map(compatibilityKeys.map((key) => [key, window[key]]));
+const bootstrap = window.APStudyCalendarBootstrap.createCalendarBootstrap({
     state,
     callbacks: {
         applyCoursesFiltersFromUrl,
@@ -455,5 +526,39 @@ window.APStudyCalendarBootstrap.createCalendarBootstrap({
         runManualRefresh,
         wireControls,
     },
-}).register();
+});
+const originalDocumentAddEventListener = doc.addEventListener;
+if (typeof originalDocumentAddEventListener === "function") {
+    doc.addEventListener = function (type, listener, options) {
+        if (type === "DOMContentLoaded" && typeof listener === "function") {
+            originalDocumentAddEventListener.call(this, type, listener, options);
+            lifecycle.addCleanup(() => doc.removeEventListener(type, listener, options));
+            return undefined;
+        }
+        return originalDocumentAddEventListener.call(this, type, listener, options);
+    };
+}
+try {
+    bootstrap.register();
+} finally {
+    if (typeof originalDocumentAddEventListener === "function") {
+        doc.addEventListener = originalDocumentAddEventListener;
+    }
+}
+const mountedCompatibility = new Map(compatibilityKeys.map((key) => [key, window[key]]));
+
+return () => {
+    if (disposed) return;
+    disposed = true;
+    calendarExtensionUi.dispose();
+    lifecycle.dispose();
+    for (const key of compatibilityKeys) {
+        if (window[key] === mountedCompatibility.get(key)) {
+            const previous = previousCompatibility.get(key);
+            if (previous === undefined) delete window[key];
+            else window[key] = previous;
+        }
+    }
+};
+}
 /* ── Controls ──────────────────────────────────────────────────────────────── */

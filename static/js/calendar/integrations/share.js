@@ -1,5 +1,8 @@
 (function () {
     function createCalendarShare({
+        root = document,
+        lifecycle = null,
+        dataAdapter = null,
         state,
         constants,
         escapeHtml,
@@ -8,6 +11,26 @@
         trackCalendarMutation,
     }) {
         const { calendarShareCloseMs, simulatedCalendarName } = constants;
+        const doc = root.ownerDocument || root;
+        const view = doc.defaultView || window;
+        const mountNode = root.nodeType === 9 ? (root.body || root.documentElement) : root;
+
+        function requestController() {
+            return lifecycle?.trackAbortController?.() || new AbortController();
+        }
+
+        async function requestShare(path, options = {}) {
+            const controller = requestController();
+            try {
+                if (dataAdapter?.saveShare) {
+                    return await dataAdapter.saveShare({ ...options, path, signal: controller.signal });
+                }
+                const response = await fetch(path, { ...options, signal: controller.signal });
+                return { response };
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
+            }
+        }
 
         function closeCalendarShareModal(immediate = false) {
             if (state.ui.shareModalEl) {
@@ -16,7 +39,8 @@
                     modal.remove();
                 } else {
                     modal.classList.add("is-closing");
-                    window.setTimeout(() => {
+                    const schedule = lifecycle?.setTimeout || view.setTimeout.bind(view);
+                    schedule(() => {
                         modal.remove();
                     }, calendarShareCloseMs);
                 }
@@ -27,17 +51,25 @@
         }
 
         async function loadCalendarShares(force = false) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (state.shares.loading || (state.shares.loaded && !force)) return;
             state.shares.loading = true;
             state.shares.error = "";
             renderCalendarShareModal();
             try {
-                const res = await fetch("/api/calendar/shares");
-                const payload = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(payload.error || "Unable to load share links.");
-                state.shares.items = Array.isArray(payload.shares) ? payload.shares : [];
-                state.shares.loaded = true;
+                const controller = requestController();
+                try {
+                    const result = dataAdapter?.loadShares
+                        ? await dataAdapter.loadShares({ signal: controller.signal })
+                        : { response: await fetch("/api/calendar/shares", { signal: controller.signal }) };
+                    const res = result.response || result;
+                    const payload = result.payload || await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(payload.error || "Unable to load share links.");
+                    state.shares.items = Array.isArray(payload.shares) ? payload.shares : [];
+                    state.shares.loaded = true;
+                } finally {
+                    lifecycle?.releaseAbortController?.(controller);
+                }
             } catch (err) {
                 state.shares.error = err.message || "Unable to load share links.";
             } finally {
@@ -49,12 +81,16 @@
         function openCalendarShareModal() {
             if (state.public.readOnly) return;
             closeCalendarShareModal(true);
-            const modal = document.createElement("div");
+            const modal = doc.createElement("div");
             modal.className = "calendar-info-modal calendar-share-modal";
-            modal.addEventListener("click", onCalendarShareModalClick);
-            modal.addEventListener("change", onCalendarShareModalChange);
-            modal.addEventListener("submit", onCalendarShareModalSubmit);
-            document.body.appendChild(modal);
+            const listen = lifecycle?.addEventListener
+                ? lifecycle.addEventListener.bind(lifecycle)
+                : (target, type, handler) => target.addEventListener(type, handler);
+            listen(modal, "click", onCalendarShareModalClick);
+            listen(modal, "change", onCalendarShareModalChange);
+            listen(modal, "submit", onCalendarShareModalSubmit);
+            mountNode.appendChild(modal);
+            lifecycle?.trackNode?.(modal);
             state.ui.shareModalEl = modal;
             renderCalendarShareModal();
             void loadCalendarShares();
@@ -244,12 +280,16 @@
             const editingId = state.shares.editingId;
             renderCalendarShareModal();
             try {
-                const res = await trackCalendarMutation(fetch(editingId ? `/api/calendar/shares/${encodeURIComponent(editingId)}` : "/api/calendar/shares", {
-                    method: editingId ? "PATCH" : "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                }));
-                const response = await res.json().catch(() => ({}));
+                const result = await trackCalendarMutation(requestShare(
+                    editingId ? `/api/calendar/shares/${encodeURIComponent(editingId)}` : "/api/calendar/shares",
+                    {
+                        method: editingId ? "PATCH" : "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload),
+                    }
+                ));
+                const res = result.response || result;
+                const response = result.payload || await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(response.error || "Unable to save share link.");
                 const share = response.share;
                 if (share?.id) {
@@ -272,12 +312,13 @@
             state.shares.notice = "";
             renderCalendarShareModal();
             try {
-                const res = await trackCalendarMutation(fetch(path, {
+                const result = await trackCalendarMutation(requestShare(path, {
                     method: options.method || "POST",
                     headers: { "Content-Type": "application/json" },
                     body: options.body ? JSON.stringify(options.body) : undefined,
                 }));
-                const response = await res.json().catch(() => ({}));
+                const res = result.response || result;
+                const response = result.payload || await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(response.error || "Unable to update share link.");
                 const share = response.share;
                 if (share?.id) {
@@ -297,18 +338,18 @@
 
         async function copyTextToClipboard(value) {
             if (!value) return false;
-            if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(value);
+            if (view.navigator?.clipboard?.writeText) {
+                await view.navigator.clipboard.writeText(value);
                 return true;
             }
-            const textarea = document.createElement("textarea");
+            const textarea = doc.createElement("textarea");
             textarea.value = value;
             textarea.setAttribute("readonly", "");
             textarea.style.position = "fixed";
             textarea.style.left = "-9999px";
-            document.body.appendChild(textarea);
+            root.appendChild(textarea);
             textarea.select();
-            const ok = document.execCommand("copy");
+            const ok = doc.execCommand("copy");
             textarea.remove();
             return ok;
         }

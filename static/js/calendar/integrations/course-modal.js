@@ -1,5 +1,7 @@
 (function () {
     function createCourseModalRenderer({
+        root = document,
+        lifecycle = null,
         state,
         escapeHtml,
         formatTermLabel,
@@ -8,13 +10,17 @@
         formatSectionTypeLabel,
     }) {
         const backgroundState = [];
+        const doc = root.ownerDocument || root;
+        const view = doc.defaultView || window;
+        const mountNode = root.nodeType === 9 ? (root.body || root.documentElement) : root;
+        const query = (selector) => root?.querySelector?.(selector);
 
         function setCoursesModalBackgroundInert(inert) {
-            const overlay = document.getElementById("courses-modal-overlay");
+            const overlay = query("#courses-modal-overlay");
             if (inert) {
                 backgroundState.length = 0;
-                for (const element of Array.from(document.body.children)) {
-                    if (element === overlay || element.tagName === "SCRIPT") continue;
+                for (const element of Array.from(mountNode?.children || [])) {
+                    if (element === overlay) continue;
                     backgroundState.push({
                         element,
                         inert: Boolean(element.inert),
@@ -35,7 +41,7 @@
 
         function captureCoursesModalViewState(overlay) {
             const scroller = overlay.querySelector("#courses-modal-scroll");
-            const activeEl = document.activeElement;
+            const activeEl = doc.activeElement;
             const activeInModal = activeEl && overlay.contains(activeEl) ? activeEl : null;
             const activeId = activeInModal?.id || null;
             return {
@@ -73,7 +79,7 @@
 
         function trapCoursesModalFocus(event) {
             if (event.key !== "Tab" || !state.courses.modalOpen) return;
-            const panel = document.getElementById("courses-modal-panel");
+            const panel = query("#courses-modal-panel");
             if (!panel) return;
             const focusable = Array.from(panel.querySelectorAll(
                 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
@@ -81,26 +87,29 @@
             if (!focusable.length) return;
             const first = focusable[0];
             const last = focusable[focusable.length - 1];
-            if (!panel.contains(document.activeElement)) {
+            const activeElement = doc.activeElement;
+            if (!panel.contains(activeElement)) {
                 event.preventDefault();
                 first.focus();
-            } else if (event.shiftKey && document.activeElement === first) {
+            } else if (event.shiftKey && activeElement === first) {
                 event.preventDefault();
                 last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
+            } else if (!event.shiftKey && activeElement === last) {
                 event.preventDefault();
                 first.focus();
             }
         }
 
         function renderCoursesModal() {
-            let overlay = document.getElementById("courses-modal-overlay");
+            let overlay = query("#courses-modal-overlay");
             if (!overlay) {
-                overlay = document.createElement("div");
+                overlay = doc.createElement("div");
                 overlay.id = "courses-modal-overlay";
                 overlay.className = "calendar-modal-overlay fixed inset-0 hidden items-center justify-center bg-black/55 backdrop-blur-[1px] p-4";
-                overlay.addEventListener("keydown", trapCoursesModalFocus);
-                document.body.appendChild(overlay);
+                if (lifecycle?.addEventListener) lifecycle.addEventListener(overlay, "keydown", trapCoursesModalFocus);
+                else overlay.addEventListener("keydown", trapCoursesModalFocus);
+                mountNode.appendChild(overlay);
+                lifecycle?.trackNode?.(overlay);
             }
             if (!state.courses.modalOpen) {
                 overlay.classList.add("hidden");
@@ -165,9 +174,10 @@
             overlay.classList.add("transition-opacity", "duration-200");
             if (state.courses.animateOnOpen) {
                 overlay.classList.add("opacity-0", "pointer-events-none");
-                window.requestAnimationFrame(() => {
+                const runFrame = lifecycle?.requestAnimationFrame || view.requestAnimationFrame.bind(view);
+                runFrame(() => {
                     overlay.classList.remove("opacity-0", "pointer-events-none");
-                    const mountedPanel = document.getElementById("courses-modal-panel");
+                    const mountedPanel = query("#courses-modal-panel");
                     mountedPanel?.classList.remove("-translate-y-3", "opacity-0");
                 });
                 state.courses.animateOnOpen = false;

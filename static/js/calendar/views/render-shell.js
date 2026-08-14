@@ -1,5 +1,6 @@
 (function () {
     function createCalendarRenderShell({
+        root = document,
         state,
         constants,
         callbacks,
@@ -20,6 +21,8 @@
             renderCoursesModal,
         } = callbacks;
 
+        const query = (selector) => root?.querySelector?.(selector);
+
         function render() {
             updateHeader();
             updateViewToggleButtons();
@@ -32,8 +35,8 @@
         }
 
         function updateHeader() {
-            const title = document.getElementById("calendar-title");
-            const subtitle = document.getElementById("calendar-subtitle");
+            const title = query("#calendar-title");
+            const subtitle = query("#calendar-subtitle");
             if (!title || !subtitle) return;
             const monthLabel = state.anchorDate.toLocaleDateString(undefined, { month: "long", year: "numeric" });
             if (state.public.readOnly) {
@@ -73,9 +76,9 @@
         }
 
         function updateViewToggleButtons() {
-            const weekBtn = document.getElementById("calendar-view-week");
-            const monthBtn = document.getElementById("calendar-view-month");
-            const upcomingBtn = document.getElementById("calendar-view-upcoming");
+            const weekBtn = query("#calendar-view-week");
+            const monthBtn = query("#calendar-view-month");
+            const upcomingBtn = query("#calendar-view-upcoming");
             if (!weekBtn || !monthBtn) return;
             const active = "inline-flex h-8 min-w-[84px] items-center justify-center rounded-md px-3 text-sm font-medium text-on-primary shadow-sm transition-colors";
             const inactive = "inline-flex h-8 min-w-[84px] items-center justify-center rounded-md bg-transparent px-3 text-sm font-medium text-on-surface-variant transition-colors hover:bg-surface-container-high hover:text-on-surface";
@@ -88,11 +91,11 @@
             [weekBtn, monthBtn, upcomingBtn].filter(Boolean).forEach((button) => {
                 button.style.background = button.getAttribute("aria-pressed") === "true" ? "var(--color-primary)" : "";
             });
-            const periodControls = document.getElementById("calendar-period-controls");
+            const periodControls = query("#calendar-period-controls");
             if (periodControls) periodControls.hidden = false;
             const periodDisabled = state.view === "upcoming";
             ["calendar-prev", "calendar-next"].forEach((id) => {
-                const button = document.getElementById(id);
+                const button = query(`#${id}`);
                 if (!button) return;
                 button.disabled = periodDisabled;
                 button.setAttribute("aria-disabled", String(periodDisabled));
@@ -103,16 +106,16 @@
         }
 
         function renderCalendarView() {
-            const root = document.getElementById("calendar-view-root");
-            if (!root) return;
+            const viewRoot = query("#calendar-view-root");
+            if (!viewRoot) return;
             hideCalendarHoverCard();
-            root.closest(".calendar-surface")?.classList.toggle("is-upcoming", state.view === "upcoming");
+            viewRoot.closest(".calendar-surface")?.classList.toggle("is-upcoming", state.view === "upcoming");
             if (state.loadingDashboard) {
-                root.innerHTML = buildCalendarSkeletonHtml();
+                viewRoot.innerHTML = buildCalendarSkeletonHtml();
                 return;
             }
             const compactCalendar = isCompactCalendarViewport();
-            root.innerHTML = state.view === "upcoming"
+            viewRoot.innerHTML = state.view === "upcoming"
                 ? buildUpcomingAgendaHtml()
                 : compactCalendar ? buildMobileCalendarAgendaHtml() : (state.view === "month" ? buildMonthViewHtml() : buildWeekViewHtml());
             if (state.view === "week" && !compactCalendar) {
@@ -182,7 +185,7 @@
         }
 
         function applyWeekAutoScroll() {
-            const scroller = document.getElementById("calendar-week-time-scroller");
+            const scroller = query("#calendar-week-time-scroller");
             if (!scroller) return;
             const scrollbarWidth = scroller.offsetWidth - scroller.clientWidth;
             const calendarContainer = scroller.closest(".rounded-2xl");

@@ -1,5 +1,8 @@
 (function () {
     function createCalendarSources({
+        root = document,
+        lifecycle = null,
+        dataAdapter = null,
         state,
         constants,
         closeCalendarContextMenu,
@@ -18,6 +21,34 @@
         trackCalendarMutation,
     }) {
         const { eventsCacheKey } = constants;
+        const doc = root.ownerDocument || root;
+        const view = doc.defaultView || window;
+        const storage = view.localStorage || localStorage;
+        const mountNode = root.nodeType === 9 ? (root.body || root.documentElement) : root;
+        const listen = lifecycle?.addEventListener
+            ? lifecycle.addEventListener.bind(lifecycle)
+            : (target, type, handler) => target.addEventListener(type, handler);
+
+        async function fetchWithLifecycle(url, options = {}) {
+            const controller = lifecycle?.trackAbortController?.() || new AbortController();
+            try {
+                if (dataAdapter?.saveSource) {
+                    let body = options.body;
+                    if (typeof body === "string") {
+                        try { body = JSON.parse(body); } catch (_) { /* keep the raw body */ }
+                    }
+                    return await dataAdapter.saveSource({
+                        path: url,
+                        method: options.method || "POST",
+                        body,
+                        signal: controller.signal,
+                    });
+                }
+                return await fetch(url, { ...options, signal: controller.signal });
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
+            }
+        }
 
         function closeRgbModal() {
             if (state.ui.rgbModalEl) {
@@ -48,7 +79,7 @@
             const isLocal = calendar.kind === "local" || isLocalCalendar(calendarName);
             const eventCount = getCalendarEventCount(calendarName);
             const label = getCalendarLabel(calendarName);
-            const modal = document.createElement("div");
+            const modal = doc.createElement("div");
             modal.className = "calendar-info-modal";
             modal.innerHTML = `
                 <div class="calendar-info-dialog" role="dialog" aria-modal="true" aria-labelledby="calendar-info-title">
@@ -89,7 +120,7 @@
                     </div>
                 </div>
             `;
-            modal.addEventListener("click", async (event) => {
+            listen(modal, "click", async (event) => {
                 if (event.target === modal || event.target.closest(".js-source-info-close") || event.target.closest(".js-source-info-cancel")) {
                     closeSourceInfoModal();
                     return;
@@ -98,7 +129,8 @@
                 if (!saveButton || saveButton.disabled) return;
                 await saveCalendarSourceInfo(calendarName, modal, saveButton);
             });
-            document.body.appendChild(modal);
+            mountNode.appendChild(modal);
+            lifecycle?.trackNode?.(modal);
             state.ui.sourceInfoModalEl = modal;
             modal.querySelector(".js-source-info-name")?.focus();
         }
@@ -128,16 +160,17 @@
             const previousLabel = saveButton.textContent;
             saveButton.textContent = "Saving...";
             try {
-                const res = await trackCalendarMutation(fetch("/api/calendar/sources", {
+                const result = await trackCalendarMutation(fetchWithLifecycle("/api/calendar/sources", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payload),
                 }));
-                const response = await res.json().catch(() => ({}));
+                const res = result.response || result;
+                const response = result.payload || await res.json().catch(() => ({}));
                 if (!res.ok) {
                     throw new Error(response.error || "Unable to save calendar.");
                 }
-                localStorage.removeItem(eventsCacheKey);
+                storage.removeItem(eventsCacheKey);
                 invalidateCalendarPreferencesCache();
                 closeSourceInfoModal();
                 closeCalendarContextMenu();
@@ -159,7 +192,7 @@
             closeCalendarSourceCreateModal();
             closeCalendarContextMenu();
             closeRgbModal();
-            const modal = document.createElement("div");
+            const modal = doc.createElement("div");
             modal.className = "calendar-info-modal";
             const colors = state.calendarColors;
             let mode = "url";
@@ -217,7 +250,7 @@
                 modal.querySelector(".js-source-create-name")?.focus();
             };
             renderBody();
-            modal.addEventListener("click", async (event) => {
+            listen(modal, "click", async (event) => {
                 if (event.target === modal || event.target.closest(".js-source-create-close") || event.target.closest(".js-source-create-cancel")) {
                     closeCalendarSourceCreateModal();
                     return;
@@ -257,7 +290,7 @@
                 saveButton.disabled = true;
                 saveButton.textContent = "Adding...";
                 try {
-                    const res = await trackCalendarMutation(fetch(mode === "local" ? "/api/calendar/sources/local" : "/api/calendar/sources/url", {
+                    const result = await trackCalendarMutation(fetchWithLifecycle(mode === "local" ? "/api/calendar/sources/local" : "/api/calendar/sources/url", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
@@ -266,11 +299,12 @@
                             color_hex: selectedColor,
                         }),
                     }));
-                    const response = await res.json().catch(() => ({}));
+                    const res = result.response || result;
+                    const response = result.payload || await res.json().catch(() => ({}));
                     if (!res.ok) {
                         throw new Error(response.error || "Unable to add calendar.");
                     }
-                    localStorage.removeItem(eventsCacheKey);
+                    storage.removeItem(eventsCacheKey);
                     invalidateCalendarPreferencesCache();
                     closeCalendarSourceCreateModal();
                     state.ui.calendarMenuOpen = true;
@@ -281,7 +315,8 @@
                     saveButton.textContent = "Add";
                 }
             });
-            document.body.appendChild(modal);
+            mountNode.appendChild(modal);
+            lifecycle?.trackNode?.(modal);
             state.ui.sourceCreateModalEl = modal;
             modal.querySelector(".js-source-create-name")?.focus();
         }
@@ -301,7 +336,7 @@
                 g: parseInt(hex.slice(2, 4), 16),
                 b: parseInt(hex.slice(4, 6), 16),
             };
-            const modal = document.createElement("div");
+            const modal = doc.createElement("div");
             modal.className = "calendar-modal-overlay fixed inset-0 bg-black/50 backdrop-blur-[2px] flex items-center justify-center p-4";
             modal.innerHTML = `
                 <div class="w-full max-w-[480px] rounded-2xl border border-outline-variant/40 bg-surface p-5 shadow-2xl" role="dialog" aria-modal="true" aria-label="Custom calendar color">
@@ -351,7 +386,7 @@
                 if (preview) preview.style.background = hexValue;
                 if (hexText) hexText.textContent = hexValue.toUpperCase();
             };
-            modal.addEventListener("input", (event) => {
+            listen(modal, "input", (event) => {
                 const range = event.target.closest(".js-rgb-range");
                 const number = event.target.closest(".js-rgb-number");
                 if (range) {
@@ -370,7 +405,7 @@
                     paintPreview();
                 }
             });
-            modal.addEventListener("click", async (event) => {
+            listen(modal, "click", async (event) => {
                 if (event.target === modal || event.target.closest(".js-rgb-close") || event.target.closest(".js-rgb-cancel")) {
                     closeRgbModal();
                     return;
@@ -393,7 +428,8 @@
                     renderCalendarMenu();
                 }
             });
-            document.body.appendChild(modal);
+            mountNode.appendChild(modal);
+            lifecycle?.trackNode?.(modal);
             state.ui.rgbModalEl = modal;
             paintPreview();
         }

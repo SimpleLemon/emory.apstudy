@@ -1,5 +1,7 @@
 (function () {
     function createCalendarPreferences({
+        lifecycle = null,
+        dataAdapter = null,
         state,
         constants,
         getSavedCalendarInfo,
@@ -15,8 +17,12 @@
             preferenceSaveWarningCooldownMs,
         } = constants;
 
+        function createRequestController() {
+            return lifecycle?.trackAbortController?.() || new AbortController();
+        }
+
         function writeCalendarStateToStorage() {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             localStorage.setItem("calendarState", JSON.stringify(Object.fromEntries(
                 Object.entries(state.calendars).map(([cal, data]) => [cal, { visible: data.visible, color: data.color }])
             )));
@@ -27,14 +33,16 @@
         }
 
         function fetchWithTimeout(url, options = {}, timeoutMs = preferenceSaveTimeoutMs) {
-            const controller = new AbortController();
+            const controller = lifecycle?.trackAbortController?.(new AbortController()) || new AbortController();
             const { signal, ...rest } = options || {};
             if (signal) {
                 signal.addEventListener("abort", () => controller.abort(), { once: true });
             }
-            const timeoutId = window.setTimeout(() => controller.abort(), timeoutMs);
+            const schedule = lifecycle?.setTimeout || window.setTimeout.bind(window);
+            const timeoutId = schedule(() => controller.abort(), timeoutMs);
             return fetch(url, { ...rest, signal: controller.signal }).finally(() => {
-                window.clearTimeout(timeoutId);
+                lifecycle?.clearTimeout?.(timeoutId);
+                lifecycle?.releaseAbortController?.(controller);
             });
         }
 
@@ -49,7 +57,7 @@
         }
 
         function markCalendarPreferenceDirty(calendarName) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (!state.calendars[calendarName]) return;
             state.ui.preferenceDirty.add(calendarName);
         }
@@ -72,15 +80,16 @@
         }
 
         function scheduleCalendarPreferenceFlush(delayMs = preferenceSaveDelayMs) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (state.ui.preferenceFlushTimer) {
-                clearTimeout(state.ui.preferenceFlushTimer);
+                lifecycle?.clearTimeout?.(state.ui.preferenceFlushTimer);
             }
             if (state.ui.preferenceRetryTimer) {
-                clearTimeout(state.ui.preferenceRetryTimer);
+                lifecycle?.clearTimeout?.(state.ui.preferenceRetryTimer);
                 state.ui.preferenceRetryTimer = null;
             }
-            state.ui.preferenceFlushTimer = setTimeout(() => {
+            const schedule = lifecycle?.setTimeout || window.setTimeout.bind(window);
+            state.ui.preferenceFlushTimer = schedule(() => {
                 state.ui.preferenceFlushTimer = null;
                 void flushCalendarPreferenceQueue();
             }, delayMs);
@@ -92,9 +101,10 @@
                 const delay = preferenceSaveRetryDelaysMs[attempt];
                 state.ui.preferenceRetryCount = attempt + 1;
                 if (state.ui.preferenceRetryTimer) {
-                    clearTimeout(state.ui.preferenceRetryTimer);
+                    lifecycle?.clearTimeout?.(state.ui.preferenceRetryTimer);
                 }
-                state.ui.preferenceRetryTimer = setTimeout(() => {
+                const schedule = lifecycle?.setTimeout || window.setTimeout.bind(window);
+                state.ui.preferenceRetryTimer = schedule(() => {
                     state.ui.preferenceRetryTimer = null;
                     void flushCalendarPreferenceQueue();
                 }, delay);
@@ -105,7 +115,7 @@
         }
 
         async function flushCalendarPreferenceQueue() {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (state.ui.preferenceInFlight) return;
             if (!state.ui.preferenceDirty.size) return;
 
@@ -115,15 +125,30 @@
             if (!preferences.length) return;
 
             state.ui.preferenceInFlight = true;
-            const request = trackCalendarMutation(fetchWithTimeout(batchEndpoint, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ preferences }),
-            }), "calendar-save");
+            const controller = createRequestController();
+            const request = trackCalendarMutation(
+                dataAdapter?.savePreferences
+                    ? Promise.resolve(dataAdapter.savePreferences({
+                        endpoint: batchEndpoint,
+                        body: { preferences },
+                        signal: controller.signal,
+                    })).then((result) => ({
+                        response: result?.response || result,
+                        payload: result?.payload,
+                    }))
+                    : fetchWithTimeout(batchEndpoint, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ preferences }),
+                        signal: controller.signal,
+                    }).then((response) => ({ response })),
+                "calendar-save"
+            );
 
             try {
-                const res = await request;
-                const payload = await res.json().catch(() => ({}));
+                const result = await request;
+                const res = result.response || result;
+                const payload = result.payload || await res.json().catch(() => ({}));
                 if (!res.ok) {
                     throw new Error(payload.error || "Unable to save calendar preferences.");
                 }
@@ -154,11 +179,14 @@
                 }
             } catch (err) {
                 console.warn("Failed to save calendar preferences:", err);
-                pending.forEach((calendarName) => state.ui.preferenceDirty.add(calendarName));
-                scheduleCalendarPreferenceRetry();
+                if (!lifecycle?.isDisposed?.()) {
+                    pending.forEach((calendarName) => state.ui.preferenceDirty.add(calendarName));
+                    scheduleCalendarPreferenceRetry();
+                }
             } finally {
+                lifecycle?.releaseAbortController?.(controller);
                 state.ui.preferenceInFlight = false;
-                if (state.ui.preferenceDirty.size && !state.ui.preferenceFlushTimer && !state.ui.preferenceRetryTimer) {
+                if (!lifecycle?.isDisposed?.() && state.ui.preferenceDirty.size && !state.ui.preferenceFlushTimer && !state.ui.preferenceRetryTimer) {
                     scheduleCalendarPreferenceFlush();
                 }
             }
@@ -170,7 +198,7 @@
         }
 
         function saveCalendarState() {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             const toSave = {};
             for (const [cal, data] of Object.entries(state.calendars)) {
                 toSave[cal] = { visible: data.visible, color: data.color };
@@ -221,7 +249,7 @@
         }
 
         async function ensureCalendarPreferencesLoaded(force = false) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             if (state.preferences.loading) return state.preferences.loading;
             if (state.preferences.loaded && !force) return;
 
@@ -231,11 +259,15 @@
             }
             state.preferences.lastAttemptAt = now;
 
+            const controller = createRequestController();
             state.preferences.loading = (async () => {
                 try {
-                    const res = await fetch("/api/calendar/preferences");
+                    const result = dataAdapter?.loadPreferences
+                        ? await dataAdapter.loadPreferences({ signal: controller.signal })
+                        : { response: await fetch("/api/calendar/preferences", { signal: controller.signal }) };
+                    const res = result.response || result;
                     if (!res.ok) return;
-                    const payload = await res.json().catch(() => ({}));
+                    const payload = result.payload || await res.json().catch(() => ({}));
                     const prefs = Array.isArray(payload.preferences) ? payload.preferences : [];
                     state.preferences.cache = Object.fromEntries(
                         prefs.filter((pref) => pref.calendar_name).map((pref) => [pref.calendar_name, pref])
@@ -245,6 +277,7 @@
                 } catch (err) {
                     console.warn("Failed to load calendar preferences:", err);
                 } finally {
+                    lifecycle?.releaseAbortController?.(controller);
                     state.preferences.loading = null;
                 }
             })();
@@ -253,7 +286,7 @@
         }
 
         async function loadCalendarState(options = {}) {
-            if (state.public.readOnly) return;
+            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
             const saved = localStorage.getItem("calendarState");
             if (saved) {
                 applyStoredCalendarState(saved);

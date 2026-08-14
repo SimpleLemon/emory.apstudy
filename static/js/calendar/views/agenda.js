@@ -1,5 +1,6 @@
 (function () {
     function createCalendarAgenda({
+        root = document,
         state,
         callbacks,
         formatters,
@@ -22,6 +23,8 @@
             isTaskEvent,
             isToday,
         } = formatters;
+
+        const query = (selector) => root?.querySelector?.(selector);
 
         function buildMobileCalendarAgendaHtml() {
             const allDays = getMobileAgendaDays();
@@ -168,8 +171,8 @@
         }
 
         function renderAssignments() {
-            const root = document.getElementById("assignments-root");
-            if (root) root.innerHTML = buildUpcomingAgendaHtml();
+            const assignmentsRoot = query("#assignments-root");
+            if (assignmentsRoot) assignmentsRoot.innerHTML = buildUpcomingAgendaHtml();
         }
 
         function buildAssignmentsSkeletonHtml() {

@@ -1,5 +1,7 @@
 (function () {
     function createCalendarUiActions({
+        root = document,
+        lifecycle = null,
         state,
         callbacks,
         formatters,
@@ -19,6 +21,8 @@
             escapeHtml,
             isTaskEvent,
         } = formatters;
+        const doc = root.ownerDocument || document;
+        const view = doc.defaultView || window;
 
         function closeCalendarContextMenu() {
             if (state.ui.contextMenuEl) {
@@ -36,7 +40,7 @@
             const currentColor = state.calendars[calendarName]?.color || "#6366f1";
             const eventCount = getCalendarEventCount(calendarName);
             const label = getCalendarLabel(calendarName);
-            const menu = document.createElement("div");
+            const menu = doc.createElement("div");
             menu.className = "calendar-context-menu fixed";
             menu.innerHTML = `
                 <div class="calendar-context-header">
@@ -90,7 +94,8 @@
                     openRgbModal(calendarName);
                 }
             });
-            document.body.appendChild(menu);
+            root.nodeType === 9 ? (root.body || root.documentElement).appendChild(menu) : root.appendChild(menu);
+            lifecycle?.trackNode?.(menu);
             state.ui.contextMenuEl = menu;
             positionCalendarContextMenu();
         }
@@ -102,9 +107,9 @@
             const menuRect = menu.getBoundingClientRect();
             let left = anchorRect.right - menuRect.width;
             let top = anchorRect.bottom + 8;
-            if (left + menuRect.width > window.innerWidth - 8) left = window.innerWidth - menuRect.width - 8;
+            if (left + menuRect.width > view.innerWidth - 8) left = view.innerWidth - menuRect.width - 8;
             if (left < 8) left = 8;
-            if (top + menuRect.height > window.innerHeight - 8) {
+            if (top + menuRect.height > view.innerHeight - 8) {
                 top = anchorRect.top - menuRect.height - 8;
             }
             if (top < 8) top = 8;

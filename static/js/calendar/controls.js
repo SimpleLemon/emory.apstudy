@@ -1,5 +1,7 @@
 (function () {
     function createCalendarControls({
+        root = document,
+        lifecycle = null,
         state,
         callbacks,
         formatters,
@@ -43,77 +45,88 @@
             formatTimedEventRange,
         } = formatters;
 
+        const doc = root.ownerDocument || document;
+        const view = doc.defaultView || window;
+        const session = view.sessionStorage || null;
+        const colorSchemeQuery = view.matchMedia?.("(prefers-color-scheme: dark)");
+        const ElementConstructor = view.Element || globalThis.Element;
+        const query = (selector) => root?.querySelector?.(selector);
+        const listen = (target, type, handler, options) => lifecycle?.addEventListener
+            ? lifecycle.addEventListener(target, type, handler, options)
+            : (target?.addEventListener(type, handler, options), () => target?.removeEventListener(type, handler, options));
+
         function wireControls() {
             const refreshThemeDependentColors = () => {
                 renderCalendarView();
                 renderAssignments();
             };
-            document.addEventListener("apstudy-theme-change", refreshThemeDependentColors);
-            window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-                if (document.documentElement.dataset.theme === "system-match") {
+            listen(doc, "apstudy-theme-change", refreshThemeDependentColors);
+            listen(colorSchemeQuery, "change", () => {
+                if (doc.documentElement.dataset.theme === "system-match") {
                     refreshThemeDependentColors();
                 }
             });
             let lastCompactCalendar = isCompactCalendarViewport();
-            window.addEventListener("resize", () => {
+            listen(view, "resize", () => {
                 const nextCompactCalendar = isCompactCalendarViewport();
                 if (nextCompactCalendar === lastCompactCalendar) return;
                 lastCompactCalendar = nextCompactCalendar;
                 renderCalendarView();
             });
-            if (!state.public.readOnly && sessionStorage.getItem("openCoursesPanelOnLoad") === "true") {
-                sessionStorage.removeItem("openCoursesPanelOnLoad");
-                setTimeout(() => {
+            if (!state.public.readOnly && session?.getItem("openCoursesPanelOnLoad") === "true") {
+                session.removeItem("openCoursesPanelOnLoad");
+                const schedule = lifecycle?.setTimeout || view.setTimeout.bind(view);
+                schedule(() => {
                     if (!state.courses.modalOpen) {
                         openCoursesModal(null);
                     }
                 }, 100);
             }
             if (!state.public.readOnly) {
-                document.addEventListener("profile-my-courses-click", (event) => {
+                listen(doc, "profile-my-courses-click", (event) => {
                     if (state.courses.modalOpen) {
                         closeCoursesModal();
                         return;
                     }
-                    openCoursesModal(event.detail?.trigger || document.activeElement);
+                    openCoursesModal(event.detail?.trigger || doc.activeElement);
                 });
-                document.getElementById("calendar-courses")?.addEventListener("click", (event) => {
+                listen(query("#calendar-courses"), "click", (event) => {
                     openCoursesModal(event.currentTarget);
                 });
             }
-            document.getElementById("calendar-view-week")?.addEventListener("click", () => {
+            listen(query("#calendar-view-week"), "click", () => {
                 state.view = "week";
                 render();
                 void ensureEventsForRange(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-view-month")?.addEventListener("click", () => {
+            listen(query("#calendar-view-month"), "click", () => {
                 state.view = "month";
                 render();
                 void ensureEventsForRange(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-view-upcoming")?.addEventListener("click", () => {
+            listen(query("#calendar-view-upcoming"), "click", () => {
                 state.view = "upcoming";
                 state.anchorDate = new Date();
                 render();
                 void ensureEventsForRange(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-prev")?.addEventListener("click", () => {
+            listen(query("#calendar-prev"), "click", () => {
                 state.anchorDate = shiftAnchorDate(-1);
                 render();
                 void ensureEventsForRange(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-next")?.addEventListener("click", () => {
+            listen(query("#calendar-next"), "click", () => {
                 state.anchorDate = shiftAnchorDate(1);
                 render();
                 void ensureEventsForRange(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-refresh")?.addEventListener("click", () => {
+            listen(query("#calendar-refresh"), "click", () => {
                 void runManualRefresh(getBufferedRange(getCurrentRenderRange()));
             });
-            document.getElementById("calendar-share")?.addEventListener("click", () => {
+            listen(query("#calendar-share"), "click", () => {
                 openCalendarShareModal();
             });
-            document.getElementById("calendar-toggle-menu")?.addEventListener("click", (event) => {
+            listen(query("#calendar-toggle-menu"), "click", (event) => {
                 event.stopPropagation();
                 const opening = !state.ui.calendarMenuOpen;
                 state.ui.calendarMenuOpen = opening;
@@ -128,7 +141,7 @@
                 }
                 renderCalendarMenu();
             });
-            document.getElementById("calendar-menu")?.addEventListener("change", (event) => {
+            listen(query("#calendar-menu"), "change", (event) => {
                 const checkbox = event.target.closest(".js-calendar-checkbox");
                 if (!checkbox) return;
                 event.stopPropagation();
@@ -138,7 +151,7 @@
                 state.ui.calendarMenuOpen = true;
                 renderCalendarMenu();
             });
-            document.getElementById("calendar-menu")?.addEventListener("click", (event) => {
+            listen(query("#calendar-menu"), "click", (event) => {
                 const addBtn = event.target.closest(".js-calendar-add-source");
                 if (addBtn) {
                     event.preventDefault();
@@ -159,8 +172,8 @@
                 }
                 openCalendarContextMenu(calendarName, moreBtn);
             });
-            document.addEventListener("pointerdown", (event) => {
-                const popoverRoot = document.getElementById("calendar-popover-root");
+            listen(doc, "pointerdown", (event) => {
+                const popoverRoot = query("#calendar-popover-root");
                 const inRoot = popoverRoot ? popoverRoot.contains(event.target) : false;
                 const inContext = state.ui.contextMenuEl ? state.ui.contextMenuEl.contains(event.target) : false;
                 const inRgb = state.ui.rgbModalEl ? state.ui.rgbModalEl.contains(event.target) : false;
@@ -171,18 +184,18 @@
                     closeAllCalendarPopups();
                 }
             }, true);
-            window.addEventListener("resize", () => {
+            listen(view, "resize", () => {
                 callbacks.positionCalendarContextMenu();
             });
-            window.addEventListener("scroll", () => {
+            listen(view, "scroll", () => {
                 callbacks.positionCalendarContextMenu();
                 positionCalendarHoverCard();
             }, true);
-            window.addEventListener("resize", () => {
+            listen(view, "resize", () => {
                 positionCalendarHoverCard();
             });
             wireCalendarHoverCard();
-            document.addEventListener("click", (event) => {
+            listen(root, "click", (event) => {
                 const upcomingToggle = event.target.closest(".js-upcoming-toggle");
                 if (upcomingToggle) {
                     event.preventDefault();
@@ -232,19 +245,19 @@
                     submitCoursesSearch();
                 }
             });
-            document.addEventListener("input", (event) => {
+            listen(root, "input", (event) => {
                 const searchInput = event.target.closest("#courses-search-input");
                 if (!searchInput) return;
                 state.courses.searchInput = searchInput.value || "";
             });
-            document.addEventListener("keydown", (event) => {
+            listen(root, "keydown", (event) => {
                 if (event.key !== "Enter") return;
                 const searchInput = event.target.closest("#courses-search-input");
                 if (!searchInput) return;
                 event.preventDefault();
                 submitCoursesSearch();
             });
-            document.addEventListener("change", (event) => {
+            listen(root, "change", (event) => {
                 const termSelect = event.target.closest("#courses-term-select");
                 if (!termSelect) return;
                 state.courses.termFilter = termSelect.value || "";
@@ -252,7 +265,7 @@
                 writeCourseFiltersToUrl();
                 renderCoursesModal();
             });
-            window.addEventListener("keydown", (event) => {
+            listen(view, "keydown", (event) => {
                 if (event.key === "Escape" && state.courses.modalOpen) {
                     closeCoursesModal();
                 }
@@ -260,7 +273,7 @@
                     closeAllCalendarPopups();
                 }
             });
-            window.addEventListener("popstate", () => {
+            listen(view, "popstate", () => {
                 applyCoursesFiltersFromUrl();
                 state.courses.searchInput = state.courses.searchQuery;
                 applyCourseFilters();
@@ -271,28 +284,27 @@
         }
 
         function wireCalendarHoverCard() {
-            const root = document.getElementById("calendar-view-root");
-            if (!root || root.dataset.hoverCardWired === "true") return;
-            root.dataset.hoverCardWired = "true";
-            root.addEventListener("pointerover", (event) => {
+            const viewRoot = query("#calendar-view-root");
+            if (!viewRoot) return;
+            listen(viewRoot, "pointerover", (event) => {
                 if (event.pointerType === "touch") return;
                 const eventEl = getCalendarEventElement(event.target);
                 if (!eventEl) return;
                 if (event.relatedTarget && eventEl.contains(event.relatedTarget)) return;
                 showCalendarHoverCard(eventEl);
             });
-            root.addEventListener("pointerout", (event) => {
+            listen(viewRoot, "pointerout", (event) => {
                 const eventEl = getCalendarEventElement(event.target);
                 if (!eventEl) return;
                 const related = event.relatedTarget;
                 if (related && (eventEl.contains(related) || state.ui.hoverCardEl?.contains(related))) return;
                 scheduleCalendarHoverCardHide();
             });
-            root.addEventListener("focusin", (event) => {
+            listen(viewRoot, "focusin", (event) => {
                 const eventEl = getCalendarEventElement(event.target);
                 if (eventEl) showCalendarHoverCard(eventEl);
             });
-            root.addEventListener("focusout", (event) => {
+            listen(viewRoot, "focusout", (event) => {
                 const related = event.relatedTarget;
                 if (related && state.ui.hoverCardEl?.contains(related)) return;
                 scheduleCalendarHoverCardHide(80);
@@ -300,26 +312,27 @@
         }
 
         function getCalendarEventElement(target) {
-            if (!(target instanceof Element)) return null;
-            const root = document.getElementById("calendar-view-root");
+            if (ElementConstructor && !(target instanceof ElementConstructor)) return null;
+            const viewRoot = query("#calendar-view-root");
             const eventEl = target.closest("[data-event-ref]");
-            return eventEl && root?.contains(eventEl) ? eventEl : null;
+            return eventEl && viewRoot?.contains(eventEl) ? eventEl : null;
         }
 
         function ensureCalendarHoverCard() {
             if (state.ui.hoverCardEl) return state.ui.hoverCardEl;
-            const card = document.createElement("div");
+            const card = doc.createElement("div");
             card.className = "calendar-event-hover-card";
             card.setAttribute("role", "tooltip");
             card.hidden = true;
-            card.addEventListener("pointerenter", () => {
+            listen(card, "pointerenter", () => {
                 if (state.ui.hoverCardHideTimer) {
-                    clearTimeout(state.ui.hoverCardHideTimer);
+                    lifecycle?.clearTimeout?.(state.ui.hoverCardHideTimer);
                     state.ui.hoverCardHideTimer = null;
                 }
             });
-            card.addEventListener("pointerleave", () => scheduleCalendarHoverCardHide());
-            document.body.appendChild(card);
+            listen(card, "pointerleave", () => scheduleCalendarHoverCardHide());
+            root.appendChild(card);
+            lifecycle?.trackNode?.(card);
             state.ui.hoverCardEl = card;
             return card;
         }
@@ -329,7 +342,7 @@
             const event = getCalendarEventByRef(eventRef);
             if (!event) return;
             if (state.ui.hoverCardHideTimer) {
-                clearTimeout(state.ui.hoverCardHideTimer);
+                lifecycle?.clearTimeout?.(state.ui.hoverCardHideTimer);
                 state.ui.hoverCardHideTimer = null;
             }
             const card = ensureCalendarHoverCard();
@@ -342,15 +355,16 @@
         }
 
         function scheduleCalendarHoverCardHide(delayMs = 120) {
-            if (state.ui.hoverCardHideTimer) clearTimeout(state.ui.hoverCardHideTimer);
-            state.ui.hoverCardHideTimer = setTimeout(() => {
+            if (state.ui.hoverCardHideTimer) lifecycle?.clearTimeout?.(state.ui.hoverCardHideTimer);
+            const schedule = lifecycle?.setTimeout || view.setTimeout.bind(view);
+            state.ui.hoverCardHideTimer = schedule(() => {
                 hideCalendarHoverCard();
             }, delayMs);
         }
 
         function hideCalendarHoverCard() {
             if (state.ui.hoverCardHideTimer) {
-                clearTimeout(state.ui.hoverCardHideTimer);
+                lifecycle?.clearTimeout?.(state.ui.hoverCardHideTimer);
                 state.ui.hoverCardHideTimer = null;
             }
             if (state.ui.hoverCardEl) {
@@ -363,41 +377,41 @@
         function positionCalendarHoverCard() {
             const card = state.ui.hoverCardEl;
             const anchorEl = state.ui.hoverCardAnchorEl;
-            if (!card || card.hidden || !anchorEl || !document.body.contains(anchorEl)) return;
+            if (!card || card.hidden || !anchorEl || !root.contains(anchorEl)) return;
             const margin = 12;
             const gap = 8;
-            const wide = window.innerWidth >= 900;
+            const wide = view.innerWidth >= 900;
             const preferredWidth = wide ? 420 : 320;
-            const width = Math.max(260, Math.min(preferredWidth, window.innerWidth - margin * 2));
+            const width = Math.max(260, Math.min(preferredWidth, view.innerWidth - margin * 2));
             card.style.width = `${width}px`;
-            card.style.maxHeight = `${Math.max(180, window.innerHeight - margin * 2)}px`;
+            card.style.maxHeight = `${Math.max(180, view.innerHeight - margin * 2)}px`;
             card.style.left = "0px";
             card.style.top = "0px";
             const anchorRect = anchorEl.getBoundingClientRect();
             const cardRect = card.getBoundingClientRect();
             let left = anchorRect.left;
             let top = anchorRect.bottom + gap;
-            if (wide && anchorRect.right + gap + cardRect.width + margin <= window.innerWidth) {
+            if (wide && anchorRect.right + gap + cardRect.width + margin <= view.innerWidth) {
                 left = anchorRect.right + gap;
                 top = anchorRect.top + (anchorRect.height - cardRect.height) / 2;
             } else if (wide && anchorRect.left - gap - cardRect.width >= margin) {
                 left = anchorRect.left - cardRect.width - gap;
                 top = anchorRect.top + (anchorRect.height - cardRect.height) / 2;
             } else {
-                const availableBelow = Math.max(0, window.innerHeight - anchorRect.bottom - gap - margin);
+                const availableBelow = Math.max(0, view.innerHeight - anchorRect.bottom - gap - margin);
                 const availableAbove = Math.max(0, anchorRect.top - gap - margin);
                 const placeBelow = availableBelow >= availableAbove;
                 const availableHeight = Math.max(120, placeBelow ? availableBelow : availableAbove);
                 card.style.maxHeight = `${availableHeight}px`;
                 const adjustedRect = card.getBoundingClientRect();
-                if (left + cardRect.width + margin > window.innerWidth) {
-                    left = window.innerWidth - adjustedRect.width - margin;
+                if (left + cardRect.width + margin > view.innerWidth) {
+                    left = view.innerWidth - adjustedRect.width - margin;
                 }
                 if (left < margin) left = margin;
                 top = placeBelow ? anchorRect.bottom + gap : anchorRect.top - adjustedRect.height - gap;
             }
             const finalRect = card.getBoundingClientRect();
-            top = Math.min(Math.max(top, margin), Math.max(margin, window.innerHeight - finalRect.height - margin));
+            top = Math.min(Math.max(top, margin), Math.max(margin, view.innerHeight - finalRect.height - margin));
             card.style.left = `${Math.round(left)}px`;
             card.style.top = `${Math.round(top)}px`;
         }
