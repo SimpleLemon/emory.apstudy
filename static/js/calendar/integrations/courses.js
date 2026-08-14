@@ -19,6 +19,7 @@
         const doc = root.ownerDocument || document;
         const view = doc.defaultView || window;
         const storage = view.localStorage || localStorage;
+        const scrollLockTarget = root?.classList ? root : root?.documentElement;
         const getActiveElement = () => doc.activeElement;
 
         function requestController() {
@@ -129,7 +130,7 @@
             state.courses.pinnedSectionIds = new Set(state.courses.selectedSectionIds);
             state.courses.showSelectedOnly = state.courses.pinnedSectionIds.size > 0;
             applyCourseFilters();
-            root.classList.add("overflow-hidden");
+            scrollLockTarget?.classList.add("overflow-hidden");
             renderCoursesModal();
             setCoursesModalBackgroundInert(true);
             if (!state.courses.indexLoaded && !state.courses.loading) {
@@ -156,7 +157,7 @@
                 state.courses.modalOpen = false;
                 state.courses.isClosing = false;
                 state.courses.modalTriggerEl = null;
-                root.classList.remove("overflow-hidden");
+                scrollLockTarget?.classList.remove("overflow-hidden");
                 renderCoursesModal();
                 setCoursesModalBackgroundInert(false);
                 if (trigger?.isConnected) trigger.focus({ preventScroll: true });
