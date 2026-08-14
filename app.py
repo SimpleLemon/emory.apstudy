@@ -82,6 +82,18 @@ def create_app():
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
         environment_config.frontend_console_diagnostics_enabled
     )
+    from services.extension_contract import (
+        EXTENSION_CALENDAR_CAPABILITY,
+        extension_capabilities_for_rollout,
+    )
+
+    extension_capabilities = extension_capabilities_for_rollout(
+        environment_config.extension_calendar_rollout_raw
+    )
+    app.config["EXTENSION_CAPABILITIES"] = extension_capabilities
+    app.config["EXTENSION_CALENDAR_INTEGRATION_ENABLED"] = extension_capabilities[
+        EXTENSION_CALENDAR_CAPABILITY
+    ]
     os.makedirs(app.config["FILE_SHARE_UPLOAD_DIR"], exist_ok=True)
     os.makedirs(app.instance_path, exist_ok=True)
     os.makedirs(nest_instance_dir(environment_config=environment_config), exist_ok=True)

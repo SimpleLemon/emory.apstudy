@@ -1,0 +1,49 @@
+{
+  "request": {
+    "version": 1,
+    "source_key": "canvas:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "account_key": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+    "action": "grant",
+    "scopes": [
+      "full_history_upload",
+      "ongoing_read",
+      "shares_ics_inclusion"
+    ]
+  },
+  "response_fields": {
+    "envelope": [
+      "contractVersion",
+      "ok",
+      "consent",
+      "capabilities",
+      "cleanup",
+      "version",
+      "current",
+      "granted",
+      "scopes",
+      "sourceKey"
+    ],
+    "consent": [
+      "version",
+      "sourceKey",
+      "source_key",
+      "accountKey",
+      "account_key",
+      "granted",
+      "current",
+      "state",
+      "scopes",
+      "granted_scopes",
+      "scope_flags",
+      "created_at",
+      "updated_at",
+      "granted_at",
+      "revoked_at",
+      "createdAt",
+      "updatedAt",
+      "grantedAt",
+      "revokedAt",
+      "revocation"
+    ]
+  }
+}

@@ -49,6 +49,11 @@ class EnvironmentConfig:
     notes_collaboration_secret: str | None = field(default=None, repr=False)
     notes_collaboration_internal_secret: str | None = field(default=None, repr=False)
     calendar_date_buffer_days_raw: str = "7"
+    # Calendar import is disabled unless the operator selects the exact,
+    # read-only rollout mode.  Keep the raw value in the immutable snapshot so
+    # capability resolution cannot accidentally treat arbitrary truthy strings
+    # as an authorization.
+    extension_calendar_rollout_raw: str | None = None
     discord_invite_url: str = ""
     app_base_url: str = "https://nest.apstudy.org"
     giphy_api_key: str = field(default="", repr=False)
@@ -157,6 +162,7 @@ def load_environment_config():
         notes_collaboration_secret=get("NOTES_COLLABORATION_SECRET"),
         notes_collaboration_internal_secret=get("NOTES_COLLABORATION_INTERNAL_SECRET"),
         calendar_date_buffer_days_raw=get("CALENDAR_DATE_BUFFER_DAYS", "7"),
+        extension_calendar_rollout_raw=get("APSTUDY_EXTENSION_CALENDAR_ROLLOUT"),
         discord_invite_url=get("DISCORD_INVITE_URL", ""),
         app_base_url=get("APP_BASE_URL", "https://nest.apstudy.org"),
         giphy_api_key=get("GIPHY_API_KEY", ""),
