@@ -83,6 +83,7 @@ from services.calendar_events import (
     _load_event_overrides as _load_event_overrides_service,
     _apply_event_override,
     _api_event_overlaps_range,
+    _project_canvas_calendar_events,
     _filter_configured_cache_events,
     _feed_needs_initial_fetch,
     _initial_fetch_feed_urls,
@@ -107,7 +108,6 @@ from services.calendar_events import (
     _calendar_share_scope_range,
     _intersect_ranges,
     _range_queries,
-    _load_serialized_calendar_events as _load_serialized_calendar_events_service,
     _sanitize_public_event,
     _sanitize_public_sources,
     _resolve_calendar_share_by_code as _resolve_calendar_share_by_code_service,
@@ -158,7 +158,9 @@ def _calendar_serialization_dependencies():
         "configured_feed_urls": _configured_feed_urls,
         "filter_configured_cache_events": _filter_configured_cache_events,
         "list_calendar_rows_all": list_calendar_rows_all,
+        "load_calendar_preferences": _load_calendar_preferences,
         "load_event_overrides": _load_event_overrides,
+        "project_canvas_events": _project_canvas_calendar_events,
         "range_queries": _range_queries,
         "serialize_event": _serialize_event,
         "serialize_user_event": _serialize_user_event,
@@ -170,13 +172,93 @@ def _load_serialized_calendar_events(
     settings,
     range_start=None,
     range_end=None,
+    *,
+    require_shares_ics=False,
 ):
-    return _load_serialized_calendar_events_service(
+    """Load feed, native, and consented Canvas events through one projection."""
+    dependencies = _calendar_serialization_dependencies()
+    list_rows = dependencies["list_calendar_rows_all"]
+    feed_urls = dependencies["configured_feed_urls"](settings)
+    cache_events = list_rows(
+        COLLECTIONS["calendar_cache"],
+        dependencies["range_queries"](
+            user_id, "event_start", "event_end", "event_start",
+            range_start, range_end,
+        ),
+    )
+    created_events = list_rows(
+        COLLECTIONS["user_events"],
+        dependencies["range_queries"](
+            user_id, "start", "end", "start", range_start, range_end,
+        ),
+    )
+    event_overrides = dependencies["load_event_overrides"](user_id)
+    overrides_by_ref = {
+        override.get("event_ref"): override
+        for override in event_overrides
+        if override.get("event_ref")
+    }
+    preferences = dependencies["load_calendar_preferences"](user_id)
+    canvas_cache_events = [
+        event for event in cache_events
+        if event.get("canvas_source_id") or event.get("canvas_event_ref")
+    ]
+    feed_cache_events = dependencies["filter_configured_cache_events"](
+        [
+            event for event in cache_events
+            if not (event.get("canvas_source_id") or event.get("canvas_event_ref"))
+        ],
+        feed_urls,
+    )
+    serialized_cache_events = []
+    for event in feed_cache_events:
+        serialized = dependencies["serialize_event"](event, settings)
+        serialized = dependencies["apply_event_override"](
+            serialized,
+            overrides_by_ref.get(serialized.get("event_ref")),
+        )
+        if serialized:
+            serialized_cache_events.append(serialized)
+
+    serialized_canvas_events = []
+    if canvas_cache_events:
+        serialized_canvas_events = dependencies["project_canvas_events"](
+            user_id,
+            canvas_cache_events,
+            overrides_by_ref,
+            preferences=preferences,
+            range_start=range_start,
+            range_end=range_end,
+            api_event_overlaps_range=dependencies["api_event_overlaps_range"],
+            require_shares_ics=require_shares_ics,
+        )
+    serialized_created_events = [
+        dependencies["serialize_user_event"](event)
+        for event in created_events
+    ]
+    events = serialized_cache_events + serialized_canvas_events + serialized_created_events
+    if range_start and range_end:
+        events = [
+            event for event in events
+            if dependencies["api_event_overlaps_range"](
+                event, range_start, range_end,
+            )
+        ]
+    return events, feed_cache_events, created_events
+
+
+def _load_serialized_calendar_events_for_share(
+    user_id,
+    settings,
+    range_start=None,
+    range_end=None,
+):
+    return _load_serialized_calendar_events(
         user_id,
         settings,
         range_start,
         range_end,
-        _calendar_serialization_dependencies(),
+        require_shares_ics=True,
     )
 
 
@@ -204,11 +286,11 @@ def _calendar_share_dependencies():
         "load_calendar_feed_metadata": _load_calendar_feed_metadata,
         "load_calendar_preferences": _load_calendar_preferences,
         "load_local_calendar_sources": _load_local_calendar_sources,
-        "load_serialized_calendar_events": _load_serialized_calendar_events,
+        "load_serialized_calendar_events_for_share": _load_serialized_calendar_events_for_share,
         "parse_json_list": _parse_json_list,
         "sanitize_public_event": _sanitize_public_event,
         "sanitize_public_sources": _sanitize_public_sources,
-        "task_calendar_payload": _task_calendar_payload,
+        "task_calendar_payload": _task_calendar_payload_for_share,
     }
 
 
@@ -223,6 +305,14 @@ def _public_calendar_events_payload(
         requested_end,
         _calendar_share_dependencies(),
     )
+
+
+def _task_calendar_payload_for_share(user_id, preferences, range_start=None, range_end=None):
+    try:
+        return _task_calendar_payload(user_id, preferences, range_start, range_end)
+    except (AppwriteException, AttributeError):
+        logger.exception("Failed to load task events for public calendar share")
+        return [], None
 
 
 def _get_events_dependencies():

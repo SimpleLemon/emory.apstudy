@@ -221,6 +221,30 @@ def _serialize_user_event(*args, **kwargs):
     return service_fn(*args, **kwargs)
 
 
+def _load_event_overrides(user_id, list_rows_fn=None):
+    from services.calendar_events import _load_event_overrides as service_fn
+
+    return service_fn(user_id, list_rows_fn)
+
+
+def _project_canvas_events(*args, **kwargs):
+    from services.calendar_events import _project_canvas_calendar_events as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _api_event_overlaps_range(*args, **kwargs):
+    from services.calendar_events import _api_event_overlaps_range as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
+def _apply_event_override(*args, **kwargs):
+    from services.calendar_events import _apply_event_override as service_fn
+
+    return service_fn(*args, **kwargs)
+
+
 def _task_calendar_events_for_user(user_id, range_start=None, range_end=None):
     from services.task_calendar import task_calendar_events_for_user as service_fn
 
@@ -605,9 +629,11 @@ def _dashboard_summary_dependencies():
         "date_key": _date_key,
         "filter_configured_cache_events": _filter_configured_cache_events,
         "format_datetime": format_datetime,
+        "api_event_overlaps_range": _api_event_overlaps_range,
         "load_calendar_feed_metadata": _load_calendar_feed_metadata,
         "load_calendar_preferences": _load_calendar_preferences,
         "load_local_calendar_sources": _load_local_calendar_sources,
+        "load_event_overrides": _load_event_overrides,
         "list_calendar_rows_all": list_calendar_rows_all,
         "list_rows_all": list_rows_all,
         "list_rows_safe": list_rows_safe,
@@ -615,6 +641,8 @@ def _dashboard_summary_dependencies():
         "normalize_task_list_ids": _normalize_task_list_ids,
         "row_id": _row_id,
         "sort_key": _sort_key,
+        "apply_event_override": _apply_event_override,
+        "project_canvas_events": _project_canvas_events,
         "serialize_event": _serialize_event,
         "serialize_user_event": _serialize_user_event,
         "task_calendar_events_for_user": _task_calendar_events_for_user,

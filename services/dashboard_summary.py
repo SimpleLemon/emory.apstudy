@@ -104,15 +104,46 @@ def load_calendar_summary(user_id, user_settings, dependencies):
             local_sources,
             event_rows,
         )
-        cache_rows = dependencies["filter_configured_cache_events"](
-            cache_rows,
+        feed_cache_rows = dependencies["filter_configured_cache_events"](
+            [
+                row for row in cache_rows
+                if not (row.get("canvas_source_id") or row.get("canvas_event_ref"))
+            ],
             feed_urls,
         )
 
-        serialized = [
-            dependencies["serialize_event"](row, user_settings)
-            for row in cache_rows
+        canvas_cache_rows = [
+            row for row in cache_rows
+            if row.get("canvas_source_id") or row.get("canvas_event_ref")
         ]
+        event_overrides = dependencies["load_event_overrides"](user_id)
+        overrides_by_ref = {
+            override.get("event_ref"): override
+            for override in event_overrides
+            if override.get("event_ref")
+        }
+        canvas_events = []
+        if canvas_cache_rows:
+            canvas_events = dependencies["project_canvas_events"](
+                user_id,
+                canvas_cache_rows,
+                overrides_by_ref,
+                preferences=preferences,
+                range_start=range_start,
+                range_end=range_end,
+                api_event_overlaps_range=dependencies["api_event_overlaps_range"],
+            )
+
+        serialized = []
+        for row in feed_cache_rows:
+            event = dependencies["serialize_event"](row, user_settings)
+            event = dependencies["apply_event_override"](
+                event,
+                overrides_by_ref.get(event.get("event_ref")),
+            )
+            if event:
+                serialized.append(event)
+        serialized.extend(canvas_events)
         serialized.extend(
             dependencies["serialize_user_event"](row) for row in event_rows
         )
@@ -195,7 +226,9 @@ def load_calendar_summary(user_id, user_settings, dependencies):
                 :DASHBOARD_CALENDAR_UPCOMING_LIMIT
             ],
             "event_count": len(month_events),
-            "setup_complete": bool(feed_urls or local_sources or event_rows),
+            "setup_complete": bool(
+                feed_urls or local_sources or event_rows or canvas_events
+            ),
             "error": None,
         }
     except AppwriteException:

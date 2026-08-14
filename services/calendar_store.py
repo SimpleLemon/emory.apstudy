@@ -14,6 +14,12 @@ CALENDAR_TABLES = (
     "user_calendar_sources",
     "user_event_overrides",
     "calendar_shares",
+    "calendar_import_sources",
+    "calendar_sync_runs",
+    "calendar_sync_batches",
+    "calendar_import_routing",
+    "calendar_event_links",
+    "calendar_writebacks",
 )
 
 TABLE_COLUMNS = {
@@ -21,6 +27,13 @@ TABLE_COLUMNS = {
         "id", "user_id", "feed_url", "feed_url_hash", "event_uid", "event_title",
         "event_start", "event_end", "is_all_day", "event_type", "course_name",
         "raw_description", "fetched_at",
+        "canvas_source_id", "canvas_account_key", "canvas_source_item_key",
+        "canvas_event_ref", "canvas_context_id", "canvas_calendar_id",
+        "canvas_item_id", "canvas_occurrence_id", "canvas_item_type",
+        "canvas_source_revision", "canvas_source_hash", "canvas_completion_status",
+        "canvas_completion_source", "canvas_completion_route", "canvas_soft_deleted",
+        "canvas_deleted_at", "canvas_last_seen_at", "canvas_last_seen_generation",
+        "canvas_last_seen_scope_hash",
     },
     "calendar_feeds": {
         "id", "user_id", "feed_url", "feed_url_hash", "calendar_name", "etag_header",
@@ -48,6 +61,41 @@ TABLE_COLUMNS = {
         "id", "user_id", "share_code", "is_active", "include_all_calendars",
         "calendar_ids_json", "date_scope", "fixed_start", "fixed_end", "rolling_days",
         "created_at", "updated_at",
+    },
+    "calendar_import_sources": {
+        "id", "user_id", "nest_user_id", "provider", "origin", "provider_user_id",
+        "account_key", "source_id", "label", "status", "default_mirror_calendar",
+        "sync_state", "last_sync_started_at", "last_sync_completed_at", "last_seen_at",
+        "last_error_code", "last_error_message", "created_at", "updated_at", "archived_at",
+    },
+    "calendar_sync_runs": {
+        "id", "user_id", "source_id", "run_id", "generation", "lease_token",
+        "lease_expires_at", "lease_renewed_at", "scope_json", "scope_hash",
+        "consent_version", "checkpoint_json", "cursor", "counters_json", "state",
+        "error_code", "error_message", "started_at", "updated_at", "completed_at",
+        "cancelled_at", "idempotency_key",
+    },
+    "calendar_sync_batches": {
+        "id", "user_id", "source_id", "run_id", "generation", "idempotency_key",
+        "payload_hash", "checkpoint_json", "result_json", "created_at",
+    },
+    "calendar_import_routing": {
+        "id", "user_id", "source_id", "state", "destination_calendar_id",
+        "fallback_calendar_id", "created_at", "updated_at",
+    },
+    "calendar_event_links": {
+        "id", "user_id", "source_id", "account_key", "event_kind", "nest_event_id",
+        "projection_event_id", "event_ref", "canvas_context_id", "canvas_calendar_id",
+        "canvas_item_id", "canvas_occurrence_id", "canvas_item_type", "source_revision",
+        "source_hash", "mirror_state", "mirror_error_code", "mirror_error_message",
+        "mirrored_at", "created_at", "updated_at", "archived_at",
+    },
+    "calendar_writebacks": {
+        "id", "user_id", "source_id", "account_key", "operation", "event_ref",
+        "expected_revision", "payload_hash", "idempotency_key", "target_account",
+        "target_calendar", "payload_json", "state", "retry_count", "last_attempt_at",
+        "next_retry_at", "result_revision", "error_code", "error_message", "created_at",
+        "updated_at", "applied_at", "cancelled_at",
     },
 }
 

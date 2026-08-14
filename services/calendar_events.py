@@ -1,12 +1,18 @@
 """Calendar event serialization, source metadata, and share helpers."""
 
 import hashlib
+import hmac
 import json
 import logging
+import re
 import secrets
+import sqlite3
+import uuid
 from collections import Counter
+from collections.abc import Mapping
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlparse, urlunparse
+from urllib.parse import urlparse, urlsplit, urlunparse
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from flask import url_for
 from werkzeug.routing import BuildError
@@ -25,6 +31,7 @@ from appwrite_helpers import (
     update_row_safe,
 )
 from services.calendar_store import (
+    calendar_connection,
     create_calendar_row,
     delete_calendar_row,
     first_calendar_row,
@@ -44,6 +51,16 @@ from services.task_calendar import (
     task_calendar_events_for_user,
     task_calendar_source,
     user_has_tasks,
+)
+from services.time_utils import utcnow_iso
+from services.extension_contract import (
+    CANVAS_LEGACY_SOURCE_KEY,
+    EXTENSION_SOURCE_REF_PREFIX,
+    ExtensionContractError,
+    canonical_canvas_source_key,
+    extension_capability_enabled,
+    validate_account_key,
+    validate_version,
 )
 
 
@@ -67,6 +84,2168 @@ CALENDAR_SHARE_MAX_ROLLING_DAYS = 366
 PREFERENCES_BATCH_LIMIT = 50
 TIMED_EVENT_REMINDERS = {-1, 0, 5, 10, 15, 30, 60, 120, 1440, 2880}
 ALL_DAY_EVENT_REMINDERS = {-1, -540, 900, 2340, 9540}
+
+CANVAS_PROVIDER = "canvas"
+CANVAS_READ_SCOPES = frozenset({"full_history_upload", "ongoing_read"})
+CANVAS_PROJECTION_SCOPES = frozenset({
+    "full_history_upload", "ongoing_read", "shares_ics_inclusion",
+})
+CANVAS_WRITEBACK_SCOPE = "two_way_writeback"
+CANVAS_MIRROR_SCOPE = "mirroring"
+CANVAS_SHARES_SCOPE = "shares_ics_inclusion"
+CANVAS_BATCH_ITEM_LIMIT = 100
+CANVAS_BATCH_BYTES_LIMIT = 512 * 1024
+CANVAS_LEASE_MINUTES = 10
+CANVAS_SOURCE_STATUSES = frozenset({"active", "paused", "archived"})
+CANVAS_ROUTE_STATES = ("incomplete", "completed")
+CANVAS_COMPLETION_STATUSES = ("incomplete", "completed")
+CANVAS_COMPLETION_SOURCES = frozenset({"canvas", "extension"})
+CANVAS_ALLOWED_ITEM_TYPES = frozenset({
+    "assignment", "quiz", "discussion_topic", "planner_note", "calendar_event",
+})
+CANVAS_REJECTED_ITEM_TYPES = frozenset({
+    "announcement", "announcements", "unknown",
+})
+CANVAS_WRITEBACK_STATES = (
+    "waiting_for_canvas_session", "queued", "applied", "unsupported", "forbidden",
+    "conflict", "retryable_failed", "cancelled",
+)
+CANVAS_MIRROR_STATES = frozenset({
+    "not_requested", "waiting_for_canvas_session", "queued", "applied", "unsupported",
+    "forbidden", "conflict", "retryable_failed", "cancelled",
+})
+CANVAS_SAFE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/~+-]{0,254}$")
+CANVAS_RUN_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+CANVAS_IDEMPOTENCY_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/=-]{0,254}$")
+CANVAS_SOURCE_REF_PATTERN = re.compile(r"^src1:[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$")
+CANVAS_CREDENTIAL_KEYS = frozenset({
+    "access_token", "api_key", "authorization", "cookie", "cookies", "credential",
+    "credentials", "password", "refresh_token", "secret", "session", "session_cookie",
+    "token", "tokens",
+})
+
+
+def _canvas_now():
+    return utcnow_iso()
+
+
+def _canvas_user_id(user_id):
+    normalized = str(user_id or "").strip()
+    if not normalized:
+        raise ExtensionContractError("invalid_user", "Authenticated user id is required.")
+    return normalized
+
+
+def _canvas_json(value, *, field="value", max_bytes=64 * 1024):
+    try:
+        encoded = json.dumps(value, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
+    except (TypeError, ValueError) as exc:
+        raise ExtensionContractError("invalid_json", f"{field} must be JSON serializable.") from exc
+    if len(encoded.encode("utf-8")) > max_bytes:
+        raise ExtensionContractError("payload_too_large", f"{field} exceeds the allowed size.")
+    return encoded
+
+
+def _canvas_hash(value):
+    return hashlib.sha256(value.encode("utf-8")).hexdigest()
+
+
+def _canvas_text(value, *, field, max_length, required=False):
+    if not isinstance(value, str):
+        value = "" if value is None else str(value)
+    value = " ".join(value.strip().split()) if field not in {"description", "payload"} else value.strip()
+    if required and not value:
+        raise ExtensionContractError(f"invalid_{field}", f"{field} is required.")
+    if len(value) > max_length:
+        raise ExtensionContractError(f"invalid_{field}", f"{field} exceeds the allowed length.")
+    return value
+
+
+def _canvas_id(value, *, field, required=True, pattern=CANVAS_SAFE_ID_PATTERN):
+    normalized = _canvas_text(value, field=field, max_length=255, required=required)
+    if not normalized:
+        return None
+    if not pattern.fullmatch(normalized):
+        raise ExtensionContractError(f"invalid_{field}", f"{field} contains unsupported characters.")
+    return normalized
+
+
+def _canvas_idempotency_key(value, *, field="idempotency_key"):
+    return _canvas_id(value, field=field, pattern=CANVAS_IDEMPOTENCY_PATTERN)
+
+
+def _canvas_reject_credentials(value):
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if str(key).strip().lower() in CANVAS_CREDENTIAL_KEYS:
+                raise ExtensionContractError(
+                    "credentials_not_allowed",
+                    "Canvas credentials, cookies, and tokens are not accepted by this API.",
+                )
+            _canvas_reject_credentials(child)
+    elif isinstance(value, list):
+        for child in value:
+            _canvas_reject_credentials(child)
+
+
+def normalize_canvas_origin(value):
+    """Normalize a Canvas origin without accepting a feed path or credentials."""
+    if not isinstance(value, str) or not value.strip():
+        raise ExtensionContractError("invalid_origin", "origin must be an HTTPS Canvas origin.")
+    raw = value.strip()
+    parsed = urlsplit(raw)
+    if parsed.scheme.lower() != "https" or not parsed.hostname:
+        raise ExtensionContractError("invalid_origin", "origin must be an HTTPS Canvas origin.")
+    try:
+        port = parsed.port
+    except ValueError as exc:
+        raise ExtensionContractError("invalid_origin", "origin has an invalid port.") from exc
+    if parsed.username or parsed.password or parsed.path not in {"", "/"} or parsed.query or parsed.fragment:
+        raise ExtensionContractError("invalid_origin", "origin must not include a path, query, fragment, or credentials.")
+    hostname = parsed.hostname.lower().rstrip(".")
+    if not hostname or ".." in hostname or any(not part for part in hostname.split(".")):
+        raise ExtensionContractError("invalid_origin", "origin must contain a valid hostname.")
+    normalized_port = "" if port in {None, 443} else f":{port}"
+    return f"https://{hostname}{normalized_port}"
+
+
+def _canvas_completion(value):
+    if not isinstance(value, str):
+        raise ExtensionContractError("invalid_completion_status", "completion_status is required.")
+    normalized = value.strip().lower().replace("-", "_").replace(" ", "_")
+    aliases = {
+        "complete": "completed",
+        "done": "completed",
+        "graded": "completed",
+        "excused": "completed",
+        "submitted": "completed",
+        "in_progress": "incomplete",
+        "not_started": "incomplete",
+        "unsubmitted": "incomplete",
+        "missing": "incomplete",
+        "late": "incomplete",
+    }
+    normalized = aliases.get(normalized, normalized)
+    if normalized not in CANVAS_COMPLETION_STATUSES:
+        raise ExtensionContractError(
+            "invalid_completion_status",
+            "completion_status must normalize to incomplete or completed.",
+        )
+    return normalized
+
+
+def _canvas_completion_source(value):
+    normalized = str(value or "").strip().lower()
+    if normalized == "nest":
+        normalized = "extension"
+    if normalized not in CANVAS_COMPLETION_SOURCES:
+        raise ExtensionContractError(
+            "invalid_completion_source",
+            "completion_source must be canvas or extension.",
+        )
+    return normalized
+
+
+def _canvas_item_type(value):
+    normalized = str(value or "").strip().lower().replace(" ", "_")
+    if normalized in CANVAS_REJECTED_ITEM_TYPES:
+        raise ExtensionContractError("item_quarantined", "This Canvas item type is not importable.")
+    if normalized not in CANVAS_ALLOWED_ITEM_TYPES:
+        raise ExtensionContractError("item_quarantined", "Unknown Canvas item type is not importable.")
+    return normalized
+
+
+def _canvas_source_reference(value):
+    normalized = _canvas_text(value, field="source_ref", max_length=160, required=True)
+    if normalized.startswith(EXTENSION_SOURCE_REF_PREFIX):
+        if not CANVAS_SOURCE_REF_PATTERN.fullmatch(normalized):
+            raise ExtensionContractError("invalid_source_ref", "source_ref is invalid.")
+        return "row_id", normalized[len(EXTENSION_SOURCE_REF_PREFIX):]
+    return "source_id", _canvas_id(normalized, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+
+
+def _canvas_source_ref(row):
+    if not row or not row["id"]:
+        return None
+    row_id = _canvas_text(row["id"], field="source_ref", max_length=128, required=True)
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._:-]{0,127}", row_id):
+        raise ExtensionContractError("invalid_source_ref", "Stored source reference is invalid.")
+    return f"{EXTENSION_SOURCE_REF_PREFIX}{row_id}"
+
+
+def _canvas_source_row(connection, user_id, source_reference, *, include_archived=False):
+    reference_kind, reference_value = _canvas_source_reference(source_reference)
+    status_clause = "" if include_archived else " AND status != 'archived'"
+    column = "id" if reference_kind == "row_id" else "source_id"
+    query = (
+        f"SELECT * FROM calendar_import_sources WHERE user_id = ? AND {column} = ?{status_clause}"
+    )
+    row = connection.execute(query, [_canvas_user_id(user_id), reference_value]).fetchone()
+    return dict(row) if row else None
+
+
+def _canvas_source_internal_payload(row):
+    return dict(row) if row else None
+
+
+def _canvas_source_payload(row):
+    if not row:
+        return None
+    return {
+        "id": row["id"],
+        "source_ref": _canvas_source_ref(row),
+        # Keep the legacy source_id for clients released before source_ref.
+        # It is never used as the account binding; all lookups remain user-scoped.
+        "source_id": row["source_id"],
+        "provider": row["provider"],
+        "label": row["label"],
+        "status": row["status"],
+        "default_mirror_calendar": row["default_mirror_calendar"],
+        "sync_state": row["sync_state"],
+        "last_sync_started_at": row["last_sync_started_at"],
+        "last_sync_completed_at": row["last_sync_completed_at"],
+        "last_seen_at": row["last_seen_at"],
+        "last_error_code": row["last_error_code"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+        "archived_at": row["archived_at"],
+    }
+
+
+def _canvas_routing_payload(row, source=None, *, idempotent=False):
+    if not row:
+        return None
+    payload = {
+        "id": row["id"],
+        "source_id": row["source_id"],
+        "source_ref": _canvas_source_ref(source) if source else None,
+        "state": row["state"],
+        "destination_calendar_id": row["destination_calendar_id"],
+        "fallback_calendar_id": row["fallback_calendar_id"],
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+    if idempotent:
+        payload["idempotent"] = True
+    return payload
+
+
+def _canvas_consent_from_connection(connection, user_id, account_key, required_scopes=(), version=None):
+    user_id = _canvas_user_id(user_id)
+    account_key = validate_account_key(account_key)
+    if version is not None:
+        validate_version(version)
+    canonical_key = canonical_canvas_source_key(account_key)
+    row = connection.execute(
+        "SELECT * FROM calendar_integration_consents "
+        "WHERE nest_user_id = ? AND source_key = ? AND account_key = ?",
+        [user_id, canonical_key, account_key],
+    ).fetchone()
+    # One-release compatibility for rows created by the old global-looking
+    # source key.  The account predicate remains mandatory, and a canonical
+    # row (including a revoked one) always wins so revocation cannot be
+    # bypassed through the legacy fallback.
+    if row is None:
+        row = connection.execute(
+            "SELECT * FROM calendar_integration_consents "
+            "WHERE nest_user_id = ? AND source_key = ? AND account_key = ?",
+            [user_id, CANVAS_LEGACY_SOURCE_KEY, account_key],
+        ).fetchone()
+    if not row or row["state"] != "active":
+        raise ExtensionContractError("consent_required", "Active Canvas consent is required.")
+    if version is not None and int(row["version"]) != int(version):
+        raise ExtensionContractError("consent_version_mismatch", "Consent version is no longer current.")
+    try:
+        scopes = json.loads(row["scopes_json"] or "{}")
+    except (TypeError, json.JSONDecodeError) as exc:
+        raise ExtensionContractError("consent_unavailable", "Stored Canvas consent is invalid.") from exc
+    if not isinstance(scopes, dict):
+        raise ExtensionContractError("consent_unavailable", "Stored Canvas consent is invalid.")
+    missing = [scope for scope in required_scopes if not bool(scopes.get(scope))]
+    if missing:
+        raise ExtensionContractError(
+            "scope_required",
+            "Required Canvas consent scope is not granted.",
+        )
+    return dict(row)
+
+
+def canvas_consent_status(user_id, account_key, required_scopes=(), version=None):
+    with calendar_connection() as connection:
+        row = _canvas_consent_from_connection(
+            connection,
+            user_id,
+            account_key,
+            required_scopes,
+            version,
+        )
+    return row
+
+
+def register_canvas_import_source(user_id, payload):
+    """Register an extension-owned Canvas account without accepting credentials."""
+    _canvas_reject_credentials(payload)
+    if not isinstance(payload, dict):
+        raise ExtensionContractError("invalid_json", "Request body must be a JSON object.")
+    user_id = _canvas_user_id(user_id)
+    account_key = validate_account_key(payload.get("account_key"))
+    consent_version = payload.get("consent_version", payload.get("version"))
+    if consent_version is not None:
+        validate_version(consent_version)
+    source_id = _canvas_id(payload.get("source_id"), field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    origin = normalize_canvas_origin(payload.get("origin"))
+    provider_user_id = _canvas_text(
+        payload.get("provider_user_id", payload.get("canvas_user_id")),
+        field="provider_user_id",
+        max_length=255,
+        required=True,
+    )
+    label = _canvas_text(payload.get("label") or "Canvas", field="label", max_length=120, required=True)
+    default_calendar = payload.get(
+        "default_mirror_calendar",
+        payload.get("default_calendar_id", payload.get("defaultMirrorCalendar")),
+    )
+    default_calendar = _canvas_id(
+        default_calendar,
+        field="default_mirror_calendar",
+        required=False,
+    )
+    now = _canvas_now()
+
+    with calendar_connection() as connection:
+        _canvas_consent_from_connection(
+            connection,
+            user_id,
+            account_key,
+            CANVAS_READ_SCOPES,
+            consent_version,
+        )
+        by_account = connection.execute(
+            "SELECT * FROM calendar_import_sources "
+            "WHERE user_id = ? AND provider = 'canvas' AND account_key = ?",
+            [user_id, account_key],
+        ).fetchone()
+        by_source = connection.execute(
+            "SELECT * FROM calendar_import_sources WHERE user_id = ? AND source_id = ?",
+            [user_id, source_id],
+        ).fetchone()
+        if by_account and by_account["source_id"] != source_id:
+            raise ExtensionContractError(
+                "source_account_conflict",
+                "This Canvas account is already registered under another source_id.",
+            )
+        if by_source and by_source["account_key"] != account_key:
+            raise ExtensionContractError(
+                "source_id_conflict",
+                "This source_id belongs to another Canvas account.",
+            )
+
+        if by_account:
+            connection.execute(
+                """UPDATE calendar_import_sources
+                   SET nest_user_id = ?, origin = ?, provider_user_id = ?, label = ?,
+                       status = 'active', default_mirror_calendar = ?, archived_at = NULL,
+                       updated_at = ?, last_error_code = NULL, last_error_message = NULL
+                   WHERE id = ?""",
+                [user_id, origin, provider_user_id, label, default_calendar, now, by_account["id"]],
+            )
+            row_id = by_account["id"]
+        else:
+            row_id = uuid.uuid4().hex
+            connection.execute(
+                """INSERT INTO calendar_import_sources
+                   (id, user_id, nest_user_id, provider, origin, provider_user_id,
+                    account_key, source_id, label, status, default_mirror_calendar,
+                    sync_state, created_at, updated_at)
+                   VALUES (?, ?, ?, 'canvas', ?, ?, ?, ?, ?, 'active', ?, 'idle', ?, ?)""",
+                [
+                    row_id,
+                    user_id,
+                    user_id,
+                    origin,
+                    provider_user_id,
+                    account_key,
+                    source_id,
+                    label,
+                    default_calendar,
+                    now,
+                    now,
+                ],
+            )
+        row = connection.execute(
+            "SELECT * FROM calendar_import_sources WHERE id = ?", [row_id]
+        ).fetchone()
+    return _canvas_source_payload(row)
+
+
+def list_canvas_import_sources(user_id, *, include_archived=True):
+    user_id = _canvas_user_id(user_id)
+    query = (
+        "SELECT * FROM calendar_import_sources WHERE user_id = ? ORDER BY created_at ASC"
+        if include_archived
+        else "SELECT * FROM calendar_import_sources WHERE user_id = ? AND status != 'archived' ORDER BY created_at ASC"
+    )
+    with calendar_connection() as connection:
+        rows = connection.execute(query, [user_id]).fetchall()
+    return [_canvas_source_payload(dict(row)) for row in rows]
+
+
+def get_canvas_import_source(user_id, source_id, *, include_archived=True):
+    with calendar_connection() as connection:
+        row = _canvas_source_row(connection, user_id, source_id, include_archived=include_archived)
+    return _canvas_source_payload(row)
+
+
+def get_canvas_import_source_context(user_id, source_reference, *, include_archived=True):
+    """Load a source's private account context for server-side checks only."""
+    with calendar_connection() as connection:
+        row = _canvas_source_row(
+            connection,
+            user_id,
+            source_reference,
+            include_archived=include_archived,
+        )
+    return _canvas_source_internal_payload(row)
+
+
+def _archive_canvas_source_in_connection(connection, user_id, source_id, *, now=None, reason="source_archived"):
+    now = now or _canvas_now()
+    source = _canvas_source_row(connection, user_id, source_id, include_archived=True)
+    if not source:
+        return {"source": None, "events_archived": 0, "runs_cancelled": 0, "writebacks_cancelled": 0}
+    connection.execute(
+        """UPDATE calendar_import_sources
+           SET status = 'archived', sync_state = 'idle', archived_at = ?, updated_at = ?
+           WHERE user_id = ? AND source_id = ?""",
+        [now, now, user_id, source_id],
+    )
+    cache_result = connection.execute(
+        """UPDATE calendar_cache
+           SET canvas_soft_deleted = 1, canvas_deleted_at = ?, canvas_last_seen_at = ?
+           WHERE user_id = ? AND canvas_source_id = ? AND canvas_soft_deleted = 0""",
+        [now, now, user_id, source_id],
+    )
+    run_result = connection.execute(
+        """UPDATE calendar_sync_runs
+           SET state = 'cancelled', error_code = ?, error_message = ?,
+               cancelled_at = ?, updated_at = ?
+           WHERE user_id = ? AND source_id = ? AND state = 'active'""",
+        [reason, "Canvas source is no longer active.", now, now, user_id, source_id],
+    )
+    writeback_result = connection.execute(
+        """UPDATE calendar_writebacks
+           SET state = 'cancelled', error_code = ?, error_message = ?,
+               cancelled_at = ?, updated_at = ?
+           WHERE user_id = ? AND source_id = ?
+             AND state IN ('waiting_for_canvas_session', 'queued', 'retryable_failed')""",
+        [reason, "Canvas source is no longer active.", now, now, user_id, source_id],
+    )
+    connection.execute(
+        """UPDATE calendar_event_links
+           SET mirror_state = 'cancelled', mirror_error_code = ?,
+               mirror_error_message = ?, archived_at = ?, updated_at = ?
+           WHERE user_id = ? AND source_id = ? AND archived_at IS NULL""",
+        [reason, "Canvas source is no longer active.", now, now, user_id, source_id],
+    )
+    updated = connection.execute(
+        "SELECT * FROM calendar_import_sources WHERE user_id = ? AND source_id = ?",
+        [user_id, source_id],
+    ).fetchone()
+    return {
+        "source": _canvas_source_payload(dict(updated)) if updated else None,
+        "events_archived": cache_result.rowcount,
+        "runs_cancelled": run_result.rowcount,
+        "writebacks_cancelled": writeback_result.rowcount,
+    }
+
+
+def revoke_canvas_consent_in_connection(connection, user_id, account_key, *, now=None):
+    """Archive all active outputs for one Canvas account in the consent transaction."""
+    user_id = _canvas_user_id(user_id)
+    account_key = validate_account_key(account_key)
+    source_rows = connection.execute(
+        """SELECT source_id FROM calendar_import_sources
+           WHERE user_id = ? AND provider = 'canvas' AND account_key = ?
+             AND status != 'archived'""",
+        [user_id, account_key],
+    ).fetchall()
+    result = {"sources_archived": 0, "events_archived": 0, "runs_cancelled": 0, "writebacks_cancelled": 0}
+    for row in source_rows:
+        archived = _archive_canvas_source_in_connection(
+            connection,
+            user_id,
+            row["source_id"],
+            now=now,
+            reason="consent_revoked",
+        )
+        result["sources_archived"] += 1
+        result["events_archived"] += archived["events_archived"]
+        result["runs_cancelled"] += archived["runs_cancelled"]
+        result["writebacks_cancelled"] += archived["writebacks_cancelled"]
+    return result
+
+
+def archive_canvas_import_source(user_id, source_id):
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    with calendar_connection() as connection:
+        result = _archive_canvas_source_in_connection(connection, _canvas_user_id(user_id), source_id)
+    return result
+
+
+def canvas_purge_preflight(user_id, source_id):
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    user_id = _canvas_user_id(user_id)
+    with calendar_connection() as connection:
+        source = _canvas_source_row(connection, user_id, source_id, include_archived=True)
+        if not source:
+            return None
+        counts = {}
+        for table in (
+            "calendar_cache", "calendar_sync_runs", "calendar_sync_batches",
+            "calendar_import_routing", "calendar_event_links", "calendar_writebacks",
+        ):
+            column = "canvas_source_id" if table == "calendar_cache" else "source_id"
+            counts[table] = connection.execute(
+                f"SELECT COUNT(*) FROM {table} WHERE user_id = ? AND {column} = ?",
+                [user_id, source_id],
+            ).fetchone()[0]
+    return {
+        "source": _canvas_source_payload(source),
+        "purge_supported": False,
+        "destructive_purge_requires_phase_5": True,
+        "counts": counts,
+    }
+
+
+CANVAS_SCOPE_ARRAY_KEYS = frozenset({
+    "contexts", "context_ids", "calendars", "calendar_ids", "item_types",
+})
+CANVAS_SCOPE_DATE_KEYS = frozenset({"start", "end", "start_at", "end_at"})
+CANVAS_SYNC_TERMINAL_STATES = frozenset({
+    "complete", "partial", "expired", "error", "cancelled", "superseded",
+})
+CANVAS_WRITEBACK_CREATE_STATES = frozenset({
+    "waiting_for_canvas_session", "queued",
+})
+
+
+def _canvas_timestamp(value, *, field, required=True):
+    """Normalize a JSON timestamp to an explicit UTC ISO value."""
+    if value is None or value == "":
+        if required:
+            raise ExtensionContractError(f"invalid_{field}", f"{field} is required.")
+        return None
+    if isinstance(value, datetime):
+        parsed = value
+    elif isinstance(value, str):
+        candidate = value.strip()
+        if not candidate:
+            if required:
+                raise ExtensionContractError(f"invalid_{field}", f"{field} is required.")
+            return None
+        if candidate.endswith("Z"):
+            candidate = candidate[:-1] + "+00:00"
+        try:
+            parsed = datetime.fromisoformat(candidate)
+        except ValueError as exc:
+            raise ExtensionContractError(
+                f"invalid_{field}", f"{field} must be an ISO-8601 date or timestamp."
+            ) from exc
+    else:
+        raise ExtensionContractError(f"invalid_{field}", f"{field} must be a date or timestamp.")
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+    normalized = parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+    return normalized
+
+
+def _canvas_generation(value, *, required=True):
+    if value is None and not required:
+        return None
+    if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
+        raise ExtensionContractError("invalid_generation", "generation must be a positive integer.")
+    return value
+
+
+def _canvas_optional_id(value, *, field):
+    return _canvas_id(value, field=field, required=False)
+
+
+def _canvas_normalized_value(value, *, key=None):
+    if isinstance(value, Mapping):
+        normalized = {}
+        for raw_key, child in value.items():
+            if not isinstance(raw_key, str) or not raw_key.strip():
+                raise ExtensionContractError("invalid_json", "JSON object keys must be non-empty strings.")
+            normalized_key = raw_key.strip()
+            if normalized_key in normalized:
+                raise ExtensionContractError("invalid_json", "JSON object keys must be unique after normalization.")
+            normalized[normalized_key] = _canvas_normalized_value(child, key=normalized_key)
+        return {name: normalized[name] for name in sorted(normalized)}
+    if isinstance(value, list):
+        children = [_canvas_normalized_value(child, key=key) for child in value]
+        if key in CANVAS_SCOPE_ARRAY_KEYS:
+            deduped = []
+            for child in children:
+                if child not in deduped:
+                    deduped.append(child)
+            return sorted(deduped, key=lambda child: json.dumps(child, sort_keys=True, ensure_ascii=False))
+        return children
+    if isinstance(value, (str, int, float, bool)) or value is None:
+        return value.strip() if isinstance(value, str) else value
+    raise ExtensionContractError("invalid_json", "Payload contains an unsupported JSON value.")
+
+
+def _normalize_canvas_scope(scope):
+    if scope is None:
+        scope = {}
+    if not isinstance(scope, Mapping):
+        raise ExtensionContractError("invalid_scope", "scope must be a JSON object.")
+    _canvas_reject_credentials(scope)
+    normalized = _canvas_normalized_value(scope)
+    aliases = {
+        "contextIds": "context_ids",
+        "calendarIds": "calendar_ids",
+        "itemTypes": "item_types",
+        "start_at": "start",
+        "end_at": "end",
+    }
+    canonical = {}
+    for key, value in normalized.items():
+        canonical_key = aliases.get(key, key)
+        if canonical_key in canonical and canonical[canonical_key] != value:
+            raise ExtensionContractError("invalid_scope", "scope contains conflicting aliases.")
+        canonical[canonical_key] = value
+
+    for key in CANVAS_SCOPE_ARRAY_KEYS:
+        if key not in canonical:
+            continue
+        values = canonical[key]
+        if not isinstance(values, list):
+            raise ExtensionContractError("invalid_scope", f"{key} must be an array.")
+        if key in {"contexts", "context_ids", "calendars", "calendar_ids"}:
+            canonical[key] = [
+                _canvas_id(value, field=key.rstrip("s") + "_id") for value in values
+            ]
+        else:
+            canonical[key] = [_canvas_item_type(value) for value in values]
+
+    for key in ("start", "end"):
+        if key in canonical:
+            canonical[key] = _canvas_timestamp(canonical[key], field=key)
+    if canonical.get("start") and canonical.get("end"):
+        if canonical["start"] > canonical["end"]:
+            raise ExtensionContractError("invalid_scope", "scope start must not be after scope end.")
+
+    encoded = _canvas_json(canonical, field="scope", max_bytes=64 * 1024)
+    return canonical, encoded, _canvas_hash(encoded)
+
+
+def _canvas_scope_matches(row, scope):
+    context_ids = set(scope.get("context_ids", [])) | set(scope.get("contexts", []))
+    calendar_ids = set(scope.get("calendar_ids", [])) | set(scope.get("calendars", []))
+    item_types = set(scope.get("item_types", []))
+    if context_ids and row["canvas_context_id"] not in context_ids:
+        return False
+    if calendar_ids and row["canvas_calendar_id"] not in calendar_ids:
+        return False
+    if item_types and row["canvas_item_type"] not in item_types:
+        return False
+    event_start = row["event_start"]
+    if scope.get("start") and (not event_start or event_start < scope["start"]):
+        return False
+    if scope.get("end") and (not event_start or event_start > scope["end"]):
+        return False
+    return True
+
+
+def _canvas_decode_json(raw_value, default):
+    try:
+        decoded = json.loads(raw_value) if raw_value else default
+    except (TypeError, json.JSONDecodeError):
+        return default
+    return decoded
+
+
+def _canvas_sync_run_payload(row, *, idempotent=False, tombstoned=0):
+    if not row:
+        return None
+    payload = dict(row)
+    payload["scope"] = _canvas_decode_json(payload.pop("scope_json", None), {})
+    payload["checkpoint"] = _canvas_decode_json(payload.pop("checkpoint_json", None), None)
+    payload["counters"] = _canvas_decode_json(payload.pop("counters_json", None), {})
+    payload["idempotent"] = bool(idempotent)
+    if tombstoned:
+        payload["tombstoned"] = tombstoned
+    return payload
+
+
+def _canvas_batch_payload(row, *, idempotent=False):
+    if not row:
+        return None
+    result = _canvas_decode_json(row["result_json"], {})
+    if not isinstance(result, dict):
+        result = {}
+    result.update({
+        "id": row["id"],
+        "run_id": row["run_id"],
+        "generation": row["generation"],
+        "idempotent": bool(idempotent),
+        "checkpoint": _canvas_decode_json(row["checkpoint_json"], None),
+    })
+    return result
+
+
+def _canvas_writeback_payload(row, *, idempotent=False):
+    if not row:
+        return None
+    payload = dict(row)
+    payload["payload"] = _canvas_decode_json(payload.pop("payload_json", None), {})
+    payload["idempotent"] = bool(idempotent)
+    return payload
+
+
+def _canvas_link_payload(row, *, idempotent=False):
+    if not row:
+        return None
+    payload = dict(row)
+    payload["idempotent"] = bool(idempotent)
+    return payload
+
+
+def _canvas_result_error(code=None, message=None):
+    """Return bounded, credential-free error fields for provider results."""
+    if code is None and message is None:
+        return None, None
+    normalized_code = _canvas_text(
+        code or "provider_error",
+        field="error_code",
+        max_length=80,
+        required=True,
+    ).lower().replace(" ", "_")
+    if not re.fullmatch(r"[a-z0-9][a-z0-9_.:-]{0,79}", normalized_code):
+        raise ExtensionContractError("invalid_error_code", "error_code contains unsupported characters.")
+    if isinstance(message, Mapping):
+        raise ExtensionContractError("invalid_error", "error_message must be text.")
+    normalized_message = _canvas_text(
+        message or "The Canvas operation failed.",
+        field="error_message",
+        max_length=500,
+    )
+    _canvas_reject_credentials({"message": normalized_message})
+    return normalized_code, normalized_message
+
+
+def _canvas_source_account(source, account_key):
+    account_key = validate_account_key(account_key)
+    if source["account_key"] != account_key:
+        raise ExtensionContractError(
+            "source_account_mismatch",
+            "The Canvas account does not belong to this import source.",
+        )
+    return account_key
+
+
+def _canvas_event_link_identity(payload):
+    """Normalize the optional Canvas identity used by the unique link index."""
+    identity = {
+        "canvas_context_id": _canvas_optional_id(
+            payload.get("canvas_context_id", payload.get("context_id", payload.get("contextId"))),
+            field="canvas_context_id",
+        ),
+        "canvas_calendar_id": _canvas_optional_id(
+            payload.get("canvas_calendar_id", payload.get("calendar_id", payload.get("calendarId"))),
+            field="canvas_calendar_id",
+        ),
+        "canvas_item_type": (
+            _canvas_item_type(payload.get("canvas_item_type", payload.get("item_type", payload.get("itemType"))))
+            if payload.get("canvas_item_type", payload.get("item_type", payload.get("itemType"))) is not None
+            else None
+        ),
+        "canvas_item_id": _canvas_optional_id(
+            payload.get("canvas_item_id", payload.get("item_id", payload.get("itemId"))),
+            field="canvas_item_id",
+        ),
+        "canvas_occurrence_id": _canvas_optional_id(
+            payload.get("canvas_occurrence_id", payload.get("occurrence_id", payload.get("occurrenceId"))),
+            field="canvas_occurrence_id",
+        ),
+    }
+    if identity["canvas_item_id"] and not all(
+        identity[key] for key in ("canvas_context_id", "canvas_calendar_id", "canvas_item_type")
+    ):
+        raise ExtensionContractError(
+            "invalid_event_link",
+            "Canvas identity requires context, calendar, and item type.",
+        )
+    return identity
+
+
+def _canvas_event_link_lookup(connection, user_id, source_id, event_ref=None, *, link_id=None, include_archived=False):
+    clauses = ["user_id = ?", "source_id = ?"]
+    params = [user_id, source_id]
+    if link_id is not None:
+        clauses.append("id = ?")
+        params.append(link_id)
+    elif event_ref is not None:
+        clauses.append("event_ref = ?")
+        params.append(event_ref)
+    if not include_archived:
+        clauses.append("archived_at IS NULL")
+    return connection.execute(
+        f"SELECT * FROM calendar_event_links WHERE {' AND '.join(clauses)} ORDER BY created_at DESC LIMIT 1",
+        params,
+    ).fetchone()
+
+
+def create_canvas_event_link(user_id, source_id, payload=None, *, account_key=None, event_kind=None,
+                             nest_event_id=None, projection_event_id=None, event_ref=None,
+                             source_revision=None, source_hash=None, mirror_state=None):
+    """Create or replay an active Canvas-to-Nest event link."""
+    if payload is not None:
+        if not isinstance(payload, Mapping):
+            raise ExtensionContractError("invalid_json", "Event-link payload must be a JSON object.")
+        values = dict(payload)
+        account_key = values.get("account_key", account_key)
+        event_kind = values.get("event_kind", values.get("eventKind", event_kind))
+        nest_event_id = values.get("nest_event_id", values.get("nestEventId", nest_event_id))
+        projection_event_id = values.get("projection_event_id", values.get("projectionEventId", projection_event_id))
+        event_ref = values.get("event_ref", event_ref)
+        source_revision = values.get("source_revision", values.get("sourceRevision", source_revision))
+        source_hash = values.get("source_hash", values.get("sourceHash", source_hash))
+        mirror_state = values.get("mirror_state", values.get("mirrorState", mirror_state))
+    else:
+        values = {}
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    event_kind = str(event_kind or "projection").strip().lower()
+    if event_kind not in {"native", "projection", "feed"}:
+        raise ExtensionContractError("invalid_event_kind", "event_kind must be native, projection, or feed.")
+    event_ref = _canvas_optional_id(event_ref, field="event_ref")
+    nest_event_id = _canvas_optional_id(nest_event_id, field="nest_event_id")
+    projection_event_id = _canvas_optional_id(projection_event_id, field="projection_event_id")
+    source_revision = _canvas_optional_id(source_revision, field="source_revision")
+    source_hash = _canvas_optional_id(source_hash, field="source_hash")
+    mirror_state = str(mirror_state or "not_requested").strip().lower()
+    if mirror_state not in CANVAS_MIRROR_STATES:
+        raise ExtensionContractError("invalid_mirror_state", "mirror_state is not an approved Canvas mirror state.")
+    identity = _canvas_event_link_identity(values)
+    if not event_ref and not identity["canvas_item_id"]:
+        raise ExtensionContractError("invalid_event_link", "event_ref or a Canvas item identity is required.")
+    now = _canvas_now()
+
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        account_key = _canvas_source_account(source, account_key)
+        existing = _canvas_event_link_lookup(connection, user_id, source_id, event_ref)
+        if existing is None and identity["canvas_item_id"]:
+            existing = connection.execute(
+                """SELECT * FROM calendar_event_links
+                   WHERE user_id = ? AND source_id = ? AND account_key = ?
+                     AND canvas_context_id = ? AND canvas_calendar_id = ?
+                     AND canvas_item_type = ? AND canvas_item_id = ?
+                     AND IFNULL(canvas_occurrence_id, '') = IFNULL(?, '')
+                     AND archived_at IS NULL
+                   LIMIT 1""",
+                [user_id, source_id, account_key, identity["canvas_context_id"],
+                 identity["canvas_calendar_id"], identity["canvas_item_type"],
+                 identity["canvas_item_id"], identity["canvas_occurrence_id"]],
+            ).fetchone()
+        if existing:
+            same = all(existing[field] == value for field, value in {
+                "account_key": account_key, "event_kind": event_kind,
+                "nest_event_id": nest_event_id, "projection_event_id": projection_event_id,
+                "event_ref": event_ref, **identity, "source_revision": source_revision,
+                "source_hash": source_hash, "mirror_state": mirror_state,
+            }.items())
+            if not same:
+                raise ExtensionContractError("event_link_conflict", "The active Canvas event link already exists.")
+            return _canvas_link_payload(existing, idempotent=True)
+        link_id = uuid.uuid4().hex
+        try:
+            connection.execute(
+                """INSERT INTO calendar_event_links
+                   (id, user_id, source_id, account_key, event_kind, nest_event_id,
+                    projection_event_id, event_ref, canvas_context_id, canvas_calendar_id,
+                    canvas_item_id, canvas_occurrence_id, canvas_item_type, source_revision,
+                    source_hash, mirror_state, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                [link_id, user_id, source_id, account_key, event_kind, nest_event_id,
+                 projection_event_id, event_ref, identity["canvas_context_id"],
+                 identity["canvas_calendar_id"], identity["canvas_item_id"],
+                 identity["canvas_occurrence_id"], identity["canvas_item_type"],
+                 source_revision, source_hash, mirror_state, now, now],
+            )
+        except sqlite3.IntegrityError as exc:
+            raise ExtensionContractError("event_link_conflict", "The active Canvas event link already exists.") from exc
+        created = connection.execute("SELECT * FROM calendar_event_links WHERE id = ?", [link_id]).fetchone()
+    return _canvas_link_payload(created)
+
+
+def get_canvas_event_link(user_id, source_id, event_ref=None, *, link_id=None, include_archived=False):
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    if event_ref is None and link_id is None:
+        raise ExtensionContractError("invalid_event_link", "event_ref or link_id is required.")
+    if event_ref is not None:
+        event_ref = _canvas_id(event_ref, field="event_ref")
+    if link_id is not None:
+        link_id = _canvas_id(link_id, field="link_id")
+    with calendar_connection() as connection:
+        _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        row = _canvas_event_link_lookup(
+            connection, user_id, source_id, event_ref, link_id=link_id, include_archived=include_archived
+        )
+    return _canvas_link_payload(row)
+
+
+def record_canvas_event_link_result(user_id, source_id, event_ref=None, *, link_id=None, payload=None,
+                                   mirror_state=None, state=None, expected_revision=None, source_revision=None,
+                                   source_hash=None, error_code=None, error_message=None,
+                                   mirrored_at=None):
+    """Record an approved provider mirror result with optimistic revision control."""
+    if payload is not None:
+        if not isinstance(payload, Mapping):
+            raise ExtensionContractError("invalid_json", "Event-link result must be a JSON object.")
+        values = dict(payload)
+        mirror_state = values.get("mirror_state", values.get("state", mirror_state))
+        expected_revision = values.get("expected_revision", values.get("expectedRevision", expected_revision))
+        source_revision = values.get("source_revision", values.get("sourceRevision", source_revision))
+        source_hash = values.get("source_hash", values.get("sourceHash", source_hash))
+        error_code = values.get("error_code", error_code)
+        error_message = values.get("error_message", values.get("errorMessage", error_message))
+        mirrored_at = values.get("mirrored_at", values.get("mirroredAt", mirrored_at))
+    mirror_state = str(mirror_state or state or "queued").strip().lower()
+    if mirror_state not in CANVAS_MIRROR_STATES:
+        raise ExtensionContractError("invalid_mirror_state", "mirror_state is not an approved Canvas mirror state.")
+    expected_revision = _canvas_optional_id(expected_revision, field="expected_revision")
+    source_revision = _canvas_optional_id(source_revision, field="source_revision")
+    source_hash = _canvas_optional_id(source_hash, field="source_hash")
+    error_code, error_message = _canvas_result_error(error_code, error_message)
+    mirrored_at = _canvas_timestamp(mirrored_at, field="mirrored_at", required=False) or _canvas_now()
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        row = _canvas_event_link_lookup(
+            connection, user_id, source_id, event_ref, link_id=link_id, include_archived=True
+        )
+        if not row:
+            raise ExtensionContractError("event_link_not_found", "Canvas event link was not found.")
+        if expected_revision is not None and row["source_revision"] != expected_revision:
+            raise ExtensionContractError("revision_conflict", "The Canvas event link revision is no longer current.")
+        if row["archived_at"] is not None:
+            raise ExtensionContractError("event_link_archived", "The Canvas event link is archived.")
+        if row["mirror_state"] == mirror_state and row["source_revision"] == source_revision and row["source_hash"] == source_hash:
+            return _canvas_link_payload(row, idempotent=True)
+        connection.execute(
+            """UPDATE calendar_event_links
+               SET mirror_state = ?, mirror_error_code = ?, mirror_error_message = ?,
+                   source_revision = ?, source_hash = ?, mirrored_at = ?, updated_at = ?
+               WHERE id = ? AND user_id = ? AND source_id = ? AND archived_at IS NULL""",
+            [mirror_state, error_code, error_message, source_revision, source_hash,
+             mirrored_at if mirror_state == "applied" else None, _canvas_now(),
+             row["id"], user_id, source_id],
+        )
+        updated = connection.execute("SELECT * FROM calendar_event_links WHERE id = ?", [row["id"]]).fetchone()
+    return _canvas_link_payload(updated)
+
+
+def _canvas_writeback_request(payload, *, operation, event_ref, expected_revision, idempotency_key,
+                              target_account, target_calendar):
+    if payload is None:
+        payload = {}
+    if not isinstance(payload, Mapping):
+        raise ExtensionContractError("invalid_json", "Writeback payload must be a JSON object.")
+    values = dict(payload)
+    operation = values.get("operation", operation)
+    event_ref = values.get("event_ref", values.get("eventRef", event_ref))
+    expected_revision = values.get("expected_revision", values.get("expectedRevision", expected_revision))
+    idempotency_key = values.get("idempotency_key", values.get("idempotencyKey", idempotency_key))
+    target_account = values.get("target_account", values.get("targetAccount", target_account))
+    target_calendar = values.get("target_calendar", values.get("targetCalendar", target_calendar))
+    operation = str(operation or "").strip().lower()
+    if operation not in {"create", "update", "delete"}:
+        raise ExtensionContractError("invalid_operation", "operation must be create, update, or delete.")
+    event_ref = _canvas_optional_id(event_ref, field="event_ref")
+    expected_revision = _canvas_optional_id(expected_revision, field="expected_revision")
+    idempotency_key = _canvas_idempotency_key(idempotency_key, field="idempotency_key")
+    target_account = validate_account_key(target_account)
+    target_calendar = _canvas_optional_id(target_calendar, field="target_calendar")
+    _canvas_reject_credentials(values)
+    payload_json = _canvas_json(values, field="payload", max_bytes=64 * 1024)
+    return operation, event_ref, expected_revision, idempotency_key, target_account, target_calendar, payload_json
+
+
+def create_canvas_writeback(user_id, source_id, payload=None, *, account_key=None, operation=None,
+                            event_ref=None, expected_revision=None, idempotency_key=None,
+                            target_account=None, target_calendar=None, state="waiting_for_canvas_session"):
+    """Queue or replay one consented Canvas writeback operation."""
+    if payload is not None and isinstance(payload, Mapping):
+        account_key = payload.get("account_key", account_key)
+        state = payload.get("state", state)
+    state = str(state or "waiting_for_canvas_session").strip().lower()
+    if state not in CANVAS_WRITEBACK_CREATE_STATES:
+        raise ExtensionContractError("invalid_writeback_state", "A new writeback must be waiting or queued.")
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    account_key = validate_account_key(account_key)
+    (operation, event_ref, expected_revision, idempotency_key, target_account,
+     target_calendar, payload_json) = _canvas_writeback_request(
+        payload, operation=operation, event_ref=event_ref, expected_revision=expected_revision,
+        idempotency_key=idempotency_key, target_account=target_account, target_calendar=target_calendar,
+    )
+    payload_hash = _canvas_hash(payload_json)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        _canvas_source_account(source, account_key)
+        _canvas_source_consent(connection, source, scopes=(CANVAS_WRITEBACK_SCOPE,))
+        if operation in {"update", "delete"} and expected_revision is None:
+            raise ExtensionContractError("expected_revision_required", "update and delete require expected_revision.")
+        if expected_revision is not None and event_ref:
+            link = _canvas_event_link_lookup(connection, user_id, source_id, event_ref)
+            cache = connection.execute(
+                """SELECT canvas_source_revision FROM calendar_cache
+                   WHERE user_id = ? AND canvas_source_id = ? AND canvas_account_key = ?
+                     AND canvas_event_ref = ? AND canvas_soft_deleted = 0 LIMIT 1""",
+                [user_id, source_id, account_key, event_ref],
+            ).fetchone()
+            current_revision = link["source_revision"] if link and link["source_revision"] is not None else (cache["canvas_source_revision"] if cache else None)
+            if current_revision is not None and current_revision != expected_revision:
+                raise ExtensionContractError("revision_conflict", "The Canvas event revision is no longer current.")
+        existing = connection.execute(
+            """SELECT * FROM calendar_writebacks
+               WHERE user_id = ? AND source_id = ? AND idempotency_key = ?""",
+            [user_id, source_id, idempotency_key],
+        ).fetchone()
+        if existing:
+            if existing["payload_hash"] != payload_hash or existing["operation"] != operation or existing["expected_revision"] != expected_revision:
+                raise ExtensionContractError("idempotency_conflict", "The writeback idempotency key was already used with different parameters.")
+            return _canvas_writeback_payload(existing, idempotent=True)
+        now = _canvas_now()
+        writeback_id = uuid.uuid4().hex
+        try:
+            connection.execute(
+                """INSERT INTO calendar_writebacks
+                   (id, user_id, source_id, account_key, operation, event_ref, expected_revision,
+                    payload_hash, idempotency_key, target_account, target_calendar, payload_json,
+                    state, retry_count, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, ?, ?)""",
+                [writeback_id, user_id, source_id, account_key, operation, event_ref, expected_revision,
+                 payload_hash, idempotency_key, target_account, target_calendar, payload_json, state, now, now],
+            )
+        except sqlite3.IntegrityError as exc:
+            raise ExtensionContractError("writeback_conflict", "The Canvas writeback could not be created.") from exc
+        created = connection.execute("SELECT * FROM calendar_writebacks WHERE id = ?", [writeback_id]).fetchone()
+    return _canvas_writeback_payload(created)
+
+
+def list_canvas_writebacks(user_id, source_id, *, account_key=None, event_ref=None, states=None, limit=100):
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= 100:
+        raise ExtensionContractError("invalid_limit", "limit must be between 1 and 100.")
+    if states is None:
+        states = None
+    elif isinstance(states, str):
+        states = [states]
+    elif not isinstance(states, (list, tuple, set)):
+        raise ExtensionContractError("invalid_writeback_state", "states must be an array.")
+    if states is not None:
+        states = [str(value).strip().lower() for value in states]
+        if any(value not in CANVAS_WRITEBACK_STATES for value in states):
+            raise ExtensionContractError("invalid_writeback_state", "states contains an unapproved state.")
+    if account_key is not None:
+        account_key = validate_account_key(account_key)
+    if event_ref is not None:
+        event_ref = _canvas_id(event_ref, field="event_ref")
+    with calendar_connection() as connection:
+        source = _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        if account_key is not None:
+            _canvas_source_account(source, account_key)
+        clauses = ["user_id = ?", "source_id = ?"]
+        params = [user_id, source_id]
+        if account_key is not None:
+            clauses.append("account_key = ?")
+            params.append(account_key)
+        if event_ref is not None:
+            clauses.append("event_ref = ?")
+            params.append(event_ref)
+        if states:
+            clauses.append("state IN (" + ",".join("?" for _ in states) + ")")
+            params.extend(states)
+        rows = connection.execute(
+            f"SELECT * FROM calendar_writebacks WHERE {' AND '.join(clauses)} ORDER BY created_at ASC LIMIT ?",
+            [*params, limit],
+        ).fetchall()
+    return [_canvas_writeback_payload(row) for row in rows]
+
+
+def get_canvas_writeback_result(user_id, source_id, writeback_id, *, include_archived=True):
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    writeback_id = _canvas_id(writeback_id, field="writeback_id")
+    with calendar_connection() as connection:
+        _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        row = connection.execute(
+            "SELECT * FROM calendar_writebacks WHERE id = ? AND user_id = ? AND source_id = ?",
+            [writeback_id, user_id, source_id],
+        ).fetchone()
+        if row and not include_archived and row["state"] == "cancelled":
+            row = None
+    return _canvas_writeback_payload(row)
+
+
+def record_canvas_writeback_result(user_id, source_id, writeback_id, payload=None, *, state=None,
+                                   expected_revision=None, result_revision=None, error_code=None,
+                                   error_message=None, retry_count=None, next_retry_at=None):
+    """Apply one approved Canvas writeback result, once, to an owned row."""
+    if payload is not None:
+        if not isinstance(payload, Mapping):
+            raise ExtensionContractError("invalid_json", "Writeback result must be a JSON object.")
+        values = dict(payload)
+        state = values.get("state", values.get("status", state))
+        expected_revision = values.get("expected_revision", values.get("expectedRevision", expected_revision))
+        result_revision = values.get("result_revision", values.get("resultRevision", result_revision))
+        error_code = values.get("error_code", error_code)
+        error_message = values.get("error_message", values.get("errorMessage", error_message))
+        retry_count = values.get("retry_count", retry_count)
+        next_retry_at = values.get("next_retry_at", values.get("nextRetryAt", next_retry_at))
+    state = str(state or "retryable_failed").strip().lower()
+    if state not in CANVAS_WRITEBACK_STATES:
+        raise ExtensionContractError("invalid_writeback_state", "state is not an approved Canvas writeback state.")
+    expected_revision = _canvas_optional_id(expected_revision, field="expected_revision")
+    result_revision = _canvas_optional_id(result_revision, field="result_revision")
+    error_code, error_message = _canvas_result_error(error_code, error_message)
+    if retry_count is not None and (isinstance(retry_count, bool) or not isinstance(retry_count, int) or retry_count < 0):
+        raise ExtensionContractError("invalid_retry_count", "retry_count must be a non-negative integer.")
+    next_retry_at = _canvas_timestamp(next_retry_at, field="next_retry_at", required=False)
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        row = connection.execute(
+            "SELECT * FROM calendar_writebacks WHERE id = ? AND user_id = ? AND source_id = ?",
+            [writeback_id, user_id, source_id],
+        ).fetchone()
+        if not row:
+            raise ExtensionContractError("writeback_not_found", "Canvas writeback was not found.")
+        if expected_revision is not None and row["expected_revision"] != expected_revision:
+            raise ExtensionContractError("revision_conflict", "The Canvas writeback revision is no longer current.")
+        if row["state"] in {"applied", "unsupported", "forbidden", "conflict", "cancelled"}:
+            if row["state"] == state and row["result_revision"] == result_revision and row["error_code"] == error_code:
+                return _canvas_writeback_payload(row, idempotent=True)
+            raise ExtensionContractError("writeback_terminal", "The Canvas writeback already has a terminal result.")
+        now = _canvas_now()
+        applied_at = now if state == "applied" else None
+        cancelled_at = now if state == "cancelled" else None
+        next_retry_at = next_retry_at if state == "retryable_failed" else None
+        connection.execute(
+            """UPDATE calendar_writebacks
+               SET state = ?, retry_count = COALESCE(?, retry_count), last_attempt_at = ?,
+                   next_retry_at = ?, result_revision = ?, error_code = ?, error_message = ?,
+                   updated_at = ?, applied_at = ?, cancelled_at = ?
+               WHERE id = ? AND user_id = ? AND source_id = ?""",
+            [state, retry_count, now, next_retry_at, result_revision, error_code, error_message,
+             now, applied_at, cancelled_at, writeback_id, user_id, source_id],
+        )
+        updated = connection.execute("SELECT * FROM calendar_writebacks WHERE id = ?", [writeback_id]).fetchone()
+    return _canvas_writeback_payload(updated)
+
+
+# Route layers can bind these explicit service hooks without reaching into SQL.
+create_canvas_event_link_result = record_canvas_event_link_result
+create_canvas_writeback_result = record_canvas_writeback_result
+
+
+def _require_canvas_source(connection, user_id, source_id, *, include_archived=False):
+    user_id = _canvas_user_id(user_id)
+    source = _canvas_source_row(
+        connection,
+        user_id,
+        source_id,
+        include_archived=include_archived,
+    )
+    if not source:
+        raise ExtensionContractError("source_not_found", "Canvas import source was not found.")
+    if source["provider"] != CANVAS_PROVIDER:
+        raise ExtensionContractError("source_not_canvas", "The import source is not Canvas.")
+    if not include_archived and source["status"] != "active":
+        raise ExtensionContractError("source_inactive", "Canvas import source is not active.")
+    return source
+
+
+def _canvas_source_consent(connection, source, *, version=None, scopes=()):
+    if version is not None:
+        validate_version(version)
+    consent = _canvas_consent_from_connection(
+        connection,
+        source["user_id"],
+        source["account_key"],
+        scopes,
+        version,
+    )
+    return consent, int(consent["version"])
+
+
+def _canvas_current_generation(connection, user_id, source_id):
+    row = connection.execute(
+        "SELECT MAX(generation) AS generation FROM calendar_sync_runs WHERE user_id = ? AND source_id = ?",
+        [user_id, source_id],
+    ).fetchone()
+    return int(row["generation"] or 0)
+
+
+def _canvas_run_row(connection, user_id, source_id, run_id):
+    return connection.execute(
+        "SELECT * FROM calendar_sync_runs WHERE user_id = ? AND source_id = ? AND run_id = ?",
+        [user_id, source_id, run_id],
+    ).fetchone()
+
+
+def _canvas_mark_run_expired(connection, row, now):
+    if row["state"] != "active":
+        return row
+    connection.execute(
+        """UPDATE calendar_sync_runs
+           SET state = 'expired', error_code = 'lease_expired',
+               error_message = 'The sync lease expired.', updated_at = ?, completed_at = ?
+           WHERE id = ? AND state = 'active'""",
+        [now, now, row["id"]],
+    )
+    return connection.execute("SELECT * FROM calendar_sync_runs WHERE id = ?", [row["id"]]).fetchone()
+
+
+def _require_current_active_run(
+    connection,
+    user_id,
+    source_id,
+    run_id,
+    *,
+    generation=None,
+    lease_token=None,
+    now=None,
+):
+    now = now or _canvas_now()
+    run_id = _canvas_id(run_id, field="run_id", pattern=CANVAS_RUN_ID_PATTERN)
+    row = _canvas_run_row(connection, user_id, source_id, run_id)
+    if not row:
+        raise ExtensionContractError("run_not_found", "Canvas sync run was not found.")
+    expected_generation = _canvas_generation(generation, required=False)
+    current_generation = _canvas_current_generation(connection, user_id, source_id)
+    if row["generation"] != current_generation or (
+        expected_generation is not None and row["generation"] != expected_generation
+    ):
+        raise ExtensionContractError("stale_run", "Only the current Canvas sync generation may mutate this run.")
+    if lease_token is not None and (
+        not isinstance(lease_token, str)
+        or not isinstance(row["lease_token"], str)
+        or not hmac.compare_digest(lease_token, row["lease_token"])
+    ):
+        raise ExtensionContractError("lease_token_mismatch", "The Canvas sync lease token is invalid.")
+    if row["state"] != "active":
+        raise ExtensionContractError("run_not_active", "The Canvas sync run is not active.")
+    if row["lease_expires_at"] <= now:
+        _canvas_mark_run_expired(connection, row, now)
+        # Expiration is a state transition, not part of the rejected mutation.
+        # Commit it before surfacing the client error so callers cannot keep
+        # using a lease that the service has already invalidated.
+        connection.commit()
+        raise ExtensionContractError("lease_expired", "The Canvas sync lease has expired.")
+    return row
+
+
+def _canvas_update_source_after_run(connection, source, *, state, now, error_code=None, error_message=None):
+    connection.execute(
+        """UPDATE calendar_import_sources
+           SET sync_state = ?, updated_at = ?, last_error_code = ?, last_error_message = ?
+           WHERE user_id = ? AND source_id = ?""",
+        [state, now, error_code, error_message, source["user_id"], source["source_id"]],
+    )
+
+
+def _canvas_parse_run_request(scope, consent_version, idempotency_key, run_id, payload):
+    if payload is not None:
+        if not isinstance(payload, Mapping):
+            raise ExtensionContractError("invalid_json", "Sync run payload must be a JSON object.")
+        if scope is None:
+            scope = payload.get("scope")
+        if consent_version is None:
+            consent_version = payload.get("consent_version", payload.get("version"))
+        if idempotency_key is None:
+            idempotency_key = payload.get("idempotency_key")
+        if run_id is None:
+            run_id = payload.get("run_id")
+    normalized_scope, scope_json, scope_hash = _normalize_canvas_scope(scope)
+    idempotency_key = _canvas_idempotency_key(idempotency_key)
+    if run_id is None:
+        run_id = uuid.uuid4().hex
+    run_id = _canvas_id(run_id, field="run_id", pattern=CANVAS_RUN_ID_PATTERN)
+    return normalized_scope, scope_json, scope_hash, consent_version, idempotency_key, run_id
+
+
+def begin_canvas_sync_run(
+    user_id,
+    source_id,
+    payload=None,
+    *,
+    scope=None,
+    consent_version=None,
+    idempotency_key=None,
+    run_id=None,
+):
+    """Begin or return an idempotent, leased Canvas sync generation."""
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    (
+        normalized_scope,
+        scope_json,
+        scope_hash,
+        consent_version,
+        idempotency_key,
+        run_id,
+    ) = _canvas_parse_run_request(scope, consent_version, idempotency_key, run_id, payload)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        consent, consent_version = _canvas_source_consent(
+            connection,
+            source,
+            version=consent_version,
+            scopes=CANVAS_READ_SCOPES,
+        )
+        existing = connection.execute(
+            """SELECT * FROM calendar_sync_runs
+               WHERE user_id = ? AND source_id = ? AND idempotency_key = ?""",
+            [user_id, source_id, idempotency_key],
+        ).fetchone()
+        if existing:
+            if existing["scope_hash"] != scope_hash or int(existing["consent_version"]) != consent_version:
+                raise ExtensionContractError(
+                    "idempotency_conflict",
+                    "The sync idempotency key was already used with different parameters.",
+                )
+            return _canvas_sync_run_payload(existing, idempotent=True)
+
+        generation = _canvas_current_generation(connection, user_id, source_id) + 1
+        now = _canvas_now()
+        lease_expires_at = _canvas_timestamp(
+            datetime.fromisoformat(now[:-1] + "+00:00") + timedelta(minutes=CANVAS_LEASE_MINUTES),
+            field="lease_expires_at",
+        )
+        lease_token = secrets.token_urlsafe(32)
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET state = 'superseded', error_code = 'new_generation',
+                   error_message = 'A newer sync generation was started.', updated_at = ?
+               WHERE user_id = ? AND source_id = ? AND state = 'active'""",
+            [now, user_id, source_id],
+        )
+        connection.execute(
+            """INSERT INTO calendar_sync_runs
+               (id, user_id, source_id, run_id, generation, lease_token,
+                lease_expires_at, lease_renewed_at, scope_json, scope_hash,
+                consent_version, checkpoint_json, cursor, counters_json, state,
+                started_at, updated_at, idempotency_key)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, NULL, ?, 'active', ?, ?, ?)""",
+            [
+                uuid.uuid4().hex,
+                user_id,
+                source_id,
+                run_id,
+                generation,
+                lease_token,
+                lease_expires_at,
+                now,
+                scope_json,
+                scope_hash,
+                consent_version,
+                _canvas_json({"accepted": 0, "updated": 0, "unchanged": 0, "quarantined": 0}, field="counters"),
+                now,
+                now,
+                idempotency_key,
+            ],
+        )
+        _canvas_update_source_after_run(connection, source, state="active", now=now)
+        created = _canvas_run_row(connection, user_id, source_id, run_id)
+    return _canvas_sync_run_payload(created)
+
+
+def get_canvas_sync_run(user_id, source_id, run_id=None, *, generation=None):
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    generation = _canvas_generation(generation, required=False)
+    with calendar_connection() as connection:
+        _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        if run_id is not None:
+            run_id = _canvas_id(run_id, field="run_id", pattern=CANVAS_RUN_ID_PATTERN)
+            row = _canvas_run_row(connection, user_id, source_id, run_id)
+        elif generation is not None:
+            row = connection.execute(
+                "SELECT * FROM calendar_sync_runs WHERE user_id = ? AND source_id = ? AND generation = ?",
+                [user_id, source_id, generation],
+            ).fetchone()
+        else:
+            row = connection.execute(
+                """SELECT * FROM calendar_sync_runs
+                   WHERE user_id = ? AND source_id = ?
+                   ORDER BY generation DESC LIMIT 1""",
+                [user_id, source_id],
+            ).fetchone()
+    return _canvas_sync_run_payload(row)
+
+
+def renew_canvas_sync_run(user_id, source_id, run_id, *, generation=None, lease_token=None):
+    """Renew only an active lease held by the source's current generation."""
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        row = _require_current_active_run(
+            connection,
+            user_id,
+            source_id,
+            run_id,
+            generation=generation,
+            lease_token=lease_token,
+        )
+        now = _canvas_now()
+        lease_expires_at = _canvas_timestamp(
+            datetime.fromisoformat(now[:-1] + "+00:00") + timedelta(minutes=CANVAS_LEASE_MINUTES),
+            field="lease_expires_at",
+        )
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET lease_expires_at = ?, lease_renewed_at = ?, updated_at = ?
+               WHERE id = ? AND generation = ? AND state = 'active'""",
+            [lease_expires_at, now, now, row["id"], row["generation"]],
+        )
+        renewed = connection.execute("SELECT * FROM calendar_sync_runs WHERE id = ?", [row["id"]]).fetchone()
+        _canvas_update_source_after_run(connection, source, state="active", now=now)
+    return _canvas_sync_run_payload(renewed)
+
+
+def resume_canvas_sync_run(user_id, source_id, run_id, *, generation=None, lease_token=None):
+    """Resume the current generation after an expired lease with a fresh lease."""
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        run_id = _canvas_id(run_id, field="run_id", pattern=CANVAS_RUN_ID_PATTERN)
+        row = _canvas_run_row(connection, user_id, source_id, run_id)
+        if not row:
+            raise ExtensionContractError("run_not_found", "Canvas sync run was not found.")
+        expected_generation = _canvas_generation(generation, required=False)
+        if row["generation"] != _canvas_current_generation(connection, user_id, source_id) or (
+            expected_generation is not None and row["generation"] != expected_generation
+        ):
+            raise ExtensionContractError("stale_run", "Only the current Canvas sync generation may resume.")
+        if lease_token is not None and row["lease_token"] != lease_token:
+            raise ExtensionContractError("lease_token_mismatch", "The Canvas sync lease token is invalid.")
+        if row["state"] not in {"active", "expired"}:
+            raise ExtensionContractError("run_not_resumable", "The Canvas sync run is not resumable.")
+        now = _canvas_now()
+        next_token = row["lease_token"] if row["state"] == "active" else secrets.token_urlsafe(32)
+        lease_expires_at = _canvas_timestamp(
+            datetime.fromisoformat(now[:-1] + "+00:00") + timedelta(minutes=CANVAS_LEASE_MINUTES),
+            field="lease_expires_at",
+        )
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET state = 'active', lease_token = ?, lease_expires_at = ?,
+                   lease_renewed_at = ?, updated_at = ?, error_code = NULL,
+                   error_message = NULL, completed_at = NULL
+               WHERE id = ?""",
+            [next_token, lease_expires_at, now, now, row["id"]],
+        )
+        resumed = connection.execute("SELECT * FROM calendar_sync_runs WHERE id = ?", [row["id"]]).fetchone()
+        _canvas_update_source_after_run(connection, source, state="active", now=now)
+    return _canvas_sync_run_payload(resumed)
+
+
+def cancel_canvas_sync_run(user_id, source_id, run_id, *, generation=None, lease_token=None, reason=None):
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    reason = _canvas_text(reason or "Cancelled by the caller.", field="reason", max_length=500, required=True)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        row = _canvas_run_row(connection, user_id, source_id, run_id)
+        if not row:
+            raise ExtensionContractError("run_not_found", "Canvas sync run was not found.")
+        expected_generation = _canvas_generation(generation, required=False)
+        if row["generation"] != _canvas_current_generation(connection, user_id, source_id) or (
+            expected_generation is not None and row["generation"] != expected_generation
+        ):
+            raise ExtensionContractError("stale_run", "Only the current Canvas sync generation may be cancelled.")
+        if lease_token is not None and row["lease_token"] != lease_token:
+            raise ExtensionContractError("lease_token_mismatch", "The Canvas sync lease token is invalid.")
+        if row["state"] == "cancelled":
+            return _canvas_sync_run_payload(row, idempotent=True)
+        if row["state"] != "active":
+            raise ExtensionContractError("run_not_active", "Only an active Canvas sync run may be cancelled.")
+        now = _canvas_now()
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET state = 'cancelled', error_code = 'cancelled', error_message = ?,
+                   cancelled_at = ?, updated_at = ?, completed_at = ?
+               WHERE id = ? AND state = 'active'""",
+            [reason, now, now, now, row["id"]],
+        )
+        cancelled = connection.execute("SELECT * FROM calendar_sync_runs WHERE id = ?", [row["id"]]).fetchone()
+        if source["status"] != "archived":
+            _canvas_update_source_after_run(connection, source, state="cancelled", now=now)
+    return _canvas_sync_run_payload(cancelled)
+
+
+def _canvas_item_value(item, *keys, default=None):
+    for key in keys:
+        if key in item:
+            return item[key]
+    return default
+
+
+def _canvas_bool(value, *, field, default=False):
+    if value is None:
+        return default
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, int) and value in {0, 1}:
+        return bool(value)
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in {"true", "1", "yes", "on"}:
+            return True
+        if normalized in {"false", "0", "no", "off"}:
+            return False
+    raise ExtensionContractError(f"invalid_{field}", f"{field} must be a boolean.")
+
+
+def _normalize_canvas_item(item, *, source_id, account_key):
+    if not isinstance(item, Mapping):
+        raise ExtensionContractError("item_quarantined", "Canvas item must be a JSON object.")
+    _canvas_reject_credentials(item)
+    context_id = _canvas_id(
+        _canvas_item_value(item, "context_id", "contextId", "context"),
+        field="context_id",
+    )
+    calendar_id = _canvas_id(
+        _canvas_item_value(item, "calendar_id", "calendarId", "calendar"),
+        field="calendar_id",
+    )
+    item_type = _canvas_item_type(_canvas_item_value(item, "item_type", "itemType", "type"))
+    item_id = _canvas_id(
+        _canvas_item_value(item, "item_id", "itemId", "id"),
+        field="item_id",
+    )
+    occurrence_id = _canvas_id(
+        _canvas_item_value(item, "occurrence_id", "occurrenceId"),
+        field="occurrence_id",
+        required=False,
+    )
+    is_all_day = _canvas_bool(
+        _canvas_item_value(item, "is_all_day", "all_day", "allDay"),
+        field="is_all_day",
+        default=False,
+    )
+    start = _canvas_timestamp(
+        _canvas_item_value(item, "start", "start_at", "startAt", "event_start", "due_at", "dueAt"),
+        field="start",
+    )
+    end = _canvas_timestamp(
+        _canvas_item_value(item, "end", "end_at", "endAt", "event_end"),
+        field="end",
+        required=False,
+    ) or start
+    if end < start:
+        raise ExtensionContractError("item_quarantined", "Canvas item end must not be before its start.")
+
+    title = _canvas_text(
+        _canvas_item_value(item, "title", "summary", "name", default=item_type),
+        field="title",
+        max_length=500,
+        required=True,
+    )
+    description = _canvas_text(
+        _canvas_item_value(item, "description", "raw_description", default=""),
+        field="description",
+        max_length=64 * 1024,
+    )
+    completion_status = _canvas_completion(
+        _canvas_item_value(item, "completion_status", "completionStatus", default="incomplete")
+    )
+    completion_source = _canvas_completion_source(
+        _canvas_item_value(item, "completion_source", "completionSource", default="canvas")
+    )
+    source_revision = _canvas_id(
+        _canvas_item_value(item, "source_revision", "sourceRevision", "revision"),
+        field="source_revision",
+        required=False,
+    )
+    source_hash = _canvas_id(
+        _canvas_item_value(item, "source_hash", "sourceHash", "content_hash", "contentHash"),
+        field="source_hash",
+        required=False,
+    )
+    course_name = _canvas_text(
+        _canvas_item_value(item, "course_name", "courseName", "context_name", "contextName", default=""),
+        field="course_name",
+        max_length=255,
+    )
+    event_ref = canvas_event_ref_for_item(
+        source_id,
+        account_key,
+        context_id,
+        calendar_id,
+        item_type,
+        item_id,
+        occurrence_id,
+    )
+    source_item_key = _canvas_source_item_key(
+        source_id,
+        account_key,
+        context_id,
+        calendar_id,
+        item_type,
+        item_id,
+        occurrence_id,
+    )
+    normalized = {
+        "context_id": context_id,
+        "calendar_id": calendar_id,
+        "item_type": item_type,
+        "item_id": item_id,
+        "occurrence_id": occurrence_id,
+        "event_ref": event_ref,
+        "source_item_key": source_item_key,
+        "title": title,
+        "description": description,
+        "start": start,
+        "end": end,
+        "is_all_day": is_all_day,
+        "course_name": course_name,
+        "source_revision": source_revision,
+        "source_hash": source_hash,
+        "completion_status": completion_status,
+        "completion_source": completion_source,
+    }
+    if not source_hash:
+        source_hash = _canvas_hash(_canvas_json(normalized, field="item"))
+        normalized["source_hash"] = source_hash
+    return normalized
+
+
+_CANVAS_CACHE_OWNED_FIELDS = (
+    "event_title", "event_start", "event_end", "is_all_day", "event_type",
+    "course_name", "raw_description", "canvas_source_revision", "canvas_source_hash",
+    "canvas_completion_status", "canvas_completion_source",
+)
+
+
+def _canvas_cache_row(connection, user_id, source_id, account_key, item):
+    occurrence_clause = "canvas_occurrence_id IS NULL" if item["occurrence_id"] is None else "canvas_occurrence_id = ?"
+    params = [
+        user_id,
+        source_id,
+        account_key,
+        item["context_id"],
+        item["calendar_id"],
+        item["item_type"],
+        item["item_id"],
+    ]
+    if item["occurrence_id"] is not None:
+        params.append(item["occurrence_id"])
+    return connection.execute(
+        f"""SELECT * FROM calendar_cache
+            WHERE user_id = ? AND canvas_source_id = ? AND canvas_account_key = ?
+              AND canvas_context_id = ? AND canvas_calendar_id = ?
+              AND canvas_item_type = ? AND canvas_item_id = ?
+              AND {occurrence_clause}""",
+        params,
+    ).fetchone()
+
+
+def _canvas_cache_values(source_id, account_key, item, now, generation, scope_hash):
+    return {
+        "canvas_source_id": source_id,
+        "canvas_account_key": account_key,
+        "canvas_source_item_key": item["source_item_key"],
+        "canvas_event_ref": item["event_ref"],
+        "canvas_context_id": item["context_id"],
+        "canvas_calendar_id": item["calendar_id"],
+        "canvas_item_id": item["item_id"],
+        "canvas_occurrence_id": item["occurrence_id"],
+        "canvas_item_type": item["item_type"],
+        "canvas_source_revision": item["source_revision"],
+        "canvas_source_hash": item["source_hash"],
+        "canvas_completion_status": item["completion_status"],
+        "canvas_completion_source": item["completion_source"],
+        "canvas_last_seen_at": now,
+        "canvas_last_seen_generation": generation,
+        "canvas_last_seen_scope_hash": scope_hash,
+        "event_uid": item["source_item_key"],
+        "event_title": item["title"],
+        "event_start": item["start"],
+        "event_end": item["end"],
+        "is_all_day": item["is_all_day"],
+        "event_type": item["item_type"],
+        "course_name": item["course_name"],
+        "raw_description": item["description"],
+        "fetched_at": now,
+        "canvas_soft_deleted": 0,
+        "canvas_deleted_at": None,
+    }
+
+
+def _canvas_cache_is_changed(row, values):
+    if row["canvas_soft_deleted"]:
+        return True
+    for field in _CANVAS_CACHE_OWNED_FIELDS:
+        if row[field] != values[field]:
+            return True
+    return False
+
+
+def _canvas_insert_cache(connection, user_id, values):
+    data = {
+        "id": uuid.uuid4().hex,
+        "user_id": user_id,
+        "feed_url": None,
+        "feed_url_hash": None,
+        **values,
+    }
+    columns = list(data)
+    placeholders = ", ".join("?" for _ in columns)
+    connection.execute(
+        f"INSERT INTO calendar_cache ({', '.join(columns)}) VALUES ({placeholders})",
+        [data[column] for column in columns],
+    )
+    return connection.execute("SELECT * FROM calendar_cache WHERE id = ?", [data["id"]]).fetchone()
+
+
+def _canvas_update_cache(connection, row, values):
+    mutable = dict(values)
+    assignments = ", ".join(f"{field} = ?" for field in mutable)
+    connection.execute(
+        f"UPDATE calendar_cache SET {assignments} WHERE id = ?",
+        [*mutable.values(), row["id"]],
+    )
+    return connection.execute("SELECT * FROM calendar_cache WHERE id = ?", [row["id"]]).fetchone()
+
+
+def _canvas_parse_batch_request(items, *, generation, lease_token, idempotency_key, checkpoint, payload):
+    if payload is not None:
+        if not isinstance(payload, Mapping):
+            raise ExtensionContractError("invalid_json", "Sync batch payload must be a JSON object.")
+        if items is None:
+            items = payload.get("items")
+        if generation is None:
+            generation = payload.get("generation")
+        if lease_token is None:
+            lease_token = payload.get("lease_token", payload.get("leaseToken"))
+        if idempotency_key is None:
+            idempotency_key = payload.get("idempotency_key", payload.get("idempotencyKey"))
+        if checkpoint is None:
+            checkpoint = payload.get("checkpoint")
+    if not isinstance(items, list):
+        raise ExtensionContractError("invalid_items", "items must be an array.")
+    if len(items) > CANVAS_BATCH_ITEM_LIMIT:
+        raise ExtensionContractError("batch_too_large", "A Canvas batch may contain at most 100 items.")
+    _canvas_reject_credentials(items)
+    items_json = _canvas_json(items, field="items", max_bytes=CANVAS_BATCH_BYTES_LIMIT)
+    idempotency_key = _canvas_idempotency_key(idempotency_key, field="batch_idempotency_key")
+    generation = _canvas_generation(generation, required=False)
+    checkpoint_json = None
+    if checkpoint is not None:
+        _canvas_reject_credentials(checkpoint)
+        checkpoint_json = _canvas_json(checkpoint, field="checkpoint", max_bytes=64 * 1024)
+    return items, items_json, generation, lease_token, idempotency_key, checkpoint_json
+
+
+def ingest_canvas_sync_batch(
+    user_id,
+    source_id,
+    run_id,
+    items=None,
+    *,
+    generation=None,
+    lease_token=None,
+    idempotency_key=None,
+    checkpoint=None,
+    payload=None,
+):
+    """Validate and atomically ingest one idempotent Canvas batch."""
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    (
+        items,
+        items_json,
+        generation,
+        lease_token,
+        idempotency_key,
+        checkpoint_json,
+    ) = _canvas_parse_batch_request(
+        items,
+        generation=generation,
+        lease_token=lease_token,
+        idempotency_key=idempotency_key,
+        checkpoint=checkpoint,
+        payload=payload,
+    )
+    payload_hash = _canvas_hash(items_json)
+    if not isinstance(lease_token, str) or not lease_token.strip():
+        raise ExtensionContractError("invalid_lease_token", "lease_token is required.")
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        run = _require_current_active_run(
+            connection,
+            user_id,
+            source_id,
+            run_id,
+            generation=generation,
+            lease_token=lease_token,
+        )
+        _canvas_source_consent(
+            connection,
+            source,
+            version=run["consent_version"],
+            scopes=CANVAS_READ_SCOPES,
+        )
+        receipt = connection.execute(
+            """SELECT * FROM calendar_sync_batches
+               WHERE user_id = ? AND source_id = ? AND idempotency_key = ?""",
+            [user_id, source_id, idempotency_key],
+        ).fetchone()
+        if receipt:
+            if receipt["payload_hash"] != payload_hash or receipt["run_id"] != run_id or (
+                generation is not None and receipt["generation"] != generation
+            ):
+                raise ExtensionContractError(
+                    "idempotency_conflict",
+                    "The batch idempotency key was already used with different parameters.",
+                )
+            return _canvas_batch_payload(receipt, idempotent=True)
+
+        scope = _canvas_decode_json(run["scope_json"], {})
+        counters = _canvas_decode_json(run["counters_json"], {})
+        counters = {
+            "accepted": int(counters.get("accepted", 0)),
+            "updated": int(counters.get("updated", 0)),
+            "unchanged": int(counters.get("unchanged", 0)),
+            "quarantined": int(counters.get("quarantined", 0)),
+        }
+        batch_counts = {key: 0 for key in counters}
+        now = _canvas_now()
+        accepted_items = []
+        for raw_item in items:
+            try:
+                item = _normalize_canvas_item(
+                    raw_item,
+                    source_id=source_id,
+                    account_key=source["account_key"],
+                )
+            except ExtensionContractError as exc:
+                if exc.code == "credentials_not_allowed":
+                    raise
+                batch_counts["quarantined"] += 1
+                continue
+            values = _canvas_cache_values(
+                source_id,
+                source["account_key"],
+                item,
+                now,
+                run["generation"],
+                run["scope_hash"],
+            )
+            existing = _canvas_cache_row(
+                connection,
+                user_id,
+                source_id,
+                source["account_key"],
+                item,
+            )
+            if existing is None:
+                _canvas_insert_cache(connection, user_id, values)
+                batch_counts["accepted"] += 1
+            else:
+                changed = _canvas_cache_is_changed(existing, values)
+                _canvas_update_cache(connection, existing, values)
+                batch_counts["updated" if changed else "unchanged"] += 1
+                batch_counts["accepted"] += 1
+            accepted_items.append(item["event_ref"])
+
+        for key, value in batch_counts.items():
+            counters[key] += value
+        result = {
+            **batch_counts,
+            "accepted_event_refs": accepted_items,
+            "batch_size": len(items),
+            "payload_hash": payload_hash,
+        }
+        connection.execute(
+            """INSERT INTO calendar_sync_batches
+               (id, user_id, source_id, run_id, generation, idempotency_key,
+                payload_hash, checkpoint_json, result_json, created_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+            [
+                uuid.uuid4().hex,
+                user_id,
+                source_id,
+                run_id,
+                run["generation"],
+                idempotency_key,
+                payload_hash,
+                checkpoint_json,
+                _canvas_json(result, field="batch_result"),
+                now,
+            ],
+        )
+        checkpoint_value = _canvas_decode_json(checkpoint_json, None)
+        if checkpoint_json is None:
+            checkpoint_json = run["checkpoint_json"]
+            checkpoint_value = _canvas_decode_json(checkpoint_json, None)
+        cursor = checkpoint_value.get("cursor") if isinstance(checkpoint_value, dict) else None
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET counters_json = ?, checkpoint_json = ?, cursor = ?, updated_at = ?
+               WHERE id = ? AND state = 'active'""",
+            [
+                _canvas_json(counters, field="counters"),
+                checkpoint_json,
+                cursor,
+                now,
+                run["id"],
+            ],
+        )
+        receipt = connection.execute(
+            """SELECT * FROM calendar_sync_batches
+               WHERE user_id = ? AND source_id = ? AND idempotency_key = ?""",
+            [user_id, source_id, idempotency_key],
+        ).fetchone()
+    return _canvas_batch_payload(receipt)
+
+
+def _canvas_finalize_status(value):
+    normalized = str(value or "complete").strip().lower().replace("-", "_")
+    if normalized in {"completed", "complete", "done"}:
+        return "complete"
+    if normalized in {"partial", "incomplete"}:
+        return "partial"
+    raise ExtensionContractError("invalid_run_status", "A sync run may finalize only as complete or partial.")
+
+
+def finalize_canvas_sync_run(
+    user_id,
+    source_id,
+    run_id,
+    *,
+    scope=None,
+    generation=None,
+    lease_token=None,
+    status="complete",
+    complete=None,
+):
+    """Close the current run; only an exact complete scope may tombstone."""
+    user_id = _canvas_user_id(user_id)
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    run_id = _canvas_id(run_id, field="run_id", pattern=CANVAS_RUN_ID_PATTERN)
+    if complete is not None:
+        if not isinstance(complete, bool):
+            raise ExtensionContractError("invalid_run_status", "complete must be a boolean.")
+        status = "complete" if complete else "partial"
+    status = _canvas_finalize_status(status)
+    normalized_scope, scope_json, scope_hash = _normalize_canvas_scope(scope)
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id)
+        run = _require_current_active_run(
+            connection,
+            user_id,
+            source_id,
+            run_id,
+            generation=generation,
+            lease_token=lease_token,
+        )
+        if run["scope_hash"] != scope_hash or run["scope_json"] != scope_json:
+            raise ExtensionContractError(
+                "scope_mismatch",
+                "Finalization scope must exactly match the normalized begin scope.",
+            )
+        now = _canvas_now()
+        tombstoned = 0
+        if status == "complete":
+            rows = connection.execute(
+                """SELECT * FROM calendar_cache
+                   WHERE user_id = ? AND canvas_source_id = ? AND canvas_account_key = ?""",
+                [user_id, source_id, source["account_key"]],
+            ).fetchall()
+            for cache_row in rows:
+                if not _canvas_scope_matches(cache_row, normalized_scope):
+                    continue
+                if (
+                    cache_row["canvas_last_seen_generation"] == run["generation"]
+                    and cache_row["canvas_last_seen_scope_hash"] == run["scope_hash"]
+                ):
+                    continue
+                connection.execute(
+                    """UPDATE calendar_cache
+                       SET canvas_soft_deleted = 1, canvas_deleted_at = ?, canvas_last_seen_at = ?
+                       WHERE id = ? AND canvas_soft_deleted = 0""",
+                    [now, now, cache_row["id"]],
+                )
+                tombstoned += connection.execute("SELECT changes() AS count").fetchone()["count"]
+
+        error_code = "partial" if status == "partial" else None
+        error_message = "The sync completed without a full snapshot." if status == "partial" else None
+        connection.execute(
+            """UPDATE calendar_sync_runs
+               SET state = ?, error_code = ?, error_message = ?, completed_at = ?, updated_at = ?
+               WHERE id = ? AND state = 'active'""",
+            [status, error_code, error_message, now, now, run["id"]],
+        )
+        _canvas_update_source_after_run(
+            connection,
+            source,
+            state=status,
+            now=now,
+            error_code=error_code,
+            error_message=error_message,
+        )
+        completed = connection.execute("SELECT * FROM calendar_sync_runs WHERE id = ?", [run["id"]]).fetchone()
+    return _canvas_sync_run_payload(completed, tombstoned=tombstoned)
+
+
+def get_canvas_import_routing(user_id, source_id, state=None):
+    user_id = _canvas_user_id(user_id)
+    if state is not None and state not in CANVAS_ROUTE_STATES:
+        raise ExtensionContractError("invalid_route_state", "Routing state must be incomplete or completed.")
+    with calendar_connection() as connection:
+        source = _require_canvas_source(connection, user_id, source_id, include_archived=True)
+        if source["status"] != "active":
+            return [] if state is None else None
+        try:
+            _canvas_source_consent(
+                connection,
+                source,
+                scopes=CANVAS_READ_SCOPES,
+            )
+        except ExtensionContractError as exc:
+            # Revocation archives the source, but this also covers a source
+            # whose consent was disconnected before cleanup completed. A GET
+            # may safely appear empty after revocation.
+            if exc.code in {"consent_required", "scope_required", "consent_version_mismatch"}:
+                return [] if state is None else None
+            raise
+        source_id = source["source_id"]
+        query = "SELECT * FROM calendar_import_routing WHERE user_id = ? AND source_id = ?"
+        params = [user_id, source_id]
+        if state is not None:
+            query += " AND state = ?"
+            params.append(state)
+        query += " ORDER BY state ASC"
+        rows = connection.execute(query, params).fetchall()
+    if state is None:
+        return [_canvas_routing_payload(dict(row), source) for row in rows]
+    return _canvas_routing_payload(dict(rows[0]), source) if rows else None
+
+
+def set_canvas_import_routing(
+    user_id,
+    source_id,
+    state,
+    destination_calendar_id=None,
+    fallback_calendar_id=None,
+    *,
+    payload=None,
+):
+    if isinstance(state, Mapping):
+        payload = state
+        state = payload.get("state")
+        destination_calendar_id = payload.get(
+            "destination_calendar_id", payload.get("destinationCalendarId")
+        )
+        fallback_calendar_id = payload.get("fallback_calendar_id", payload.get("fallbackCalendarId"))
+    if state not in CANVAS_ROUTE_STATES:
+        raise ExtensionContractError("invalid_route_state", "Routing state must be incomplete or completed.")
+    destination_calendar_id = _canvas_optional_id(
+        destination_calendar_id,
+        field="destination_calendar_id",
+    )
+    fallback_calendar_id = _canvas_optional_id(
+        fallback_calendar_id,
+        field="fallback_calendar_id",
+    )
+    user_id = _canvas_user_id(user_id)
+    now = _canvas_now()
+    with calendar_connection() as connection:
+        connection.execute("BEGIN IMMEDIATE")
+        source = _require_canvas_source(connection, user_id, source_id, include_archived=False)
+        _canvas_source_consent(
+            connection,
+            source,
+            scopes=CANVAS_READ_SCOPES,
+        )
+        routing_inventory = {
+            destination["id"]
+            for destination in extension_calendar_destinations(user_id)
+            if destination.get("visible") and destination.get("routing_eligible")
+        }
+        for field, calendar_id in (
+            ("destination_calendar_id", destination_calendar_id),
+            ("fallback_calendar_id", fallback_calendar_id),
+        ):
+            if calendar_id is not None and calendar_id not in routing_inventory:
+                raise ExtensionContractError(
+                    "routing_destination_unavailable",
+                    f"{field} must name a visible, routing-eligible calendar.",
+                )
+        source_id = source["source_id"]
+        existing = connection.execute(
+            """SELECT * FROM calendar_import_routing
+               WHERE user_id = ? AND source_id = ? AND state = ?""",
+            [user_id, source_id, state],
+        ).fetchone()
+        if existing:
+            unchanged = (
+                existing["destination_calendar_id"] == destination_calendar_id
+                and existing["fallback_calendar_id"] == fallback_calendar_id
+            )
+            if unchanged:
+                return _canvas_routing_payload(dict(existing), source, idempotent=True)
+            connection.execute(
+                """UPDATE calendar_import_routing
+                   SET destination_calendar_id = ?, fallback_calendar_id = ?, updated_at = ?
+                   WHERE id = ?""",
+                [destination_calendar_id, fallback_calendar_id, now, existing["id"]],
+            )
+            row_id = existing["id"]
+        else:
+            row_id = uuid.uuid4().hex
+            connection.execute(
+                """INSERT INTO calendar_import_routing
+                   (id, user_id, source_id, state, destination_calendar_id,
+                    fallback_calendar_id, created_at, updated_at)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                [
+                    row_id,
+                    user_id,
+                    source_id,
+                    state,
+                    destination_calendar_id,
+                    fallback_calendar_id,
+                    now,
+                    now,
+                ],
+            )
+        row = connection.execute("SELECT * FROM calendar_import_routing WHERE id = ?", [row_id]).fetchone()
+    return _canvas_routing_payload(dict(row), source)
 
 
 def _normalize_canvas_calendar_url(url):
@@ -187,7 +2366,78 @@ def _source_id_for_feed_url(feed_url, settings=None):
     return _feed_source_id(feed_url)
 
 
+def canvas_event_ref_for_item(
+    source_id,
+    account_key,
+    context_id,
+    calendar_id,
+    item_type,
+    item_id,
+    occurrence_id=None,
+):
+    """Return the stable identity used by imported Canvas calendar items.
+
+    Feed references deliberately continue to use their historical URL/UID
+    hash.  Canvas references are scoped by user-owned source and account so a
+    provider item can never alias another user's or another account's item.
+    """
+    source_id = _canvas_id(source_id, field="source_id", pattern=CANVAS_RUN_ID_PATTERN)
+    account_key = validate_account_key(account_key)
+    context_id = _canvas_id(context_id, field="context_id")
+    calendar_id = _canvas_id(calendar_id, field="calendar_id")
+    item_type = _canvas_item_type(item_type)
+    item_id = _canvas_id(item_id, field="item_id")
+    occurrence_id = _canvas_id(occurrence_id, field="occurrence_id", required=False)
+    identity = {
+        "account_key": account_key,
+        "calendar_id": calendar_id,
+        "context_id": context_id,
+        "item_id": item_id,
+        "item_type": item_type,
+        "occurrence_id": occurrence_id or "",
+        "source_id": source_id,
+    }
+    identity_json = json.dumps(identity, separators=(",", ":"), sort_keys=True)
+    return f"canvas:{source_id}:{_canvas_hash(identity_json)}"
+
+
+def _canvas_source_item_key(
+    source_id,
+    account_key,
+    context_id,
+    calendar_id,
+    item_type,
+    item_id,
+    occurrence_id=None,
+):
+    """Return a compact stable source-item key for cache provenance."""
+    return canvas_event_ref_for_item(
+        source_id,
+        account_key,
+        context_id,
+        calendar_id,
+        item_type,
+        item_id,
+        occurrence_id,
+    ).removeprefix("canvas:")
+
+
 def _event_ref_for_cache_event(doc):
+    if doc.get("canvas_event_ref"):
+        return doc["canvas_event_ref"]
+    if doc.get("canvas_source_id"):
+        try:
+            return canvas_event_ref_for_item(
+                doc.get("canvas_source_id"),
+                doc.get("canvas_account_key"),
+                doc.get("canvas_context_id"),
+                doc.get("canvas_calendar_id"),
+                doc.get("canvas_item_type"),
+                doc.get("canvas_item_id"),
+                doc.get("canvas_occurrence_id"),
+            )
+        except (ExtensionContractError, TypeError, ValueError):
+            return None
     feed_hash = doc.get("feed_url_hash") or _feed_url_hash(doc.get("feed_url") or "")
     event_uid = doc.get("event_uid") or ""
     if not feed_hash or not event_uid:
@@ -322,6 +2572,8 @@ def _span_metadata(start_dt, end_dt, is_all_day=False):
 
 def _serialize_event(doc, settings=None):
     """Serialize a calendar_cache row for API response."""
+    if doc.get("canvas_source_id") or doc.get("canvas_event_ref"):
+        return _serialize_canvas_event(doc, settings=settings)
     is_all_day = bool(doc.get("is_all_day", False))
     event_start = parse_datetime(doc.get("event_start"))
     event_end = parse_datetime(doc.get("event_end"))
@@ -350,6 +2602,55 @@ def _serialize_event(doc, settings=None):
         "calendar_id": calendar_id,
         "original_calendar_id": calendar_id,
     }
+
+
+def _serialize_canvas_event(doc, settings=None, source=None, *, authenticated=False):
+    """Serialize a sanitized extension-owned Canvas cache row."""
+    source = source or {}
+    is_all_day = bool(doc.get("is_all_day", False))
+    event_start = parse_datetime(doc.get("event_start"))
+    event_end = parse_datetime(doc.get("event_end"))
+    fetched_at = parse_datetime(doc.get("fetched_at"))
+    is_multi_day, span_days = _span_metadata(event_start, event_end, is_all_day)
+    event_ref = _event_ref_for_cache_event(doc)
+    source_id = doc.get("canvas_source_id") or source.get("source_id")
+    account_key = doc.get("canvas_account_key") or source.get("account_key")
+    source_label = source.get("label") or source.get("source_id") or source_id
+    source_url = doc.get("canvas_source_url") or source.get("origin")
+    original_calendar_id = doc.get("canvas_calendar_id")
+    serialized = {
+        "uid": doc.get("event_uid") or doc.get("canvas_source_item_key") or event_ref,
+        "event_ref": event_ref,
+        "source_type": "canvas",
+        "provider": source.get("provider") or CANVAS_PROVIDER,
+        "source_id": source_id,
+        "source_label": source_label,
+        "account_label": source_label,
+        "editable": True,
+        "title": doc.get("event_title"),
+        "start": _serialize_datetime(event_start, is_all_day),
+        "end": _serialize_datetime(event_end, is_all_day),
+        "type": doc.get("event_type") or doc.get("canvas_item_type"),
+        "course": doc.get("course_name"),
+        "description": doc.get("raw_description"),
+        "fetched_at": fetched_at.isoformat() if fetched_at else None,
+        "is_multi_day": is_multi_day,
+        "span_days": span_days,
+        "is_all_day": is_all_day,
+        "reminder_minutes": _default_reminder_minutes(is_all_day),
+        "calendar_id": original_calendar_id,
+        "original_calendar_id": original_calendar_id,
+        "source_item_type": doc.get("canvas_item_type") or doc.get("event_type"),
+        "source_item_key": doc.get("canvas_source_item_key"),
+        "completion_status": doc.get("canvas_completion_status") or "incomplete",
+        "completion_source": doc.get("canvas_completion_source") or "canvas",
+        "has_override": False,
+        "routing_degraded": False,
+        "stale": _canvas_truthy(doc.get("canvas_stale", doc.get("stale", False))),
+    }
+    if authenticated:
+        serialized["source_url"] = source_url
+    return serialized
 
 
 def _serialize_user_event(doc):
@@ -607,6 +2908,96 @@ def _configured_calendar_sources(settings, cache_events=None, preferences=None, 
     )
 
 
+def extension_calendar_destinations(user_id):
+    """Return the authenticated extension's safe, visible routing destinations.
+
+    The source/preference inputs intentionally come from the same loader family
+    used by the dashboard, calendar share, and ICS projections. Provider URLs,
+    event rows, and account identifiers stay inside this service and are never
+    copied into the extension response.
+    """
+    user_id = _canvas_user_id(user_id)
+    settings = first_row(
+        COLLECTIONS["user_settings"],
+        [Query.equal("user_id", [user_id])],
+    ) or _settings_defaults(user_id)
+    preferences = _load_calendar_preferences(user_id)
+    cache_events = list_calendar_rows_all(
+        COLLECTIONS["calendar_cache"],
+        [Query.equal("user_id", [user_id])],
+    )
+    feed_urls = _configured_feed_urls(settings)
+    cache_events = _filter_configured_cache_events(cache_events, feed_urls)
+    feed_metadata = _load_calendar_feed_metadata(user_id)
+    local_sources = _load_local_calendar_sources(user_id)
+    created_events = list_calendar_rows_all(
+        COLLECTIONS["user_events"],
+        [Query.equal("user_id", [user_id])],
+    )
+    sources = _configured_calendar_sources(
+        settings,
+        cache_events,
+        preferences,
+        feed_metadata,
+        local_sources,
+        created_events,
+    )
+    try:
+        _, task_source = _task_calendar_payload(user_id, preferences)
+    except (AppwriteException, AttributeError):
+        task_source = None
+    sources = _append_task_calendar_source(sources, task_source)
+
+    preferences_by_name = {
+        preference.get("calendar_name"): preference
+        for preference in preferences
+        if preference.get("calendar_name")
+    }
+    destinations = []
+    for source in sources:
+        calendar_id = source.get("id")
+        if not isinstance(calendar_id, str) or not calendar_id.strip():
+            continue
+        source_status = str(source.get("status") or "active").strip().lower()
+        if source_status in {"archived", "deleted", "hidden"}:
+            continue
+        preference = preferences_by_name.get(calendar_id)
+        if preference is None:
+            preference = next(
+                (
+                    preferences_by_name.get(legacy_name)
+                    for legacy_name in source.get("legacy_names", [])
+                    if preferences_by_name.get(legacy_name) is not None
+                ),
+                None,
+            )
+        if preference is not None:
+            preference_visible = preference.get("visible", True)
+            if preference_visible is not None and not _canvas_truthy(preference_visible):
+                continue
+
+        kind = str(source.get("kind") or "local").strip().lower() or "local"
+        imported = bool(source.get("imported")) or kind in {"canvas", "external", "imported"}
+        label = _normalize_source_label(
+            (preference or {}).get("display_name")
+            or source.get("display_name")
+            or source.get("default_name")
+            or calendar_id
+        ) or calendar_id
+        destinations.append({
+            "id": calendar_id,
+            "label": label,
+            "visible": True,
+            "read_only": bool(source.get("read_only")) or imported,
+            "imported": imported,
+            "kind": kind,
+            "routing_eligible": True,
+            "routing_degraded": False,
+        })
+
+    return sorted(destinations, key=lambda item: (item["label"].lower(), item["id"]))
+
+
 def _task_calendar_payload(user_id, preferences, range_start=None, range_end=None):
     try:
         task_events = task_calendar_events_for_user(user_id, range_start, range_end)
@@ -720,6 +3111,188 @@ def _apply_event_override(event, override):
     result["override_id"] = override.get("$id")
     result["has_override"] = True
     return result
+
+
+def _canvas_truthy(value):
+    """Interpret SQLite/Appwrite boolean values without treating ``"0"`` as true."""
+    if isinstance(value, str):
+        return value.strip().lower() in {"1", "true", "yes", "on"}
+    return bool(value)
+
+
+def _load_active_canvas_sources(user_id, *, require_shares_ics=False):
+    """Load active Canvas sources only when the effective projection gates pass."""
+    if not extension_capability_enabled("calendar_read"):
+        return []
+    if not extension_capability_enabled("calendar_projection"):
+        return []
+    if require_shares_ics and not extension_capability_enabled("calendar_shares_ics"):
+        return []
+    with calendar_connection() as connection:
+        rows = connection.execute(
+            """SELECT * FROM calendar_import_sources
+               WHERE user_id = ? AND provider = 'canvas' AND status = 'active'
+                 AND archived_at IS NULL
+               ORDER BY created_at ASC""",
+            [str(user_id)],
+        ).fetchall()
+        sources = []
+        for row in rows:
+            source = dict(row)
+            try:
+                _canvas_consent_from_connection(
+                    connection,
+                    user_id,
+                    source.get("account_key"),
+                    CANVAS_PROJECTION_SCOPES,
+                )
+            except ExtensionContractError:
+                continue
+            sources.append(_canvas_source_internal_payload(source))
+    return sources
+
+
+def _load_canvas_import_routing_rows(user_id):
+    """Load display routing without mutating routes or validating destinations."""
+    with calendar_connection() as connection:
+        rows = connection.execute(
+            """SELECT * FROM calendar_import_routing
+               WHERE user_id = ?
+               ORDER BY source_id ASC, state ASC""",
+            [str(user_id)],
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def _visible_calendar_fallback(preferences):
+    """Choose the first visible configured calendar, or the legacy local calendar."""
+    if isinstance(preferences, Mapping):
+        preferences = [preferences]
+    for preference in preferences or []:
+        calendar_id = preference.get("calendar_name")
+        visible = preference.get("visible", True)
+        if calendar_id and (visible is None or _canvas_truthy(visible)):
+            return calendar_id
+    return DEFAULT_LOCAL_SOURCE_ID
+
+
+def _canvas_route_state(doc):
+    status = str(doc.get("canvas_completion_status") or "incomplete").strip().lower()
+    return "completed" if status in {"completed", "complete", "done"} else "incomplete"
+
+
+def _canvas_routed_calendar_id(doc, source, routing_by_key, visible_fallback, override):
+    """Resolve display routing in precedence order and report degraded routing."""
+    explicit_calendar = (override or {}).get("calendar_id")
+    if explicit_calendar:
+        return explicit_calendar, False
+
+    source_id = doc.get("canvas_source_id") or source.get("source_id")
+    route_state = _canvas_route_state(doc)
+    route = routing_by_key.get((source_id, route_state))
+    if route and route.get("destination_calendar_id"):
+        return route["destination_calendar_id"], False
+    if route and route.get("fallback_calendar_id"):
+        return route["fallback_calendar_id"], True
+
+    source_default = source.get("default_mirror_calendar")
+    if source_default:
+        return source_default, True
+    return visible_fallback, True
+
+
+def _project_canvas_calendar_events(
+    user_id,
+    cache_events,
+    overrides_by_ref=None,
+    *,
+    preferences=None,
+    range_start=None,
+    range_end=None,
+    source_rows=None,
+    routing_rows=None,
+    apply_event_override=_apply_event_override,
+    api_event_overlaps_range=None,
+    require_shares_ics=False,
+):
+    """Return sanitized authenticated Canvas events for the unified calendar feed.
+
+    Loader contract: ``cache_events`` is a read-only sequence of cache rows and the
+    helper returns a new list of response dictionaries.  It only reads active,
+    consented sources/routes; it never updates cache rows, routes, or overrides.
+    """
+    source_rows = (
+        _load_active_canvas_sources(user_id, require_shares_ics=require_shares_ics)
+        if source_rows is None
+        else source_rows
+    )
+    routing_rows = (
+        _load_canvas_import_routing_rows(user_id)
+        if routing_rows is None
+        else routing_rows
+    )
+    source_by_key = {
+        (source.get("source_id"), source.get("account_key")): source
+        for source in source_rows
+        if (
+            source.get("source_id")
+            and source.get("status", "active") == "active"
+            and not source.get("archived_at")
+            and source.get("consent_state", "active") == "active"
+            and source.get("consented", True) is not False
+        )
+    }
+    routing_by_key = {
+        (row.get("source_id"), row.get("state")): row
+        for row in routing_rows
+        if row.get("source_id") and row.get("state") in CANVAS_ROUTE_STATES
+    }
+    overrides_by_ref = overrides_by_ref or {}
+    api_event_overlaps_range = api_event_overlaps_range or _api_event_overlaps_range
+    visible_fallback = _visible_calendar_fallback(preferences)
+    projected = []
+
+    for cache_event in cache_events or []:
+        if not (cache_event.get("canvas_source_id") or cache_event.get("canvas_event_ref")):
+            continue
+        if _canvas_truthy(cache_event.get("canvas_soft_deleted")):
+            continue
+        source_key = (
+            cache_event.get("canvas_source_id"),
+            cache_event.get("canvas_account_key"),
+        )
+        source = source_by_key.get(source_key)
+        if not source:
+            continue
+        event_ref = _event_ref_for_cache_event(cache_event)
+        if not event_ref:
+            continue
+        override = overrides_by_ref.get(event_ref)
+        serialized = _serialize_canvas_event(
+            cache_event,
+            source=source,
+            authenticated=True,
+        )
+        routed_calendar_id, routing_degraded = _canvas_routed_calendar_id(
+            cache_event,
+            source,
+            routing_by_key,
+            visible_fallback,
+            override,
+        )
+        serialized["calendar_id"] = routed_calendar_id
+        serialized["routing_degraded"] = routing_degraded
+        serialized = apply_event_override(serialized, override)
+        if not serialized:
+            continue
+        if range_start and range_end and not api_event_overlaps_range(
+            serialized,
+            range_start,
+            range_end,
+        ):
+            continue
+        projected.append(serialized)
+    return projected
 
 
 def _api_event_overlaps_range(event, range_start, range_end):
@@ -1384,8 +3957,8 @@ def _public_calendar_events_payload(
         _calendar_share_payload,
     )
     load_serialized_calendar_events = dependencies.get(
-        "load_serialized_calendar_events",
-        _load_serialized_calendar_events,
+        "load_serialized_calendar_events_for_share",
+        dependencies.get("load_serialized_calendar_events", _load_serialized_calendar_events),
     )
     load_calendar_preferences = dependencies.get(
         "load_calendar_preferences",
@@ -1520,6 +4093,10 @@ def get_events_response(user_id, response_user_id, args, dependencies):
     serialize_user_event = dependencies["serialize_user_event"]
     api_event_overlaps_range = dependencies["api_event_overlaps_range"]
     resolve_last_fetched = dependencies["resolve_last_fetched"]
+    project_canvas_events = dependencies.get(
+        "project_canvas_events",
+        _project_canvas_calendar_events,
+    )
 
     range_start = parse_range_param(args.get("start"))
     range_end = parse_range_param(args.get("end"))
@@ -1583,7 +4160,35 @@ def get_events_response(user_id, response_user_id, args, dependencies):
             )
             return jsonify({"error": "Unable to load calendar events."}), 500
 
-    cache_events = filter_configured_cache_events(cache_events, feed_urls)
+    canvas_cache_events = [
+        event
+        for event in cache_events
+        if event.get("canvas_source_id") or event.get("canvas_event_ref")
+    ]
+    overrides_by_ref = {
+        override.get("event_ref"): override
+        for override in event_overrides
+        if override.get("event_ref")
+    }
+    feed_cache_events = filter_configured_cache_events(
+        [
+            event
+            for event in cache_events
+            if not (event.get("canvas_source_id") or event.get("canvas_event_ref"))
+        ],
+        feed_urls,
+    )
+    serialized_canvas_events = []
+    if canvas_cache_events:
+        serialized_canvas_events = project_canvas_events(
+            user_id,
+            canvas_cache_events,
+            overrides_by_ref,
+            preferences=preferences,
+            range_start=range_start,
+            range_end=range_end,
+            api_event_overlaps_range=api_event_overlaps_range,
+        )
     try:
         task_events, task_source = task_calendar_payload(
             user_id,
@@ -1598,7 +4203,7 @@ def get_events_response(user_id, response_user_id, args, dependencies):
     calendar_sources = append_task_calendar_source(
         configured_calendar_sources(
             settings,
-            cache_events,
+            feed_cache_events,
             preferences,
             feed_metadata,
             local_sources,
@@ -1606,14 +4211,28 @@ def get_events_response(user_id, response_user_id, args, dependencies):
         ),
         task_source,
     )
-    overrides_by_ref = {
-        override.get("event_ref"): override
-        for override in event_overrides
-        if override.get("event_ref")
+    canvas_events_by_ref = {}
+    for event in serialized_canvas_events:
+        canvas_events_by_ref.setdefault(event.get("event_ref"), []).append(event)
+    feed_event_keys = {
+        event.get("$id") or event.get("id") or _event_ref_for_cache_event(event)
+        for event in feed_cache_events
     }
-
     serialized_cache_events = []
     for cache_event in cache_events:
+        if cache_event.get("canvas_source_id") or cache_event.get("canvas_event_ref"):
+            event_ref = _event_ref_for_cache_event(cache_event)
+            candidates = canvas_events_by_ref.get(event_ref) or []
+            if candidates:
+                serialized_cache_events.append(candidates.pop(0))
+            continue
+        event_key = (
+            cache_event.get("$id")
+            or cache_event.get("id")
+            or _event_ref_for_cache_event(cache_event)
+        )
+        if event_key not in feed_event_keys:
+            continue
         serialized_event = serialize_event(cache_event, settings)
         serialized_event = apply_event_override(
             serialized_event,

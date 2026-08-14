@@ -12,13 +12,129 @@ by the calendar_api blueprint.
 """
 
 import icalendar
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 from appwrite.exception import AppwriteException
 from appwrite.query import Query
 from appwrite_client import COLLECTIONS
-from appwrite_helpers import list_rows_all, parse_datetime
+from appwrite_helpers import first_row, list_rows_all, parse_datetime
 from services.calendar_store import list_calendar_rows_all
+from services.calendar_events import (
+    _api_event_overlaps_range,
+    _apply_event_override,
+    _event_ref_for_cache_event,
+    _load_active_canvas_sources,
+    _load_calendar_preferences,
+    _load_event_overrides,
+    _load_canvas_import_routing_rows,
+    _project_canvas_calendar_events,
+    _serialize_event,
+)
+
+
+DEFAULT_ICS_TIMEZONE = "America/New_York"
+
+
+def _user_settings(user_id):
+    try:
+        return first_row(
+            COLLECTIONS["user_settings"],
+            [Query.equal("user_id", [str(user_id)])],
+        ) or {}
+    except Exception:
+        return {}
+
+
+def _valid_timezone(value, fallback=DEFAULT_ICS_TIMEZONE):
+    candidate = str(value or "").strip()
+    if not candidate:
+        candidate = fallback
+    try:
+        ZoneInfo(candidate)
+    except (KeyError, TypeError):
+        candidate = fallback
+    return candidate
+
+
+def _event_timezone(event, source=None, settings=None):
+    event = event or {}
+    source = source or {}
+    settings = settings or {}
+    for row in (event, source, settings):
+        for key in (
+            "timezone",
+            "time_zone",
+            "tzid",
+            "source_timezone",
+            "canvas_timezone",
+        ):
+            if row.get(key):
+                return _valid_timezone(row[key])
+    return DEFAULT_ICS_TIMEZONE
+
+
+def _load_projected_events(
+    user_id,
+    cache_events,
+    settings,
+    overrides_by_ref=None,
+    *,
+    require_shares_ics=True,
+):
+    canvas_events = [
+        event for event in cache_events
+        if event.get("canvas_source_id") or event.get("canvas_event_ref")
+    ]
+    if not canvas_events:
+        return [], {}
+    if overrides_by_ref is None:
+        overrides = _load_event_overrides(user_id, list_calendar_rows_all)
+        overrides_by_ref = {
+            override.get("event_ref"): override
+            for override in overrides
+            if override.get("event_ref")
+        }
+    preferences = _load_calendar_preferences(user_id, list_calendar_rows_all)
+    source_rows = _load_active_canvas_sources(
+        user_id,
+        require_shares_ics=require_shares_ics,
+    )
+    return _project_canvas_calendar_events(
+        user_id,
+        canvas_events,
+        overrides_by_ref,
+        preferences=preferences,
+        source_rows=source_rows,
+        routing_rows=_load_canvas_import_routing_rows(user_id),
+        api_event_overlaps_range=_api_event_overlaps_range,
+        require_shares_ics=require_shares_ics,
+    ), {
+        (source.get("source_id"), source.get("account_key")): source
+        for source in source_rows
+    }
+
+
+def _add_event_datetime(vevent, field, value, *, all_day, timezone_name=None, canvas=False):
+    if not value:
+        return
+    if all_day:
+        try:
+            vevent.add(field, date.fromisoformat(str(value)[:10]))
+        except ValueError:
+            return
+        return
+    parsed = parse_datetime(value)
+    if not parsed:
+        return
+    if canvas:
+        target_zone = ZoneInfo(_valid_timezone(timezone_name))
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        local_value = parsed.astimezone(target_zone).replace(tzinfo=None)
+        vevent.add(field, local_value, parameters={"TZID": _valid_timezone(timezone_name)})
+        return
+    vevent.add(field, parsed)
 
 
 def _build_event_uid(event_uid, user_id, event_id=None):
@@ -56,7 +172,8 @@ def build_ics_for_user(user_id):
     cal.add("calscale", "GREGORIAN")
     cal.add("method", "PUBLISH")
     cal.add("x-wr-calname", "Nest APStudy")
-    cal.add("x-wr-timezone", "America/New_York")
+    settings = _user_settings(user_id)
+    cal.add("x-wr-timezone", _valid_timezone(settings.get("timezone")))
 
     # Fetch all cached events for this user
     try:
@@ -70,45 +187,123 @@ def build_ics_for_user(user_id):
     except AppwriteException:
         events = []
 
+    try:
+        overrides = _load_event_overrides(user_id, list_calendar_rows_all)
+    except Exception:
+        overrides = []
+    overrides_by_ref = {
+        override.get("event_ref"): override
+        for override in overrides
+        if override.get("event_ref")
+    }
+    projected_events, canvas_sources = _load_projected_events(
+        user_id,
+        events,
+        settings,
+        overrides_by_ref,
+    )
+    projected_by_ref = {}
+    for projected in projected_events:
+        projected_by_ref.setdefault(projected.get("event_ref"), []).append(projected)
+
     now = datetime.now(timezone.utc)
 
     for event in events:
+        if event.get("canvas_source_id") or event.get("canvas_event_ref"):
+            event_ref = _event_ref_for_cache_event(event)
+            projected = (projected_by_ref.get(event_ref) or [])
+            if not projected:
+                continue
+            event = projected.pop(0)
+        else:
+            override = overrides_by_ref.get(_event_ref_for_cache_event(event))
+            if override:
+                event = _apply_event_override(
+                    _serialize_event(event, settings),
+                    override,
+                )
+                if not event:
+                    continue
         vevent = icalendar.Event()
 
         # UID is required per RFC 5545 and must be globally unique [7]
         event_id = event.get("$id") or event.get("id")
         vevent.add(
             "uid",
-            _build_event_uid(event.get("event_uid"), user_id, event_id),
+            _build_event_uid(event.get("event_uid") or event.get("uid"), user_id, event_id),
         )
 
         # DTSTAMP is the timestamp of when this .ics was generated [7]
         vevent.add("dtstamp", now)
 
-        if event.get("event_title"):
-            vevent.add("summary", event.get("event_title"))
+        title = event.get("event_title") or event.get("title")
+        if title:
+            vevent.add("summary", title)
 
-        if event.get("raw_description"):
-            vevent.add("description", event.get("raw_description"))
+        description = event.get("raw_description") or event.get("description")
+        if description:
+            vevent.add("description", description)
 
-        event_start = parse_datetime(event.get("event_start"))
-        event_end = parse_datetime(event.get("event_end"))
-        if event_start:
-            vevent.add("dtstart", event_start)
-
-        if event_end:
-            vevent.add("dtend", event_end)
-        elif event_start:
-            # If no end time, default to 1 hour after start
-            vevent.add("dtend", event_start + timedelta(hours=1))
+        is_canvas = event.get("source_type") == "canvas"
+        is_all_day = bool(event.get("is_all_day"))
+        start_value = event.get("event_start") or event.get("start")
+        end_value = event.get("event_end") or event.get("end")
+        source = None
+        if is_canvas:
+            raw_event = next(
+                (
+                    candidate for candidate in events
+                    if _event_ref_for_cache_event(candidate) == event.get("event_ref")
+                ),
+                {},
+            )
+            source = canvas_sources.get(
+                (
+                    raw_event.get("canvas_source_id"),
+                    raw_event.get("canvas_account_key"),
+                )
+            )
+        timezone_name = None
+        if is_canvas:
+            timezone_event = {**raw_event, **event}
+            timezone_name = _event_timezone(timezone_event, source, settings)
+        _add_event_datetime(
+            vevent,
+            "dtstart",
+            start_value,
+            all_day=is_all_day,
+            timezone_name=timezone_name,
+            canvas=is_canvas,
+        )
+        if end_value:
+            _add_event_datetime(
+                vevent,
+                "dtend",
+                end_value,
+                all_day=is_all_day,
+                timezone_name=timezone_name,
+                canvas=is_canvas,
+            )
+        elif start_value:
+            event_start = parse_datetime(start_value)
+            if event_start:
+                if is_all_day:
+                    try:
+                        vevent.add("dtend", date.fromisoformat(str(start_value)[:10]) + timedelta(days=1))
+                    except ValueError:
+                        pass
+                else:
+                    vevent.add("dtend", event_start + timedelta(hours=1))
 
         # Add course name as a category for client-side filtering
-        if event.get("course_name"):
-            vevent.add("categories", [event.get("course_name")])
+        course_name = event.get("course_name") or event.get("course")
+        if course_name:
+            vevent.add("categories", [course_name])
 
         # Add event type as a custom property
-        if event.get("event_type") and event.get("event_type") != "unknown":
-            vevent.add("x-apstudy-type", event.get("event_type"))
+        event_type = event.get("event_type") or event.get("type")
+        if event_type and event_type != "unknown":
+            vevent.add("x-apstudy-type", event_type)
 
         cal.add_component(vevent)
 
