@@ -191,7 +191,7 @@ test("calendar dashboard keeps cache, public-share, and event-form contracts wir
     assert.match(source, /window\.getDefaultCalendarIdForEventForm = getDefaultCalendarIdForEventForm/);
     assert.match(source, /fetch\("\/api\/calendar\/preferences"/);
     assert.match(source, /\/api\/calendar\/share\/\$\{encodeURIComponent\(state\.public\.shareCode\)\}\/events/);
-    assert.match(source, /fetch\("\/api\/calendar\/refresh", \{ method: "POST" \}\)/);
+    assert.match(source, /fetch\("\/api\/calendar\/refresh", \{ method: "POST", signal: controller\.signal \}\)/);
     assert.match(source, /fetch\("\/api\/atlas\/sections\/by-id"/);
     assert.match(source, /const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
 });

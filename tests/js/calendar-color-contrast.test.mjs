@@ -114,9 +114,10 @@ test("completed tasks retain accessible contrast and a distinct neutral palette"
 test("calendar recomputes inline contrast colors after theme and system-scheme changes", async () => {
     const source = await readFile(path.join(repoRoot, "static/js/calendar/controls.js"), "utf8");
 
-    assert.match(source, /document\.addEventListener\("apstudy-theme-change", refreshThemeDependentColors\)/);
-    assert.match(source, /window\.matchMedia\("\(prefers-color-scheme: dark\)"\)\.addEventListener\("change"/);
-    assert.match(source, /document\.documentElement\.dataset\.theme === "system-match"/);
+    assert.match(source, /listen\(doc, "apstudy-theme-change", refreshThemeDependentColors\)/);
+    assert.match(source, /const colorSchemeQuery = view\.matchMedia\?\.\("\(prefers-color-scheme: dark\)"\)/);
+    assert.match(source, /listen\(colorSchemeQuery, "change", \(\) =>/);
+    assert.match(source, /doc\.documentElement\.dataset\.theme === "system-match"/);
     assert.match(source, /renderCalendarView\(\);\s*renderAssignments\(\);/);
 });
 
@@ -150,6 +151,11 @@ test("upcoming view keeps period arrows visible and disables them", () => {
     ].forEach(makeElement);
     elements.get("calendar-view-root").closest = () => ({ classList: { toggle() {} } });
     document.getElementById = (id) => elements.get(id) || null;
+    const root = {
+        querySelector(selector) {
+            return selector.startsWith("#") ? elements.get(selector.slice(1)) || null : null;
+        },
+    };
 
     const state = {
         anchorDate: new Date(2026, 6, 20),
@@ -159,6 +165,7 @@ test("upcoming view keeps period arrows visible and disables them", () => {
         view: "upcoming",
     };
     const shell = window.APStudyCalendarRenderShell.createCalendarRenderShell({
+        root,
         state,
         constants: { compactCalendarQuery: { matches: false }, hourHeightPx: 60 },
         callbacks: {
