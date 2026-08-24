@@ -123,6 +123,10 @@ export function createCalendarDataAdapter(overrides = {}) {
                 });
                 return { response, payload: await responseJson(response) };
             },
+            async loadSavedCourses({ signal } = {}) {
+                const response = await request("/api/courses/saved", { signal });
+                return { response, payload: await responseJson(response) };
+            },
             async setCanvasRouting({ sourceId, state, destinationCalendarId, fallbackCalendarId, signal } = {}) {
                 const response = await request(
                     `/api/extension/calendar/sources/${encodeURIComponent(sourceId || "")}/routing`,

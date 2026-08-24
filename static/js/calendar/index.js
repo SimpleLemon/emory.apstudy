@@ -218,6 +218,7 @@ const calendarCourses = window.APStudyCalendarCourses.createCalendarCourses({
 });
 const {
     initializeCourseSelectionsFromStorage,
+    hydrateSavedCourses,
     hydrateSelectedSimulatedSections,
     applyCoursesFiltersFromUrl,
     writeCourseFiltersToUrl,
@@ -520,6 +521,7 @@ const bootstrap = window.APStudyCalendarBootstrap.createCalendarBootstrap({
         getCurrentRenderRange,
         getDefaultCalendarIdForEventForm,
         initializeCourseSelectionsFromStorage,
+        hydrateSavedCourses,
         loadCalendarData,
         refreshCalendarFeed,
         render,

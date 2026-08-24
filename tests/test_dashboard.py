@@ -56,7 +56,7 @@ class TestDashboardSummary(unittest.TestCase):
 
         first_row.assert_called_once()
 
-    def test_authenticated_calendar_route_renders_courses_control(self):
+    def _render_calendar_page(self):
         with self.app.test_request_context("/calendar"):
             with patch.object(dashboard_bp, "current_user", self.user), \
                     patch.object(dashboard_bp, "_load_user_settings", return_value={}), \
@@ -65,9 +65,18 @@ class TestDashboardSummary(unittest.TestCase):
                         "runtime_environment_config",
                         return_value=SimpleNamespace(calendar_date_buffer_days_raw="7"),
                     ):
-                response = dashboard_bp.calendar.__wrapped__()
+                return dashboard_bp.calendar.__wrapped__()
 
-        page = response
+    def test_authenticated_calendar_route_omits_courses_control_for_non_emory(self):
+        page = self._render_calendar_page()
+        self.assertIn('data-emory-student="false"', page)
+        self.assertNotIn('id="calendar-courses"', page)
+        self.assertNotIn('<span>Courses</span>', page)
+
+    def test_authenticated_calendar_route_renders_courses_control_for_emory(self):
+        self.user.emory_student = True
+        page = self._render_calendar_page()
+        self.assertIn('data-emory-student="true"', page)
         self.assertIn('id="calendar-courses"', page)
         self.assertIn('aria-haspopup="dialog"', page)
         self.assertIn('<span>Courses</span>', page)

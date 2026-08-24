@@ -31,6 +31,96 @@
             state.courses.selectedSectionIds = new Set(persistedSelections);
         }
 
+        function isEmoryStudentSession() {
+            const bodyValue = String(doc.body?.dataset?.emoryStudent || "").toLowerCase();
+            const rootValue = String(root?.dataset?.emoryStudent || "").toLowerCase();
+            const value = bodyValue || rootValue;
+            return value === "true" || value === "1";
+        }
+
+        function sectionFromSavedCourse(course) {
+            const id = String(course?.section_id || course?.id || "");
+            const instructors = Array.isArray(course?.instructors) ? course.instructors : [];
+            const instructorsUnique = Array.isArray(course?.instructors_unique) ? course.instructors_unique : [];
+            const instructor = course?.instructor || course?.instructor_name || "";
+            const courseTitle = course?.course_title || course?.course_name || "";
+            const searchBlob = [
+                courseTitle,
+                course?.subject,
+                course?.course_code,
+                instructor,
+                ...instructors,
+                ...instructorsUnique,
+            ].join(" ").toLowerCase();
+            return {
+                ...course,
+                id,
+                course_code: course?.course_code || "",
+                course_title: courseTitle,
+                instructor,
+                section_number: course?.section_number,
+                meetings: Array.isArray(course?.meetings) ? course.meetings : [],
+                date_range: course?.date_range || {},
+                is_cancelled: Boolean(course?.is_cancelled),
+                searchBlob,
+            };
+        }
+
+        function removeSimulatedCalendarPreference() {
+            if (state.calendars[simulatedCalendarName]) {
+                delete state.calendars[simulatedCalendarName];
+            }
+        }
+
+        function clearSimulatedCourseSelections() {
+            state.courses.selectedSectionIds = new Set();
+            saveSelectedCourseSectionIds();
+            removeSimulatedCalendarPreference();
+        }
+
+        function applySavedCourses(courses) {
+            const ids = [];
+            for (const course of courses) {
+                const section = sectionFromSavedCourse(course);
+                if (!section.id) continue;
+                ids.push(section.id);
+                state.courses.sectionsById[section.id] = {
+                    ...(state.courses.sectionsById[section.id] || {}),
+                    ...section,
+                };
+            }
+            state.courses.selectedSectionIds = new Set(ids);
+            saveSelectedCourseSectionIds();
+            ensureSimulatedCalendarPreference();
+        }
+
+        async function hydrateSavedCourses() {
+            if (state.public.readOnly) return;
+            if (!isEmoryStudentSession()) {
+                clearSimulatedCourseSelections();
+                return;
+            }
+            const controller = requestController();
+            try {
+                const result = dataAdapter?.loadSavedCourses
+                    ? await dataAdapter.loadSavedCourses({ signal: controller.signal })
+                    : { response: await fetch("/api/courses/saved", { signal: controller.signal }) };
+                const response = result.response || result;
+                if (response.status === 403) {
+                    clearSimulatedCourseSelections();
+                    return;
+                }
+                if (!response.ok) return;
+                const payload = result.payload || await response.json();
+                const courses = Array.isArray(payload.courses) ? payload.courses : [];
+                applySavedCourses(courses);
+            } catch (err) {
+                console.error("Failed to hydrate saved courses:", err);
+            } finally {
+                lifecycle?.releaseAbortController?.(controller);
+            }
+        }
+
         async function hydrateSelectedSimulatedSections() {
             if (!state.courses.selectedSectionIds.size) return;
             const missingIds = Array.from(state.courses.selectedSectionIds)
@@ -229,7 +319,17 @@
                 state.courses.terms = Array.isArray(termsPayload.terms) ? termsPayload.terms : [];
                 state.courses.sections = Array.isArray(sectionsPayload.sections) ? sectionsPayload.sections : [];
                 state.courses.indexLoaded = true;
-                state.courses.sectionsById = {};
+                const validTerms = new Set(state.courses.terms);
+                if (state.courses.termFilter && !validTerms.has(state.courses.termFilter)) {
+                    state.courses.termFilter = "";
+                }
+                const preservedById = {};
+                for (const id of state.courses.selectedSectionIds) {
+                    if (state.courses.sectionsById[id]) {
+                        preservedById[id] = state.courses.sectionsById[id];
+                    }
+                }
+                state.courses.sectionsById = { ...preservedById };
                 for (const section of state.courses.sections) {
                     const id = String(section.id || "");
                     if (!id) continue;
@@ -242,13 +342,8 @@
                     ].join(" ").toLowerCase();
                     state.courses.sectionsById[id] = { ...section, searchBlob };
                 }
-                const validTerms = new Set(state.courses.terms);
-                if (state.courses.termFilter && !validTerms.has(state.courses.termFilter)) {
-                    state.courses.termFilter = "";
-                }
-                const persistedSelections = loadSelectedCourseSectionIds();
                 state.courses.selectedSectionIds = new Set(
-                    persistedSelections.filter((id) => Boolean(state.courses.sectionsById[id]))
+                    Array.from(state.courses.selectedSectionIds).filter((id) => Boolean(state.courses.sectionsById[id]))
                 );
                 ensureSimulatedCalendarPreference();
                 applyCourseFilters();
@@ -368,7 +463,10 @@
         });
 
         function ensureSimulatedCalendarPreference() {
-            if (state.courses.selectedSectionIds.size === 0) return;
+            if (state.courses.selectedSectionIds.size === 0) {
+                removeSimulatedCalendarPreference();
+                return;
+            }
             if (state.calendars[simulatedCalendarName]) {
                 state.calendars[simulatedCalendarName].visible = true;
                 return;
@@ -452,6 +550,7 @@
 
         return {
             initializeCourseSelectionsFromStorage,
+            hydrateSavedCourses,
             hydrateSelectedSimulatedSections,
             applyCoursesFiltersFromUrl,
             writeCourseFiltersToUrl,

@@ -12,6 +12,7 @@
             getCurrentRenderRange,
             getDefaultCalendarIdForEventForm,
             initializeCourseSelectionsFromStorage,
+            hydrateSavedCourses,
             loadCalendarData,
             refreshCalendarFeed,
             render,
@@ -62,6 +63,9 @@
                 if (!state.public.readOnly) {
                     applyCoursesFiltersFromUrl();
                     initializeCourseSelectionsFromStorage();
+                    if (typeof hydrateSavedCourses === "function") {
+                        await hydrateSavedCourses();
+                    }
                 }
                 wireControls();
                 await loadCalendarData();
