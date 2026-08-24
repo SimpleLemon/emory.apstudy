@@ -1,11 +1,14 @@
 """Session-backed toast/flash queue.
 
-Lets any backend view (typically before a redirect) queue a toast that the
-frontend drains on the next page load via ``GET /api/toasts``. Rendered by
-``window.APStudyToast`` in ``static/js/core/global.js``.
+Lets any backend view (typically before a redirect) queue a toast. HTML
+pages consume the queue once via ``consume_request_toasts()`` and embed it
+for ``window.APStudyToast``. ``GET /api/toasts`` is only a fallback.
 """
 
-from flask import session
+import uuid
+from datetime import datetime, timezone
+
+from flask import g, has_request_context, session
 
 _SESSION_KEY = "_toast_queue"
 _VALID_TYPES = {"info", "success", "warning", "error"}
@@ -30,7 +33,12 @@ def push_toast(message, *, type="info", title=None, action=None, duration=None):
     if toast_type not in _VALID_TYPES:
         toast_type = "info"
 
-    entry = {"message": message, "type": toast_type}
+    entry = {
+        "id": str(uuid.uuid4()),
+        "message": message,
+        "type": toast_type,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
     if title:
         entry["title"] = str(title)
     if isinstance(action, dict) and (action.get("label") or action.get("text")):
@@ -55,3 +63,15 @@ def pop_toasts():
     if not isinstance(queue, list):
         return []
     return queue
+
+
+def consume_request_toasts():
+    """Pop the session queue once per request for HTML embedding."""
+    if has_request_context() and getattr(g, "_server_toasts_loaded", False):
+        cached = getattr(g, "server_toasts", None)
+        return list(cached) if isinstance(cached, list) else []
+    toasts = pop_toasts()
+    if has_request_context():
+        g.server_toasts = toasts
+        g._server_toasts_loaded = True
+    return toasts

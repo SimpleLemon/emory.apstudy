@@ -271,6 +271,14 @@ def create_app():
             "frontend_console_diagnostics_enabled": app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"],
         }
 
+    @app.context_processor
+    def inject_server_toasts():
+        from services.toasts import consume_request_toasts
+
+        if request.path.startswith("/api/"):
+            return {"server_toasts": []}
+        return {"server_toasts": consume_request_toasts()}
+
     # Register all blueprints
     from blueprints import register_blueprints
     register_blueprints(app)

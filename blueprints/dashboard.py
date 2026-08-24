@@ -760,12 +760,14 @@ def dashboard():
 
 @dashboard_bp.route("/api/toasts")
 def drain_toasts():
-    """Return and clear any server-queued toasts for the current session.
+    """Return leftover session toasts. HTML pages consume the queue first.
 
-    Drained once per page load by window.APStudyToast in global.js. Available to
-    anonymous sessions too (e.g. post-logout messages).
+    Kept as a fallback for responses that omit the embedded JSON payload.
+    Must not be cached: a cached GET would re-show consumed toasts.
     """
-    return jsonify(pop_toasts())
+    response = jsonify(pop_toasts())
+    response.headers["Cache-Control"] = "no-store"
+    return response
 
 
 @dashboard_bp.route("/api/dashboard/summary")

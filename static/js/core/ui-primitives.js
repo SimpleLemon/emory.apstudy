@@ -123,6 +123,45 @@
         return icon;
     }
 
+    const TOAST_SEEN_STORAGE_KEY = 'apstudy.seen-toasts';
+    const TOAST_DEDUPE_MS = 60_000;
+    const TOAST_MAX_LIFETIME_MS = {
+        info: 8_000,
+        success: 8_000,
+        warning: 15_000,
+        error: 15_000,
+    };
+
+    function readSeenToasts() {
+        try {
+            const parsed = JSON.parse(sessionStorage.getItem(TOAST_SEEN_STORAGE_KEY) || '{}');
+            return parsed && typeof parsed === 'object' ? parsed : {};
+        } catch (_error) {
+            return {};
+        }
+    }
+
+    function hasRecentlyShownToast(id) {
+        if (!id) return false;
+        const seenAt = Number(readSeenToasts()[id]);
+        return Number.isFinite(seenAt) && (Date.now() - seenAt) < TOAST_DEDUPE_MS;
+    }
+
+    function markToastSeen(id) {
+        if (!id) return;
+        try {
+            const seen = readSeenToasts();
+            const now = Date.now();
+            Object.keys(seen).forEach((key) => {
+                if (now - Number(seen[key]) >= TOAST_DEDUPE_MS) delete seen[key];
+            });
+            seen[id] = now;
+            sessionStorage.setItem(TOAST_SEEN_STORAGE_KEY, JSON.stringify(seen));
+        } catch (_error) {
+            // Private mode or blocked storage should not prevent the toast.
+        }
+    }
+
     function showToast(options = {}) {
         if (typeof options === 'string') options = { message: options };
         if (!options || typeof options !== 'object') return null;
@@ -132,8 +171,11 @@
         const primaryText = titleText || messageText;
         const detailText = titleText && messageText ? messageText : '';
         if (!primaryText) return null;
+        const toastId = toastText(options.id);
+        if (toastId && hasRecentlyShownToast(toastId)) return null;
         const hasAction = Boolean(options.action && (options.action.label || options.action.text));
         const duration = toastDuration(options, type, Boolean(detailText), hasAction);
+        const maxLifetime = Math.max(duration || 0, TOAST_MAX_LIFETIME_MS[type] || 8_000);
         const toast = document.createElement('div');
         toast.className = `apstudy-toast is-${type}`;
         toast.classList.toggle('is-compact', !detailText && !hasAction);
@@ -204,13 +246,16 @@
         if (progress) toast.appendChild(progress);
         let dismissed = false;
         let timer = null;
+        let maxTimer = null;
         let remaining = duration;
         let startedAt = 0;
+        let allowPointerPause = false;
         const pauseReasons = new Set();
         const dismiss = (reason = 'programmatic') => {
             if (dismissed) return;
             dismissed = true;
             if (timer) window.clearTimeout(timer);
+            if (maxTimer) window.clearTimeout(maxTimer);
             if (typeof options.onDismiss === 'function') {
                 try {
                     options.onDismiss(reason);
@@ -245,18 +290,29 @@
             if (pauseReasons.size) pauseTimer();
             else resumeTimer();
         };
-        toast.addEventListener('mouseenter', () => setPaused('pointer', true));
-        toast.addEventListener('mouseleave', () => setPaused('pointer', false));
+        toast.addEventListener('mouseenter', () => {
+            if (!allowPointerPause) return;
+            setPaused('pointer', true);
+        });
+        toast.addEventListener('mouseleave', () => {
+            allowPointerPause = true;
+            setPaused('pointer', false);
+        });
         toast.addEventListener('focusin', () => setPaused('focus', true));
         toast.addEventListener('focusout', (event) => {
             if (!toast.contains(event.relatedTarget)) setPaused('focus', false);
         });
         ensureToastHost().prepend(toast);
+        if (toastId) markToastSeen(toastId);
         requestAnimationFrame(() => {
             toast.classList.add('is-visible');
             progress?.classList.add('is-running');
         });
+        window.setTimeout(() => {
+            allowPointerPause = true;
+        }, 300);
         resumeTimer();
+        maxTimer = window.setTimeout(() => dismiss('max-lifetime'), maxLifetime);
         return { dismiss };
     }
     window.APStudyToast = window.APStudyToast || {

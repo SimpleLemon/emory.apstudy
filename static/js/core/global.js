@@ -377,17 +377,47 @@ async function runLogoutFlow() {
 window.APStudyAuth = window.APStudyAuth || {};
 window.APStudyAuth.logout = runLogoutFlow;
 
+function showServerToast(entry) {
+    if (!entry || typeof entry !== "object") return;
+    window.APStudyToast.show({
+        id: entry.id,
+        message: entry.message,
+        title: entry.title,
+        type: entry.type,
+        duration: entry.duration,
+        action: entry.action,
+    });
+}
+
+function readEmbeddedServerToasts() {
+    const node = document.getElementById("apstudy-server-toasts");
+    if (!node) return null;
+    try {
+        const parsed = JSON.parse(node.textContent || "[]");
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (_error) {
+        return [];
+    }
+}
+
 function drainServerToasts() {
     if (window.__apstudyToastsDrained) return;
     window.__apstudyToastsDrained = true;
-    if (!window.APStudyToast || typeof fetch !== "function") return;
+    if (!window.APStudyToast) return;
 
-    const toastRequest = {
+    const embedded = readEmbeddedServerToasts();
+    if (embedded !== null) {
+        embedded.forEach(showServerToast);
+        return;
+    }
+    if (typeof fetch !== "function") return;
+
+    fetch("/api/toasts", {
         method: "GET",
         headers: { Accept: "application/json" },
-    };
-    toastRequest["credentials"] = "same-origin";
-    fetch("/api/toasts", toastRequest)
+        credentials: "same-origin",
+        cache: "no-store",
+    })
         .then((response) => (response.ok ? response.json() : null))
         .then((payload) => {
             const toasts = Array.isArray(payload)
@@ -395,16 +425,7 @@ function drainServerToasts() {
                 : Array.isArray(payload?.toasts)
                   ? payload.toasts
                   : [];
-            toasts.forEach((entry) => {
-                if (!entry || typeof entry !== "object") return;
-                window.APStudyToast.show({
-                    message: entry.message,
-                    title: entry.title,
-                    type: entry.type,
-                    duration: entry.duration,
-                    action: entry.action,
-                });
-            });
+            toasts.forEach(showServerToast);
         })
         .catch(() => {});
 }
