@@ -90,9 +90,6 @@
                     }
                     openCoursesModal(event.detail?.trigger || doc.activeElement);
                 });
-                listen(query("#calendar-courses"), "click", (event) => {
-                    openCoursesModal(event.currentTarget);
-                });
             }
             listen(query("#calendar-view-week"), "click", () => {
                 state.view = "week";

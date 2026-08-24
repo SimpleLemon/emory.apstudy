@@ -67,19 +67,14 @@ class TestDashboardSummary(unittest.TestCase):
                     ):
                 return dashboard_bp.calendar.__wrapped__()
 
-    def test_authenticated_calendar_route_omits_courses_control_for_non_emory(self):
-        page = self._render_calendar_page()
-        self.assertIn('data-emory-student="false"', page)
-        self.assertNotIn('id="calendar-courses"', page)
-        self.assertNotIn('<span>Courses</span>', page)
-
-    def test_authenticated_calendar_route_renders_courses_control_for_emory(self):
-        self.user.emory_student = True
-        page = self._render_calendar_page()
-        self.assertIn('data-emory-student="true"', page)
-        self.assertIn('id="calendar-courses"', page)
-        self.assertIn('aria-haspopup="dialog"', page)
-        self.assertIn('<span>Courses</span>', page)
+    def test_authenticated_calendar_route_omits_courses_control(self):
+        for emory_student in (False, True):
+            with self.subTest(emory_student=emory_student):
+                self.user.emory_student = emory_student
+                page = self._render_calendar_page()
+                self.assertIn(f'data-emory-student="{str(emory_student).lower()}"', page)
+                self.assertNotIn('id="calendar-courses"', page)
+                self.assertNotIn('<span>Courses</span>', page)
 
     def _summary_with_patches(self, *, settings=None, calendar=None, tasks=None, courses=None):
         with self.app.test_request_context("/api/dashboard/summary"):
