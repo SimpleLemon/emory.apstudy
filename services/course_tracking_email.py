@@ -12,11 +12,16 @@ SECONDARY_BG = "#F5F5F5"
 OUTER_BG = "#E1E1E1"
 
 
+def build_nest_courses_detail_path(section_id):
+    """Build a same-origin Nest courses path with query + hash deep link to a section."""
+    encoded = quote(str(section_id or ""), safe="")
+    return f"/courses?section={encoded}#section={encoded}"
+
+
 def build_nest_courses_detail_url(base_url, section_id):
     """Build Nest courses URL with query + hash deep link to a section."""
     base = str(base_url or "").rstrip("/")
-    encoded = quote(str(section_id or ""), safe="")
-    return f"{base}/courses?section={encoded}#section={encoded}"
+    return f"{base}{build_nest_courses_detail_path(section_id)}"
 
 
 def build_open_seat_subject(course_code, seats_available, waitlist_available=None):

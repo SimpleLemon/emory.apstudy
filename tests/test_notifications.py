@@ -62,6 +62,48 @@ def test_preferences_subscription_feed_and_mutations():
         Path(path).unlink(missing_ok=True)
 
 
+class NotificationSafeUrlTests(unittest.TestCase):
+    def test_rewrites_same_origin_and_rejects_off_origin(self):
+        app, path = notification_app()
+        encoded = "Spring_2026%7CJPN%7C101%7C1234%7C1"
+        expected = f"/courses?section={encoded}#section={encoded}"
+        absolute = f"https://nest.apstudy.org/courses?section={encoded}#section={encoded}"
+        try:
+            with app.app_context(), patch.object(notifications, "runtime_environment_config") as runtime:
+                runtime.return_value.app_base_url = "https://nest.apstudy.org"
+                self.assertEqual(notifications._safe_url(absolute, fallback=None), expected)
+                self.assertEqual(
+                    notifications._safe_url("/courses?section=kept#section=kept", fallback=None),
+                    "/courses?section=kept#section=kept",
+                )
+                self.assertIsNone(notifications._safe_url("https://evil.example/courses", fallback=None))
+                self.assertIsNone(notifications._safe_url("//evil.example/courses", fallback=None))
+                self.assertIsNone(notifications._safe_url(None, fallback=None))
+                same_origin_id = notifications.create_feed_item(
+                    "u1",
+                    "courses",
+                    "JPN 101 has an opening",
+                    "2 seats available.",
+                    absolute,
+                )
+                stored = next(
+                    item for item in notifications.list_feed("u1")["notifications"] if item["id"] == same_origin_id
+                )
+                self.assertEqual(stored["target_url"], expected)
+                no_link_id = notifications.create_feed_item("u1", "notes", "FYI", "No destination", None)
+                no_link = next(
+                    item for item in notifications.list_feed("u1")["notifications"] if item["id"] == no_link_id
+                )
+                self.assertIsNone(no_link["target_url"])
+                evil_id = notifications.create_feed_item(
+                    "u1", "courses", "Nope", "Off origin", "https://evil.example/courses"
+                )
+                evil = next(item for item in notifications.list_feed("u1")["notifications"] if item["id"] == evil_id)
+                self.assertIsNone(evil["target_url"])
+        finally:
+            Path(path).unlink(missing_ok=True)
+
+
 def test_course_notification_and_email_channels_are_independent():
     app, path = notification_app()
     try:

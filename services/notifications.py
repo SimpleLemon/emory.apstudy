@@ -7,7 +7,7 @@ import os
 import uuid
 import sqlite3
 from datetime import datetime, timedelta, timezone
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit, urlunsplit
 from zoneinfo import ZoneInfo
 
 from services.database import db_connection
@@ -48,7 +48,14 @@ def _safe_url(value, fallback="/dashboard?notifications=open"):
         return fallback
     value = str(value).strip()
     parsed = urlsplit(value)
-    return value if value.startswith("/") and not value.startswith("//") and not parsed.netloc else fallback
+    if value.startswith("/") and not value.startswith("//") and not parsed.netloc:
+        return value
+    if parsed.scheme not in {"http", "https"} or not parsed.netloc or not parsed.path.startswith("/"):
+        return fallback
+    app_origin = urlsplit(str(runtime_environment_config().app_base_url or "").strip())
+    if parsed.scheme != app_origin.scheme or parsed.netloc.lower() != str(app_origin.netloc or "").lower():
+        return fallback
+    return urlunsplit(("", "", parsed.path, parsed.query, parsed.fragment)) or fallback
 
 
 def push_configuration():

@@ -11,6 +11,7 @@ from appwrite_client import COLLECTIONS, client as appwrite_client
 from appwrite_helpers import format_datetime, list_rows_all, update_row_safe
 from services.atlas_client import fetch_live_section_status
 from services.course_tracking_email import (
+    build_nest_courses_detail_path,
     build_nest_courses_detail_url,
     build_open_seat_html,
     build_open_seat_subject,
@@ -405,8 +406,7 @@ def check_course_seat_tracks(*, term=None, subject=None, catalog=None, poll_sour
                     try:
                         _, push_result = notifications.notify(
                             track.get("user_id"), "courses", f"{code} has an opening", body,
-                            build_nest_courses_detail_url(
-                                runtime_environment_config().app_base_url,
+                            build_nest_courses_detail_path(
                                 section.get("id") or track.get("section_id"),
                             ),
                             source_ref=row_id,

@@ -469,6 +469,42 @@ class CourseTrackingEmailTests(unittest.TestCase):
         self.assertIn("section=Spring_2026%7CJPN%7C101%7C1234%7C1", url)
         self.assertIn("#section=Spring_2026%7CJPN%7C101%7C1234%7C1", url)
 
+    def test_build_nest_courses_detail_path_encodes_section_id(self):
+        from services.course_tracking_email import build_nest_courses_detail_path
+
+        section_id = "Spring_2026|JPN|101|1234|1"
+        path = build_nest_courses_detail_path(section_id)
+        self.assertEqual(
+            path,
+            "/courses?section=Spring_2026%7CJPN%7C101%7C1234%7C1#section=Spring_2026%7CJPN%7C101%7C1234%7C1",
+        )
+
+    def test_open_transition_push_notify_uses_relative_courses_path(self):
+        tracks = [self._track("track-1", "user-1")]
+        section = self._sample_section()
+
+        with patch.dict(course_tracking.COLLECTIONS, {"course_seat_tracks": "tracks"}, clear=False), \
+                patch.object(course_tracking, "list_rows_all", return_value=tracks), \
+                patch.object(course_tracking, "fetch_live_section_status", return_value={"section": section}), \
+                patch.object(course_tracking.notifications, "preferences", return_value={"course_email_enabled": False, "course_push_enabled": True}), \
+                patch.object(course_tracking.notifications, "notify", return_value=("nid", {"accepted": 1, "failed": 0})) as notify, \
+                patch.object(course_tracking, "_send_open_email") as send_email, \
+                patch.object(course_tracking, "update_row_safe", side_effect=lambda table, row_id, data: {"$id": row_id, **data}), \
+                patch.object(course_tracking, "emit_course_track_event"), \
+                patch.object(course_tracking, "update_course_tracks_channel_topic"), \
+                patch.object(course_tracking, "_now_utc", return_value=datetime(2026, 5, 29, tzinfo=timezone.utc)):
+            notified = course_tracking.check_course_seat_tracks()
+
+        self.assertEqual(notified, 1)
+        send_email.assert_not_called()
+        notify.assert_called_once()
+        self.assertEqual(notify.call_args.args[1], "courses")
+        self.assertEqual(
+            notify.call_args.args[4],
+            "/courses?section=Spring_2026%7CJPN%7C101%7C1234%7C1#section=Spring_2026%7CJPN%7C101%7C1234%7C1",
+        )
+        self.assertNotIn("https://", notify.call_args.args[4])
+
     def test_build_open_seat_html_includes_logo_buttons_and_table(self):
         from services.course_tracking_email import build_open_seat_html
 
