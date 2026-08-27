@@ -78,6 +78,13 @@ def create_app():
     app.config["REMEMBER_COOKIE_HTTPONLY"] = True
     app.config["REMEMBER_COOKIE_SAMESITE"] = "Lax"
     app.config["PREFERRED_URL_SCHEME"] = "http" if allow_insecure_http else "https"
+    app.config["APP_BASE_URL"] = environment_config.app_base_url
+    app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"] = (
+        environment_config.calendar_ics_subscriptions_enabled_raw
+    )
+    app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = (
+        environment_config.calendar_ics_subscriptions_owner_allowlist_raw
+    )
     app.config["WTF_CSRF_CHECK_DEFAULT"] = False
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
         environment_config.frontend_console_diagnostics_enabled

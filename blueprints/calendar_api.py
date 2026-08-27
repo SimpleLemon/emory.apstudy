@@ -130,6 +130,25 @@ from services.calendar_store import (
     list_calendar_rows_safe,
     update_calendar_row,
 )
+from services.calendar_ics_contract import CalendarIcsFailure
+from services.calendar_ics_feed import (
+    CalendarIcsFeedError,
+    build_calendar_ics_feed,
+    if_none_match_matches,
+)
+from services.calendar_share_service import (
+    CalendarIcsResourceError,
+    assert_selection_change_allowed,
+    creation_ics_fields,
+    disable_calendar_ics,
+    enable_calendar_ics,
+    owner_ics_metadata,
+    remove_calendar_ics,
+    require_calendar_ics_enabled,
+    resolve_calendar_ics_token,
+    rotate_calendar_ics,
+    update_owned_calendar_share_with_invariants,
+)
 
 calendar_bp = Blueprint("calendar", __name__)
 logger = logging.getLogger(__name__)
@@ -381,6 +400,11 @@ def create_calendar_share():
         config = _normalize_calendar_share_payload(request.get_json(silent=True) or {})
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
+    payload = request.get_json(silent=True) or {}
+    try:
+        ics_fields = creation_ics_fields(user_id, payload, config)
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
 
     now = format_datetime(datetime.utcnow())
     try:
@@ -394,6 +418,7 @@ def create_calendar_share():
                 "created_at": now,
                 "updated_at": now,
                 **config,
+                **ics_fields,
             },
         )
     except AppwriteException:
@@ -438,14 +463,19 @@ def update_calendar_share(share_id):
     payload = request.get_json(silent=True) or {}
     try:
         updates = _normalize_calendar_share_payload(payload, existing=share)
+        assert_selection_change_allowed(share, updates)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
     if "isActive" in payload or "is_active" in payload:
         updates["is_active"] = bool(payload.get("isActive", payload.get("is_active")))
     updates["updated_at"] = format_datetime(datetime.utcnow())
 
     try:
-        updated = update_calendar_row(_calendar_shares_collection(), _row_id(share), updates)
+        updated = update_owned_calendar_share_with_invariants(user_id, share_id, updates)
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
     except AppwriteException:
         logger.exception("Failed to update calendar share")
         return jsonify({"error": "Unable to update calendar share."}), 500
@@ -500,6 +530,10 @@ def revoke_calendar_share(share_id):
             _row_id(share),
             {
                 "is_active": False,
+                "ics_token": None,
+                "ics_enabled": False,
+                "ics_issued_at": None,
+                "ics_rotated_at": None,
                 "updated_at": format_datetime(datetime.utcnow()),
             },
         )
@@ -508,6 +542,86 @@ def revoke_calendar_share(share_id):
         return jsonify({"error": "Unable to revoke calendar share."}), 500
 
     return jsonify({"share": _calendar_share_payload(updated)})
+
+
+def _calendar_ics_lifecycle_response(share_id, action):
+    user_id = str(current_user.id)
+    actions = {
+        "enable": enable_calendar_ics,
+        "disable": disable_calendar_ics,
+        "rotate": rotate_calendar_ics,
+        "remove": remove_calendar_ics,
+    }
+    try:
+        outcome = actions[action](user_id, share_id)
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
+    except AppwriteException:
+        logger.exception("Failed to update calendar ICS subscription")
+        return jsonify({"error": "Unable to update calendar ICS subscription.", "code": "calendar_ics_unavailable"}), 500
+    return jsonify({"share": _calendar_share_payload(outcome.share)})
+
+
+@calendar_bp.route("/shares/<share_id>/ics", methods=["GET"])
+@login_required
+def get_calendar_share_ics(share_id):
+    user_id = str(current_user.id)
+    try:
+        require_calendar_ics_enabled(user_id)
+        share = _owned_calendar_share_or_none(share_id, user_id)
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
+    except AppwriteException:
+        logger.exception("Failed to load calendar ICS subscription")
+        return jsonify({"error": "Unable to load calendar ICS subscription.", "code": "calendar_ics_unavailable"}), 500
+    if not share:
+        return jsonify({"error": "Calendar share not found.", "code": "calendar_ics_not_found"}), 404
+    try:
+        return jsonify({"ics": owner_ics_metadata(share)})
+    except CalendarIcsFailure as exc:
+        return jsonify(exc.payload()), exc.status
+
+
+@calendar_bp.route("/shares/<share_id>/ics", methods=["POST"])
+@login_required
+def configure_calendar_share_ics(share_id):
+    payload = request.get_json(silent=True) or {}
+    action = payload.get("action")
+    if action is None and "enabled" in payload:
+        enabled = payload.get("enabled")
+        if isinstance(enabled, str):
+            enabled = enabled.strip().lower() in {"1", "true", "yes", "on"}
+        action = "enable" if bool(enabled) else "disable"
+    if action not in {"enable", "disable", "rotate"}:
+        return jsonify({
+            "error": "ICS action must be enable, disable, or rotate.",
+            "code": "calendar_ics_invalid_action",
+        }), 422
+    return _calendar_ics_lifecycle_response(share_id, action)
+
+
+@calendar_bp.route("/shares/<share_id>/ics/enable", methods=["POST"])
+@login_required
+def enable_calendar_share_ics(share_id):
+    return _calendar_ics_lifecycle_response(share_id, "enable")
+
+
+@calendar_bp.route("/shares/<share_id>/ics/disable", methods=["POST"])
+@login_required
+def disable_calendar_share_ics(share_id):
+    return _calendar_ics_lifecycle_response(share_id, "disable")
+
+
+@calendar_bp.route("/shares/<share_id>/ics/rotate", methods=["POST"])
+@login_required
+def rotate_calendar_share_ics(share_id):
+    return _calendar_ics_lifecycle_response(share_id, "rotate")
+
+
+@calendar_bp.route("/shares/<share_id>/ics", methods=["DELETE"])
+@login_required
+def remove_calendar_share_ics(share_id):
+    return _calendar_ics_lifecycle_response(share_id, "remove")
 
 
 @calendar_bp.route("/share/<share_code>/events")
@@ -1033,6 +1147,63 @@ def update_calendar_preferences_batch():
         "skipped": skipped,
         "errors": errors,
     })
+
+
+_SHARE_FEED_SECURITY_HEADERS = {
+    "Cache-Control": "no-store, private, no-transform",
+    "Referrer-Policy": "no-referrer",
+    "X-Content-Type-Options": "nosniff",
+    "X-Robots-Tag": "noindex, nofollow",
+}
+_SHARE_FEED_SUCCESS_HEADERS = {
+    **_SHARE_FEED_SECURITY_HEADERS,
+    "Content-Type": "text/calendar; charset=utf-8; method=PUBLISH",
+    "Cache-Control": "no-store, private, no-transform",
+}
+
+
+def _share_feed_error(status, body):
+    headers = dict(_SHARE_FEED_SECURITY_HEADERS)
+    if status == 503:
+        headers["Content-Type"] = "text/plain; charset=utf-8"
+    return Response(body, status=status, headers=headers)
+
+
+@calendar_bp.route("/share-feed.ics", methods=["GET", "HEAD"])
+def share_feed_ics():
+    """Serve the canonical, token-only share-scoped ICS subscription feed."""
+    if set(request.args.keys()) != {"token"}:
+        return _share_feed_error(404, "Not Found")
+    token_values = request.args.getlist("token")
+    if len(token_values) != 1 or not token_values[0]:
+        return _share_feed_error(404, "Not Found")
+
+    try:
+        share = resolve_calendar_ics_token(token_values[0])
+    except CalendarIcsResourceError:
+        return _share_feed_error(503, "Calendar temporarily unavailable.")
+    except CalendarIcsFailure:
+        return _share_feed_error(404, "Not Found")
+    if not share:
+        return _share_feed_error(404, "Not Found")
+
+    try:
+        document, _window = build_calendar_ics_feed(share)
+    except CalendarIcsFeedError:
+        return _share_feed_error(503, "Calendar temporarily unavailable.")
+    except Exception:
+        return _share_feed_error(503, "Calendar temporarily unavailable.")
+
+    headers = dict(_SHARE_FEED_SUCCESS_HEADERS)
+    headers["ETag"] = document.etag
+    headers["Content-Length"] = str(len(document.content))
+    if if_none_match_matches(request.headers.get("If-None-Match"), document.etag):
+        return Response(status=304, headers=headers)
+    body = document.content if request.method == "GET" else b""
+    response = Response(body, status=200, headers=headers)
+    if request.method == "HEAD":
+        response.headers["Content-Length"] = str(len(document.content))
+    return response
 
 
 @calendar_bp.route("/feed.ics")

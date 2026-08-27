@@ -16,6 +16,7 @@ class EnvironmentConfigContractTests(unittest.TestCase):
             "APP_BASE_URL": "https://example.test/",
             "CHAT_EVENTS_POLL_SECONDS": "1.5",
             "DISCORD_CHAT_INGEST_SECRET": " ingest ",
+            "CALENDAR_ICS_UID_SECRET": "uid-secret",
             "DISCORD_GATEWAY_ENABLED": "false",
             "DISCORD_AUDIT_CHAT_DELETES_CHANNEL_ID": " audit-channel ",
             "SCHEDULER_ENABLED": "yes",
@@ -32,6 +33,7 @@ class EnvironmentConfigContractTests(unittest.TestCase):
             "app_base_url": "https://example.test/",
             "chat_events_poll_seconds_raw": "1.5",
             "discord_chat_ingest_secret": " ingest ",
+            "calendar_ics_uid_secret": "uid-secret",
             "discord_gateway_enabled_raw": "false",
             "discord_audit_chat_deletes_channel_id": " audit-channel ",
             "scheduler_enabled_raw": "yes",
@@ -88,12 +90,19 @@ class EnvironmentConfigContractTests(unittest.TestCase):
                 "APPWRITE_API_KEY": "appwrite-secret",
                 "DISCORD_BOT_TOKEN": "discord-secret",
                 "VAPID_PRIVATE_KEY": "vapid-secret",
+                "CALENDAR_ICS_UID_SECRET": "calendar-uid-secret",
             },
             clear=True,
         ):
             rendered = repr(load_environment_config())
 
-        for secret in ("session-secret", "appwrite-secret", "discord-secret", "vapid-secret"):
+        for secret in (
+            "session-secret",
+            "appwrite-secret",
+            "discord-secret",
+            "vapid-secret",
+            "calendar-uid-secret",
+        ):
             self.assertNotIn(secret, rendered)
 
     def test_runtime_accessor_prefers_the_registered_snapshot(self):

@@ -38,7 +38,7 @@ BOOLEAN_COLUMNS = {
     "user_calendar_preferences": {"visible"},
     "user_events": {"is_all_day"},
     "user_event_overrides": {"hidden", "is_all_day"},
-    "calendar_shares": {"is_active", "include_all_calendars"},
+    "calendar_shares": {"is_active", "include_all_calendars", "ics_enabled"},
     "task_lists": {"collapsed", "hidden"},
     "tasks": {"completed", "starred"},
     "shared_files": {"is_public"},

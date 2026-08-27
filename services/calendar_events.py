@@ -3628,8 +3628,10 @@ def _normalize_share_calendar_ids(value):
     seen = set()
     for item in value or []:
         calendar_id = str(item or "").strip()
-        if not calendar_id or calendar_id == SIMULATED_CALENDAR_NAME:
+        if not calendar_id:
             continue
+        if calendar_id == SIMULATED_CALENDAR_NAME:
+            calendar_id = "simulated_courses"
         calendar_id = calendar_id[:255]
         if calendar_id in seen:
             continue
@@ -3720,6 +3722,11 @@ def _calendar_share_scope_label(share):
 
 def _calendar_share_payload(share):
     fixed_start = _coerce_utc(parse_datetime(share.get("fixed_start")))
+    def truthy(value):
+        if isinstance(value, str):
+            return value.strip().lower() in {"1", "true", "yes", "on"}
+        return bool(value)
+
     return {
         "id": _row_id(share),
         "shareCode": share.get("share_code"),
@@ -3732,6 +3739,10 @@ def _calendar_share_payload(share):
         "fixedEnd": _fixed_end_display_date(share.get("fixed_end")),
         "rollingDays": share.get("rolling_days"),
         "scopeLabel": _calendar_share_scope_label(share),
+        # ICS secrets and derived URLs are owner-GET-only.  These fields are
+        # deliberately safe for collection, ordinary share, and public payloads.
+        "icsConfigured": bool(share.get("ics_token")),
+        "icsEnabled": truthy(share.get("ics_enabled")) and bool(share.get("ics_token")),
         "createdAt": share.get("created_at"),
         "updatedAt": share.get("updated_at"),
     }

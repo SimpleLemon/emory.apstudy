@@ -162,6 +162,10 @@ Table: calendar_shares
 - id INTEGER PRIMARY KEY -> use Appwrite $id (string); no separate attribute
 - user_id INTEGER FK users.id -> string attribute: user_id
 - share_code VARCHAR(16) UNIQUE -> string(16) attribute: share_code (unique)
+- ics_token TEXT UNIQUE NULL -> string attribute: ics_token (unique, nullable)
+- ics_enabled BOOLEAN NOT NULL DEFAULT 0 -> boolean attribute: ics_enabled
+- ics_issued_at DATETIME NULL -> datetime attribute: ics_issued_at
+- ics_rotated_at DATETIME NULL -> datetime attribute: ics_rotated_at
 - is_active BOOLEAN NOT NULL DEFAULT 1 -> boolean attribute: is_active
 - include_all_calendars BOOLEAN NOT NULL DEFAULT 1 -> boolean attribute: include_all_calendars
 - calendar_ids_json TEXT -> string/text attribute: calendar_ids_json

@@ -1088,6 +1088,10 @@
 	filter: saturate(0.75);
 }
 
+.calendar-share-calendar-grid.is-locked {
+	opacity: 0.62;
+}
+
 .calendar-share-calendar-choice {
 	display: inline-flex;
 	align-items: center;
@@ -1233,6 +1237,189 @@
 	padding: 10px 12px;
 }
 
+.calendar-share-ics-create,
+.calendar-share-ics {
+	display: grid;
+	gap: 10px;
+	grid-column: 1 / -1;
+	min-width: 0;
+	border-top: 1px solid rgba(148, 163, 184, 0.12);
+	padding-top: 14px;
+}
+
+.calendar-share-ics-create-heading,
+.calendar-share-ics-summary-copy {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.calendar-share-ics-create h4,
+.calendar-share-ics-summary strong {
+	margin: 0;
+	color: #e8edf5;
+	font-size: 13px;
+	font-weight: 700;
+}
+
+.calendar-share-ics-create p,
+.calendar-share-ics-summary span,
+.calendar-share-ics-window,
+.calendar-share-ics-warning,
+.calendar-share-lock-note,
+.calendar-share-ics-edit-note,
+.calendar-share-ics-selection-note {
+	margin: 0;
+	color: #a9b1bf;
+	font-size: 12px;
+	line-height: 1.45;
+}
+
+.calendar-share-ics-optin {
+	display: flex;
+	align-items: flex-start;
+	gap: 10px;
+	min-width: 0;
+	border: 1px solid rgba(96, 165, 250, 0.24);
+	border-radius: var(--radius-card);
+	background: rgba(96, 165, 250, 0.08);
+	color: #dbeafe;
+	padding: 11px 13px;
+}
+
+.calendar-share-ics-optin input {
+	margin-top: 2px;
+	accent-color: #60a5fa;
+}
+
+.calendar-share-ics-optin span {
+	display: grid;
+	gap: 3px;
+	min-width: 0;
+}
+
+.calendar-share-ics-optin strong {
+	color: #eff6ff;
+	font-size: 13px;
+}
+
+.calendar-share-ics-optin small {
+	color: #a9bfe3;
+	font-size: 12px;
+	line-height: 1.4;
+}
+
+.calendar-share-ics-summary {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	min-width: 0;
+}
+
+.calendar-share-ics-summary .calendar-info-button {
+	flex: 0 0 auto;
+}
+
+.calendar-share-ics-detail {
+	display: grid;
+	gap: 10px;
+	min-width: 0;
+	border: 1px solid rgba(148, 163, 184, 0.13);
+	border-radius: var(--radius-card);
+	background: rgba(255, 255, 255, 0.025);
+	padding: 12px;
+}
+
+.calendar-share-ics-urls {
+	display: grid;
+	gap: 8px;
+	min-width: 0;
+}
+
+.calendar-share-ics-url-row {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 10px;
+	min-width: 0;
+}
+
+.calendar-share-ics-url-copy {
+	display: grid;
+	gap: 4px;
+	min-width: 0;
+}
+
+.calendar-share-ics-url-label {
+	color: #8e98a8;
+	font-size: 12px;
+	font-weight: 700;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+}
+
+.calendar-share-ics-url-value {
+	display: block;
+	max-width: 100%;
+	overflow-wrap: anywhere;
+	word-break: break-word;
+	border: 1px solid rgba(148, 163, 184, 0.12);
+	border-radius: var(--radius-control);
+	background: rgba(255, 255, 255, 0.035);
+	color: #c9d7eb;
+	font-family: var(--font-mono);
+	font-size: 12px;
+	line-height: 1.45;
+	padding: 7px 8px;
+}
+
+.calendar-share-ics-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.calendar-share-ics-error {
+	margin: 0;
+	border: 1px solid rgba(248, 113, 113, 0.24);
+	border-radius: var(--radius-card);
+	background: rgba(248, 113, 113, 0.1);
+	color: #fecaca;
+	font-size: 12px;
+	line-height: 1.45;
+	padding: 10px 12px;
+}
+
+.calendar-share-ics-notice,
+.calendar-share-lock-note {
+	border: 1px solid rgba(96, 165, 250, 0.2);
+	border-radius: var(--radius-card);
+	background: rgba(96, 165, 250, 0.08);
+	padding: 10px 12px;
+}
+
+.calendar-share-ics-warning {
+	color: #c8b98c;
+}
+
+.calendar-share-ics .calendar-info-button-danger {
+	background: rgba(248, 113, 113, 0.1);
+	color: #fecaca;
+}
+
+.calendar-share-ics .calendar-info-button-danger:hover,
+.calendar-share-ics .calendar-info-button-danger:focus-visible {
+	background: rgba(248, 113, 113, 0.18);
+	color: #fee2e2;
+}
+
+.calendar-share-ics-create [hidden],
+.calendar-share-ics-detail[hidden],
+.calendar-share-ics-selection-note[hidden] {
+	display: none !important;
+}
+
 @keyframes calendar-share-overlay-in {
 	from { opacity: 0; }
 	to { opacity: 1; }
@@ -1283,6 +1470,20 @@
 
 	.calendar-share-actions {
 		justify-content: flex-start;
+	}
+
+	.calendar-share-ics-summary,
+	.calendar-share-ics-url-row {
+		grid-template-columns: 1fr;
+		align-items: stretch;
+	}
+
+	.calendar-share-ics-summary {
+		display: grid;
+	}
+
+	.calendar-share-ics-url-row .calendar-info-button {
+		width: 100%;
 	}
 }
 

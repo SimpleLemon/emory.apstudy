@@ -56,6 +56,9 @@ class EnvironmentConfig:
     extension_calendar_rollout_raw: str | None = None
     discord_invite_url: str = ""
     app_base_url: str = "https://nest.apstudy.org"
+    calendar_ics_subscriptions_enabled_raw: str = "0"
+    calendar_ics_subscriptions_owner_allowlist_raw: str = ""
+    calendar_ics_uid_secret: str | None = field(default=None, repr=False)
     giphy_api_key: str = field(default="", repr=False)
     admin_user_ids_raw: str | None = None
     admin_user_id_raw: str | None = None
@@ -165,6 +168,12 @@ def load_environment_config():
         extension_calendar_rollout_raw=get("APSTUDY_EXTENSION_CALENDAR_ROLLOUT"),
         discord_invite_url=get("DISCORD_INVITE_URL", ""),
         app_base_url=get("APP_BASE_URL", "https://nest.apstudy.org"),
+        calendar_ics_subscriptions_enabled_raw=get("CALENDAR_ICS_SUBSCRIPTIONS_ENABLED", "0"),
+        calendar_ics_subscriptions_owner_allowlist_raw=get(
+            "CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST",
+            get("CALENDAR_ICS_OWNER_ALLOWLIST", get("CALENDAR_ICS_ALLOWLIST", "")),
+        ),
+        calendar_ics_uid_secret=get("CALENDAR_ICS_UID_SECRET"),
         giphy_api_key=get("GIPHY_API_KEY", ""),
         admin_user_ids_raw=get("ADMIN_USER_IDS"),
         admin_user_id_raw=get("ADMIN_USER_ID"),

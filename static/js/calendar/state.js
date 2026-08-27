@@ -31,6 +31,8 @@
                 saving: false,
                 loaded: false,
                 editingId: null,
+                draft: null,
+                focusTarget: "",
                 error: "",
                 notice: "",
             },

@@ -60,7 +60,7 @@ TABLE_COLUMNS = {
     "calendar_shares": {
         "id", "user_id", "share_code", "is_active", "include_all_calendars",
         "calendar_ids_json", "date_scope", "fixed_start", "fixed_end", "rolling_days",
-        "created_at", "updated_at",
+        "created_at", "updated_at", "ics_token", "ics_enabled", "ics_issued_at", "ics_rotated_at",
     },
     "calendar_import_sources": {
         "id", "user_id", "nest_user_id", "provider", "origin", "provider_user_id",
