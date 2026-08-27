@@ -83,6 +83,8 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertFalse(configured.appwrite_chat_attachments_enabled)
         self.assertFalse(configured.allow_insecure_http)
         self.assertFalse(configured.frontend_console_diagnostics_enabled)
+        self.assertEqual(configured.calendar_ics_subscriptions_enabled_raw, "0")
+        self.assertEqual(configured.calendar_ics_subscriptions_owner_allowlist_raw, "")
 
     def test_preserves_explicit_empty_appwrite_values(self):
         with patch.dict(
@@ -150,6 +152,8 @@ class EnvironmentConfigTests(unittest.TestCase):
                 "APSTUDY_ALLOW_INSECURE_HTTP": "1",
                 "FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED": "on",
                 "SCHEDULER_ENABLED": "0",
+                "CALENDAR_ICS_SUBSCRIPTIONS_ENABLED": "1",
+                "CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST": "*",
             },
             clear=False,
         ), patch("services.discord_audit.init_discord_audit"), patch("services.scheduler.init_scheduler"):
@@ -160,8 +164,17 @@ class EnvironmentConfigTests(unittest.TestCase):
         self.assertEqual(configured.flask_secret_key, "test-secret")
         self.assertTrue(configured.allow_insecure_http)
         self.assertTrue(configured.frontend_console_diagnostics_enabled)
+        self.assertEqual(configured.calendar_ics_subscriptions_enabled_raw, "1")
+        self.assertEqual(configured.calendar_ics_subscriptions_owner_allowlist_raw, "*")
         self.assertFalse(app.config["SESSION_COOKIE_SECURE"])
         self.assertTrue(app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"])
+        self.assertEqual(app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"], "1")
+        self.assertEqual(app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"], "*")
+        from services.calendar_share_service import calendar_ics_enabled_for_owner
+
+        with app.app_context():
+            self.assertTrue(calendar_ics_enabled_for_owner("owner-a"))
+            self.assertTrue(calendar_ics_enabled_for_owner("owner-b"))
 
     def test_avatar_storage_uses_the_registered_environment_snapshot(self):
         from flask import Flask

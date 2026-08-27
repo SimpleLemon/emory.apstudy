@@ -10,6 +10,7 @@ from unittest.mock import patch
 from flask import Flask
 from types import SimpleNamespace
 
+from extensions import login_manager
 from services import database
 import services.calendar_ics_contract as ics_contract
 from services.calendar_ics_contract import (
@@ -26,6 +27,7 @@ from services.calendar_ics_contract import (
 )
 from services.calendar_events import _calendar_share_payload
 from services.calendar_share_service import (
+    _owner_allowlist,
     assert_selection_change_allowed,
     calendar_ics_enabled_for_owner,
     creation_ics_fields,
@@ -61,7 +63,26 @@ class CalendarIcsSubscriptionTests(unittest.TestCase):
             APP_BASE_URL="https://calendar.example.test",
             CALENDAR_ICS_SUBSCRIPTIONS_ENABLED=True,
             CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST="owner-1",
+            TESTING=True,
         )
+        self.app.secret_key = "test-secret"
+        self.authenticated_users = {}
+        previous_loader = login_manager._user_callback
+        previous_unauthorized_callback = login_manager.unauthorized_callback
+        previous_login_view = login_manager.login_view
+        self.addCleanup(setattr, login_manager, "_user_callback", previous_loader)
+        self.addCleanup(
+            setattr,
+            login_manager,
+            "unauthorized_callback",
+            previous_unauthorized_callback,
+        )
+        self.addCleanup(setattr, login_manager, "login_view", previous_login_view)
+        login_manager.unauthorized_callback = None
+        login_manager.login_view = None
+        login_manager.init_app(self.app)
+        login_manager._user_callback = lambda user_id: self.authenticated_users.get(user_id)
+        self.app.register_blueprint(calendar_api.calendar_bp, url_prefix="/api/calendar")
 
     def insert_share(self, *, share_id="share-1", user_id="owner-1", calendar_id="canvas", token=None):
         with calendar_connection(self.db_path) as connection:
@@ -77,6 +98,17 @@ class CalendarIcsSubscriptionTests(unittest.TestCase):
                     token, 1 if token else 0, "2026-08-24T00:00:00Z" if token else None,
                 ],
             )
+
+    def authenticated_client(self, user_id):
+        self.authenticated_users[user_id] = SimpleNamespace(
+            id=user_id,
+            is_authenticated=True,
+        )
+        client = self.app.test_client()
+        with client.session_transaction() as session:
+            session["_user_id"] = user_id
+            session["_fresh"] = True
+        return client
 
     def test_migration_adds_defaults_and_partial_unique_index(self):
         with sqlite3.connect(self.db_path) as connection:
@@ -217,6 +249,198 @@ class CalendarIcsSubscriptionTests(unittest.TestCase):
             with self.assertRaisesRegex(CalendarIcsFailure, "not enabled") as error:
                 creation_ics_fields("owner-1", {"icsEnabled": True}, normalized)
             self.assertEqual(error.exception.code, CalendarIcsFailureCode.DISABLED)
+
+    def test_global_owner_entitlement_is_explicit_and_fail_closed(self):
+        with self.app.app_context():
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"] = False
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "*"
+            self.assertFalse(calendar_ics_enabled_for_owner("owner-1"))
+            self.assertFalse(calendar_ics_enabled_for_owner("owner-2"))
+
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"] = True
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = ""
+            self.assertFalse(calendar_ics_enabled_for_owner("owner-1"))
+
+            self.assertEqual(_owner_allowlist(), frozenset())
+
+    def test_enabled_allowlist_supports_multiple_exact_owners_and_normalizes_config(self):
+        with self.app.app_context():
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = (
+                " owner-1, owner-2, owner-1, , owner-2 "
+            )
+            self.assertEqual(_owner_allowlist(), frozenset({"owner-1", "owner-2"}))
+            self.assertTrue(calendar_ics_enabled_for_owner("owner-1"))
+            self.assertTrue(calendar_ics_enabled_for_owner("owner-2"))
+            self.assertFalse(calendar_ics_enabled_for_owner("owner-3"))
+            self.assertFalse(calendar_ics_enabled_for_owner(" owner-1 "))
+            self.assertFalse(calendar_ics_enabled_for_owner(None))
+
+    def test_enabled_wildcard_alone_grants_multiple_authenticated_owners(self):
+        with self.app.app_context():
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = " * "
+            self.assertEqual(_owner_allowlist(), frozenset({"*"}))
+            for owner_id in ("owner-1", "owner-2", "owner-3"):
+                with self.subTest(owner_id=owner_id):
+                    self.assertTrue(calendar_ics_enabled_for_owner(owner_id))
+
+    def test_mixed_wildcard_ids_and_duplicate_whitespace_entries_are_deterministic(self):
+        with self.app.app_context():
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = (
+                " owner-1, *, owner-1, , owner-2, * "
+            )
+            self.assertEqual(_owner_allowlist(), frozenset({"*"}))
+            for owner_id in ("owner-1", "owner-2", "owner-3"):
+                with self.subTest(owner_id=owner_id):
+                    self.assertTrue(calendar_ics_enabled_for_owner(owner_id))
+
+    def test_missing_environment_defaults_disable_ics_and_empty_allowlist(self):
+        with patch.dict(os.environ, {}, clear=True):
+            self.assertFalse(calendar_ics_enabled_for_owner("owner-1"))
+            self.assertEqual(_owner_allowlist(), frozenset())
+
+    def test_owner_ics_routes_enforce_authentication_and_ownership(self):
+        self.insert_share(token="route-secret")
+        self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "owner-1, owner-2"
+
+        for method, path, kwargs in (
+            ("GET", "/api/calendar/shares/share-1/ics", {}),
+            ("POST", "/api/calendar/shares/share-1/ics", {"json": {"action": "enable"}}),
+            ("DELETE", "/api/calendar/shares/share-1/ics", {}),
+        ):
+            with self.subTest(method=method, path=path):
+                response = self.app.test_client().open(path, method=method, **kwargs)
+                self.assertEqual(response.status_code, 401)
+
+        client = self.authenticated_client("owner-2")
+        for method, path, kwargs in (
+            ("GET", "/api/calendar/shares/share-1/ics", {}),
+            ("POST", "/api/calendar/shares/share-1/ics", {"json": {"action": "enable"}}),
+            ("DELETE", "/api/calendar/shares/share-1/ics", {}),
+        ):
+            with self.subTest(method=method, path=path):
+                response = client.open(path, method=method, **kwargs)
+                self.assertEqual(response.status_code, 404)
+
+    def test_unauthenticated_share_creation_is_rejected_by_the_http_route(self):
+        response = self.app.test_client().post(
+            "/api/calendar/shares",
+            json={
+                "includeAllCalendars": False,
+                "calendarIds": ["simulated_courses"],
+                "icsEnabled": True,
+            },
+        )
+        self.assertEqual(response.status_code, 401)
+        with calendar_connection(self.db_path) as connection:
+            self.assertEqual(
+                connection.execute("SELECT COUNT(*) FROM calendar_shares").fetchone()[0],
+                0,
+            )
+
+    def test_dedicated_lifecycle_routes_conceal_wrong_owner_and_preserve_state_transitions(self):
+        self.insert_share(user_id="owner-1")
+        self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "owner-1, owner-2"
+
+        wrong_owner = self.authenticated_client("owner-2")
+        for action in ("enable", "disable", "rotate"):
+            with self.subTest(owner="owner-2", action=action):
+                response = wrong_owner.post(f"/api/calendar/shares/share-1/ics/{action}")
+                self.assertEqual(response.status_code, 404)
+
+        with calendar_connection(self.db_path) as connection:
+            untouched = connection.execute(
+                "SELECT ics_token, ics_enabled FROM calendar_shares WHERE id = ?",
+                ["share-1"],
+            ).fetchone()
+        self.assertEqual(tuple(untouched), (None, 0))
+
+        owner = self.authenticated_client("owner-1")
+        enabled = owner.post("/api/calendar/shares/share-1/ics/enable")
+        self.assertEqual(enabled.status_code, 200)
+        self.assertTrue(enabled.get_json()["share"]["icsConfigured"])
+        self.assertTrue(enabled.get_json()["share"]["icsEnabled"])
+        with calendar_connection(self.db_path) as connection:
+            first_token = connection.execute(
+                "SELECT ics_token FROM calendar_shares WHERE id = ?", ["share-1"]
+            ).fetchone()[0]
+        self.assertTrue(first_token)
+
+        disabled = owner.post("/api/calendar/shares/share-1/ics/disable")
+        self.assertEqual(disabled.status_code, 200)
+        self.assertFalse(disabled.get_json()["share"]["icsEnabled"])
+        with calendar_connection(self.db_path) as connection:
+            self.assertEqual(
+                connection.execute(
+                    "SELECT ics_token FROM calendar_shares WHERE id = ?", ["share-1"]
+                ).fetchone()[0],
+                first_token,
+            )
+
+        reenabled = owner.post("/api/calendar/shares/share-1/ics/enable")
+        self.assertEqual(reenabled.status_code, 200)
+        self.assertTrue(reenabled.get_json()["share"]["icsEnabled"])
+
+        rotated = owner.post("/api/calendar/shares/share-1/ics/rotate")
+        self.assertEqual(rotated.status_code, 200)
+        self.assertTrue(rotated.get_json()["share"]["icsConfigured"])
+        self.assertTrue(rotated.get_json()["share"]["icsEnabled"])
+        with calendar_connection(self.db_path) as connection:
+            second_token = connection.execute(
+                "SELECT ics_token FROM calendar_shares WHERE id = ?", ["share-1"]
+            ).fetchone()[0]
+        self.assertTrue(second_token)
+        self.assertNotEqual(second_token, first_token)
+
+    def test_existing_public_feed_rechecks_current_entitlement_without_rotating_token(self):
+        self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "*"
+        self.insert_share(token="public-secret")
+        document = SimpleNamespace(content=b"BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n", etag='"etag"')
+        with patch.object(calendar_api, "build_calendar_ics_feed", return_value=(document, None)):
+            client = self.app.test_client()
+            self.assertEqual(
+                client.get("/api/calendar/share-feed.ics?token=public-secret").status_code,
+                200,
+            )
+
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"] = False
+            self.assertEqual(
+                client.get("/api/calendar/share-feed.ics?token=public-secret").status_code,
+                404,
+            )
+
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_ENABLED"] = True
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = ""
+            self.assertEqual(
+                client.get("/api/calendar/share-feed.ics?token=public-secret").status_code,
+                404,
+            )
+
+            self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "*"
+            self.assertEqual(
+                client.get("/api/calendar/share-feed.ics?token=public-secret").status_code,
+                200,
+            )
+
+        with calendar_connection(self.db_path) as connection:
+            row = connection.execute(
+                "SELECT ics_token, ics_enabled FROM calendar_shares WHERE id = ?",
+                ["share-1"],
+            ).fetchone()
+        self.assertEqual(tuple(row), ("public-secret", 1))
+
+    def test_wildcard_does_not_change_public_token_or_payload_redaction(self):
+        self.app.config["CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"] = "*"
+        self.insert_share(token="public-secret")
+        with self.app.app_context():
+            resolved = resolve_calendar_ics_token("public-secret")
+            self.assertEqual(resolved["id"], "share-1")
+            with self.assertRaises(CalendarIcsFailure):
+                resolve_calendar_ics_token("not-the-token")
+
+            payload = _calendar_share_payload(resolved)
+            self.assertNotIn("public-secret", json.dumps(payload))
+            self.assertNotIn("httpsUrl", payload)
+            self.assertNotIn("webcalUrl", payload)
 
     def test_selection_lock_and_browser_regeneration_independence(self):
         self.insert_share(token=new_ics_token())

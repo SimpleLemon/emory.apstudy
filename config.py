@@ -11,6 +11,9 @@ import os
 ENVIRONMENT_CONFIG_EXTENSION_KEY = "apstudy.environment_config"
 _DIAGNOSTIC_TRUTH_VALUES = {"1", "true", "yes", "on"}
 APSTUDY_FORCE_LOCAL_INSTANCE_DB_ENV = "APSTUDY_FORCE_LOCAL_INSTANCE_DB"
+# An explicit operator-controlled sentinel for granting the ICS owner
+# entitlement to every authenticated owner when the feature is enabled.
+CALENDAR_ICS_GLOBAL_OWNER_ALLOWLIST_SENTINEL = "*"
 
 
 @dataclass(frozen=True, slots=True)

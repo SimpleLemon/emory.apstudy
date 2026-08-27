@@ -6,7 +6,11 @@ from urllib.parse import urlsplit, urlunsplit
 
 from flask import current_app, has_app_context
 
-from config import ENVIRONMENT_CONFIG_EXTENSION_KEY, load_environment_config
+from config import (
+    CALENDAR_ICS_GLOBAL_OWNER_ALLOWLIST_SENTINEL,
+    ENVIRONMENT_CONFIG_EXTENSION_KEY,
+    load_environment_config,
+)
 from services.calendar_ics_contract import (
     CalendarIcsFailure,
     CalendarIcsFailureCode,
@@ -51,19 +55,47 @@ def _truthy(value):
 
 
 def _owner_allowlist():
+    """Return normalized ICS owner entries.
+
+    ``*`` is an explicit global-entitlement sentinel.  If it appears with
+    owner IDs, normalization collapses the mixed value to ``{"*"}``, so the
+    result is deterministic and global.  An empty or missing value remains
+    fail-closed.
+    """
     configured = _setting("CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST", "")
     if isinstance(configured, str):
-        return frozenset(item.strip() for item in configured.split(",") if item.strip())
-    if configured:
-        return frozenset(str(item).strip() for item in configured if str(item).strip())
-    return frozenset()
+        entries = configured.split(",")
+    elif configured:
+        try:
+            entries = list(configured)
+        except TypeError:
+            entries = [configured]
+    else:
+        entries = []
+    normalized = frozenset(
+        str(item).strip() for item in entries if str(item).strip()
+    )
+    if CALENDAR_ICS_GLOBAL_OWNER_ALLOWLIST_SENTINEL in normalized:
+        return frozenset({CALENDAR_ICS_GLOBAL_OWNER_ALLOWLIST_SENTINEL})
+    return normalized
 
 
 def calendar_ics_enabled_for_owner(user_id):
     enabled = _setting("CALENDAR_ICS_SUBSCRIPTIONS_ENABLED", None)
     if enabled is None:
         enabled = _setting("calendar_ics_subscriptions_enabled", False)
-    return _truthy(enabled) and str(user_id) in _owner_allowlist()
+    if not _truthy(enabled):
+        return False
+    # Configured entries are normalized for operator convenience, but the
+    # authenticated identity is compared exactly after string canonicalization.
+    normalized_user_id = str(user_id) if user_id is not None else ""
+    if not normalized_user_id:
+        return False
+    allowlist = _owner_allowlist()
+    return (
+        CALENDAR_ICS_GLOBAL_OWNER_ALLOWLIST_SENTINEL in allowlist
+        or normalized_user_id in allowlist
+    )
 
 
 def require_calendar_ics_enabled(user_id):
