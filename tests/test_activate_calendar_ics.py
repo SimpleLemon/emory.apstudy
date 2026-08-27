@@ -57,39 +57,73 @@ class FakeHTTPResponse:
         self.status = status
         self.headers = dict(headers or {})
         self._body = body
+        self.read_calls = 0
+        self.close_calls = 0
+        self.closed = False
 
     def read(self, limit=-1):
+        self.read_calls += 1
         return self._body if limit < 0 else self._body[:limit]
+
+    def close(self):
+        self.close_calls += 1
+        self.closed = True
+        return None
 
     def __enter__(self):
         return self
 
     def __exit__(self, *_args):
+        self.close()
         return False
 
 
 class FakeHTTP:
-    def __init__(self, *, root_status=200, advance=None):
+    def __init__(self, *, root_status=200, readiness=None, readiness_default=200, advance=None):
         self.requests = []
+        self.request_headers = []
         self.root_status = root_status
+        self.readiness = list(readiness or [])
+        self.readiness_default = readiness_default
+        self.readiness_calls = 0
         self.head_calls = 0
         self.advance = advance
+        self.responses = []
 
     def __call__(self, request, timeout):
         self.requests.append((request.method, request.full_url, timeout))
+        self.request_headers.append(dict(request.headers))
         if self.advance:
             self.advance()
         headers = {
             "Cache-Control": "private, no-store, no-transform",
             "X-Content-Type-Options": "nosniff",
         }
+        if request.full_url == ACTIVATE.PRODUCTION_LOOPBACK_ORIGIN + "/":
+            self.readiness_calls += 1
+            outcome = (
+                self.readiness.pop(0)
+                if self.readiness
+                else self.readiness_default
+            )
+            if isinstance(outcome, BaseException):
+                raise outcome
+            response = FakeHTTPResponse(outcome, headers, b"ok")
+            self.responses.append(response)
+            return response
         if request.full_url == ACTIVATE.PRODUCTION_HEALTH_ORIGIN + "/":
-            return FakeHTTPResponse(self.root_status, headers, b"ok")
+            response = FakeHTTPResponse(self.root_status, headers, b"ok")
+            self.responses.append(response)
+            return response
         if request.method == "HEAD":
             self.head_calls += 1
             if self.head_calls >= 32:
-                return FakeHTTPResponse(429, {**headers, "Retry-After": "60"})
-        return FakeHTTPResponse(404, headers, b"" if request.method == "HEAD" else b"Not Found")
+                response = FakeHTTPResponse(429, {**headers, "Retry-After": "60"})
+                self.responses.append(response)
+                return response
+        response = FakeHTTPResponse(404, headers, b"" if request.method == "HEAD" else b"Not Found")
+        self.responses.append(response)
+        return response
 
 
 class ManualClock:
@@ -145,7 +179,7 @@ class CalendarIcsActivationTests(unittest.TestCase):
     def tearDown(self):
         self.temp.cleanup()
 
-    def make_tool(self, *, runner=None, hook=None, http=None, clock=None):
+    def make_tool(self, *, runner=None, hook=None, http=None, clock=None, sleeper=None):
         return ACTIVATE.ActivationTool(
             root=self.root,
             env_path=self.env,
@@ -159,6 +193,7 @@ class CalendarIcsActivationTests(unittest.TestCase):
             nginx_log_dir=self.logs,
             http_open=http or self.http,
             clock=clock or time.monotonic,
+            sleeper=sleeper or time.sleep,
             hook=hook,
         )
 
@@ -420,8 +455,153 @@ class CalendarIcsActivationTests(unittest.TestCase):
             self.assertIn("uid", record)
             self.assertIn("gid", record)
         self.assertEqual(len([call for call in self.runner.calls if "--porcelain=v1" in call]), 2)
-        self.assertLessEqual(len(self.http.requests), 43)
+        self.assertLessEqual(len(self.http.requests), 44)
         self.assertTrue(all(timeout <= ACTIVATE.HEALTH_REQUEST_TIMEOUT_SECONDS for _, _, timeout in self.http.requests))
+
+    def test_readiness_retries_connection_refused_then_public_probe_runs(self):
+        http = FakeHTTP(readiness=[ConnectionRefusedError("not listening"), 200])
+        sleeps = []
+        self.apply(self.make_tool(http=http, sleeper=sleeps.append))
+
+        loopback_url = ACTIVATE.PRODUCTION_LOOPBACK_ORIGIN + "/"
+        loopback_requests = [request for request in http.requests if request[1] == loopback_url]
+        self.assertEqual(len(loopback_requests), 2)
+        self.assertEqual(sleeps, [ACTIVATE.READINESS_RETRY_DELAY_SECONDS])
+        self.assertEqual(http.request_headers[0]["Host"], ACTIVATE.PRODUCTION_LOOPBACK_HOST)
+        self.assertEqual(http.request_headers[1]["Host"], ACTIVATE.PRODUCTION_LOOPBACK_HOST)
+        self.assertEqual(loopback_requests[0][1], "http://127.0.0.1:8000/")
+        self.assertEqual(http.requests[2][1], ACTIVATE.PRODUCTION_HEALTH_ORIGIN + "/")
+        self.assertTrue(all(timeout <= ACTIVATE.READINESS_REQUEST_TIMEOUT_SECONDS for _, _, timeout in loopback_requests))
+        self.assertTrue(http.responses[0].closed)
+        self.assertEqual(http.responses[0].read_calls, 0)
+
+    def test_readiness_retries_5xx_then_returns_200_without_reading_body(self):
+        http = FakeHTTP(readiness=[503, 200])
+        sleeps = []
+        self.make_tool(http=http, sleeper=sleeps.append)._wait_for_app_readiness()
+
+        self.assertEqual(http.readiness_calls, 2)
+        self.assertEqual(sleeps, [ACTIVATE.READINESS_RETRY_DELAY_SECONDS])
+        self.assertEqual(len(http.responses), 2)
+        self.assertTrue(all(response.closed for response in http.responses))
+        self.assertTrue(all(response.read_calls == 0 for response in http.responses))
+
+    def test_readiness_rejects_3xx_and_4xx_immediately_without_sleeping(self):
+        for status in (302, 404):
+            with self.subTest(status=status):
+                http = FakeHTTP(readiness=[status, 200])
+                sleeps = []
+                with self.assertRaisesRegex(ACTIVATE.ActivationError, "non-success HTTP status"):
+                    self.make_tool(http=http, sleeper=sleeps.append)._wait_for_app_readiness()
+                self.assertEqual(http.readiness_calls, 1)
+                self.assertEqual(sleeps, [])
+                self.assertEqual(len(http.responses), 1)
+                self.assertTrue(http.responses[0].closed)
+                self.assertEqual(http.responses[0].close_calls, 1)
+                self.assertEqual(http.responses[0].read_calls, 0)
+
+    def test_readiness_closes_http_error_without_reading_error_body(self):
+        class TrackingBody(io.BytesIO):
+            def __init__(self, content):
+                super().__init__(content)
+                self.read_calls = 0
+
+            def read(self, *args, **kwargs):
+                self.read_calls += 1
+                return super().read(*args, **kwargs)
+
+        body = TrackingBody(b"private error body")
+        error = ACTIVATE.HTTPError(
+            ACTIVATE.PRODUCTION_LOOPBACK_ORIGIN + "/",
+            404,
+            "not found",
+            {},
+            body,
+        )
+        sleeps = []
+
+        def http_open(_request, timeout):
+            del timeout
+            raise error
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "non-success HTTP status"):
+            self.make_tool(http=http_open, sleeper=sleeps.append)._wait_for_app_readiness()
+
+        self.assertTrue(body.closed)
+        self.assertEqual(body.read_calls, 0)
+        self.assertEqual(sleeps, [])
+
+    def test_readiness_status_failure_triggers_transaction_rollback(self):
+        http = FakeHTTP(readiness=[302, 200])
+        sleeps = []
+        baseline = self.baseline()
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "non-success HTTP status"):
+            self.apply(self.make_tool(http=http, sleeper=sleeps.append))
+
+        self.assertEqual(http.responses[0].status, 302)
+        self.assertEqual(http.readiness_calls, 2)
+        self.assertEqual(sleeps, [])
+        self.assertTrue(all(response.closed for response in http.responses[:2]))
+        self.assertTrue(all(response.read_calls == 0 for response in http.responses[:2]))
+        self.assert_baseline(baseline)
+        journal = json.loads(next(self.state.glob("transaction-*.json")).read_text())
+        self.assertEqual(journal["status"], "rolled_back")
+
+    def test_readiness_exhaustion_rolls_back_exactly_without_public_probe(self):
+        clock = ManualClock()
+        http = FakeHTTP(readiness=[TimeoutError("booting")] + [503] * 49 + [200])
+        baseline = self.baseline()
+
+        def sleeper(seconds):
+            clock.value += seconds
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "readiness check timed out"):
+            self.apply(self.make_tool(http=http, clock=clock, sleeper=sleeper))
+
+        self.assertEqual(http.readiness_calls, 51)
+        self.assertFalse(any(url.startswith("https://") for _, url, _ in http.requests))
+        self.assert_baseline(baseline)
+        journal = json.loads(next(self.state.glob("transaction-*.json")).read_text())
+        self.assertEqual(journal["status"], "rolled_back")
+
+    def test_readiness_deadline_is_bounded_with_fake_clock_and_sleeper(self):
+        clock = ManualClock()
+        sleeps = []
+        http = FakeHTTP(readiness_default=503)
+
+        def sleeper(seconds):
+            sleeps.append(seconds)
+            clock.value += seconds
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "readiness check timed out"):
+            self.make_tool(http=http, clock=clock, sleeper=sleeper)._wait_for_app_readiness()
+
+        self.assertAlmostEqual(clock.value, 105.0)
+        self.assertEqual(len(sleeps), 50)
+        self.assertTrue(all(0 < delay <= ACTIVATE.READINESS_RETRY_DELAY_SECONDS for delay in sleeps))
+        self.assertTrue(
+            all(timeout <= ACTIVATE.READINESS_REQUEST_TIMEOUT_SECONDS for _, _, timeout in http.requests)
+        )
+
+    def test_public_502_after_readiness_still_rolls_back(self):
+        http = FakeHTTP(root_status=502)
+        baseline = self.baseline()
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "ordinary root health check failed"):
+            self.apply(self.make_tool(http=http))
+
+        loopback_url = ACTIVATE.PRODUCTION_LOOPBACK_ORIGIN + "/"
+        loopback_index = next(index for index, request in enumerate(http.requests) if request[1] == loopback_url)
+        public_index = next(
+            index
+            for index, request in enumerate(http.requests)
+            if request[1] == ACTIVATE.PRODUCTION_HEALTH_ORIGIN + "/"
+        )
+        self.assertLess(loopback_index, public_index)
+        self.assert_baseline(baseline)
+        journal = json.loads(next(self.state.glob("transaction-*.json")).read_text())
+        self.assertEqual(journal["status"], "rolled_back")
 
     def test_apply_faults_restore_exact_baseline_and_required_rollback_order(self):
         phases = (
@@ -502,6 +682,33 @@ class CalendarIcsActivationTests(unittest.TestCase):
                 self.assertEqual(journal["status"], "rolled_back")
                 case.make_tool().recover()
                 case.tearDown()
+
+    def test_recovery_readiness_failure_is_bounded_and_resumes_idempotently(self):
+        case = self.fresh_case()
+        baseline = case.baseline()
+        txid = case.prepare_interrupted_activation()
+        clock = ManualClock()
+        http = FakeHTTP(readiness_default=503)
+
+        def sleeper(seconds):
+            clock.value += seconds
+
+        with self.assertRaisesRegex(ACTIVATE.ActivationError, "readiness check timed out"):
+            case.make_tool(http=http, clock=clock, sleeper=sleeper).recover(transaction_id=txid)
+
+        journal_path = next(case.state.glob("transaction-*.json"))
+        journal = json.loads(journal_path.read_text())
+        self.assertEqual(journal["status"], "rolling_back")
+        self.assertFalse(journal["rollback"].get("app_restarted", False))
+        self.assertEqual(http.readiness_calls, 50)
+
+        http.readiness_default = 200
+        case.make_tool(http=http).recover(transaction_id=txid)
+        case.assert_baseline(baseline)
+        journal = json.loads(journal_path.read_text())
+        self.assertEqual(journal["status"], "rolled_back")
+        case.make_tool(http=http).recover()
+        case.tearDown()
 
     def test_recovery_rejects_malicious_journal_and_symlink_without_touching_victim(self):
         txid = self.prepare_interrupted_activation()

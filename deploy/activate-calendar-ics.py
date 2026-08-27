@@ -49,8 +49,13 @@ PRODUCTION_STATE_DIR = Path("/var/lib/nest-calendar-ics-activation")
 PRODUCTION_LOCK = Path("/run/lock/nest-calendar-ics-activation.lock")
 PRODUCTION_NGINX_LOG_DIR = Path("/var/log/nginx")
 PRODUCTION_HEALTH_ORIGIN = "https://nest.apstudy.org"
+PRODUCTION_LOOPBACK_ORIGIN = "http://127.0.0.1:8000"
+PRODUCTION_LOOPBACK_HOST = "nest.apstudy.org"
 PRODUCTION_APP_SERVICE = "nest"
 PRODUCTION_NGINX_SERVICE = "nginx"
+READINESS_TOTAL_TIMEOUT_SECONDS = 5.0
+READINESS_REQUEST_TIMEOUT_SECONDS = 0.5
+READINESS_RETRY_DELAY_SECONDS = 0.1
 HEALTH_TOTAL_TIMEOUT_SECONDS = 30.0
 HEALTH_REQUEST_TIMEOUT_SECONDS = 3.0
 HEALTH_RESPONSE_LIMIT_BYTES = 1024 * 1024
@@ -429,6 +434,7 @@ class ActivationTool:
         nginx_log_dir: Path = PRODUCTION_NGINX_LOG_DIR,
         http_open: Callable[..., Any] | None = None,
         clock: Callable[[], float] = time.monotonic,
+        sleeper: Callable[[float], None] = time.sleep,
         hook: Callable[[str], None] | None = None,
     ):
         self.root = root
@@ -445,6 +451,7 @@ class ActivationTool:
         self.nginx_log_dir = nginx_log_dir
         self.http_open = http_open or build_opener(NoRedirectHandler()).open
         self.clock = clock
+        self.sleeper = sleeper
         self.hook = hook
         self._lock_handle = None
         self._journal: dict[str, Any] | None = None
@@ -920,6 +927,59 @@ class ActivationTool:
         self._call_hook("service:restart")
         self._run("systemctl", "restart", self.service)
 
+    def _wait_for_app_readiness(self) -> None:
+        """Wait for the restarted app, without sending traffic through Nginx."""
+
+        deadline = self.clock() + READINESS_TOTAL_TIMEOUT_SECONDS
+        url = PRODUCTION_LOOPBACK_ORIGIN + "/"
+        while True:
+            remaining = deadline - self.clock()
+            if remaining <= 0:
+                raise ActivationError("Nest application readiness check timed out")
+            request = Request(
+                url,
+                method="GET",
+                headers={
+                    "Host": PRODUCTION_LOOPBACK_HOST,
+                    "User-Agent": "Nest-ICS-activation/1",
+                },
+            )
+            status: int | None = None
+            try:
+                response = self.http_open(
+                    request,
+                    timeout=min(READINESS_REQUEST_TIMEOUT_SECONDS, remaining),
+                )
+                try:
+                    status = response.status
+                finally:
+                    response.close()
+            except HTTPError as exc:
+                try:
+                    status = exc.code
+                finally:
+                    exc.close()
+            except (URLError, TimeoutError, OSError):
+                pass
+            if self.clock() >= deadline:
+                raise ActivationError("Nest application readiness check timed out")
+            if status == 200:
+                return
+            if status is not None and not 500 <= status <= 599:
+                raise ActivationError("Nest application readiness check returned a non-success HTTP status")
+            remaining = deadline - self.clock()
+            if remaining <= 0:
+                raise ActivationError("Nest application readiness check timed out")
+            if remaining <= READINESS_RETRY_DELAY_SECONDS + 1e-9:
+                self.sleeper(min(READINESS_RETRY_DELAY_SECONDS, remaining))
+                raise ActivationError("Nest application readiness check timed out")
+            self.sleeper(READINESS_RETRY_DELAY_SECONDS)
+
+    def _restart_and_verify_app(self) -> None:
+        self._restart_app()
+        self._active(self.service)
+        self._wait_for_app_readiness()
+
     def _health_request(self, method: str, url: str, deadline: float) -> tuple[int, Mapping[str, str], bytes]:
         parsed = urlsplit(url)
         if parsed.scheme != "https" or parsed.hostname != "nest.apstudy.org" or parsed.username or parsed.password:
@@ -1142,8 +1202,7 @@ class ActivationTool:
                 rollback["env_restored"] = True
                 self._persist_rollback_state(working, journal_path, rollback, "rollback_env_restored")
             if rollback.get("app_restart_required") and not rollback.get("app_restarted"):
-                self._run("systemctl", "restart", self.service)
-                self._active(self.service)
+                self._restart_and_verify_app()
                 self._call_hook("crash-after:rollback-app-restart")
                 rollback["app_restarted"] = True
                 self._persist_rollback_state(working, journal_path, rollback, "rollback_app_restarted")
@@ -1270,8 +1329,7 @@ class ActivationTool:
 
             self._replace_env(Path(staged["env"]), manifest["env"])
             self._update_journal(phase="env_installed")
-            self._restart_app()
-            self._active(self.service)
+            self._restart_and_verify_app()
             self._update_journal(phase="app_restarted")
             self._health_checks()
             self._update_journal(phase="health_checked")
