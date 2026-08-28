@@ -100,6 +100,64 @@ class CalendarShareTestCase(unittest.TestCase):
 
         self.assertEqual(response.get_json()["share"]["shareCode"], "QRSTUVWXYZabcdef")
 
+    def test_create_share_rejects_non_object_json_before_mutation(self):
+        payloads = [
+            ("string", {"json": "a string"}),
+            ("list", {"json": ["canvas"]}),
+            ("number", {"json": 17}),
+            ("boolean", {"json": True}),
+            ("null", {"data": "null", "content_type": "application/json"}),
+            ("whitespace application/json", {"data": " \t\n", "content_type": "application/json"}),
+            ("malformed application/json", {"data": '{"calendarIds":', "content_type": "application/json"}),
+            ("malformed text/plain", {"data": "not-json", "content_type": "text/plain"}),
+        ]
+        for label, request_kwargs in payloads:
+            with self.subTest(payload=label):
+                with self.app.test_request_context("/api/calendar/shares", method="POST", **request_kwargs):
+                    with patch.object(ca, "current_user", self.user), \
+                            patch.object(ca, "create_calendar_row") as create_row, \
+                            patch.object(ca, "creation_ics_fields") as prepare_ics:
+                        response, status = ca.create_calendar_share.__wrapped__()
+
+                self.assertEqual(status, 400)
+                self.assertEqual(response.get_json(), {
+                    "error": "Calendar share payload must be a JSON object.",
+                    "code": "calendar_share_invalid_payload",
+                })
+                self.assertEqual(create_row.call_count, 0, "invalid input must not change the share count")
+                prepare_ics.assert_not_called()
+
+    def test_create_share_preserves_missing_and_empty_payload_defaults(self):
+        created = {
+            "$id": "share-default",
+            "user_id": "user-1",
+            "share_code": "ABCDEFGHIJKLMNOP",
+            "is_active": True,
+            "include_all_calendars": True,
+            "calendar_ids_json": "[]",
+            "date_scope": "all",
+            "created_at": "2026-05-18T00:00:00Z",
+            "updated_at": "2026-05-18T00:00:00Z",
+        }
+        for json_payload in ({}, None):
+            with self.subTest(json_payload=json_payload):
+                request_context = self.app.test_request_context(
+                    "/api/calendar/shares",
+                    method="POST",
+                    **({"json": json_payload} if json_payload is not None else {}),
+                )
+                with request_context:
+                    with patch.object(ca, "current_user", self.user), \
+                            patch.object(ca, "_generate_calendar_share_code", return_value="ABCDEFGHIJKLMNOP"), \
+                            patch.object(ca, "create_calendar_row", return_value=created) as create_row, \
+                            patch.object(ca, "emit_creation_event"):
+                        response, status = ca.create_calendar_share.__wrapped__()
+
+                self.assertEqual(status, 201)
+                data = create_row.call_args.kwargs["data"]
+                self.assertTrue(data["include_all_calendars"])
+                self.assertEqual(data["calendar_ids_json"], "[]")
+
     def test_public_events_are_filtered_overridden_and_sanitized(self):
         canvas_url = "https://canvas.emory.edu/feeds/calendars/user-token"
         work_url = "https://calendar.example.com/work.ics"

@@ -392,15 +392,32 @@ def list_calendar_shares():
     return jsonify({"shares": [_calendar_share_payload(share) for share in shares]})
 
 
+def _calendar_share_request_payload():
+    """Read a share request while preserving the legacy missing-body default."""
+
+    raw_body = request.get_data(cache=True)
+    if not raw_body:
+        return {}, None, None
+    payload = request.get_json(force=True, silent=True)
+    if not isinstance(payload, dict):
+        return None, jsonify({
+            "error": "Calendar share payload must be a JSON object.",
+            "code": "calendar_share_invalid_payload",
+        }), 400
+    return payload, None, None
+
+
 @calendar_bp.route("/shares", methods=["POST"])
 @login_required
 def create_calendar_share():
     user_id = str(current_user.id)
+    payload, error_response, error_status = _calendar_share_request_payload()
+    if error_response is not None:
+        return error_response, error_status
     try:
-        config = _normalize_calendar_share_payload(request.get_json(silent=True) or {})
+        config = _normalize_calendar_share_payload(payload)
     except ValueError as exc:
         return jsonify({"error": str(exc)}), 400
-    payload = request.get_json(silent=True) or {}
     try:
         ics_fields = creation_ics_fields(user_id, payload, config)
     except CalendarIcsFailure as exc:

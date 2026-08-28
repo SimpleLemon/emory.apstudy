@@ -199,7 +199,11 @@
                 if (dataAdapter?.saveShare) {
                     return await dataAdapter.saveShare({ ...options, path, signal: controller.signal });
                 }
-                const response = await fetch(path, { ...options, signal: controller.signal });
+                const response = await fetch(path, {
+                    ...options,
+                    body: options.body === undefined ? undefined : JSON.stringify(options.body),
+                    signal: controller.signal,
+                });
                 return { response };
             } finally {
                 lifecycle?.releaseAbortController?.(controller);
@@ -630,7 +634,7 @@
                     {
                         method: editingId ? "PATCH" : "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify(payload),
+                        body: payload,
                     }
                 ));
                 const res = result.response || result;
@@ -666,7 +670,7 @@
                 const result = await trackCalendarMutation(requestShare(path, {
                     method: options.method || "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: options.body ? JSON.stringify(options.body) : undefined,
+                    body: options.body,
                 }));
                 const res = result.response || result;
                 const response = result.payload || await res.json().catch(() => ({}));

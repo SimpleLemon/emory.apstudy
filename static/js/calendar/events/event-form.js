@@ -1,4 +1,4 @@
-import { escapeHtml } from "../../core/ui-primitives-module.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2";
+import { escapeHtml } from "../../core/ui-primitives-module.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41";
 
 // Event create/edit modal and API integration.
 (function () {

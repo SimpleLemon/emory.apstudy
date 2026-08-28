@@ -1,12 +1,27 @@
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { cp, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
+import os from "node:os";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const source = await readFile(path.join(repoRoot, "static/js/calendar/integrations/share.js"), "utf8");
+
+async function loadCalendarDataAdapter() {
+    const moduleRoot = await mkdtemp(path.join(os.tmpdir(), "apstudy-calendar-share-adapter-"));
+    await writeFile(path.join(moduleRoot, "package.json"), '{"type":"module"}\n');
+    await cp(path.join(repoRoot, "static/js/calendar/capabilities.js"), path.join(moduleRoot, "capabilities.js"));
+    await cp(path.join(repoRoot, "static/js/calendar/adapter.js"), path.join(moduleRoot, "adapter.js"));
+    try {
+        const module = await import(pathToFileURL(path.join(moduleRoot, "adapter.js")).href);
+        return { createCalendarDataAdapter: module.createCalendarDataAdapter, moduleRoot };
+    } catch (error) {
+        await rm(moduleRoot, { recursive: true, force: true });
+        throw error;
+    }
+}
 
 class Element {
     constructor(doc, tag = "div", attrs = {}) { this.ownerDocument = doc; this.tagName = tag.toUpperCase(); this.attrs = attrs; this.children = []; this.listeners = {}; this.checked = attrs.checked; this.disabled = attrs.disabled; this.value = attrs.value || ""; this.name = attrs.name || ""; this.id = attrs.id || ""; this.className = attrs.class || ""; }
@@ -43,9 +58,9 @@ class Document extends Element {
     execCommand() { return this.clipboardOk; }
 }
 
-async function fixture({ shares = [], saveResponse = null, detailResponse = null, loadShares = null, autoOpen = true } = {}) {
+async function fixture({ shares = [], saveResponse = null, detailResponse = null, loadShares = null, autoOpen = true, adapterOverride = null, fallbackFetch = null } = {}) {
     const document = new Document();
-    const context = { document, window: document.defaultView, AbortController, console, setTimeout: (fn) => fn() };
+    const context = { document, window: document.defaultView, AbortController, console, setTimeout: (fn) => fn(), ...(fallbackFetch ? { fetch: fallbackFetch } : {}) };
     vm.runInNewContext(source, context);
     context.window.APStudyLoader = { html: (text) => text };
     const state = { public: { readOnly: false }, calendars: { Canvas: { color: "#123" }, Tasks: { color: "#456" } }, shares: { items: shares, loading: false, saving: false, loaded: false, editingId: null, draft: null, focusTarget: "", error: "", notice: "" }, ui: { shareModalEl: null } };
@@ -53,7 +68,7 @@ async function fixture({ shares = [], saveResponse = null, detailResponse = null
     let loadCalls = 0;
     let saveCalls = 0;
     let lastSave = null;
-    const adapter = { async loadShares(options) { loadCalls += 1; if (loadShares) return loadShares(options); return { response: { ok: true, status: 200, json: async () => ({ shares }) } }; }, async saveShare(options) { lastSave = options; const { path, method } = options; if (path.endsWith("/ics") && method === "GET") return { response: { ok: (detailResponse?.status || 200) < 400, status: detailResponse?.status || 200, json: async () => detailResponse?.body || {} } }; if (path.endsWith("/ics")) rotateRequestSawOldUrl = state.ui.shareModalEl?.innerHTML.includes("secret.test") || false; saveCalls += 1; return { response: { ok: (saveResponse?.status || 200) < 400, status: saveResponse?.status || 200, json: async () => saveResponse?.body || {} } }; } };
+    const adapter = fallbackFetch ? null : adapterOverride || { async loadShares(options) { loadCalls += 1; if (loadShares) return loadShares(options); return { response: { ok: true, status: 200, json: async () => ({ shares }) } }; }, async saveShare(options) { lastSave = options; const { path, method } = options; if (path.endsWith("/ics") && method === "GET") return { response: { ok: (detailResponse?.status || 200) < 400, status: detailResponse?.status || 200, json: async () => detailResponse?.body || {} } }; if (path.endsWith("/ics")) rotateRequestSawOldUrl = state.ui.shareModalEl?.innerHTML.includes("secret.test") || false; saveCalls += 1; return { response: { ok: (saveResponse?.status || 200) < 400, status: saveResponse?.status || 200, json: async () => saveResponse?.body || {} } }; } };
     const share = context.window.APStudyCalendarShare.createCalendarShare({ root: document, lifecycle: null, dataAdapter: adapter, state, constants: { calendarShareCloseMs: 0, simulatedCalendarName: "Simulated Courses" }, escapeHtml: (v) => String(v ?? ""), getCalendarLabel: (v) => v, getCalendarLabelFromData: (v) => v.label || v.defaultName || "", trackCalendarMutation: (p) => p });
     if (autoOpen) {
         share.openCalendarShareModal();
@@ -146,6 +161,49 @@ test("422 create errors are associated with the form and double-submit is guarde
     assert.ok(modal.querySelector("#calendar-share-form"), "share form remains present while saving");
 });
 
+test("500 create errors preserve the Simulated Courses form and allow a clean retry", async () => {
+    const created = { id: "retried-simulated", shareCode: "retried", isActive: true, includeAllCalendars: false, calendarIds: ["simulated_courses"], icsConfigured: true, icsEnabled: true };
+    const f = await fixture({ saveResponse: { status: 500, body: { error: "database unavailable" } } });
+    const prepareForm = (modal) => {
+        const form = modal.querySelector("#calendar-share-form");
+        form.include_scope = { value: "selected" };
+        form.date_scope = { value: "all" };
+        form.rolling_days = { value: "30" };
+        form.fixed_start = { value: "" };
+        form.fixed_end = { value: "" };
+        form.ics_enabled = { checked: true };
+        form.querySelectorAll = () => [{ value: "Simulated Courses" }];
+        return form;
+    };
+    const firstForm = prepareForm(f.modal());
+    const submit = { target: firstForm, preventDefault() {} };
+
+    await Promise.all([f.modal().listeners.submit(submit), f.modal().listeners.submit(submit)]);
+
+    assert.equal(f.saveCalls(), 1, "a failed request still blocks the concurrent duplicate submit");
+    assert.equal(f.state.shares.saving, false, "the submit state recovers after a 500");
+    assert.equal(f.state.shares.editingId, null);
+    assert.deepEqual(Array.from(f.state.shares.draft.calendarIds), ["Simulated Courses"]);
+    assert.match(f.modal().innerHTML, /Nest could not prepare this subscription right now/);
+    assert.match(f.modal().innerHTML, /name="calendar_ids"[^>]*value="Simulated Courses"[^>]*checked/);
+    assert.match(f.modal().innerHTML, /Create Link/);
+    assert.doesNotMatch(f.modal().innerHTML, /Saving\.\.\./);
+    assert.equal(f.state.shares.items.length, 0, "a failed create does not leave a stale share row");
+
+    f.saveResponse.status = 201;
+    f.saveResponse.body = { share: created };
+    const retryForm = prepareForm(f.modal());
+    await f.modal().listeners.submit({ target: retryForm, preventDefault() {} });
+
+    assert.equal(f.saveCalls(), 2, "the user can retry after the failed request");
+    assert.equal(f.state.shares.saving, false);
+    assert.equal(f.state.shares.error, "");
+    assert.equal(f.state.shares.draft, null);
+    assert.equal(f.state.shares.items.length, 1, "the retry adds one share without duplicating stale state");
+    assert.equal(f.state.shares.items[0].id, "retried-simulated");
+    assert.match(f.modal().innerHTML, /Share link created/);
+});
+
 test("suspended subscriptions explain retained URL behavior and 400 uses validation fallback", async () => {
     const suspended = { ...active, icsEnabled: false };
     const f = await fixture({ shares: [suspended], saveResponse: { status: 400, body: {} }, detailResponse: { status: 200, body: { ics: { configured: true, httpsUrl: "https://secret.test/suspended", webcalUrl: "webcal://secret.test/suspended" } } } });
@@ -183,7 +241,8 @@ test("calendar subscription intent preselects one calendar and does not submit u
     form.querySelectorAll = () => [{ value: "Simulated Courses" }];
     await modal.listeners.submit({ target: form, preventDefault() {} });
     assert.equal(f.saveCalls(), 1);
-    assert.deepEqual(JSON.parse(f.lastSave().body), {
+    assert.equal(typeof f.lastSave().body, "object");
+    assert.deepEqual(JSON.parse(JSON.stringify(f.lastSave().body)), {
         includeAllCalendars: false,
         calendarIds: ["Simulated Courses"],
         dateScope: "all",
@@ -192,6 +251,94 @@ test("calendar subscription intent preselects one calendar and does not submit u
         rollingDays: 30,
         icsEnabled: true,
     });
+});
+
+test("real share-to-adapter boundary sends Simulated Courses JSON exactly once", async () => {
+    const adapterModule = await loadCalendarDataAdapter();
+    try {
+        const requests = [];
+        const fakeWindow = { fetch: async (url, options = {}) => {
+            requests.push({ url, options });
+            return {
+                ok: true,
+                status: options.method === "POST" ? 201 : 200,
+                json: async () => options.method === "POST"
+                    ? { share: { id: "simulated-share", icsEnabled: true } }
+                    : { shares: [] },
+            };
+        } };
+        const adapter = adapterModule.createCalendarDataAdapter({ window: fakeWindow, fetch: fakeWindow.fetch });
+        const f = await fixture({ autoOpen: false, adapterOverride: adapter });
+        f.share.openCalendarSubscriptionModal("Simulated Courses");
+        await new Promise((resolve) => setImmediate(resolve));
+        const form = f.modal().querySelector("#calendar-share-form");
+        form.include_scope = { value: "selected" };
+        form.date_scope = { value: "all" };
+        form.rolling_days = { value: "30" };
+        form.fixed_start = { value: "" };
+        form.fixed_end = { value: "" };
+        form.ics_enabled = { checked: true };
+        form.querySelectorAll = () => [{ value: "Simulated Courses" }];
+
+        await f.modal().listeners.submit({ target: form, preventDefault() {} });
+        const post = requests.find(({ options }) => options.method === "POST");
+        assert.ok(post, "share creation should reach fetch");
+        assert.equal(typeof post.options.body, "string", "adapter owns the one serialization step");
+        assert.deepEqual(JSON.parse(post.options.body), {
+            includeAllCalendars: false,
+            calendarIds: ["Simulated Courses"],
+            dateScope: "all",
+            fixedStart: null,
+            fixedEnd: null,
+            rollingDays: 30,
+            icsEnabled: true,
+        });
+        assert.doesNotMatch(post.options.body, /^"/);
+    } finally {
+        await rm(adapterModule.moduleRoot, { recursive: true, force: true });
+    }
+});
+
+test("fetch fallback sends Simulated Courses ICS JSON once with the JSON content type", async () => {
+    const requests = [];
+    const fallbackFetch = async (url, options = {}) => {
+        requests.push({ url, options });
+        const isPost = options.method === "POST";
+        return {
+            ok: true,
+            status: isPost ? 201 : 200,
+            json: async () => isPost
+                ? { share: { id: "fallback-simulated", icsEnabled: true } }
+                : { shares: [] },
+        };
+    };
+    const f = await fixture({ autoOpen: false, fallbackFetch });
+    f.share.openCalendarSubscriptionModal("Simulated Courses");
+    await new Promise((resolve) => setImmediate(resolve));
+    const form = f.modal().querySelector("#calendar-share-form");
+    form.include_scope = { value: "selected" };
+    form.date_scope = { value: "all" };
+    form.rolling_days = { value: "30" };
+    form.fixed_start = { value: "" };
+    form.fixed_end = { value: "" };
+    form.ics_enabled = { checked: true };
+    form.querySelectorAll = () => [{ value: "Simulated Courses" }];
+
+    await f.modal().listeners.submit({ target: form, preventDefault() {} });
+    const post = requests.find(({ options }) => options.method === "POST");
+    assert.ok(post, "fallback creation should reach fetch");
+    assert.equal(post.options.headers["Content-Type"], "application/json");
+    assert.equal(typeof post.options.body, "string");
+    assert.deepEqual(JSON.parse(post.options.body), {
+        includeAllCalendars: false,
+        calendarIds: ["Simulated Courses"],
+        dateScope: "all",
+        fixedStart: null,
+        fixedEnd: null,
+        rollingDays: 30,
+        icsEnabled: true,
+    });
+    assert.doesNotMatch(post.options.body, /^"/);
 });
 
 test("active matching ICS share is opened for management while revoked and broad shares do not block creation", async () => {

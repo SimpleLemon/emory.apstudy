@@ -2,9 +2,9 @@
    Dashboard Calendar & Assignments
    ──────────────────────────────────────────────────────────────────────────── */
 /* ── Constants ─────────────────────────────────────────────────────────────── */
-import { createCalendarLifecycle } from "./lifecycle.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2";
-import { normalizeCalendarCapabilities } from "./capabilities.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2";
-import { createCalendarExtensionUi } from "./extension-ui.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2";
+import { createCalendarLifecycle } from "./lifecycle.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41";
+import { normalizeCalendarCapabilities } from "./capabilities.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41";
+import { createCalendarExtensionUi } from "./extension-ui.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41";
 
 export function mountCalendar(root, dataAdapter, capabilities = {}) {
     if (!root || root.nodeType !== 1) return () => {};

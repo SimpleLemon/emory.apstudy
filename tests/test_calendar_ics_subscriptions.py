@@ -542,6 +542,55 @@ class CalendarIcsSubscriptionTests(unittest.TestCase):
                     response = calendar_api.update_calendar_share.__wrapped__(share_id)
             self.assertEqual(response.get_json()["share"]["calendarIds"], ["simulated_courses"])
 
+    def test_simulated_courses_ics_post_route_returns_created_metadata(self):
+        client = self.authenticated_client("owner-1")
+        with patch.object(calendar_api, "_generate_calendar_share_code", return_value="simulated-route-code"), \
+                patch.object(calendar_api, "emit_creation_event"):
+            response = client.post("/api/calendar/shares", json={
+                "includeAllCalendars": False,
+                "calendarIds": ["Simulated Courses"],
+                "icsEnabled": True,
+            })
+
+        self.assertEqual(response.status_code, 201)
+        share = response.get_json()["share"]
+        self.assertEqual(share["calendarIds"], ["simulated_courses"])
+        self.assertTrue(share["icsConfigured"])
+        self.assertTrue(share["icsEnabled"])
+        with calendar_connection(self.db_path) as connection:
+            token = connection.execute(
+                "SELECT ics_token FROM calendar_shares WHERE id = ?",
+                [share["id"]],
+            ).fetchone()[0]
+        self.assertTrue(token)
+
+    def test_invalid_create_bodies_leave_the_calendar_share_count_unchanged(self):
+        client = self.authenticated_client("owner-1")
+        invalid_requests = [
+            {"data": " \t\n", "content_type": "application/json"},
+            {"data": '{"calendarIds":', "content_type": "application/json"},
+            {"data": "not-json", "content_type": "text/plain"},
+            {"data": "null", "content_type": "application/json"},
+            {"data": '"text"', "content_type": "application/json"},
+            {"data": "[\"simulated_courses\"]", "content_type": "application/json"},
+            {"data": "17", "content_type": "application/json"},
+            {"data": "true", "content_type": "application/json"},
+        ]
+        expected = {
+            "error": "Calendar share payload must be a JSON object.",
+            "code": "calendar_share_invalid_payload",
+        }
+        for request_kwargs in invalid_requests:
+            with self.subTest(request=request_kwargs):
+                with calendar_connection(self.db_path) as connection:
+                    before = connection.execute("SELECT COUNT(*) FROM calendar_shares").fetchone()[0]
+                response = client.post("/api/calendar/shares", **request_kwargs)
+                with calendar_connection(self.db_path) as connection:
+                    after = connection.execute("SELECT COUNT(*) FROM calendar_shares").fetchone()[0]
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response.get_json(), expected)
+                self.assertEqual(after, before)
+
     def test_contract_uid_invariants_outcomes_diagnostics_and_serializer_metadata(self):
         secret = "s" * 32
         with patch.object(ics_contract, "CALENDAR_ICS_UID_SECRET", secret):

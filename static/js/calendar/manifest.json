@@ -1,11 +1,11 @@
 {
   "schema": 2,
   "entry": "js/calendar/entry.js",
-  "version": "32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+  "version": "e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
   "modules": [
     {
       "path": "js/calendar/adapter.js",
-      "sha256": "0aa132927a206cf11220dfbff5bac5835beca31eb41aaf1603285bfcd53ef24e"
+      "sha256": "22a4b806720ed7cf5a8f13398936038e2dcfa11466cb7e1e675d03b6efa3d3a3"
     },
     {
       "path": "js/calendar/bootstrap.js",
@@ -25,7 +25,7 @@
     },
     {
       "path": "js/calendar/entry.js",
-      "sha256": "8eba6edcf679c5bac942aad938cc349e98267972c5d92c20950765295dd86b55"
+      "sha256": "37d4810fa965266471da563cfbfe2bad4a2a60e863228d71446d7d9e72e74ff4"
     },
     {
       "path": "js/calendar/events/context-menu.js",
@@ -33,7 +33,7 @@
     },
     {
       "path": "js/calendar/events/event-form.js",
-      "sha256": "432704d6087440448c16ab5bf1ec8f60d0566f31adde60ecc696d66db4937d0c"
+      "sha256": "95474f56211c036c54f267fbca4d5767a9162b7acc08781b57840b09bfef30e7"
     },
     {
       "path": "js/calendar/events/ui-actions.js",
@@ -41,11 +41,11 @@
     },
     {
       "path": "js/calendar/extension-ui.js",
-      "sha256": "427248c03b95e733f8305ae06677ddd536eac00dafcad3bab78dfaafe3d45f95"
+      "sha256": "eb441e5c23875819cb67554a194df999ae85f4275bb9edc6f24f8375120f042d"
     },
     {
       "path": "js/calendar/index.js",
-      "sha256": "83368808d5d9a974561518ba1602d3813eb33f49cb258b83279bc158a678a8e5"
+      "sha256": "72eb76caa9b32e51300de7050fd9d27626c414f7ea3b066f7236257026537256"
     },
     {
       "path": "js/calendar/integrations/course-modal.js",
@@ -61,7 +61,7 @@
     },
     {
       "path": "js/calendar/integrations/share.js",
-      "sha256": "6b368494235795ddb81d2b2a7c6e840210cc65dec6b01502b9716a340eda800d"
+      "sha256": "3773dace6447556b0633eb58b9d064d4c2a6c24beea73530f0c65013ccec31df"
     },
     {
       "path": "js/calendar/integrations/sources.js",
@@ -109,7 +109,7 @@
     },
     {
       "path": "js/core/ui-primitives-module.js",
-      "sha256": "36b4e6ece4831eda7fedc0d4c24355cf720f69cf015aa70f2c274c235fe0cb04"
+      "sha256": "b575194c77b8198d779ccc2c0a0df561ecb101db0417d42b4642a50d346dc2d6"
     },
     {
       "path": "js/core/ui-primitives.js",
@@ -119,157 +119,157 @@
   "edges": [
     {
       "from": "js/calendar/adapter.js",
-      "specifier": "./capabilities.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./capabilities.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/capabilities.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "../core/ui-primitives-module.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "../core/ui-primitives-module.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/core/ui-primitives-module.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./adapter.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./adapter.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/adapter.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./bootstrap.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./bootstrap.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/bootstrap.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./controls.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./controls.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/controls.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./core.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./core.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/core.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./events/context-menu.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./events/context-menu.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/events/context-menu.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./events/event-form.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./events/event-form.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/events/event-form.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./events/ui-actions.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./events/ui-actions.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/events/ui-actions.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./index.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./index.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/index.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./integrations/course-modal.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./integrations/course-modal.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/integrations/course-modal.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./integrations/courses.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./integrations/courses.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/integrations/courses.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./integrations/data.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./integrations/data.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/integrations/data.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./integrations/share.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./integrations/share.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/integrations/share.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./integrations/sources.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./integrations/sources.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/integrations/sources.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./lifecycle.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./lifecycle.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/lifecycle.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./menu.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./menu.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/menu.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./preferences.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./preferences.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/preferences.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./state.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./state.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/state.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./utils.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./utils.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/utils.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./views/agenda.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./views/agenda.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/views/agenda.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./views/event-render.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./views/event-render.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/views/event-render.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./views/month-view.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./views/month-view.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/views/month-view.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./views/render-shell.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./views/render-shell.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/views/render-shell.js"
     },
     {
       "from": "js/calendar/entry.js",
-      "specifier": "./views/week-view.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./views/week-view.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/views/week-view.js"
     },
     {
       "from": "js/calendar/events/event-form.js",
-      "specifier": "../../core/ui-primitives-module.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "../../core/ui-primitives-module.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/core/ui-primitives-module.js"
     },
     {
       "from": "js/calendar/extension-ui.js",
-      "specifier": "./capabilities.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./capabilities.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/capabilities.js"
     },
     {
       "from": "js/calendar/index.js",
-      "specifier": "./capabilities.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./capabilities.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/capabilities.js"
     },
     {
       "from": "js/calendar/index.js",
-      "specifier": "./extension-ui.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./extension-ui.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/extension-ui.js"
     },
     {
       "from": "js/calendar/index.js",
-      "specifier": "./lifecycle.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./lifecycle.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/calendar/lifecycle.js"
     },
     {
       "from": "js/core/ui-primitives-module.js",
-      "specifier": "./ui-primitives.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2",
+      "specifier": "./ui-primitives.js?v=e618f7039349a94f81f18f8ce31a6d986c7ae808a3b1069594faec0180fa9a41",
       "to": "js/core/ui-primitives.js"
     }
   ]
