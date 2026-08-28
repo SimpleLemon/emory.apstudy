@@ -13,7 +13,9 @@
             getEventBadgeColors,
             getEventBadgeStyle,
             getEventElementAttributes,
+            canCreateCalendarSubscription,
             openCalendarInfoModal,
+            openCalendarSubscriptionModal,
             openRgbModal,
             setCalendarColor,
         } = callbacks;
@@ -40,6 +42,7 @@
             const currentColor = state.calendars[calendarName]?.color || "#6366f1";
             const eventCount = getCalendarEventCount(calendarName);
             const label = getCalendarLabel(calendarName);
+            const showSubscriptionAction = !state.public.readOnly && canCreateCalendarSubscription(calendarName);
             const menu = doc.createElement("div");
             menu.className = "calendar-context-menu fixed";
             menu.innerHTML = `
@@ -52,6 +55,14 @@
                         <span class="material-symbols-outlined calendar-context-action-icon" aria-hidden="true">info</span>
                         <span>Get Info</span>
                     </button>
+                    ${showSubscriptionAction ? `
+                        <button type="button" class="js-context-subscription calendar-context-action">
+                            <svg class="calendar-context-action-icon" width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8v-2H5V8h14v3h2V5a2 2 0 0 0-2-2Zm0 3H5V5h14v1Zm-5 8h-3v2h3v3h2v-3h3v-2h-3v-3h-2v3Z"/>
+                            </svg>
+                            <span>Create subscription link…</span>
+                        </button>
+                    ` : ""}
                     <div class="calendar-context-separator"></div>
                     <div class="calendar-context-colors">
                         <div class="calendar-context-section-label">Colors</div>
@@ -78,6 +89,12 @@
                 if (infoBtn) {
                     openCalendarInfoModal(calendarName);
                     closeCalendarContextMenu();
+                    return;
+                }
+                const subscriptionBtn = event.target.closest(".js-context-subscription");
+                if (subscriptionBtn) {
+                    closeCalendarContextMenu();
+                    openCalendarSubscriptionModal(calendarName);
                     return;
                 }
                 const presetBtn = event.target.closest(".js-context-preset");

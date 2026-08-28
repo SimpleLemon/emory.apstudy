@@ -16,6 +16,8 @@
         const mountNode = root.nodeType === 9 ? (root.body || root.documentElement) : root;
         const icsState = new Map();
         const icsEligibleIds = new Set(["canvas", "tasks", "simulated_courses"]);
+        let activeModalSession = null;
+        let shareDataLoadPromise = null;
 
         function canonicalIcsCalendarId(value) {
             const candidate = String(value || "").trim();
@@ -46,6 +48,57 @@
                 eligible: !includeAll && !hasIneligibleCalendar && ids.length === 1 && icsEligibleIds.has(ids[0]),
                 calendarId: !includeAll && ids.length === 1 ? ids[0] : null,
             };
+        }
+
+        function canCreateCalendarSubscription(calendarName) {
+            return getIcsSelectionEligibility({
+                includeAll: false,
+                calendarIds: [calendarName],
+            }).eligible;
+        }
+
+        function findActiveConfiguredIcsShare(calendarId) {
+            return state.shares.items.find((share) => Boolean(
+                share.isActive
+                && share.icsConfigured
+                && getIcsSelectionEligibility({
+                    includeAll: share.includeAllCalendars !== false,
+                    calendarIds: share.calendarIds || [],
+                }).calendarId === calendarId,
+            )) || null;
+        }
+
+        function applyCalendarSubscriptionIntent(calendarName, { matchExisting = true } = {}) {
+            const eligibility = getIcsSelectionEligibility({ includeAll: false, calendarIds: [calendarName] });
+            if (!eligibility.eligible) return null;
+            const existing = matchExisting ? findActiveConfiguredIcsShare(eligibility.calendarId) : null;
+            if (existing) {
+                state.shares.editingId = existing.id;
+                state.shares.draft = null;
+                state.shares.notice = "This calendar already has an ICS subscription. Manage or re-enable it below.";
+                return existing;
+            }
+            state.shares.editingId = null;
+            state.shares.draft = {
+                includeAllCalendars: false,
+                calendarIds: [calendarName],
+                dateScope: "all",
+                fixedStart: "",
+                fixedEnd: "",
+                rollingDays: 30,
+                icsEnabled: true,
+            };
+            state.shares.notice = "Review the single-calendar subscription, then create the link. Nothing has been changed yet.";
+            return null;
+        }
+
+        function isCurrentModalSession(session) {
+            return Boolean(
+                session
+                && activeModalSession === session
+                && state.ui.shareModalEl === session.modal
+                && !lifecycle?.isDisposed?.(),
+            );
         }
 
         function getIcsState(shareId) {
@@ -154,6 +207,7 @@
         }
 
         function closeCalendarShareModal(immediate = false) {
+            activeModalSession = null;
             if (state.ui.shareModalEl) {
                 const modal = state.ui.shareModalEl;
                 if (immediate) {
@@ -169,18 +223,18 @@
             }
             state.shares.editingId = null;
             state.shares.error = "";
+            state.shares.formValidationError = false;
+            state.shares.loading = false;
+            state.shares.notice = "";
             state.shares.focusTarget = "";
         }
 
-        async function loadCalendarShares(force = false) {
-            if (state.public.readOnly || lifecycle?.isDisposed?.()) return;
-            if (state.shares.loading || (state.shares.loaded && !force)) return;
-            state.shares.loading = true;
-            state.shares.error = "";
-            state.shares.formValidationError = false;
-            renderCalendarShareModal();
-            try {
-                const controller = requestController();
+        function ensureCalendarShareDataLoaded() {
+            if (state.shares.loaded) return Promise.resolve(state.shares.items);
+            if (shareDataLoadPromise) return shareDataLoadPromise;
+            const controller = requestController();
+            let request;
+            request = (async () => {
                 try {
                     const result = dataAdapter?.loadShares
                         ? await dataAdapter.loadShares({ signal: controller.signal })
@@ -190,20 +244,48 @@
                     if (!res.ok) throw new Error(payload.error || "Unable to load share links.");
                     state.shares.items = Array.isArray(payload.shares) ? payload.shares : [];
                     state.shares.loaded = true;
+                    return state.shares.items;
                 } finally {
                     lifecycle?.releaseAbortController?.(controller);
+                    if (shareDataLoadPromise === request) shareDataLoadPromise = null;
                 }
-            } catch (err) {
-                state.shares.error = err.message || "Could not reach Nest. Check your connection and try again.";
-            } finally {
-                state.shares.loading = false;
-                renderCalendarShareModal();
-            }
+            })();
+            shareDataLoadPromise = request;
+            return request;
         }
 
-        function openCalendarShareModal() {
+        async function hydrateCalendarShareModal(session) {
+            try {
+                await ensureCalendarShareDataLoaded();
+            } catch (err) {
+                if (!isCurrentModalSession(session)) return;
+                state.shares.loading = false;
+                state.shares.error = err.message || "Could not reach Nest. Check your connection and try again.";
+                renderCalendarShareModal();
+                return;
+            }
+            if (!isCurrentModalSession(session)) return;
+            state.shares.loading = false;
+            state.shares.error = "";
+            if (session.subscriptionCalendar) {
+                applyCalendarSubscriptionIntent(session.subscriptionCalendar);
+            }
+            renderCalendarShareModal();
+        }
+
+        function openCalendarShareModal({ subscriptionCalendar = "" } = {}) {
             if (state.public.readOnly) return;
             closeCalendarShareModal(true);
+            const session = { modal: null, subscriptionCalendar };
+            activeModalSession = session;
+            state.shares.editingId = null;
+            state.shares.draft = null;
+            state.shares.error = "";
+            state.shares.loading = !state.shares.loaded;
+            state.shares.notice = "";
+            if (subscriptionCalendar) {
+                applyCalendarSubscriptionIntent(subscriptionCalendar, { matchExisting: state.shares.loaded });
+            }
             const modal = doc.createElement("div");
             modal.className = "calendar-info-modal calendar-share-modal";
             const listen = lifecycle?.addEventListener
@@ -215,9 +297,15 @@
             mountNode.appendChild(modal);
             lifecycle?.trackNode?.(modal);
             state.ui.shareModalEl = modal;
+            session.modal = modal;
             renderCalendarShareModal();
             modalFocus(".js-share-close");
-            void loadCalendarShares();
+            void hydrateCalendarShareModal(session);
+        }
+
+        function openCalendarSubscriptionModal(calendarName) {
+            if (!canCreateCalendarSubscription(calendarName)) return;
+            openCalendarShareModal({ subscriptionCalendar: calendarName });
         }
 
         function renderCalendarShareModal() {
@@ -878,8 +966,10 @@
         }
 
         return {
+            canCreateCalendarSubscription,
             closeCalendarShareModal,
             openCalendarShareModal,
+            openCalendarSubscriptionModal,
             renderCalendarShareModal,
         };
     }

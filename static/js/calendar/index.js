@@ -290,6 +290,26 @@ const {
     getEventElementAttributes,
     getEventsForDay,
 } = calendarEventRender;
+const calendarShare = window.APStudyCalendarShare.createCalendarShare({
+    root: pageRoot,
+    lifecycle,
+    dataAdapter: adapter,
+    state,
+    constants: {
+        calendarShareCloseMs: CALENDAR_SHARE_CLOSE_MS,
+        simulatedCalendarName: SIMULATED_CALENDAR_NAME,
+    },
+    escapeHtml,
+    getCalendarLabel,
+    getCalendarLabelFromData,
+    trackCalendarMutation,
+});
+const {
+    canCreateCalendarSubscription,
+    closeCalendarShareModal,
+    openCalendarShareModal,
+    openCalendarSubscriptionModal,
+} = calendarShare;
 const calendarUiActions = window.APStudyCalendarUiActions.createCalendarUiActions({
     root: pageRoot,
     lifecycle,
@@ -301,7 +321,9 @@ const calendarUiActions = window.APStudyCalendarUiActions.createCalendarUiAction
         getEventBadgeColors,
         getEventBadgeStyle,
         getEventElementAttributes,
+        canCreateCalendarSubscription,
         openCalendarInfoModal: (...args) => openCalendarInfoModal(...args),
+        openCalendarSubscriptionModal: (...args) => openCalendarSubscriptionModal(...args),
         openRgbModal: (...args) => openRgbModal(...args),
         setCalendarColor,
     },
@@ -429,24 +451,6 @@ const {
     openCalendarSourceCreateModal,
     openRgbModal,
 } = calendarSources;
-const calendarShare = window.APStudyCalendarShare.createCalendarShare({
-    root: pageRoot,
-    lifecycle,
-    dataAdapter: adapter,
-    state,
-    constants: {
-        calendarShareCloseMs: CALENDAR_SHARE_CLOSE_MS,
-        simulatedCalendarName: SIMULATED_CALENDAR_NAME,
-    },
-    escapeHtml,
-    getCalendarLabel,
-    getCalendarLabelFromData,
-    trackCalendarMutation,
-});
-const {
-    closeCalendarShareModal,
-    openCalendarShareModal,
-} = calendarShare;
 const calendarControls = window.APStudyCalendarControls.createCalendarControls({
     root: pageRoot,
     lifecycle,
