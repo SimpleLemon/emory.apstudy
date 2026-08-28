@@ -63,7 +63,7 @@ test('shared UI primitive module has substantive owned APIs', () => {
     assert.match(primitives, /\.replace\(\/"\/g, '&quot;'\)/);
     assert.match(primitives, /\.replace\(\/'\/g, '&#39;'\)/);
     assert.match(primitives, /Object\.freeze\(\{\s*escapeHtml,/);
-    assert.match(primitivesModule, /import '\.\/ui-primitives\.js'/);
+    assert.match(primitivesModule, /import '\.\/ui-primitives\.js(\?v=[0-9a-f]{64})?'/);
     assert.match(primitivesModule, /export const \{ escapeHtml \} = window\.APStudyUIPrimitives/);
     assert.ok(primitives.length > 8_000, 'ui-primitives.js must not become an empty compatibility shim');
     const globalSource = fs.readFileSync(path.join(repoRoot, 'static/js/core/global.js'), 'utf8');
