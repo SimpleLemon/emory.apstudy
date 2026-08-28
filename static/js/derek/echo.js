@@ -1,6 +1,7 @@
 import {
   calendarDayKey,
   centerNowMarker,
+  mergeEventLists,
   normalizeEvents,
   pickNextEvent,
   renderAgendaList,
@@ -11,6 +12,10 @@ import {
 } from "./echo-calendar.js";
 import { createEchoClock, isReducedMotion } from "./echo-clock.js";
 import { createEchoEventDetails } from "./echo-event-details.js";
+import {
+  fetchSimulatedCourses,
+  simulatedCoursesPayload,
+} from "./echo-courses.js";
 import {
   addDays,
   endOfDay,
@@ -52,6 +57,16 @@ function openEventDetails(eventKey, trigger) {
   if (event) eventDetails?.open(event, trigger);
 }
 
+async function loadSimulatedEvents(start, end) {
+  try {
+    const courses = await fetchSimulatedCourses();
+    return normalizeEvents(simulatedCoursesPayload(courses, { start, end }));
+  } catch (error) {
+    console.error("Failed to load simulated courses:", error);
+    return [];
+  }
+}
+
 async function loadCalendar({ center = true } = {}) {
   const now = new Date();
   const start = startOfDay(now);
@@ -59,13 +74,18 @@ async function loadCalendar({ center = true } = {}) {
   const url = `/api/calendar/events?start=${encodeURIComponent(start.toISOString())}&end=${encodeURIComponent(end.toISOString())}`;
 
   try {
-    const response = await fetch(url, {
-      credentials: "same-origin",
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) throw new Error(`Calendar request failed (${response.status})`);
-    const payload = await response.json();
-    cachedEvents = normalizeEvents(payload);
+    const [baseEvents, simulatedEvents] = await Promise.all([
+      (async () => {
+        const response = await fetch(url, {
+          credentials: "same-origin",
+          headers: { Accept: "application/json" },
+        });
+        if (!response.ok) throw new Error(`Calendar request failed (${response.status})`);
+        return normalizeEvents(await response.json());
+      })(),
+      loadSimulatedEvents(start, end),
+    ]);
+    cachedEvents = mergeEventLists(baseEvents, simulatedEvents);
     loadedCalendarDayKey = calendarDayKey(now);
     lastQuarterHourKey = getQuarterHourKey(now);
     calendarLoaded = true;

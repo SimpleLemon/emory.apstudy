@@ -56,6 +56,13 @@ export function normalizeEvents(payload) {
     .sort((a, b) => a.startDate - b.startDate || String(a.title || "").localeCompare(String(b.title || "")));
 }
 
+export function mergeEventLists(...lists) {
+  return lists.flat().sort((a, b) => (
+    a.startDate - b.startDate
+    || String(a.title || "").localeCompare(String(b.title || ""))
+  ));
+}
+
 export function eventOverlapsDay(event, day) {
   const dayStart = startOfDay(day);
   const dayEnd = endOfDay(day);
