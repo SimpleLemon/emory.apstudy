@@ -130,7 +130,7 @@ async function resolveLocalSource(importer, specifier) {
     if (!specifier.startsWith(".") && !specifier.startsWith("/")) {
         throw new Error(`Calendar extension policy rejected ${importer}: external executable import ${specifier}.`);
     }
-    const candidate = path.resolve(path.dirname(importer), specifier);
+    const candidate = path.resolve(path.dirname(importer), specifier.split(/[?#]/, 1)[0]);
     if (!sourcePathIsAllowed(candidate)) {
         throw new Error(`Calendar extension policy rejected ${importer}: executable import escapes the local source graph.`);
     }

@@ -148,7 +148,8 @@ async function importCalendarGraph(runtime) {
     );
     globalThis.window = runtime.view;
     globalThis.document = runtime.document;
-    const importFile = (relativePath) => import(pathToFileURL(path.join(moduleRoot, relativePath)).href);
+    const manifest = JSON.parse(await readFile(path.join(moduleRoot, "static/js/calendar/manifest.json"), "utf8"));
+    const importFile = (relativePath) => import(`${pathToFileURL(path.join(moduleRoot, relativePath)).href}?v=${manifest.version}`);
     const [entry, index, adapter, lifecycle] = await Promise.all([
         importFile("static/js/calendar/entry.js"),
         importFile("static/js/calendar/index.js"),
@@ -254,7 +255,7 @@ test("normal and share templates use the module entry and explicit Element app r
         readFile(path.join(repoRoot, "templates/calendar_share.html"), "utf8"),
     ]);
     for (const template of [calendar, share]) {
-        assert.match(template, /<script type="module" src="\{\{ url_for\('static', filename='js\/calendar\/entry\.js'\) \}\}"><\/script>/);
+        assert.match(template, /<script type="module" src="\{\{ url_for\('static', filename='js\/calendar\/entry\.js', v=calendar_asset_version\) \}\}"><\/script>/);
         assert.match(template, /id="calendar-app-root"[\s\S]*id="calendar-view-root"/);
         assert.ok(template.indexOf('id="calendar-app-root"') < template.indexOf('id="calendar-view-root"'));
     }

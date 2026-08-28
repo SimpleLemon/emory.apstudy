@@ -144,7 +144,7 @@ test("calendar event form preserves escaping, API routes, and cache refresh beha
     for (const replacement of ["&quot;", "&#39;"]) {
         assert.match(primitives, new RegExp(replacement.replace("&", "&")));
     }
-    assert.match(source, /import \{ escapeHtml \} from "\.\.\/\.\.\/core\/ui-primitives-module\.js"/);
+    assert.match(source, /import \{ escapeHtml \} from "\.\.\/\.\.\/core\/ui-primitives-module\.js\?v=[0-9a-f]{64}"/);
 
     assert.match(source, /window\.openCalendarEventForm = function/);
     assert.match(source, /fetch\("\/api\/calendar\/events"/);

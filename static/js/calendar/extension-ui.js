@@ -4,7 +4,7 @@ import {
     normalizeCalendarCapabilities,
     normalizeWritebackState,
     writebackStateLabel,
-} from "./capabilities.js";
+} from "./capabilities.js?v=32eec5b276367ae3c9bbbb502fe8b544ffa3e5147a1b831249095e4f15570cb2";
 
 function escapeHtml(value) {
     return String(value ?? "")

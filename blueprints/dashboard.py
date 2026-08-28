@@ -5,7 +5,7 @@ import json
 import logging
 from datetime import datetime, timezone
 
-from flask import Blueprint, g, jsonify, render_template, redirect, request, url_for
+from flask import Blueprint, current_app, g, jsonify, render_template, redirect, request, url_for
 from flask_login import login_required, current_user
 
 from appwrite.exception import AppwriteException
@@ -24,6 +24,7 @@ from services.environment_config import runtime_environment_config
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import first_calendar_row, list_calendar_rows_all
+from services.calendar_assets import calendar_asset_version
 from services.dashboard_summary import (
     DASHBOARD_CALENDAR_UPCOMING_LIMIT,
     DASHBOARD_LIST_LIMIT,
@@ -90,6 +91,10 @@ DASHBOARD_CALENDAR_UPCOMING_DAYS = (7, 14, 30)
 DASHBOARD_TASK_DEADLINE_DAYS = (7, 30)
 DASHBOARD_TASK_PRIORITIES = ("high", "medium", "low", "none")
 DASHBOARD_TITLE_MAX_LENGTH = 60
+
+
+def _calendar_asset_version():
+    return calendar_asset_version()
 
 
 def _is_emory_or_oxford_user():
@@ -921,6 +926,7 @@ def calendar():
         preferred_calendar_view=preferred_calendar_view,
         theme_preference=interface_theme,
         calendar_buffer_days=calendar_buffer_days,
+        calendar_asset_version=_calendar_asset_version(),
     )
 
 
@@ -954,6 +960,7 @@ def public_calendar_share(share_code):
             theme_preference=theme_preference,
             preferred_calendar_view="month",
             calendar_buffer_days=calendar_buffer_days,
+            calendar_asset_version=_calendar_asset_version(),
         ), 404
 
     context = _public_calendar_share_context(share)
@@ -963,6 +970,7 @@ def public_calendar_share(share_code):
         preferred_calendar_view="month",
         theme_preference=theme_preference,
         calendar_buffer_days=calendar_buffer_days,
+        calendar_asset_version=_calendar_asset_version(),
         **context,
     )
 

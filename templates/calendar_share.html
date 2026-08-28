@@ -26,7 +26,7 @@
     {% if share_found %}
     <script src="{{ url_for('static', filename='js/core/global-chrome.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/core/global.js') }}" defer></script>
-    <script type="module" src="{{ url_for('static', filename='js/calendar/entry.js') }}"></script>
+    <script type="module" src="{{ url_for('static', filename='js/calendar/entry.js', v=calendar_asset_version) }}"></script>
     {% endif %}
     <style>
         .material-symbols-outlined {

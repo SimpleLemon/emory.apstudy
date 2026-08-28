@@ -89,6 +89,9 @@ def create_app():
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
         environment_config.frontend_console_diagnostics_enabled
     )
+    from services.calendar_assets import calendar_asset_version
+
+    calendar_asset_version()
     from services.extension_contract import (
         EXTENSION_CALENDAR_CAPABILITY,
         extension_capabilities_for_rollout,
