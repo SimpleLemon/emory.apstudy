@@ -89,9 +89,6 @@ def create_app():
     app.config["FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED"] = (
         environment_config.frontend_console_diagnostics_enabled
     )
-    app.config["ATLAS_BROWSER_DIAGNOSTIC_ENABLED"] = (
-        environment_config.atlas_browser_diagnostic_enabled
-    )
     from services.calendar_assets import calendar_asset_version
 
     calendar_asset_version()

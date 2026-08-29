@@ -10,8 +10,6 @@
         window.APSTUDY_COURSES_DEFAULT_CAMPUS = "{{ default_campus or 'atlanta' }}";
         window.APSTUDY_ATLAS_SRCDB = {{ atlas_srcdb | tojson }};
         window.APSTUDY_ATLAS_BROWSER_DIRECT_ENABLED = false;
-        window.APSTUDY_ATLAS_DIAGNOSTIC_ENABLED = {{ 'true' if atlas_diagnostic else 'false' }};
-        window.APSTUDY_ATLAS_DIAGNOSTIC_CONFIG = {{ (atlas_diagnostic or {}) | tojson }};
         window.APSTUDY_COURSES_GENERAL_ED_REQUIREMENTS = {{ (general_ed_requirements or []) | tojson }};
         window.APSTUDY_COURSES_GER_ALIASES = {{ (general_ed_requirement_aliases or {}) | tojson }};
         window.APSTUDY_COURSES_GER_COMPOSITE = {{ (general_ed_composite_requirements or {}) | tojson }};
@@ -39,9 +37,6 @@
     <script src="{{ url_for('static', filename='js/core/sidebar.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/utils.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/atlas-live.js') }}" defer></script>
-    {% if atlas_diagnostic %}
-    <script src="{{ url_for('static', filename='js/courses/atlas-diagnostic.js') }}" defer></script>
-    {% endif %}
     <script src="{{ url_for('static', filename='js/courses/filters.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/panel.js') }}" defer></script>
     <script src="{{ url_for('static', filename='js/courses/calendar.js') }}" defer></script>
