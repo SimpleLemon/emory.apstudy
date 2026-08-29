@@ -27,6 +27,12 @@ ICS_PAST_DAYS = 30
 ICS_FUTURE_DAYS = 366
 ICS_RANGE_END_DAYS = ICS_FUTURE_DAYS + 1
 ICS_TIMEZONE = "UTC"
+# Campus times (course scrapes, Atlas schedules) are published as Atlanta
+# wall-clock. Projectors must localize with this zone before converting to
+# UTC; the share feed's Z-suffixed values then render in each subscriber's
+# local timezone. Feed ingestion also uses it as the fallback zone for
+# upstream floating (zone-less) times.
+CAMPUS_TIMEZONE = "America/New_York"
 ICS_UID_POLICY_VERSION = 1
 ICS_METHOD = "PUBLISH"
 ICS_UID_SECRET_MIN_BYTES = 32

@@ -11,6 +11,7 @@ import logging
 from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
+from zoneinfo import ZoneInfo
 
 from appwrite.query import Query
 
@@ -19,6 +20,7 @@ from appwrite_helpers import list_rows_all
 from services.calendar_ics_contract import (
     CalendarIcsDiagnosticCode,
     CalendarIcsProjectionOutcome,
+    CAMPUS_TIMEZONE,
     NormalizedCalendarEvent,
     SIMULATED_COURSES_CALENDAR_ID,
     subscription_window,
@@ -26,6 +28,8 @@ from services.calendar_ics_contract import (
 
 
 logger = logging.getLogger(__name__)
+
+_COURSE_ZONE = ZoneInfo(CAMPUS_TIMEZONE)
 
 COURSE_DATA_ROOT = Path(__file__).resolve().parent.parent
 SIMULATED_COURSE_SOURCE_TYPE = "simulated_course"
@@ -106,7 +110,7 @@ def _parse_time(value: Any) -> time:
     hour, minute = int(digits[:2]), int(digits[2:])
     if hour > 23 or minute > 59:
         raise _SourceProblem(SOURCE_MALFORMED, "A saved course has an invalid meeting time.")
-    return time(hour, minute, tzinfo=timezone.utc)
+    return time(hour, minute)
 
 
 def _parse_last_modified(row: dict[str, Any]) -> datetime | None:
@@ -241,6 +245,8 @@ def _event_for_occurrence(
     occurrence: date,
     start: datetime,
     end: datetime,
+    start_time: time,
+    end_time: time,
     meeting_key: str,
     last_modified: datetime | None,
 ) -> NormalizedCalendarEvent:
@@ -267,7 +273,7 @@ def _event_for_occurrence(
     row_id = _course_row_id(row, f"{row.get('term')}|{subject.upper()}|{catalog}|{row.get('crn') or section_number}")
     raw_identity = "|".join((
         "simulated-course", row_id, str(occurrence), meeting_key,
-        start.strftime("%H:%M"), end.strftime("%H:%M"),
+        start_time.strftime("%H:%M"), end_time.strftime("%H:%M"),
     ))
     return NormalizedCalendarEvent.from_internal(
         raw_identity=raw_identity,
@@ -401,12 +407,16 @@ def project_simulated_courses(
                     first_date = course_start + timedelta(days=(day_number - course_start.weekday()) % 7)
                     occurrence = first_date
                     while occurrence <= course_end:
-                        start_dt = datetime.combine(occurrence, start_time)
-                        end_dt = datetime.combine(occurrence, end_time)
+                        # Meeting times are campus (Atlanta) wall-clock; localize per
+                        # occurrence so DST is honored, then convert to true UTC for the
+                        # contract. Subscribers' calendars render the Z-suffixed instant
+                        # in their own local timezone.
+                        start_dt = datetime.combine(occurrence, start_time, tzinfo=_COURSE_ZONE).astimezone(timezone.utc)
+                        end_dt = datetime.combine(occurrence, end_time, tzinfo=_COURSE_ZONE).astimezone(timezone.utc)
                         if start_dt < range_end and end_dt > range_start:
                             events.append(_event_for_occurrence(
                                 row, course, section, overrides, occurrence,
-                                start_dt, end_dt,
+                                start_dt, end_dt, start_time, end_time,
                                 f"{day_number}:{start_time.strftime('%H:%M')}-{end_time.strftime('%H:%M')}",
                                 last_modified,
                             ))

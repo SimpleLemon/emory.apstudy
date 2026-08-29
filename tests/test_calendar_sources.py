@@ -194,6 +194,60 @@ class TestCalendarSources(unittest.TestCase):
         self.assertEqual(parsed["calendar_name"], "NotchNook")
         self.assertEqual(parsed["events"][0]["course_name"], "NotchNook")
 
+    def test_floating_feed_times_are_interpreted_as_campus_wall_clock(self):
+        ics_payload = "\r\n".join([
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Example Corp//Calendar//EN",
+            "BEGIN:VEVENT",
+            "UID:floating-1",
+            "SUMMARY:Campus Meeting",
+            "DTSTART:20260831T083000",
+            "DTEND:20260831T093000",
+            "END:VEVENT",
+            "END:VCALENDAR",
+        ]).encode("utf-8")
+        response = Mock()
+        response.status_code = 200
+        response.content = ics_payload
+        response.text = ics_payload.decode("utf-8")
+        response.headers = {}
+
+        with patch("services.feed_fetcher.require_public_http_url", side_effect=lambda url: url), \
+                patch("services.feed_fetcher.http_requests.get", return_value=response):
+            parsed = fetch_and_parse_ical("https://example.com/floating.ics")
+
+        # Zone-less times are Atlanta wall-clock; 08:30 EDT (UTC-4) -> 12:30Z.
+        self.assertEqual(parsed["events"][0]["start"], datetime(2026, 8, 31, 12, 30))
+        self.assertEqual(parsed["events"][0]["end"], datetime(2026, 8, 31, 13, 30))
+
+    def test_floating_feed_times_honor_x_wr_timezone_hint(self):
+        ics_payload = "\r\n".join([
+            "BEGIN:VCALENDAR",
+            "VERSION:2.0",
+            "PRODID:-//Google Inc//Calendar//EN",
+            "X-WR-TIMEZONE:America/Denver",
+            "BEGIN:VEVENT",
+            "UID:floating-2",
+            "SUMMARY:Mountain Meeting",
+            "DTSTART:20260831T083000",
+            "DTEND:20260831T093000",
+            "END:VEVENT",
+            "END:VCALENDAR",
+        ]).encode("utf-8")
+        response = Mock()
+        response.status_code = 200
+        response.content = ics_payload
+        response.text = ics_payload.decode("utf-8")
+        response.headers = {}
+
+        with patch("services.feed_fetcher.require_public_http_url", side_effect=lambda url: url), \
+                patch("services.feed_fetcher.http_requests.get", return_value=response):
+            parsed = fetch_and_parse_ical("https://example.com/denver.ics")
+
+        # Valid X-WR-TIMEZONE wins: 08:30 MDT (UTC-6) -> 14:30Z.
+        self.assertEqual(parsed["events"][0]["start"], datetime(2026, 8, 31, 14, 30))
+
     def test_source_metadata_uses_persisted_feed_name_without_events(self):
         external_url = "https://calendar.google.com/calendar/ical/holidays/basic.ics"
         settings = {

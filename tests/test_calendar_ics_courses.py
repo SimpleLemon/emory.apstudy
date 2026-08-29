@@ -85,7 +85,30 @@ class SimulatedCoursesProjectorTests(unittest.TestCase):
         self.rows = [self._row()]
         outcome = self._project(now=date(2025, 8, 26))
         self.assertEqual(outcome.status, CalendarIcsProjectionStatus.SUCCESS)
-        self.assertEqual(outcome.events[0].start, datetime(2025, 8, 25, 10, tzinfo=timezone.utc))
+        # 10:00 Atlanta (EDT, UTC-4) on Aug 25 -> 14:00Z, rendered local on subscribers.
+        self.assertEqual(outcome.events[0].start, datetime(2025, 8, 25, 14, tzinfo=timezone.utc))
+
+    def test_meeting_times_are_atlanta_wall_clock_across_dst(self):
+        self.course["date_range"] = {"start": "2025-10-27", "end": "2025-11-04"}
+        self.course["sections"][0]["schedule"]["meetings"] = [{"day": "Mon", "start": "1000", "end": "1100"}]
+        self._write_course("Fall_2025", "CS", "170", self.course)
+        self.rows = [self._row()]
+        outcome = self._project(start=date(2025, 10, 20), end=date(2025, 11, 10))
+        self.assertEqual([event.start.date() for event in outcome.events], [date(2025, 10, 27), date(2025, 11, 3)])
+        # US fall-back is 2025-11-02: Oct 27 is EDT (UTC-4), Nov 3 is EST (UTC-5).
+        self.assertEqual(
+            [event.start for event in outcome.events],
+            [datetime(2025, 10, 27, 14, tzinfo=timezone.utc), datetime(2025, 11, 3, 15, tzinfo=timezone.utc)],
+        )
+
+    def test_uid_identity_uses_wall_clock_times(self):
+        self.rows = [self._row()]
+        outcome = self._project(start=date(2025, 8, 25), end=date(2025, 8, 26))
+        expected_uid = contract.build_calendar_ics_uid(
+            contract.SIMULATED_COURSES_CALENDAR_ID,
+            "simulated-course|saved-course-1|2025-08-25|0:10:00-11:15|10:00|11:15",
+        )
+        self.assertEqual(outcome.events[0].uid, expected_uid)
 
     def test_multiple_patterns_are_concrete_weekly_occurrences(self):
         self.rows = [self._row()]

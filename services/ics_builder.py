@@ -34,6 +34,7 @@ from services.calendar_events import (
 
 
 DEFAULT_ICS_TIMEZONE = "America/New_York"
+ATLAS_ZONE = ZoneInfo(DEFAULT_ICS_TIMEZONE)
 
 
 def _user_settings(user_id):
@@ -449,13 +450,18 @@ def _inject_atlas_schedule(cal, user_id):
             start_dt = datetime(2026, 8, 26, start_hour, start_min)
             end_dt = datetime(2026, 8, 26, end_hour, end_min)
 
-            vevent.add("dtstart", start_dt)
-            vevent.add("dtend", end_dt)
+            # Atlas meeting times are campus (Atlanta) wall-clock. Emit them
+            # with a TZID so the receiving calendar resolves the correct
+            # instant and adjusts to the viewer's local timezone, while the
+            # weekly RRULE keeps honoring campus DST.
+            vevent.add("dtstart", start_dt, parameters={"TZID": DEFAULT_ICS_TIMEZONE})
+            vevent.add("dtend", end_dt, parameters={"TZID": DEFAULT_ICS_TIMEZONE})
 
             # Weekly recurrence rule
             rrule = {"freq": "weekly", "byday": rrule_days}
             if semester_end:
-                rrule["until"] = semester_end
+                # RFC 5545: with a TZID-qualified DTSTART, UNTIL must be UTC.
+                rrule["until"] = semester_end.replace(tzinfo=ATLAS_ZONE).astimezone(timezone.utc)
             vevent.add("rrule", rrule)
 
             vevent.add("categories", [course_code])

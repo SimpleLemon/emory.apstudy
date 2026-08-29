@@ -11,6 +11,7 @@ import logging
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, date as date_type, timezone
 from urllib.parse import urljoin
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import icalendar
 import requests as http_requests
@@ -21,6 +22,7 @@ from appwrite_client import COLLECTIONS
 from appwrite_helpers import (
     format_datetime,
 )
+from services.calendar_ics_contract import CAMPUS_TIMEZONE
 from services.calendar_store import (
     create_calendar_row,
     delete_calendar_row,
@@ -121,7 +123,7 @@ def _resolve_course_label(component, calendar_name, is_canvas_feed):
     return "Other"
 
 
-def _to_datetime(dt_value):
+def _to_datetime(dt_value, floating_timezone=None):
     """
     Convert an icalendar date/datetime value to a Python datetime.
     Returns a tuple of (datetime, is_all_day).
@@ -130,6 +132,9 @@ def _to_datetime(dt_value):
     objects depending on whether the event is all-day or timed. This function
     normalizes both to datetime for consistent database storage, and signals
     whether the original value was a DATE (all-day) type.
+
+    Floating (zone-less) timed values are interpreted in ``floating_timezone``
+    and converted to naive UTC; without a zone they are returned unchanged.
     """
     if dt_value is None:
         return None, False
@@ -143,6 +148,9 @@ def _to_datetime(dt_value):
         # Timed event
         if raw.tzinfo is not None:
             return raw.astimezone(timezone.utc).replace(tzinfo=None), False
+        if floating_timezone is not None:
+            localized = raw.replace(tzinfo=floating_timezone)
+            return localized.astimezone(timezone.utc).replace(tzinfo=None), False
         return raw, False
 
     if isinstance(raw, date_type):
@@ -150,6 +158,21 @@ def _to_datetime(dt_value):
         return datetime(raw.year, raw.month, raw.day), True
 
     return None, False
+
+
+def _feed_floating_timezone(cal):
+    """
+    Resolve the zone for upstream floating (zone-less) times: the feed's
+    X-WR-TIMEZONE hint when valid (Google Calendar publishes it), otherwise
+    the campus zone, since campus-published wall-clock times are Eastern.
+    """
+    hint = _stringify_ical(cal.get("X-WR-TIMEZONE"))
+    if hint:
+        try:
+            return ZoneInfo(hint)
+        except (ZoneInfoNotFoundError, ValueError):
+            logger.warning("Ignoring invalid X-WR-TIMEZONE hint: %s", hint)
+    return ZoneInfo(CAMPUS_TIMEZONE)
 
 
 # ── Core fetch and parse ─────────────────────────────────────────────────────
@@ -375,6 +398,7 @@ def fetch_and_parse_ical(feed_url, timeout=20, etag=None, last_modified=None):
 
     now = datetime.utcnow()
     events = []
+    floating_timezone = _feed_floating_timezone(cal)
 
     for component in cal.walk():
         if component.name != "VEVENT":
@@ -387,8 +411,8 @@ def fetch_and_parse_ical(feed_url, timeout=20, etag=None, last_modified=None):
         dtstart_raw = component.get("DTSTART")
         dtend_raw = component.get("DTEND")
 
-        dtstart, start_is_all_day = _to_datetime(dtstart_raw)
-        dtend, end_is_all_day = _to_datetime(dtend_raw)
+        dtstart, start_is_all_day = _to_datetime(dtstart_raw, floating_timezone)
+        dtend, end_is_all_day = _to_datetime(dtend_raw, floating_timezone)
 
         # An event is all-day if DTSTART was a DATE type
         is_all_day = start_is_all_day

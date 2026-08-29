@@ -1,6 +1,6 @@
 import json
 import unittest
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from unittest.mock import mock_open, patch
 
 import icalendar
@@ -193,9 +193,11 @@ class TestIcsBuilder(unittest.TestCase):
         )
         self.assertEqual(event["DTSTART"].dt, datetime(2026, 8, 26, 8, 30))
         self.assertEqual(event["DTEND"].dt, datetime(2026, 8, 26, 10, 15))
+        self.assertEqual(str(event["DTSTART"].params["TZID"]), "America/New_York")
+        self.assertEqual(str(event["DTEND"].params["TZID"]), "America/New_York")
         self.assertEqual(event["RRULE"]["FREQ"], "weekly")
         self.assertEqual(event["RRULE"]["BYDAY"], ["TU", "TH"])
-        self.assertEqual(event["RRULE"]["UNTIL"], datetime(2026, 12, 10))
+        self.assertEqual(event["RRULE"]["UNTIL"], datetime(2026, 12, 10, 5, tzinfo=timezone.utc))
         self.assertEqual(str(event["X-APSTUDY-TYPE"]), "class-meeting")
         self.assertEqual(str(event["X-APSTUDY-SCHEDULE-TYPE"]), "Lecture")
         self.assertEqual(
