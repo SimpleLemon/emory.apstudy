@@ -3,6 +3,7 @@
 import hashlib
 import json
 import logging
+import re
 from datetime import datetime, timezone
 
 from flask import Blueprint, current_app, g, jsonify, render_template, redirect, request, url_for
@@ -21,6 +22,7 @@ from appwrite_helpers import (
 )
 from services.discord_audit import emit_server_log_event
 from services.environment_config import runtime_environment_config
+from services.admin_access import user_can_access_admin
 from services.atlas_client import DEFAULT_TERM, get_atlas_term_srcdb, get_general_ed_composite_requirements, get_general_ed_requirement_aliases, get_starred_general_ed_requirements
 from services.daily_quote import get_daily_quote_payload
 from services.calendar_store import first_calendar_row, list_calendar_rows_all
@@ -107,6 +109,34 @@ def _default_courses_campus():
         str(getattr(current_user, "school_key", "") or ""),
     ]).lower()
     return "oxford" if "oxford" in school else "atlanta"
+
+
+ATLAS_DIAGNOSTIC_QUERY_TRUTH_VALUES = {"1", "true", "yes", "on"}
+ATLAS_DIAGNOSTIC_SUBJECT_FORBIDDEN = re.compile(r"[^A-Za-z0-9 _&-]")
+ATLAS_DIAGNOSTIC_KEY_FORBIDDEN = re.compile(r"[^A-Za-z0-9_.:-]")
+
+
+def _atlas_browser_diagnostic_context():
+    """Opt-in admin-only context for the direct Atlas browser probe.
+
+    Requires the operator flag ATLAS_BROWSER_DIAGNOSTIC_ENABLED, an
+    authenticated admin user, and an explicit ``atlas_diag`` query parameter
+    so ordinary users never receive the diagnostic script or globals.
+    """
+    if not current_app.config.get("ATLAS_BROWSER_DIAGNOSTIC_ENABLED"):
+        return None
+    user_id = str(getattr(current_user, "id", "") or "")
+    if not user_can_access_admin(user_id):
+        return None
+    if request.args.get("atlas_diag", "").strip().lower() not in ATLAS_DIAGNOSTIC_QUERY_TRUTH_VALUES:
+        return None
+    subject = ATLAS_DIAGNOSTIC_SUBJECT_FORBIDDEN.sub(
+        "", request.args.get("atlas_diag_subject", "")
+    ).strip().upper()[:24]
+    key = ATLAS_DIAGNOSTIC_KEY_FORBIDDEN.sub(
+        "", request.args.get("atlas_diag_key", "")
+    ).strip()[:64]
+    return {"subject": subject or "CS", "key": key}
 
 DASHBOARD_QUOTE_ERROR_REASONS = {
     "fetch_failed",
@@ -995,6 +1025,7 @@ def courses():
         general_ed_requirements=get_starred_general_ed_requirements(),
         general_ed_requirement_aliases=get_general_ed_requirement_aliases(),
         general_ed_composite_requirements=get_general_ed_composite_requirements(),
+        atlas_diagnostic=_atlas_browser_diagnostic_context(),
     )
 
 

@@ -25,6 +25,7 @@ class EnvironmentConfig:
     appwrite_database_id: str
     allow_insecure_http: bool
     frontend_console_diagnostics_enabled: bool
+    atlas_browser_diagnostic_enabled: bool = False
     flask_env_raw: str | None = None
     database_path_override: str | None = None
     nest_database_path: str | None = None
@@ -133,6 +134,10 @@ def load_environment_config():
         ),
         frontend_console_diagnostics_enabled=(
             get("FRONTEND_CONSOLE_DIAGNOSTICS_ENABLED", "").strip().lower()
+            in _DIAGNOSTIC_TRUTH_VALUES
+        ),
+        atlas_browser_diagnostic_enabled=(
+            get("ATLAS_BROWSER_DIAGNOSTIC_ENABLED", "").strip().lower()
             in _DIAGNOSTIC_TRUTH_VALUES
         ),
         flask_env_raw=flask_env,
