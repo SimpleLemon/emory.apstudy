@@ -1,0 +1,226 @@
+name: Production Deployment
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to production VPS
+    runs-on: self-hosted
+    timeout-minutes: 15
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (
+        github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository
+      )
+    defaults:
+      run:
+        shell: bash
+        working-directory: /var/www/nest.apstudy.org
+
+    steps:
+      - name: Preflight checkout checks
+        run: |
+          set -Eeuo pipefail
+
+          current_branch="$(git rev-parse --abbrev-ref HEAD)"
+          if [[ "$current_branch" != "main" ]]; then
+            echo "::error::Persistent production checkout is on '$current_branch'; expected 'main'." >&2
+            exit 1
+          fi
+
+          if ! git diff --quiet; then
+            echo "::error::Tracked working tree has unstaged changes; refusing to deploy from a dirty checkout." >&2
+            exit 1
+          fi
+          if ! git diff --cached --quiet; then
+            echo "::error::Tracked checkout has staged changes; refusing to deploy." >&2
+            exit 1
+          fi
+
+          echo "CHECKOUT_MOVED=false" >> "$GITHUB_ENV"
+          echo "REQUIREMENTS_CHANGED=false" >> "$GITHUB_ENV"
+
+      - name: Resolve and validate deploy target
+        env:
+          WORKFLOW_RUN_HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          set -Eeuo pipefail
+
+          git fetch origin main
+
+          if [[ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]]; then
+            target_sha="$(git rev-parse origin/main)"
+          else
+            target_sha="${WORKFLOW_RUN_HEAD_SHA:-}"
+          fi
+
+          if [[ ! "$target_sha" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Deploy target is not a full 40-character lowercase SHA: '$target_sha'" >&2
+            exit 1
+          fi
+
+          if ! git cat-file -e "${target_sha}^{commit}" 2>/dev/null; then
+            echo "::error::Deploy target $target_sha is not a commit in this repository." >&2
+            exit 1
+          fi
+
+          origin_main_sha="$(git rev-parse origin/main)"
+          if [[ "$target_sha" != "$origin_main_sha" ]]; then
+            echo "::error::Deploy target $target_sha is not exactly origin/main ($origin_main_sha); refusing to deploy a stale or divergent commit." >&2
+            exit 1
+          fi
+
+          old_sha="$(git rev-parse HEAD)"
+          if ! git merge-base --is-ancestor "$old_sha" "$target_sha"; then
+            echo "::error::Deploy target $target_sha is not a descendant of the currently checked-out main ($old_sha); refusing a non-fast-forward deploy." >&2
+            exit 1
+          fi
+
+          {
+            echo "OLD_SHA=$old_sha"
+            echo "TARGET_SHA=$target_sha"
+          } >> "$GITHUB_ENV"
+
+      - name: Advance main to the deploy target
+        run: |
+          set -Eeuo pipefail
+
+          git checkout main
+          git merge --ff-only "$TARGET_SHA"
+          echo "CHECKOUT_MOVED=true" >> "$GITHUB_ENV"
+
+      - name: Install dependencies if requirements.txt changed
+        run: |
+          set -Eeuo pipefail
+
+          if git diff --quiet "$OLD_SHA" "$TARGET_SHA" -- requirements.txt; then
+            echo "requirements.txt unchanged between $OLD_SHA and $TARGET_SHA; skipping dependency install."
+          else
+            echo "requirements.txt changed between $OLD_SHA and $TARGET_SHA; installing dependencies."
+            echo "REQUIREMENTS_CHANGED=true" >> "$GITHUB_ENV"
+            .venv/bin/python -m pip install -r requirements.txt
+          fi
+
+      - name: Restart nest service
+        run: |
+          set -Eeuo pipefail
+          sudo systemctl restart nest
+
+      - name: Verify deployment health
+        run: |
+          set -Eeuo pipefail
+
+          check_url() {
+            local url="$1"
+            local attempt
+            for attempt in {1..10}; do
+              if curl --fail --silent --show-error --location --max-time 10 "$url" >/dev/null; then
+                echo "Health check passed: $url"
+                return 0
+              fi
+              echo "Health check attempt ${attempt}/10 failed for $url; retrying in 5 seconds." >&2
+              sleep 5
+            done
+            echo "::error::Health check failed after 10 attempts: $url" >&2
+            return 1
+          }
+
+          check_url "http://127.0.0.1:8000/login"
+          check_url "https://nest.apstudy.org/login"
+
+      - name: Roll back to the previous release
+        if: failure()
+        run: |
+          set -Eeuo pipefail
+
+          checkout_moved="${CHECKOUT_MOVED:-false}"
+          requirements_changed="${REQUIREMENTS_CHANGED:-false}"
+          old_sha="${OLD_SHA:-}"
+          target_sha="${TARGET_SHA:-}"
+          rollback_failed=0
+
+          if [[ "$checkout_moved" != "true" ]]; then
+            echo "Deployment failed before the checkout moved; no rollback needed."
+          else
+            echo "Deployment failed after the checkout moved; rolling main back to the previous release."
+            if [[ ! "$old_sha" =~ ^[0-9a-f]{40}$ ]]; then
+              echo "::error::OLD_SHA is missing or malformed; cannot roll back safely." >&2
+              rollback_failed=1
+            elif ! git diff --quiet || ! git diff --cached --quiet; then
+              echo "::error::Tracked checkout is no longer clean; refusing rollback to avoid losing state." >&2
+              rollback_failed=1
+            elif ! git merge-base --is-ancestor "$old_sha" HEAD; then
+              echo "::error::OLD_SHA $old_sha is not an ancestor of the deployed commit; refusing to force-move main." >&2
+              rollback_failed=1
+            elif ! git checkout --detach "$old_sha"; then
+              echo "::error::Could not detach at $old_sha." >&2
+              rollback_failed=1
+            elif ! git branch -f main "$old_sha"; then
+              echo "::error::Could not move main back to $old_sha." >&2
+              rollback_failed=1
+            elif ! git checkout main; then
+              echo "::error::Could not reattach to main at $old_sha." >&2
+              rollback_failed=1
+            else
+              echo "main restored to $old_sha."
+            fi
+
+            if [[ "$rollback_failed" -eq 0 && "$requirements_changed" == "true" ]]; then
+              echo "requirements.txt changed during the failed deploy; reinstalling dependencies from $old_sha."
+              if ! .venv/bin/python -m pip install -r requirements.txt; then
+                echo "::error::Dependency reinstall during rollback failed." >&2
+                rollback_failed=1
+              fi
+            fi
+
+            if [[ "$rollback_failed" -eq 0 ]]; then
+              if ! sudo systemctl restart nest; then
+                echo "::error::Service restart during rollback failed." >&2
+                rollback_failed=1
+              fi
+            fi
+
+            if [[ "$rollback_failed" -eq 0 ]]; then
+              health_ok=1
+              for url in "http://127.0.0.1:8000/login" "https://nest.apstudy.org/login"; do
+                attempt_ok=0
+                for attempt in {1..10}; do
+                  if curl --fail --silent --show-error --location --max-time 10 "$url" >/dev/null; then
+                    echo "Rollback health check passed: $url"
+                    attempt_ok=1
+                    break
+                  fi
+                  echo "Rollback health check attempt ${attempt}/10 failed for $url; retrying in 5 seconds." >&2
+                  sleep 5
+                done
+                if [[ "$attempt_ok" -ne 1 ]]; then
+                  echo "::error::Service is still unhealthy after rollback: $url" >&2
+                  health_ok=0
+                fi
+              done
+              if [[ "$health_ok" -ne 1 ]]; then
+                rollback_failed=1
+              fi
+            fi
+          fi
+
+          if [[ "$rollback_failed" -eq 0 ]]; then
+            echo "Rollback completed; production restored to ${old_sha:-unknown}. The deployment remains failed." >&2
+          else
+            echo "Rollback did not complete cleanly; manual intervention on the VPS is required." >&2
+          fi
+          exit 1
