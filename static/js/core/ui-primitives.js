@@ -136,7 +136,7 @@
         try {
             const parsed = JSON.parse(sessionStorage.getItem(TOAST_SEEN_STORAGE_KEY) || '{}');
             return parsed && typeof parsed === 'object' ? parsed : {};
-        } catch (_error) {
+        } catch {
             return {};
         }
     }
@@ -157,7 +157,7 @@
             });
             seen[id] = now;
             sessionStorage.setItem(TOAST_SEEN_STORAGE_KEY, JSON.stringify(seen));
-        } catch (_error) {
+        } catch {
             // Private mode or blocked storage should not prevent the toast.
         }
     }
