@@ -203,6 +203,7 @@ class AdminSecurityTestCase(unittest.TestCase):
                     patch.object(admin, "_fetch_account", return_value=account_doc), \
                     patch.object(admin, "_safe_count_rows", return_value=0), \
                     patch.object(admin, "count_calendar_rows", return_value=0), \
+                    patch.object(admin, "first_row", return_value=None), \
                     patch.object(admin, "_chat_count_summary", return_value={
                         "chat_messages": 0,
                         "deleted_chat_messages": 0,
