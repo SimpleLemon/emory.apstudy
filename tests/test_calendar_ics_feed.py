@@ -1,4 +1,6 @@
 import json
+import os
+import tempfile
 import unittest
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
@@ -9,15 +11,19 @@ from flask import Flask
 
 from blueprints import calendar_api
 from services import calendar_ics_feed as feed
+from services import database
+import services.calendar_ics_courses as courses
 import services.calendar_ics_contract as contract
 from services.calendar_ics_contract import (
     CalendarIcsFailure,
     CalendarIcsFailureCode,
     CalendarIcsProjectionOutcome,
     NormalizedCalendarEvent,
+    SIMULATED_COURSES_CALENDAR_ID,
     TASKS_CALENDAR_ID,
 )
 from services.calendar_share_service import CalendarIcsResourceError
+from services.calendar_store import calendar_connection
 
 
 UTC = timezone.utc
@@ -214,6 +220,82 @@ class CalendarIcsFeedTests(unittest.TestCase):
             self.assertEqual(not_modified.headers["ETag"], document.etag)
             self.assertEqual(not_modified.get_data(), b"")
             self._assert_security_headers(not_modified)
+
+    def test_saved_course_share_feed_projects_atlanta_wall_clock_to_utc(self):
+        temp_dir = tempfile.TemporaryDirectory()
+        self.addCleanup(temp_dir.cleanup)
+        root = Path(temp_dir.name)
+        db_path = str(root / "calendar.sqlite3")
+        environment = patch.dict(os.environ, {"DATABASE_PATH": db_path, "FLASK_ENV": "testing"}, clear=False)
+        environment.start()
+        self.addCleanup(environment.stop)
+        database.init_db(path=db_path)
+        self.app.config.update(
+            DATABASE_PATH=db_path,
+            CALENDAR_ICS_SUBSCRIPTIONS_ENABLED=True,
+            CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST="user-1",
+        )
+        for key in ("DATABASE_PATH", "CALENDAR_ICS_SUBSCRIPTIONS_ENABLED", "CALENDAR_ICS_SUBSCRIPTIONS_OWNER_ALLOWLIST"):
+            self.addCleanup(self.app.config.pop, key, None)
+        with calendar_connection(db_path) as connection:
+            connection.execute(
+                """INSERT INTO calendar_shares
+                   (id, user_id, share_code, is_active, include_all_calendars,
+                    calendar_ids_json, date_scope, created_at, updated_at,
+                    ics_token, ics_enabled, ics_issued_at, ics_rotated_at)
+                   VALUES (?, ?, ?, 1, 0, ?, 'all', '2025-08-01T00:00:00Z',
+                           '2025-08-01T00:00:00Z', 'secret', 1, '2025-08-01T00:00:00Z', NULL)""",
+                ["share-1", "user-1", "code-share-1", json.dumps([SIMULATED_COURSES_CALENDAR_ID])],
+            )
+        course = {
+            "course_code": "CS 170",
+            "course_title": "Introduction to Computer Science",
+            "course_description": "An approved course description.",
+            "course_notes": "An approved course note.",
+            "date_range": {"start": "2025-08-25", "end": "2025-12-12"},
+            "sections": [{
+                "crn": "12345",
+                "section_number": "1",
+                "schedule_type": "LEC",
+                "instructor": "Ada Lovelace",
+                "location": "White Hall 112",
+                "schedule": {"meetings": [{"day": "Mon", "start": "1000", "end": "1115"}]},
+            }],
+        }
+        course_dir = root / "Fall_2025" / "CS"
+        course_dir.mkdir(parents=True)
+        (course_dir / "170.json").write_text(json.dumps(course), encoding="utf-8")
+        saved_row = {
+            "$id": "saved-course-1",
+            "user_id": "user-1",
+            "term": "Fall_2025",
+            "subject": "CS",
+            "catalog": "170",
+            "crn": "12345",
+            "section_number": "1",
+            "course_name": "Introduction to Computer Science",
+            "instructor_name": "Ada Lovelace",
+            "added_at": "2025-08-01T12:00:00Z",
+            "updated_at": "2025-08-20T12:00:00Z",
+        }
+        fixed_window = (datetime(2025, 8, 1, tzinfo=UTC), datetime(2025, 9, 1, tzinfo=UTC))
+        with patch.object(courses, "list_rows_all", return_value=[saved_row]), \
+                patch.object(courses, "COURSE_DATA_ROOT", root), \
+                patch.object(feed, "utc_subscription_window", return_value=fixed_window):
+            response = self._request("/api/calendar/share-feed.ics?token=secret")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "text/calendar; charset=utf-8; method=PUBLISH")
+        self._assert_security_headers(response)
+        body = response.get_data()
+        parsed = icalendar.Calendar.from_ical(body)
+        vevents = [item for item in parsed.walk() if item.name == "VEVENT"]
+        self.assertEqual(len(vevents), 1)
+        self.assertEqual(str(vevents[0]["SUMMARY"]), "CS 170 LEC (Sec 1)")
+        # 10:00–11:15 Atlanta (EDT, UTC-4) on Mon 2025-08-25 -> 14:00Z–15:15Z.
+        self.assertIn(b"DTSTART:20250825T140000Z", body)
+        self.assertIn(b"DTEND:20250825T151500Z", body)
+        self.assertNotIn(b"DTSTART:20250825T100000Z", body)
+        self.assertNotIn(b"TZID", body)
 
     def test_route_rejects_noncanonical_queries_and_source_failures(self):
         document = feed.serialize_calendar_ics(
