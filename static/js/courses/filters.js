@@ -1,4 +1,12 @@
 (function () {
+  const AVAILABILITY_PHASES = {
+    UNVERIFIED: "unverified",
+    PENDING: "pending",
+    VERIFIED: "verified",
+    UNAVAILABLE: "unavailable",
+  };
+  const STATUS_LABELS = { open: "Open", closed: "Closed", waitlist: "Waitlist" };
+
   function createCourseFilters({
     state,
     COURSE_START_MINUTES,
@@ -6,6 +14,7 @@
     getSection,
     rememberSection,
     utils,
+    getEffectiveAvailability,
   }) {
     const {
       buildSectionSearchBlob,
@@ -14,7 +23,23 @@
       parseTimeInput,
     } = utils;
 
-    function getFilteredSections() {
+    function defaultGetEffectiveAvailability(section) {
+      const raw = section && typeof section === "object"
+        ? String(section.enrollment_status || "").trim().toLowerCase()
+        : "";
+      return {
+        phase: AVAILABILITY_PHASES.UNVERIFIED,
+        status: STATUS_LABELS[raw] || null,
+        source: "catalog",
+      };
+    }
+
+    const resolveAvailability = typeof getEffectiveAvailability === "function"
+      ? getEffectiveAvailability
+      : defaultGetEffectiveAvailability;
+
+    function getFilteredSections(options) {
+      const ignoreStatus = Boolean(options && options.ignoreStatus);
       const query = state.searchQuery.trim().toLowerCase();
       return getSectionsForActiveView().filter((section) => {
         if (section.term && section.term !== state.selectedTerm) return false;
@@ -22,7 +47,7 @@
         if (query && !searchBlob.includes(query)) return false;
         if (!sectionMatchesCampus(section)) return false;
         if (!sectionMatchesRequirement(section)) return false;
-        if (!sectionMatchesEnrollmentStatus(section)) return false;
+        if (!ignoreStatus && !sectionMatchesEnrollmentStatus(section)) return false;
         if (!sectionMatchesDay(section)) return false;
         if (!sectionMatchesTime(section)) return false;
         return true;
@@ -74,7 +99,21 @@
 
     function sectionMatchesEnrollmentStatus(section) {
       if (!state.statusFilters.size) return true;
-      return state.statusFilters.has(String(section.enrollment_status || "").trim().toLowerCase());
+      const availability = resolveAvailability(section);
+      if (!availability || availability.phase !== AVAILABILITY_PHASES.VERIFIED) return false;
+      const status = String(availability.status || "").trim().toLowerCase();
+      return state.statusFilters.has(status);
+    }
+
+    function isAvailabilityVerificationPending(sections) {
+      if (!state.statusFilters.size) return false;
+      const candidates = Array.isArray(sections)
+        ? sections
+        : getFilteredSections({ ignoreStatus: true });
+      return candidates.some((section) => {
+        const availability = resolveAvailability(section);
+        return Boolean(availability && availability.phase === AVAILABILITY_PHASES.PENDING);
+      });
     }
 
     const GER_ALIASES = window.APSTUDY_COURSES_GER_ALIASES || {};
@@ -170,7 +209,7 @@
       });
     }
 
-    return { getFilteredSections };
+    return { getFilteredSections, isAvailabilityVerificationPending };
   }
 
   window.APStudyCoursesFilters = { create: createCourseFilters };

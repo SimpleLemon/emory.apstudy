@@ -1,4 +1,13 @@
 (function () {
+  const AVAILABILITY_PHASES = {
+    UNVERIFIED: "unverified",
+    PENDING: "pending",
+    VERIFIED: "verified",
+    UNAVAILABLE: "unavailable",
+  };
+  const STATUS_CHIP_CLASSES = { open: "is-open", closed: "is-closed" };
+  const UNAVAILABLE_SEATS_TITLE = "Live availability could not be verified from Atlas just now.";
+
   function createCoursePanel({
     state,
     COURSE_COLOR_PALETTE,
@@ -7,6 +16,7 @@
     getFilteredSections,
     getSection,
     isTrackable,
+    getEffectiveAvailability,
     utils,
   }) {
     const {
@@ -99,7 +109,7 @@
       const visible = filtered.slice(0, COURSE_RESULT_LIMIT);
       summary.textContent = getPanelSummaryText(filtered.length);
       if (!visible.length) {
-        content.innerHTML = `<div class="courses-state">${escapeHtml(getEmptyStateText())}</div>`;
+        content.innerHTML = buildEmptyStateHtml();
         return;
       }
 
@@ -132,6 +142,39 @@
       if (state.activeCourseView === "selected") return "No selected courses match your filters.";
       if (state.activeCourseView === "tracked") return "No tracked courses match your filters.";
       return "No sections match your filters.";
+    }
+
+    function statusFilterAvailabilityState() {
+      if (!state.statusFilters.size) return "matched";
+      const candidates = getFilteredSections({ ignoreStatus: true });
+      if (!candidates.length) return "matched";
+      let pending = false;
+      let incomplete = false;
+      candidates.forEach((section) => {
+        const availability = resolveCardAvailability(section);
+        const phase = availability && typeof availability === "object"
+          ? availability.phase
+          : null;
+        if (phase === AVAILABILITY_PHASES.PENDING) {
+          pending = true;
+        } else if (phase !== AVAILABILITY_PHASES.VERIFIED) {
+          incomplete = true;
+        }
+      });
+      if (pending) return "pending";
+      if (incomplete) return "unavailable";
+      return "matched";
+    }
+
+    function buildEmptyStateHtml() {
+      const availabilityState = statusFilterAvailabilityState();
+      if (availabilityState === "pending" || availabilityState === "unavailable") {
+        const text = availabilityState === "pending"
+          ? "Live availability is still verifying. Status filters will apply once checks finish."
+          : "Live availability couldn't be verified, so status filters can't be applied yet.";
+        return `<div class="courses-state" role="status" aria-live="polite">${escapeHtml(text)}</div>`;
+      }
+      return `<div class="courses-state">${escapeHtml(getEmptyStateText())}</div>`;
     }
 
     function syncFilterControls() {
@@ -177,6 +220,120 @@
       });
     }
 
+    function defaultGetEffectiveAvailability(section) {
+      const raw = section && typeof section === "object"
+        ? String(section.enrollment_status || "").trim().toLowerCase()
+        : "";
+      return {
+        phase: AVAILABILITY_PHASES.UNVERIFIED,
+        status: raw === "open" ? "Open" : raw === "closed" ? "Closed" : raw === "waitlist" ? "Waitlist" : null,
+        seatsAvailable: null,
+        current: false,
+      };
+    }
+
+    function resolveCardAvailability(section) {
+      const resolved = typeof getEffectiveAvailability === "function"
+        ? getEffectiveAvailability(section)
+        : null;
+      return resolved && typeof resolved === "object"
+        ? resolved
+        : defaultGetEffectiveAvailability(section);
+    }
+
+    function statusChipClass(status) {
+      const key = String(status || "").trim().toLowerCase();
+      return STATUS_CHIP_CLASSES[key] || "";
+    }
+
+    function enrollmentCapacity(section) {
+      const parsed = Number.parseInt(section?.enrollment_capacity, 10);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
+
+    function formatLiveSeats(seats, capacity) {
+      if (capacity !== null) return `${seats} of ${capacity} seats`;
+      return `${seats} ${seats === 1 ? "seat" : "seats"}`;
+    }
+
+    function getCardAvailabilityDisplay(section) {
+      const availability = resolveCardAvailability(section);
+      const phase = availability.phase;
+
+      if (phase === AVAILABILITY_PHASES.PENDING) {
+        return {
+          status: "Checking",
+          statusClass: "is-loading",
+          seats: "Checking live seats",
+          seatsClass: "is-loading",
+          seatsTitle: "",
+        };
+      }
+
+      if (phase === AVAILABILITY_PHASES.UNAVAILABLE) {
+        return {
+          status: "Unavailable",
+          statusClass: "",
+          seats: "Unavailable",
+          seatsClass: "",
+          seatsTitle: UNAVAILABLE_SEATS_TITLE,
+        };
+      }
+
+      const status = availability.status || "Unknown";
+      const statusClass = statusChipClass(status);
+
+      if (phase === AVAILABILITY_PHASES.VERIFIED) {
+        if (String(status).toLowerCase() === "closed") {
+          const capacity = enrollmentCapacity(section);
+          return {
+            status,
+            statusClass,
+            seats: capacity !== null ? `0 of ${capacity} seats` : "0 seats available",
+            seatsClass: "",
+            seatsTitle: "",
+          };
+        }
+        const seats = availability.seatsAvailable;
+        if (seats === null || typeof seats === "undefined" || seats === "") {
+          if (availability.detailsPending) {
+            return {
+              status,
+              statusClass,
+              seats: "Loading seats",
+              seatsClass: "is-loading",
+              seatsTitle: "",
+            };
+          }
+          const detailError = availability.error;
+          return {
+            status,
+            statusClass,
+            seats: "Seats unavailable",
+            seatsClass: "",
+            seatsTitle: detailError && detailError.message
+              ? String(detailError.message)
+              : "Live seat details are unavailable for this section.",
+          };
+        }
+        return {
+          status,
+          statusClass,
+          seats: formatLiveSeats(Number(seats), enrollmentCapacity(section)),
+          seatsClass: "",
+          seatsTitle: "",
+        };
+      }
+
+      return {
+        status,
+        statusClass,
+        seats: "Not verified",
+        seatsClass: "",
+        seatsTitle: "",
+      };
+    }
+
     function buildCourseCardHtml(section) {
       const id = section.id;
       const addedCourse = state.savedCoursesBySection.get(id);
@@ -184,11 +341,10 @@
       const isTracked = Boolean(state.tracksBySection.get(id)?.enabled);
       const track = state.tracksBySection.get(id);
       const colorClass = isAdded ? getCourseColor(addedCourse).key : "";
-      const status = section.enrollment_status || "Unknown";
-      const statusClass = status.toLowerCase() === "open" ? "is-open" : status.toLowerCase() === "closed" ? "is-closed" : "";
-      const hasLiveSnapshot = section.live_snapshot_available === true;
-      const seats = hasLiveSnapshot ? formatSeats(section) : "Loading seats";
-      const seatsClass = hasLiveSnapshot ? "" : "is-loading";
+      const availability = getCardAvailabilityDisplay(section);
+      const seatsTitle = availability.seatsTitle
+        ? ` title="${escapeHtml(availability.seatsTitle)}"`
+        : "";
       const saving = state.savingIds.has(id);
       const sectionLabel = section.section_number ? ` <span class="course-section-inline">&middot; Sec ${escapeHtml(section.section_number)}</span>` : "";
       const scheduleDetail = formatCourseCardSchedule(section);
@@ -204,8 +360,8 @@
           <div class="course-card-schedule">${escapeHtml(scheduleDetail)}</div>
           <div class="course-card-meta-row">
             <div class="course-card-meta">
-              <span class="course-chip ${statusClass}">${escapeHtml(status)}</span>
-              <span class="course-chip ${seatsClass}">${escapeHtml(seats)}</span>
+              <span class="course-chip ${availability.statusClass}">${escapeHtml(availability.status)}</span>
+              <span class="course-chip ${availability.seatsClass}"${seatsTitle}>${escapeHtml(availability.seats)}</span>
               <span class="course-chip">${escapeHtml(section.schedule_type || "Type")}</span>
               <span class="course-chip">${escapeHtml(formatCampus(section))}</span>
             </div>

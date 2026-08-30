@@ -12,7 +12,6 @@ const COURSE_END_MINUTES = COURSE_END_HOUR * 60;
 const COURSE_HOUR_HEIGHT = 64;
 const COURSE_RESULT_LIMIT = 100;
 const COURSE_LIVE_HYDRATION_OVERSCAN = 5;
-const COURSE_LIVE_HYDRATION_FAILURE_TTL_MS = 2 * 60 * 1000;
 const COMPACT_COURSES_QUERY = window.matchMedia("(max-width: 640px)");
 const BODY_SCROLLING_COURSES_QUERY = window.matchMedia("(max-width: 1024px)");
 const COURSE_COLOR_PALETTE = Array.from({ length: 16 }, (_, index) => ({
@@ -25,6 +24,9 @@ const {
   parseCoursesSectionDeepLink,
 } = window.APStudyCoursesUtils;
 const { collectMeetingOverrides, meetingRemovalFocusPlan } = window.APStudyCoursesEdit;
+const availabilityVerifier = window.APStudyCoursesVerify.create({
+  onStatusProgress: renderCourses,
+});
 
 const state = {
   loading: true,
@@ -61,8 +63,6 @@ const state = {
   detailLoading: false,
   detailLiveError: "",
   liveHydrationTimer: null,
-  liveHydrationInFlight: new Set(),
-  liveHydrationFailures: new Map(),
   error: "",
   weekScrollTop: null,
   weekScrollLeft: null,
@@ -76,9 +76,10 @@ const courseFilters = window.APStudyCoursesFilters.create({
   COURSE_END_MINUTES,
   getSection,
   rememberSection,
+  getEffectiveAvailability: (section) => availabilityVerifier.getEffectiveAvailability(section),
   utils: window.APStudyCoursesUtils,
 });
-const { getFilteredSections } = courseFilters;
+const { getFilteredSections, isAvailabilityVerificationPending } = courseFilters;
 const coursePanel = window.APStudyCoursesPanel.create({
   state,
   COURSE_COLOR_PALETTE,
@@ -87,6 +88,7 @@ const coursePanel = window.APStudyCoursesPanel.create({
   getFilteredSections,
   getSection,
   isTrackable,
+  getEffectiveAvailability,
   utils: window.APStudyCoursesUtils,
 });
 const {
@@ -128,6 +130,7 @@ const { wireControls } = window.APStudyCoursesControls.create({
   removeCourse,
   removeTrack,
   renderCalendar,
+  renderCourses,
   renderPanel,
   resetWeekScroll,
   refreshSectionStatus,
@@ -135,6 +138,7 @@ const { wireControls } = window.APStudyCoursesControls.create({
   setTrack,
   startEditingCourse,
   syncFilterControls,
+  verifyCurrentAvailability,
   meetingRemovalFocusPlan,
 });
 
@@ -258,9 +262,6 @@ async function loadSectionsForTerm(term) {
     if (state.requirementFilter && state.requirementFilter !== "all") {
       params.set("requirement", state.requirementFilter);
     }
-    if (state.statusFilters.size) {
-      params.set("statuses", Array.from(state.statusFilters).join(","));
-    }
     const payload = await fetchJson(`/api/atlas/sections?${params.toString()}`);
     if (requestId !== state.currentSectionsRequest) return;
     state.sectionsById = Object.fromEntries(
@@ -270,6 +271,7 @@ async function loadSectionsForTerm(term) {
     );
     const rawSections = Array.isArray(payload.sections) ? payload.sections : [];
     state.sections = rawSections.map((section) => rememberSection(section)).filter(Boolean);
+    void verifyCurrentAvailability();
   } catch (error) {
     if (requestId !== state.currentSectionsRequest) return;
     console.error(error);
@@ -279,6 +281,70 @@ async function loadSectionsForTerm(term) {
     state.sectionsLoading = false;
     render();
   }
+}
+
+function buildAvailabilityQueryInput() {
+  return {
+    term: state.selectedTerm,
+    query: state.searchQuery.trim(),
+    days: Array.from(state.dayFilters).sort(),
+    timeEnabled: state.timeEnabled,
+    timeStart: state.timeStart,
+    timeEnd: state.timeEnd,
+    campus: state.campusFilter,
+    requirement: state.requirementFilter,
+  };
+}
+
+function getAvailabilityCandidates() {
+  const candidates = getFilteredSections({ ignoreStatus: true });
+  const sectionIds = candidates
+    .map((section) => String(section?.id || section?.section_id || ""))
+    .filter(Boolean);
+  return { candidates, sectionIds };
+}
+
+function renderCourses() {
+  if (state.loading || state.error || state.editingSectionId || state.detailSectionId || state.sectionsLoading) {
+    renderPanel();
+    return;
+  }
+  const candidates = getFilteredSections({ ignoreStatus: true });
+  if (state.statusFilters.size && isAvailabilityVerificationPending(candidates)) {
+    renderAvailabilityPendingState();
+    return;
+  }
+  renderPanel();
+}
+
+function renderAvailabilityPendingState() {
+  const summary = document.getElementById("courses-result-summary");
+  const content = document.getElementById("courses-panel-content");
+  if (!content) return;
+  if (summary) summary.textContent = "Verifying live availability…";
+  content.innerHTML = `<div class="courses-state" role="status" aria-live="polite">Verifying live availability…</div>`;
+}
+
+async function verifyCurrentAvailability() {
+  let settledState = null;
+  try {
+    const { sectionIds } = getAvailabilityCandidates();
+    const queryPromise = availabilityVerifier.startQuery({
+      queryInput: buildAvailabilityQueryInput(),
+      sectionIds,
+    });
+    renderCourses();
+    settledState = await queryPromise;
+  } catch (error) {
+    console.error(error);
+    return;
+  }
+  const currentState = availabilityVerifier.getState();
+  if (currentState.generation !== settledState.generation
+    || currentState.querySignature !== settledState.querySignature) {
+    return;
+  }
+  renderCourses();
 }
 
 async function loadSavedCourses() {
@@ -317,9 +383,6 @@ function rememberSection(section) {
   const normalized = { ...state.sectionsById[id], ...section, id };
   if (state.savedCoursesBySection.has(id)) {
     Object.assign(normalized, getDisplayCourse(id));
-  }
-  if (normalized.live_snapshot_available === true) {
-    state.liveHydrationFailures.delete(id);
   }
   normalized.searchBlob = buildSectionSearchBlob(normalized);
   state.sectionsById[id] = normalized;
@@ -372,7 +435,7 @@ function getDisplayCourse(sectionId) {
 
 function render() {
   renderTermSelect();
-  renderPanel();
+  renderCourses();
   renderCalendar();
   scheduleVisibleLiveHydration();
 }
@@ -756,10 +819,14 @@ function getSection(sectionId) {
 
 function isTrackable(section) {
   if (section?.is_cancelled) return false;
-  const status = String(section?.enrollment_status || "").toLowerCase();
-  const seats = Number.parseInt(section?.seats_available, 10);
-  if (seats === 0) return true;
-  return status === "closed" && Number.isNaN(seats);
+  const availability = availabilityVerifier.getEffectiveAvailability(section);
+  if (!availability || availability.phase !== "verified" || availability.current !== true) return false;
+  if (String(availability.status || "").toLowerCase() === "closed") return true;
+  return availability.seatsAvailable === 0;
+}
+
+function getEffectiveAvailability(section) {
+  return availabilityVerifier.getEffectiveAvailability(section);
 }
 
 function scrollPanelContentToTop() {
@@ -780,15 +847,6 @@ function wireLiveHydrationControls() {
 function scheduleVisibleLiveHydration() {
   window.clearTimeout(state.liveHydrationTimer);
   state.liveHydrationTimer = window.setTimeout(hydrateVisibleLiveSections, 140);
-}
-
-function shouldHydrateLiveSection(section) {
-  const id = String(section?.id || section?.section_id || "");
-  if (!id || state.liveHydrationInFlight.has(id)) return false;
-  if (section?.live_snapshot_available === true && section?.live_stale !== true) return false;
-  const failedAt = state.liveHydrationFailures.get(id);
-  if (failedAt && Date.now() - failedAt < COURSE_LIVE_HYDRATION_FAILURE_TTL_MS) return false;
-  return true;
 }
 
 function visibleHydrationSectionIds() {
@@ -824,38 +882,37 @@ function visibleHydrationSectionIds() {
     selected.push(cards[index].dataset.sectionId);
   }
 
-  return Array.from(new Set(selected))
-    .filter((sectionId) => shouldHydrateLiveSection(getSection(sectionId)));
+  return Array.from(new Set(selected));
 }
 
 async function hydrateVisibleLiveSections() {
   const sectionIds = visibleHydrationSectionIds();
   if (!sectionIds.length) return;
-  sectionIds.forEach((sectionId) => state.liveHydrationInFlight.add(sectionId));
+  const beforeState = availabilityVerifier.getState();
+  let settledState = null;
   try {
-    const payload = await fetchJson("/api/courses/section-status/batch", {
-      method: "POST",
-      body: JSON.stringify({ section_ids: sectionIds, force: false }),
-    });
-    Object.values(payload.sections_by_id || {}).forEach((section) => {
-      if (section?.id || section?.section_id) rememberSection(section);
-    });
-    Object.keys(payload.errors_by_id || {}).forEach((sectionId) => {
-      state.liveHydrationFailures.set(String(sectionId), Date.now());
-    });
-    rerenderAfterLiveHydration();
+    settledState = await availabilityVerifier.requestDetails(sectionIds);
   } catch (error) {
     console.error(error);
-    sectionIds.forEach((sectionId) => state.liveHydrationFailures.set(sectionId, Date.now()));
-  } finally {
-    sectionIds.forEach((sectionId) => state.liveHydrationInFlight.delete(sectionId));
+    return;
   }
+  const currentState = availabilityVerifier.getState();
+  if (!settledState
+    || beforeState.generation !== currentState.generation
+    || currentState.generation !== settledState.generation) {
+    return;
+  }
+  const changed = currentState.detailedIds.size !== beforeState.detailedIds.size
+    || currentState.detailErrors.size !== beforeState.detailErrors.size
+    || currentState.errors.size !== beforeState.errors.size;
+  if (!changed) return;
+  rerenderAfterLiveHydration();
 }
 
 function rerenderAfterLiveHydration() {
   const before = document.getElementById("courses-panel-content")?.scrollTop || 0;
   renderTermSelect();
-  renderPanel();
+  renderCourses();
   renderCalendar();
   const content = document.getElementById("courses-panel-content");
   if (content) content.scrollTop = before;

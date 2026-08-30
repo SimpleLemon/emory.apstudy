@@ -4,8 +4,10 @@ blueprints/atlas_api.py
 Atlas course lookup endpoints.
 """
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
+from flask_login import current_user, login_required
 
+from services import atlas_live_verification
 from services.atlas_client import (
     get_subjects,
     search_courses,
@@ -14,7 +16,8 @@ from services.atlas_client import (
     get_sections_by_ids,
     get_starred_general_ed_requirements,
 )
-from services.course_live_snapshots import merge_snapshots_into_sections
+from services.course_live_snapshots import isoformat, merge_snapshots_into_sections
+from services.user_profile import is_emory_or_oxford_user
 
 
 atlas_bp = Blueprint("atlas", __name__)
@@ -50,6 +53,12 @@ def _int_arg(name, default=None):
         return int(value)
     except (TypeError, ValueError):
         return default
+
+
+def _require_emory_student():
+    if not is_emory_or_oxford_user(current_user):
+        return jsonify({"error": "Courses are only available to Emory students."}), 403
+    return None
 
 
 def _filter_live_sections_by_status(result, statuses, limit=None, offset=0):
@@ -159,3 +168,41 @@ def list_sections_by_id():
         "sections": merge_snapshots_into_sections(result.get("sections") or []),
     }
     return jsonify(result)
+
+
+@atlas_bp.route("/sections/verify", methods=["POST"])
+@login_required
+def verify_sections():
+    forbidden = _require_emory_student()
+    if forbidden:
+        return forbidden
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        payload = {}
+    section_ids = payload.get("section_ids")
+    if not isinstance(section_ids, list):
+        return jsonify({"error": "section_ids must be a list"}), 400
+    detail_ids = payload.get("detail_ids")
+    if detail_ids is not None and not isinstance(detail_ids, list):
+        return jsonify({"error": "detail_ids must be a list"}), 400
+    if len(section_ids) > atlas_live_verification.MAX_SECTION_IDS:
+        return jsonify({
+            "error": f"Too many section IDs requested (max {atlas_live_verification.MAX_SECTION_IDS})"
+        }), 400
+    if detail_ids and len(detail_ids) > atlas_live_verification.MAX_DETAIL_IDS:
+        return jsonify({
+            "error": f"Too many detail IDs requested (max {atlas_live_verification.MAX_DETAIL_IDS})"
+        }), 400
+
+    try:
+        result = atlas_live_verification.verify_sections_by_ids(section_ids, detail_ids)
+    except Exception:
+        current_app.logger.exception("Live Atlas verification failed unexpectedly")
+        return jsonify({"error": "Live Atlas verification is unavailable."}), 500
+
+    return jsonify({
+        **result,
+        "status": "ok",
+        "fetched_at": isoformat(),
+    })

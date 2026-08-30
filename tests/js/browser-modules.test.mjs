@@ -54,6 +54,7 @@ if (false) {
     await import("../../static/js/courses/index.js");
     await import("../../static/js/courses/panel.js");
     await import("../../static/js/courses/utils.js");
+    await import("../../static/js/courses/verify.js");
     await import("../../static/js/dashboard/daily-quote.js");
     await import("../../static/js/dashboard/daily-quote/data.js");
     await import("../../static/js/dashboard/index.js");
@@ -813,9 +814,11 @@ test("notes sharing keeps canonical links, view-only capabilities, and folder in
 test("courses page keeps Atlas APIs, filtering state, and schedule constants connected", async () => {
     const source = await sourceFor("static/js/courses/index.js");
     const template = await sourceFor("templates/courses.html");
+    const controlsSource = await sourceFor("static/js/courses/controls.js");
     const combinedSource = [
         source,
         await sourceFor("static/js/courses/utils.js"),
+        await sourceFor("static/js/courses/verify.js"),
         await sourceFor("static/js/courses/filters.js"),
         await sourceFor("static/js/courses/panel.js"),
         await sourceFor("static/js/courses/calendar.js"),
@@ -832,10 +835,13 @@ test("courses page keeps Atlas APIs, filtering state, and schedule constants con
     assert.match(source, /fetchJson\("\/api\/atlas\/terms"\)/);
     assert.match(source, /new URLSearchParams\(\{\s*term,\s*include_cancelled: "0",\s*\}\)/);
     assert.match(source, /params\.set\("q", query\)/);
-    assert.match(source, /params\.set\("statuses", Array\.from\(state\.statusFilters\)\.join\(","\)\)/);
+    assert.doesNotMatch(source, /params\.set\("statuses",/); // verify.js owns the Atlas query contract; index.js must not send statuses directly.
     assert.match(source, /COURSE_LIVE_HYDRATION_OVERSCAN = 5/);
-    assert.match(source, /fetchJson\("\/api\/courses\/section-status\/batch"/);
-    assert.match(source, /body: JSON\.stringify\(\{ section_ids: sectionIds, force: false \}\)/);
+    assert.match(source, /availabilityVerifier\.requestDetails\(sectionIds\)/);
+    assert.match(source, /beforeState\.generation !== currentState\.generation/);
+    assert.match(source, /currentState\.generation !== settledState\.generation/);
+    assert.doesNotMatch(source, /section-status\/batch/); // verify.js owns live hydration; the old batch endpoint must stay gone.
+    assert.doesNotMatch(source, /liveHydrationInFlight|liveHydrationFailures/);
     assert.doesNotMatch(source, /APStudyAtlasLive\.fetchSectionStatus/);
     assert.match(source, /fetchJson\("\/api\/courses\/saved"\)/);
     assert.match(source, /fetchJson\("\/api\/courses\/tracks"\)/);
@@ -856,7 +862,10 @@ test("courses page keeps Atlas APIs, filtering state, and schedule constants con
     assert.match(combinedSource, /course-card-tracked/);
     assert.match(combinedSource, /notifications_active/);
     assert.match(combinedSource, /if \(section\?\.is_cancelled\) return false/);
-    assert.match(combinedSource, /if \(seats === 0\) return true/);
+    assert.match(source, /availability\.phase !== "verified" \|\| availability\.current !== true/);
+    assert.match(source, /String\(availability\.status \|\| ""\)\.toLowerCase\(\) === "closed"\) return true/);
+    assert.match(source, /return availability\.seatsAvailable === 0;/);
+    assert.doesNotMatch(source, /section\?\.seats_available/);
     assert.match(combinedSource, /normalizeScheduleDisplay/);
     assert.match(combinedSource, /courses-availability-filter/);
     assert.match(combinedSource, /sectionMatchesEnrollmentStatus/);
@@ -876,6 +885,15 @@ test("courses page keeps Atlas APIs, filtering state, and schedule constants con
     assert.match(template, /courses-results-skeleton/);
     assert.match(template, /courses-schedule-skeleton/);
     assert.match(styles, /\.courses-skeleton-week-frame/);
+
+    const verifyScriptIndex = template.indexOf("js/courses/verify.js");
+    const indexScriptIndex = template.indexOf("js/courses/index.js");
+    assert.ok(verifyScriptIndex !== -1, "courses template must load js/courses/verify.js");
+    assert.ok(indexScriptIndex !== -1, "courses template must load js/courses/index.js");
+    assert.ok(verifyScriptIndex < indexScriptIndex, "courses template must load verify.js before index.js and any consumer requiring it");
+    assert.doesNotMatch(template, /js\/courses\/atlas-live\.js/);
+    assert.match(controlsSource, /void loadSectionsForTerm\(state\.selectedTerm\);\s*\}, 500\);/);
+    assert.doesNotMatch(controlsSource, /, 250\);/);
 });
 
 test("files page keeps upload limits, modal elements, and share/delete endpoints wired", async () => {

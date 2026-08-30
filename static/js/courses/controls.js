@@ -12,6 +12,7 @@
     removeCourse,
     removeTrack,
     renderCalendar,
+    renderCourses,
     renderPanel,
     resetWeekScroll,
     refreshSectionStatus,
@@ -19,6 +20,7 @@
     setTrack,
     startEditingCourse,
     syncFilterControls,
+    verifyCurrentAvailability,
     meetingRemovalFocusPlan,
   }) {
     function wireControls() {
@@ -32,7 +34,7 @@
         window.clearTimeout(searchTimer);
         searchTimer = window.setTimeout(() => {
           void loadSectionsForTerm(state.selectedTerm);
-        }, 250);
+        }, 500);
       };
 
       let lastCompactCourses = isCompactCoursesViewport();
@@ -58,6 +60,7 @@
         state.editingSectionId = null;
         state.filtersOpen = false;
         renderPanel();
+        void verifyCurrentAvailability();
       });
 
       filterButton?.addEventListener("click", (event) => {
@@ -151,7 +154,7 @@
         clearDetailReturnContext();
         state.detailSectionId = null;
         state.editingSectionId = null;
-        scheduleSectionReload();
+        renderCourses();
       });
 
       document.getElementById("courses-prev-term")?.addEventListener("click", () => {

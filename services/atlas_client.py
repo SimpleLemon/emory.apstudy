@@ -966,6 +966,7 @@ def _live_row_from_raw(term, raw):
         meetings = _parse_meeting_times(raw.get("meetingTimes") or raw.get("meetings"))
     return {
         "id": build_section_id(term, subject, catalog, crn, section_number),
+        "atlas_key": str(raw.get("key") or "").strip() or None,
         "term": term,
         "subject": subject,
         "catalog_number": catalog,
