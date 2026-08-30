@@ -1,15 +1,19 @@
 import os
 import tempfile
 import unittest
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest.mock import patch
 
 from services import database, notes_collaboration
 
 
-NOW = "2026-07-31T12:00:00Z"
-NEXT_WEEK = "2026-08-07T12:00:00Z"
-NEXT_MONTH = "2026-08-30T12:00:00Z"
+# Derived from the real clock at import so expiry comparisons made against the
+# unpatched utcnow_iso() (for example list_versions) stay valid on any run date.
+_ANCHOR = datetime.now(timezone.utc).replace(microsecond=0)
+NOW = _ANCHOR.strftime("%Y-%m-%dT%H:%M:%SZ")
+NEXT_WEEK = (_ANCHOR + timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%SZ")
+NEXT_MONTH = (_ANCHOR + timedelta(days=30)).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
 class CollaborationDatabaseTestCase(unittest.TestCase):
