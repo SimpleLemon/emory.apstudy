@@ -350,7 +350,14 @@ def _site_with_feed_include(site: bytes, include_path: str) -> bytes:
     location = locations[0]
     absolute = brace + 1 + location.start()
     line_start = text.rfind("\n", 0, absolute) + 1
-    indentation = re.match(r"[ \t]*", text[line_start:absolute]).group(0)
+    prefix = text[line_start:absolute]
+    indentation = re.match(r"[ \t]*", prefix).group(0)
+    if prefix.strip():
+        # Content (for example "server { listen 443;") precedes the location
+        # on the same line.  Keep that prefix and put the include on its own
+        # line so it stays inside the selected server block.
+        include = f"{prefix}\n{indentation}include {include_path};\n"
+        return (text[:line_start] + include + text[absolute:]).encode("utf-8")
     include = f"{indentation}include {include_path};\n"
     return (text[:line_start] + include + text[line_start:]).encode("utf-8")
 

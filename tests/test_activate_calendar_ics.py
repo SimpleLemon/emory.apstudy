@@ -304,6 +304,23 @@ class CalendarIcsActivationTests(unittest.TestCase):
         with self.assertRaises(ACTIVATE.ActivationError):
             ACTIVATE._site_with_feed_include(existing, "/tmp/feed.conf")
 
+    def test_compact_one_line_https_server_keeps_include_inside_the_block(self):
+        compact = (
+            "server { listen 80; location /health { return 204; } }\n"
+            "server { listen 443; location / { return 204; } }\n"
+        )
+        candidate = ACTIVATE._site_with_feed_include(
+            compact.encode(), "/etc/nginx/snippets/nest-calendar-ics-feed.conf"
+        ).decode()
+        include_index = candidate.index("include /etc/nginx/snippets/nest-calendar-ics-feed.conf;")
+        line_start = candidate.rfind("\n", 0, include_index) + 1
+        self.assertEqual(candidate[line_start:include_index].strip(), "")
+        head = candidate[:include_index]
+        self.assertIn("server { listen 443;", head)
+        self.assertEqual(head.count("{") - head.count("}"), 1)
+        self.assertLess(include_index, candidate.index("location / {"))
+        self.assertTrue(candidate.endswith("location / { return 204; } }\n"))
+
     def test_check_requires_pins_rejects_tracked_dirt_and_is_read_only(self):
         pins = self.pins()
         with self.assertRaises(ACTIVATE.ActivationError):
