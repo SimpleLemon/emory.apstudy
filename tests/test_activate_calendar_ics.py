@@ -8,6 +8,7 @@ import shutil
 import signal
 import stat
 import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -35,8 +36,8 @@ class FakeRunner:
             "events {}\nhttp { server { listen 443 ssl; location / { return 204; } } }\n"
         )
 
-    def run(self, argv, *, check=True):
-        del check
+    def run(self, argv, *, check=True, diagnostics=False):
+        del check, diagnostics
         command = tuple(str(part) for part in argv)
         self.calls.append(command)
         if self.fail and self.fail(command, len(self.calls)):
@@ -424,6 +425,18 @@ class CalendarIcsActivationTests(unittest.TestCase):
         self.assertIn(f"include {stage / 'real_ip'};", shadow_config)
         self.assertIn(f"include {stage / 'http'};", shadow_config)
         self.assertIn(f"include {stage / 'shadow-site.conf'};", shadow_config)
+        self.assertIn(f"client_body_temp_path {stage / 'client-body-temp'};", shadow_config)
+        self.assertIn(f"proxy_temp_path {stage / 'proxy-temp'};", shadow_config)
+        self.assertIn(f"fastcgi_temp_path {stage / 'fastcgi-temp'};", shadow_config)
+        self.assertIn(f"uwsgi_temp_path {stage / 'uwsgi-temp'};", shadow_config)
+        self.assertIn(f"scgi_temp_path {stage / 'scgi-temp'};", shadow_config)
+        # Distro nginx compiles in absolute temp defaults (/var/lib/nginx/*)
+        # and log defaults (/var/log/nginx/*); the shadow config must keep
+        # every temp/log path beneath the stage so root-free validation never
+        # touches or requires live directories.
+        self.assertNotIn("/var/lib/nginx", shadow_config)
+        self.assertNotIn("/var/log/nginx", shadow_config)
+        self.assertIn("access_log off;", shadow_config)
         self.assertIn("server { listen 80", shadow_site)
         self.assertIn("listen 443 ssl", shadow_site)
         self.assertIn("X-Shadow-Test", next((stage / "shadow-includes").iterdir()).read_text())
@@ -449,6 +462,20 @@ class CalendarIcsActivationTests(unittest.TestCase):
         )
         stage, _ = self.tool._stage("20260827T120000Z-222222222222", self.env.read_bytes(), candidate_env, candidate_site)
         self.make_tool(runner=ACTIVATE.CommandRunner(timeout=10))._shadow_nginx(stage)
+
+    def test_command_runner_diagnostics_are_opt_in_and_sanitized(self):
+        runner = ACTIVATE.CommandRunner(timeout=10)
+        argv = [sys.executable, "-c", "import sys; print('  nginx\t detail ' + 'x' * 3000); sys.exit(3)"]
+        with self.assertRaises(ACTIVATE.ActivationError) as raised:
+            runner.run(argv, diagnostics=True)
+        message = str(raised.exception)
+        prefix = f"command returned 3: {sys.executable} "
+        self.assertTrue(message.startswith(prefix + "[nginx detail"), message)
+        self.assertLessEqual(len(message), len(prefix) + 2002)
+        self.assertNotIn("\t", message)
+        with self.assertRaises(ACTIVATE.ActivationError) as caught:
+            runner.run(argv)
+        self.assertEqual(str(caught.exception), f"command returned 3: {sys.executable}")
 
     def test_apply_commits_with_exact_manifest_and_no_secret_exposure(self):
         baseline = self.baseline()

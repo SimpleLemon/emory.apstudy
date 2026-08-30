@@ -107,7 +107,7 @@ class CommandRunner:
     def __init__(self, timeout: float = 20.0):
         self.timeout = timeout
 
-    def run(self, argv: Iterable[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+    def run(self, argv: Iterable[str], *, check: bool = True, diagnostics: bool = False) -> subprocess.CompletedProcess[str]:
         command = tuple(str(part) for part in argv)
         try:
             result = subprocess.run(
@@ -122,7 +122,15 @@ class CommandRunner:
         except (OSError, subprocess.TimeoutExpired) as exc:
             raise ActivationError(f"command failed safely: {command[0] if command else 'empty command'}") from exc
         if check and result.returncode != 0:
-            raise ActivationError(f"command returned {result.returncode}: {command[0] if command else 'empty command'}")
+            message = f"command returned {result.returncode}: {command[0] if command else 'empty command'}"
+            if diagnostics:
+                # Only for validation commands whose output cannot contain
+                # secrets (nginx -t on the tool-generated shadow config).
+                # Whitespace is flattened and the tail is bounded.
+                output = " ".join(f"{result.stdout or ''} {result.stderr or ''}".split())
+                if output:
+                    message = f"{message} [{output[:2000]}]"
+            raise ActivationError(message)
         return result
 
 
@@ -582,8 +590,8 @@ class ActivationTool:
         if stage.exists():
             assert_no_symlink_components(stage, allow_missing_leaf=False)
 
-    def _run(self, *argv: str, check: bool = True) -> subprocess.CompletedProcess[str]:
-        return self.runner.run(argv, check=check)
+    def _run(self, *argv: str, check: bool = True, diagnostics: bool = False) -> subprocess.CompletedProcess[str]:
+        return self.runner.run(argv, check=check, diagnostics=diagnostics)
 
     def _active(self, service: str) -> None:
         self._run("systemctl", "is-active", "--quiet", service)
@@ -866,12 +874,31 @@ class ActivationTool:
         shadow = stage / "nginx.conf"
         mime = Path("/etc/nginx/mime.types")
         include_mime = f'include {mime};\n' if mime.exists() else ""
+        # Pin every http-context temp path beneath the stage.  Distro nginx
+        # builds (Debian/Ubuntu) compile in absolute defaults such as
+        # /var/lib/nginx/body, and `nginx -t` creates those directories while
+        # validating.  Without explicit paths a root-free shadow validation
+        # fails on hosts where nginx never ran as root, and validation would
+        # otherwise touch the live filesystem.
+        temp_paths = (
+            f"client_body_temp_path {stage / 'client-body-temp'};\n"
+            f"proxy_temp_path {stage / 'proxy-temp'};\n"
+            f"fastcgi_temp_path {stage / 'fastcgi-temp'};\n"
+            f"uwsgi_temp_path {stage / 'uwsgi-temp'};\n"
+            f"scgi_temp_path {stage / 'scgi-temp'};\n"
+        )
         content = (
             "pid " + str(stage / "nginx.pid") + ";\n"
             "error_log stderr;\n"
             "events {}\n"
             "http {\n"
             + include_mime
+            + temp_paths
+            # Without an explicit http-level access_log, `nginx -t` opens the
+            # compiled-in default (for example /var/log/nginx/access.log on
+            # Debian builds), which a root-free validation cannot write to.
+            # Explicit per-location logs in the shadow site/feed still apply.
+            + "access_log off;\n"
             + f"include {stage / 'real_ip'};\n"
             + f"include {stage / 'http'};\n"
             + f"include {shadow_site};\n"
@@ -882,7 +909,7 @@ class ActivationTool:
 
     def _shadow_nginx(self, stage: Path) -> None:
         shadow = self._build_shadow_nginx(stage)
-        self._run("nginx", "-t", "-c", str(shadow), "-p", str(stage))
+        self._run("nginx", "-t", "-c", str(shadow), "-p", str(stage), diagnostics=True)
 
     def _install_file(self, source: Path, target: Path, *, mode: int = 0o644, metadata: Mapping[str, Any] | None = None) -> None:
         assert_no_symlink_components(source, allow_missing_leaf=False)
