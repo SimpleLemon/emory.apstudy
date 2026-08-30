@@ -456,10 +456,15 @@ class CalendarIcsActivationTests(unittest.TestCase):
             "server { listen 443; location / { return 204; } }\n",
             encoding="utf-8",
         )
-        candidate_env, _ = ACTIVATE._candidate_env(self.env.read_bytes(), "*")
         candidate_site = ACTIVATE._site_with_feed_include(
             self.site.read_bytes(), str(self.snippets_dir / "nest-calendar-ics-feed.conf")
         )
+        # The helper must first validate the real 80/443 shape, then this root-free nginx test remaps
+        # only its staged copy because nginx -t opens listeners and non-root CI cannot bind privileged ports.
+        candidate_site = candidate_site.replace(b"listen 80;", b"listen 18080;").replace(
+            b"listen 443;", b"listen 18443;"
+        )
+        candidate_env, _ = ACTIVATE._candidate_env(self.env.read_bytes(), "*")
         stage, _ = self.tool._stage("20260827T120000Z-222222222222", self.env.read_bytes(), candidate_env, candidate_site)
         self.make_tool(runner=ACTIVATE.CommandRunner(timeout=10))._shadow_nginx(stage)
 
