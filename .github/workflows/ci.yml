@@ -81,10 +81,6 @@ jobs:
       FLASK_SECRET_KEY: ci-browser-test-secret
       APSTUDY_ALLOW_INSECURE_HTTP: '1'
       APSTUDY_FORCE_LOCAL_INSTANCE_DB: '1'
-      DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
-      NEST_DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
-      NEST_INSTANCE_DIR: ${{ runner.temp }}/apstudy-ci/instance
-      SCHEDULER_LOCK_PATH: ${{ runner.temp }}/apstudy-ci/scheduler.lock
       SCHEDULER_ENABLED: '0'
       DISCORD_GATEWAY_ENABLED: '0'
       DISCORD_AUDIT_ENABLED: '0'
@@ -92,7 +88,6 @@ jobs:
       DISCORD_SERVER_CONSOLE_LOG_ENABLED: '0'
       DISCORD_CHAT_SYNC_ENABLED: '0'
       DISCORD_BOT_TOKEN: ''
-      DISCORD_AUDIT_FALLBACK_PATH: ${{ runner.temp }}/apstudy-ci/discord-audit.jsonl
       PLAYWRIGHT_BASE_URL: http://127.0.0.1:8000
 
     steps:
@@ -129,6 +124,12 @@ jobs:
 
       - name: Start browser auth server
         shell: bash
+        env:
+          DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+          NEST_DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+          NEST_INSTANCE_DIR: ${{ runner.temp }}/apstudy-ci/instance
+          SCHEDULER_LOCK_PATH: ${{ runner.temp }}/apstudy-ci/scheduler.lock
+          DISCORD_AUDIT_FALLBACK_PATH: ${{ runner.temp }}/apstudy-ci/discord-audit.jsonl
         run: |
           set -Eeuo pipefail
           ci_dir="${RUNNER_TEMP}/apstudy-ci"
@@ -158,6 +159,12 @@ jobs:
           exit 1
 
       - name: Run browser tests
+        env:
+          DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+          NEST_DATABASE_PATH: ${{ runner.temp }}/apstudy-ci/nest.sqlite3
+          NEST_INSTANCE_DIR: ${{ runner.temp }}/apstudy-ci/instance
+          SCHEDULER_LOCK_PATH: ${{ runner.temp }}/apstudy-ci/scheduler.lock
+          DISCORD_AUDIT_FALLBACK_PATH: ${{ runner.temp }}/apstudy-ci/discord-audit.jsonl
         run: npm run test:browser
 
       - name: Upload browser artifacts on failure
