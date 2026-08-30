@@ -85,6 +85,7 @@ test("dashboard calendar popovers expose and clean up their accessible relations
     await expect(firstDay).toHaveAttribute("aria-expanded", "false");
 
     await firstDay.hover();
+    await page.mouse.move(2, 2);
     await page.evaluate(() => document.dispatchEvent(new Event("DOMContentLoaded")));
     await expect(popover).toBeHidden();
 

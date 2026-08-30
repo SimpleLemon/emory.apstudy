@@ -41,7 +41,7 @@ async function mountCourses(page, baseURL, { delayLiveStatus = false, savedSecti
         json: { tracks: [], allowed_intervals_minutes: [30], tier: { key: "free", label: "Free" }, usage: 0, limit: 1 },
     }));
     await page.route("**/api/atlas/sections**", (route) => {
-        sectionsRequests += 1;
+        if (!route.request().url().includes("/api/atlas/sections/verify")) sectionsRequests += 1;
         return route.fulfill({ json: { sections } });
     });
     await page.route("**/api/courses/section-status", async (route) => {
@@ -81,6 +81,7 @@ async function mountCourses(page, baseURL, { delayLiveStatus = false, savedSecti
         "calendar.js",
         "edit.js",
         "controls.js",
+        "verify.js",
         "index.js",
     ]) {
         await page.addScriptTag({ url: `${baseURL}/static/js/courses/${source}` });

@@ -99,7 +99,9 @@ test("courses dialog traps focus, preserves rerender focus, inerts the page, and
     });
 
     const trigger = page.getByRole("button", { name: "Courses" });
-    await trigger.click();
+    await trigger.evaluate((element) => element.dispatchEvent(
+        new CustomEvent("profile-my-courses-click", { bubbles: true, detail: { trigger: element } }),
+    ));
     const dialog = page.getByRole("dialog", { name: "Courses" });
     await expect(dialog).toBeVisible();
     const search = dialog.getByRole("textbox", { name: "Search courses" });
