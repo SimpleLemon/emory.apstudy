@@ -1,3 +1,3 @@
-import './ui-primitives.js?v=9e869432dca0b68820513c16fc20f84294c53573be227500124b39abb06e13ee';
+import './ui-primitives.js?v=9c86ecb81c990de80a6ac1e903018413ee8cf0355279ce8295614463605110ea';
 
 export const { escapeHtml } = window.APStudyUIPrimitives;

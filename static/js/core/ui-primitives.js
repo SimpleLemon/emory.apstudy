@@ -249,7 +249,6 @@
         let maxTimer = null;
         let remaining = duration;
         let startedAt = 0;
-        let allowPointerPause = false;
         const pauseReasons = new Set();
         const dismiss = (reason = 'programmatic') => {
             if (dismissed) return;
@@ -290,14 +289,8 @@
             if (pauseReasons.size) pauseTimer();
             else resumeTimer();
         };
-        toast.addEventListener('mouseenter', () => {
-            if (!allowPointerPause) return;
-            setPaused('pointer', true);
-        });
-        toast.addEventListener('mouseleave', () => {
-            allowPointerPause = true;
-            setPaused('pointer', false);
-        });
+        toast.addEventListener('mouseenter', () => setPaused('pointer', true));
+        toast.addEventListener('mouseleave', () => setPaused('pointer', false));
         toast.addEventListener('focusin', () => setPaused('focus', true));
         toast.addEventListener('focusout', (event) => {
             if (!toast.contains(event.relatedTarget)) setPaused('focus', false);
@@ -308,9 +301,6 @@
             toast.classList.add('is-visible');
             progress?.classList.add('is-running');
         });
-        window.setTimeout(() => {
-            allowPointerPause = true;
-        }, 300);
         resumeTimer();
         maxTimer = window.setTimeout(() => dismiss('max-lifetime'), maxLifetime);
         return { dismiss };

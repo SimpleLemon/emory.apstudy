@@ -147,11 +147,13 @@ class ToastClientContractTests(unittest.TestCase):
         self.assertIn('cache: "no-store"', global_js)
         self.assertIn("if (embedded !== null)", global_js)
 
-    def test_toast_client_has_unpauseable_lifetime_and_ignores_initial_hover(self):
+    def test_toast_client_max_lifetime_is_unpauseable_and_hover_pauses_immediately(self):
         primitives = (ROOT / "static/js/core/ui-primitives.js").read_text()
         self.assertIn("TOAST_MAX_LIFETIME_MS", primitives)
+        self.assertIn("maxTimer", primitives)
         self.assertIn("dismiss('max-lifetime')", primitives)
-        self.assertIn("allowPointerPause", primitives)
+        self.assertNotIn("allowPointerPause", primitives)
+        self.assertIn("mouseenter', () => setPaused('pointer', true)", primitives)
         self.assertIn("hasRecentlyShownToast", primitives)
         self.assertIn("apstudy.seen-toasts", primitives)
 
