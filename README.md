@@ -21,13 +21,6 @@ Nest.APStudy is a web platform for student course planning and productivity, com
 
 > **Note:** This project is under active development. Some features depend on external Appwrite, OAuth, Discord, or calendar-feed configuration that is intentionally not committed.
 
-## Quick Start
-
-1. Clone the repository
-2. Create a virtual environment and install dependencies
-3. Configure your `.env` file with the required credentials
-4. Run the Flask app locally
-
 ## Repository Layout
 
 | Path | Description |
@@ -46,68 +39,6 @@ Nest.APStudy is a web platform for student course planning and productivity, com
 - Node.js and npm (for Tailwind and JavaScript tests)
 - Appwrite credentials (for auth and file storage)
 - SQLite 3.45+ (included with Python; CLI installed on VPS for backups)
-
-## Appwrite storage buckets
-
-The server uploads binary files to Appwrite Storage. Create these buckets in the Appwrite console (or point the env vars at existing bucket IDs) before enabling the related features:
-
-| Env var | Default bucket ID | Used for |
-|---------|-------------------|----------|
-| `APPWRITE_PROFILE_AVATAR_BUCKET_ID` | `profile_avatars` | Profile avatar uploads |
-| `APPWRITE_FILE_SHARE_BUCKET_ID` | `file_share_files` | File share uploads |
-| `APPWRITE_NOTES_MEDIA_BUCKET_ID` | `notes_media` | Inline images in notes |
-| `APPWRITE_CHAT_ATTACHMENTS_BUCKET_ID` | `chat_attachments` | Private chat attachments and PDF previews |
-
-Mirror the working `profile_avatars` bucket settings (file security, max size, MIME allowlist). The server API key (`APPWRITE_API_KEY`) needs Storage create, read, and delete access on each bucket. Notes images are limited to 10 MiB (JPEG, PNG, GIF, WebP).
-
-Verify bucket configuration from the repository root:
-
-```bash
-python scripts/verify_appwrite_storage.py
-python scripts/verify_appwrite_storage.py --probe-upload
-```
-
-The probe uploads and deletes a 1x1 PNG in `notes_media` to confirm write access. Chat attachments require file security and must not grant public read access; downloads are proxied through authenticated room-aware endpoints. Check server logs for upload errors if either feature returns 500.
-
-Create the private `chat_attachments` table/collection using the attributes represented in `migrations/009_chat_attachments.sql`, with indexes on `user_id`, `message_id`, scope, and status. See `CHAT_ATTACHMENTS.md` for the Appwrite rollout checklist. Set `GIPHY_API_KEY` to enable the GIF tab; without it, emoji and regular chat continue to work.
-
-## Setup & Deployment
-
-<details>
-  <summary>Python environment</summary>
-
-Create a virtual environment and install Python dependencies:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-```
-</details>
-
-<details>
-  <summary>Running Locally</summary>
-  
-Run the Flask app with the application factory:
-
-```bash
-flask --app app:create_app run --host 127.0.0.1 --port 8000
-```
-
-Or run the local development entrypoint:
-
-```bash
-python app.py
-```
-
-## Tests
-
-Run the full test suite:
-
-```bash
-npm test
-```
-</details>
 
 ## AI Disclosure
 
